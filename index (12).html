@@ -29380,12 +29380,12 @@ function _cinShowPlayButton(url, srcLabel) {
     const panel = document.createElement('div');
     panel.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:Inter,sans-serif;background:#0a0a0f;';
 
-    panel.innerHTML = \`
+    panel.innerHTML = `
       <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,122,255,0.06) 0%,transparent 70%);pointer-events:none;"></div>
       <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;padding:24px;">
-        <div style="font-size:0.65rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.2);text-transform:uppercase;">\${srcLabel}</div>
-        <div style="font-size:1.1rem;font-weight:700;color:#fff;max-width:420px;line-height:1.3;">\${s.title || ''}</div>
-        \${s.type === 'tv' ? \`<div style="font-size:0.7rem;color:rgba(255,255,255,0.35);">S\${String(s.season).padStart(2,'0')}E\${String(s.ep).padStart(2,'0')}</div>\` : ''}
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.2);text-transform:uppercase;">${srcLabel}</div>
+        <div style="font-size:1.1rem;font-weight:700;color:#fff;max-width:420px;line-height:1.3;">${s.title || ''}</div>
+        ${s.type === 'tv' ? `<div style="font-size:0.7rem;color:rgba(255,255,255,0.35);">S${String(s.season).padStart(2,'0')}E${String(s.ep).padStart(2,'0')}</div>` : ''}
 
         <button id="cinPlayBtn" onclick="cinPopout()"
           style="margin-top:8px;padding:18px 48px;border-radius:60px;background:linear-gradient(135deg,#30D158,#25a244);border:none;color:#fff;font-size:1.05rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(48,209,88,0.45);transition:all 0.18s;position:relative;overflow:hidden;"
@@ -29395,16 +29395,16 @@ function _cinShowPlayButton(url, srcLabel) {
           Přehrát
         </button>
 
-        \${(()=>{
+        ${(()=>{
           const src = CINEMA_SOURCES[s.sourceIdx];
           const q = encodeURIComponent(s.title||'');
           let searchUrl = '';
-          if (src.id==='svetserialu') searchUrl = \`https://www.svetserialu.to/?s=\${q}\`;
-          else if (src.id==='bombuj') searchUrl = s.type==='movie' ? \`https://www.bombuj.si/?s=\${q}\` : \`https://serialy.bombuj.si/?s=\${q}\`;
-          return searchUrl ? \`<a href="\${searchUrl}" target="_blank" rel="noopener"
+          if (src.id==='svetserialu') searchUrl = `https://www.svetserialu.to/?s=${q}`;
+          else if (src.id==='bombuj') searchUrl = s.type==='movie' ? `https://www.bombuj.si/?s=${q}` : `https://serialy.bombuj.si/?s=${q}`;
+          return searchUrl ? `<a href="${searchUrl}" target="_blank" rel="noopener"
             style="font-size:0.65rem;color:rgba(255,255,255,0.3);text-decoration:underline;cursor:pointer;margin-top:-8px;">
-            🔍 Nenašlo se? Hledat "\${s.title||''}"
-          </a>\` : '';
+            🔍 Nenašlo se? Hledat "${s.title||''}"
+          </a>` : '';
         })()}
 
         <div style="display:flex;gap:8px;margin-top:4px;">
@@ -29431,7 +29431,7 @@ function _cinShowPlayButton(url, srcLabel) {
           </div>
         </div>
       </div>
-    \`;
+    `;
 
     container.appendChild(panel);
 
