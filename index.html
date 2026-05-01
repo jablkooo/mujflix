@@ -15157,13 +15157,13 @@ html, body { background: var(--ios-bg) !important; }
 
       const btnSearch = document.createElement('a');
       btnSearch.style.cssText = 'display:block;margin:5px 0 15px;font-size:0.65rem;color:rgba(255,255,255,0.35);text-decoration:none;cursor:pointer;';
-      btnSearch.innerHTML = `🔍 Nenašlo se? Hledat '${safeTitle}'`;
-      btnSearch.onclick = () => {
+      btnSearch.innerHTML = '🔍 Nenašlo se? Hledat \'' + safeTitle + '\'';
+      btnSearch.onclick = function() {
         dismiss();
-        const finalName = (wrap._mfSearchName) || searchName || displayName;
-        const searchUrl = type === 'movie'
-          ? `https://www.bombuj.si/?s=${encodeURIComponent(finalName)}`
-          : `https://svetserialu.to/?s=${encodeURIComponent(finalName)}`;
+        var finalName = (wrap._mfSearchName) || searchName || displayName;
+        var searchUrl = (type === 'movie')
+          ? 'https://www.bombuj.si/?s=' + encodeURIComponent(finalName)
+          : 'https://svetserialu.to/?s=' + encodeURIComponent(finalName);
         window.open(searchUrl, '_blank');
       };
 
