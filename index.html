@@ -15155,6 +15155,18 @@ html, body { background: var(--ios-bg) !important; }
         else { openWithCopy(finalName, type); }
       });
 
+      const btnSearch = document.createElement('a');
+      btnSearch.style.cssText = 'display:block;margin:5px 0 15px;font-size:0.65rem;color:rgba(255,255,255,0.35);text-decoration:none;cursor:pointer;';
+      btnSearch.innerHTML = `🔍 Nenašlo se? Hledat '${safeTitle}'`;
+      btnSearch.onclick = () => {
+        dismiss();
+        const finalName = (wrap._mfSearchName) || searchName || displayName;
+        const searchUrl = type === 'movie'
+          ? `https://www.bombuj.si/?s=${encodeURIComponent(finalName)}`
+          : `https://svetserialu.to/?s=${encodeURIComponent(finalName)}`;
+        window.open(searchUrl, '_blank');
+      };
+
       const btnClose = document.createElement('button');
       btnClose.style.cssText = 'width:100%;padding:10px;border-radius:12px;background:transparent;border:none;color:rgba(255,255,255,0.3);font-size:0.75rem;cursor:pointer;';
       btnClose.textContent = 'Zavřít';
@@ -15162,6 +15174,7 @@ html, body { background: var(--ios-bg) !important; }
 
       box.appendChild(btnCinema);
       box.appendChild(btnFinder);
+      box.appendChild(btnSearch);
       box.appendChild(btnClose);
       wrap.appendChild(box);
       wrap.addEventListener('click', function(e) { if (e.target === wrap) dismiss(); });
