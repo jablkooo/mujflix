@@ -29166,7 +29166,24 @@ window.MFSettings = (function() {
 //   NontonGo 31ms · RiveStream 32ms · Smash 48ms
 // embed.su: ❌ DEAD (DNS nereaguje)
 // ═══════════════════════════════════════════════════════════════
+function _czSlug(t) {
+  if (!t) return '';
+  return t.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g,'and')
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-+|-+$/g,'');
+}
+
 const CINEMA_SOURCES = [
+  { id: 'svetserialu', label: 'SvetSerialu', popupOnly: true,
+    movie: (id,t) => `https://www.svetserialu.to/?s=${encodeURIComponent(t||'')}`,
+    tv:    (id,s,e,t) => `https://www.svetserialu.to/serial/${_czSlug(t)}/s${String(s).padStart(2,'0')}e${String(e).padStart(2,'0')}`
+  },
+  { id: 'bombuj', label: 'Bombuj', popupOnly: true,
+    movie: (id,t,yr) => `https://www.bombuj.si/online-film-${_czSlug(t)}${yr?'-'+yr:''}`,
+    tv:    (id,s,e,t,yr) => `https://serialy.bombuj.si/serial/${_czSlug(t)}${yr?'-'+yr:''}-${s}x${e}`
+  },
   { id: 'vidlink',   label: 'VidLink',    movie: id => `https://vidlink.pro/movie/${id}?autoplay=1&primaryColor=007AFF`,      tv: (id,s,e) => `https://vidlink.pro/tv/${id}/${s}/${e}?autoplay=1&primaryColor=007AFF` },
   { id: 'autoembed', label: 'AutoEmbed',  movie: id => `https://autoembed.co/movie/tmdb/${id}`,                               tv: (id,s,e) => `https://autoembed.co/tv/tmdb/${id}-${s}-${e}` },
   { id: 'vidsrc',    label: 'VS.pro',     movie: id => `https://vidsrc.pro/embed/movie/${id}`,                                tv: (id,s,e) => `https://vidsrc.pro/embed/tv/${id}/${s}/${e}` },
@@ -29182,7 +29199,7 @@ const CINEMA_SOURCES = [
   { id: 'smash',     label: 'Smash',      movie: id => `https://player.smashy.stream/movie/${id}`,                           tv: (id,s,e) => `https://player.smashy.stream/tv/${id}?s=${s}&e=${e}` },
 ];
 
-let _cinState = { tmdbId: null, type: 'movie', title: '', season: 1, ep: 1, sourceIdx: 0, totalSeasons: 1, totalEps: {} };
+let _cinState = { tmdbId: null, type: 'movie', title: '', season: 1, ep: 1, sourceIdx: 0, totalSeasons: 1, totalEps: {}, year: null };
 
 function openMovieInCinema(tmdbId, title, type) {
     type = type || 'movie';
@@ -29197,11 +29214,34 @@ function openMovieInCinema(tmdbId, title, type) {
         type    = 'tv';
     }
 
-    _cinState = { tmdbId: cleanId, type, title: title || '', season, ep, sourceIdx: 0, totalSeasons: 1, totalEps: {} };
-
-    document.getElementById('cinemaTitle').textContent = title || 'Přehrávám…';
-    document.getElementById('cinemaSubtitle').textContent = type === 'tv' ? `S${String(season).padStart(2,'0')}E${String(ep).padStart(2,'0')}` : '';
     const cinModal = document.getElementById('cinemaModal');
+    if (!cinModal) { console.error('[Cinema] cinemaModal element not found!'); if(typeof showToast==='function') showToast('❌ Chyba: cinema modal nenalezen', 'error'); return; }
+
+    _cinState = { tmdbId: cleanId, type, title: title || '', season, ep, sourceIdx: 0, totalSeasons: 1, totalEps: {}, year: null };
+
+    // Načti rok vydání z TMDB pro přesné URL (Bombuj slug)
+    if (cleanId) {
+      const tmdbType = (type === 'tv') ? 'tv' : 'movie';
+      const TMDB_KEY_CIN = typeof TMDB_KEY !== 'undefined' ? TMDB_KEY : '';
+      if (TMDB_KEY_CIN) {
+        fetch(`https://api.themoviedb.org/3/${tmdbType}/${cleanId}?api_key=${TMDB_KEY_CIN}&language=cs-CZ`)
+          .then(r => r.json())
+          .then(d => {
+            const dateStr = d.release_date || d.first_air_date || '';
+            if (dateStr) _cinState.year = parseInt(dateStr.substring(0,4)) || null;
+          }).catch(()=>{});
+      }
+    }
+
+    const cinTitleEl = document.getElementById('cinemaTitle');
+    const cinSubEl   = document.getElementById('cinemaSubtitle');
+    if (cinTitleEl) cinTitleEl.textContent = title || 'Přehrávám…';
+    if (cinSubEl)   cinSubEl.textContent = type === 'tv' ? `S${String(season).padStart(2,'0')}E${String(ep).padStart(2,'0')}` : '';
+
+    // Ujisti se že universe overlay je skutečně skrytý
+    const uniEl = document.getElementById('universeOverlay');
+    if (uniEl) { uniEl.classList.remove('visible','open'); uniEl.style.display = 'none'; }
+
     cinModal.style.display = 'flex';
     cinModal.style.opacity = '1';
     document.body.style.overflow = 'hidden';
@@ -29231,7 +29271,11 @@ function openMovieInCinema(tmdbId, title, type) {
 function _cinLoad() {
     const s = _cinState;
     const src = CINEMA_SOURCES[s.sourceIdx];
-    const url = s.type === 'movie' ? src.movie(s.tmdbId) : src.tv(s.tmdbId, s.season, s.ep);
+    const title = s.title || '';
+    const year = s.year || null;
+    const url = s.type === 'movie'
+        ? src.movie(s.tmdbId, title, year)
+        : src.tv(s.tmdbId, s.season, s.ep, title, year);
 
     const warn = document.getElementById('cinemaFileWarn');
     if (warn) warn.style.display = 'none';
@@ -29239,7 +29283,171 @@ function _cinLoad() {
     const loader = document.getElementById('cinemaLoader');
     if (loader) loader.style.display = 'none';
 
-    requestAnimationFrame(() => _cinShowEmbedPlayer(url));
+    // Zdroje označené popupOnly nefungují v iframu — rovnou zobraz Play tlačítko
+    if (src.popupOnly) {
+        requestAnimationFrame(() => _cinShowPlayButton(url, src.label));
+    } else {
+        requestAnimationFrame(() => _cinShowEmbedPlayer(url));
+    }
+}
+
+function cinPopout() {
+  const s = _cinState;
+  const src = CINEMA_SOURCES[s.sourceIdx];
+  const url = s.type === 'movie'
+    ? src.movie(s.tmdbId, s.title, s.year)
+    : src.tv(s.tmdbId, s.season, s.ep, s.title, s.year);
+  const pw = window.screen.width, ph = window.screen.height;
+  const popup = window.open(url, 'MujFlixCinema',
+    `width=${pw},height=${ph},left=0,top=0,menubar=no,toolbar=no,location=no,scrollbars=no,status=no`);
+  if (!popup || popup.closed) {
+    window.open(url, '_blank', 'noopener');
+    if (typeof showToast === 'function') showToast('Popup blokován — otevřeno v nové kartě', 'warning');
+  }
+}
+
+function cinNewTab() {
+  const s = _cinState;
+  const src = CINEMA_SOURCES[s.sourceIdx];
+  const url = s.type === 'movie'
+    ? src.movie(s.tmdbId, s.title, s.year)
+    : src.tv(s.tmdbId, s.season, s.ep, s.title, s.year);
+  window.open(url, '_blank', 'noopener');
+}
+
+async function _fetchJustWatch(title, type, year) {
+  try {
+    const jwType = type === 'movie' ? 'MOVIE' : 'SHOW';
+    const query = `{
+      popularTitles(country: "CZ", first: 3, filter: {searchQuery: "${title.replace(/"/g,'')}", objectTypes: [${jwType}]}) {
+        edges { node {
+          content(country: "CZ", language: "cs") { title originalReleaseYear }
+          offers(country: "CZ", platform: WEB) {
+            monetizationType
+            retailPrice(language: "cs") { amount currency }
+            package { packageId clearName icon }
+          }
+        }}
+      }
+    }`;
+    const res = await fetch('https://apis.justwatch.com/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'App-Version': '3.7.0-web' },
+      body: JSON.stringify({ query }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const edges = data?.data?.popularTitles?.edges || [];
+    const match = edges.find(e => {
+      const t = (e.node.content?.title || '').toLowerCase();
+      const q = title.toLowerCase();
+      return t === q || t.includes(q) || q.includes(t);
+    }) || edges[0];
+    if (!match) return null;
+    return match.node.offers || [];
+  } catch(e) {
+    return null;
+  }
+}
+
+function _cinRenderJustWatch(offers, container) {
+  if (!offers || !offers.length) {
+    container.innerHTML = '<span style="color:rgba(255,255,255,0.2);font-size:0.6rem;">Není na žádné legální službě v CZ</span>';
+    return;
+  }
+  const flat = offers.slice(0, 8);
+  const typeLabel = { FLATRATE: '▶ Streaming', RENT: '💰 Půjčit', BUY: '🛒 Koupit', FREE: '🆓 Zdarma', ADS: '📺 Reklamy' };
+  const groups = {};
+  flat.forEach(o => {
+    const key = o.package.clearName;
+    if (!groups[key]) groups[key] = { icon: o.package.icon, name: key, types: new Set() };
+    groups[key].types.add(typeLabel[o.monetizationType] || o.monetizationType);
+  });
+  container.innerHTML = Object.values(groups).map(g => `
+    <div title="${[...g.types].join(' | ')}" style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.07);border-radius:8px;padding:4px 8px;border:1px solid rgba(255,255,255,0.1);">
+      ${g.icon ? `<img src="${g.icon.replace('{profile}','s25')}" style="width:16px;height:16px;border-radius:3px;object-fit:contain;" onerror="this.style.display='none'">` : ''}
+      <span style="font-size:0.6rem;font-weight:600;color:rgba(255,255,255,0.75);">${g.name}</span>
+    </div>
+  `).join('');
+}
+
+function _cinShowPlayButton(url, srcLabel) {
+    const container = document.getElementById('cinemaFrameWrap');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const s = _cinState;
+    const panel = document.createElement('div');
+    panel.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:Inter,sans-serif;background:#0a0a0f;';
+
+    panel.innerHTML = \`
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,122,255,0.06) 0%,transparent 70%);pointer-events:none;"></div>
+      <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;padding:24px;">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.2);text-transform:uppercase;">\${srcLabel}</div>
+        <div style="font-size:1.1rem;font-weight:700;color:#fff;max-width:420px;line-height:1.3;">\${s.title || ''}</div>
+        \${s.type === 'tv' ? \`<div style="font-size:0.7rem;color:rgba(255,255,255,0.35);">S\${String(s.season).padStart(2,'0')}E\${String(s.ep).padStart(2,'0')}</div>\` : ''}
+
+        <button id="cinPlayBtn" onclick="cinPopout()"
+          style="margin-top:8px;padding:18px 48px;border-radius:60px;background:linear-gradient(135deg,#30D158,#25a244);border:none;color:#fff;font-size:1.05rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(48,209,88,0.45);transition:all 0.18s;position:relative;overflow:hidden;"
+          onmouseover="this.style.transform='scale(1.04)';this.style.boxShadow='0 12px 40px rgba(48,209,88,0.6)'"
+          onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 32px rgba(48,209,88,0.45)'">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="white" style="flex-shrink:0;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Přehrát
+        </button>
+
+        \${(()=>{
+          const src = CINEMA_SOURCES[s.sourceIdx];
+          const q = encodeURIComponent(s.title||'');
+          let searchUrl = '';
+          if (src.id==='svetserialu') searchUrl = \`https://www.svetserialu.to/?s=\${q}\`;
+          else if (src.id==='bombuj') searchUrl = s.type==='movie' ? \`https://www.bombuj.si/?s=\${q}\` : \`https://serialy.bombuj.si/?s=\${q}\`;
+          return searchUrl ? \`<a href="\${searchUrl}" target="_blank" rel="noopener"
+            style="font-size:0.65rem;color:rgba(255,255,255,0.3);text-decoration:underline;cursor:pointer;margin-top:-8px;">
+            🔍 Nenašlo se? Hledat "\${s.title||''}"
+          </a>\` : '';
+        })()}
+
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button onclick="_cinState.sourceIdx=(_cinState.sourceIdx+1)%CINEMA_SOURCES.length;_cinBuildSourceBar();_cinLoad();"
+            style="padding:9px 18px;border-radius:30px;background:rgba(0,122,255,0.12);border:1px solid rgba(0,122,255,0.25);color:rgba(0,122,255,0.85);font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.15s;"
+            onmouseover="this.style.background='rgba(0,122,255,0.22)'" onmouseout="this.style.background='rgba(0,122,255,0.12)'">
+            ↻ Jiný zdroj
+          </button>
+          <button onclick="cinNewTab()"
+            style="padding:9px 18px;border-radius:30px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.45);font-size:0.72rem;cursor:pointer;transition:all 0.15s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">
+            🔗 Nová karta
+          </button>
+        </div>
+
+        <div style="margin-top:2px;font-size:0.55rem;color:rgba(255,255,255,0.18);line-height:1.6;max-width:300px;">
+          Tento zdroj se otevírá v popup okně.<br>Pokud prohlížeč blokuje popup, klikni na ikonu v adresním řádku.
+        </div>
+
+        <div style="margin-top:8px;width:100%;max-width:420px;border-top:1px solid rgba(255,255,255,0.07);padding-top:14px;">
+          <div style="font-size:0.52rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-bottom:8px;">📺 Dostupné legálně v CZ</div>
+          <div id="jwAvailability" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">
+            <span style="color:rgba(255,255,255,0.15);font-size:0.6rem;">Načítám...</span>
+          </div>
+        </div>
+      </div>
+    \`;
+
+    container.appendChild(panel);
+
+    setTimeout(() => {
+        const btn = document.getElementById('cinPlayBtn');
+        if (btn) {
+            btn.style.animation = 'cinPlayPulse 2s ease-in-out infinite';
+        }
+    }, 500);
+
+    if (s.title) {
+      _fetchJustWatch(s.title, s.type).then(offers => {
+        const jwEl = document.getElementById('jwAvailability');
+        if (jwEl) _cinRenderJustWatch(offers, jwEl);
+      });
+    }
 }
 
 function _cinShowEmbedPlayer(url) {
