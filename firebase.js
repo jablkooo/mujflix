@@ -12,17 +12,18 @@ import {
 
 // ══════════════════════════════════════════════════════════════════
 // 🔥 FIREBASE SYNC ENGINE — MůjFlix Cross-Device Sync
-// Config lze nastavit přes GUI (Settings → Sync → Nastavit Firebase)
-// nebo přímo zde:
 // ══════════════════════════════════════════════════════════════════
-// Načti config z localStorage (nastaven přes GUI) nebo použij vestavěný
+
+// 1. Bezpečné načtení konfigurace
 const _fbCfgStored = (function() {
   try {
-    return safeLS('mf_firebase_cfg', '{}');
+    const stored = localStorage.getItem('mf_firebase_cfg');
+    return stored ? JSON.parse(stored) : {};
   } catch (e) {
     return {};
   }
 })();
+
 const FIREBASE_CONFIG = {
   apiKey: _fbCfgStored.apiKey || "AIzaSyCqbrI7B5DY7WsWOgHZZzGl0TpW20Sax9w",
   authDomain: _fbCfgStored.authDomain || "mujflix.firebaseapp.com",
@@ -33,9 +34,8 @@ const FIREBASE_CONFIG = {
   appId: _fbCfgStored.appId || "1:730605839292:web:9ca2f0c189a121ed4d81b9"
 };
 
-// Klíč pro identifikaci sync skupiny (stejný klíč = stejná data na všech zařízeních)
-// Změň na libovolný tajný řetězec, který sdílíš mezi svými zařízeními
-const SYNC_GROUP_KEY = localStorage.getItem('mf_sync_group') || null;
+// Klíč pro identifikaci sync skupiny
+let SYNC_GROUP_KEY = localStorage.getItem('mf_sync_group') || null;
 
 window.MFSync = {
   _db: null,
@@ -44,11 +44,11 @@ window.MFSync = {
   _listening: false,
   _lastLocalWrite: 0,
   _ignoreNextRemote: false,
+  _syncDebounce: null,
 
   init() {
-    // Firebase je dostupný pouze pokud je config vyplněn
     if (!FIREBASE_CONFIG.apiKey || !FIREBASE_CONFIG.databaseURL) {
-      console.info('[MFSync] Firebase config není nastaven — sync vypnut. Nastav ho v Settings.');
+      console.info('[MFSync] Firebase config není nastaven — sync vypnut.');
       this._updateStatus('offline');
       return;
     }
@@ -56,6 +56,7 @@ window.MFSync = {
       this._app = initializeApp(FIREBASE_CONFIG, 'mujflix');
       this._db = getDatabase(this._app);
       console.info('[MFSync] Firebase inicializován ✓');
+      
       if (SYNC_GROUP_KEY) {
         this.connectGroup(SYNC_GROUP_KEY);
       } else {
@@ -69,13 +70,14 @@ window.MFSync = {
 
   connectGroup(groupKey) {
     if (!this._db) return;
+    SYNC_GROUP_KEY = groupKey;
     localStorage.setItem('mf_sync_group', groupKey);
+    
     if (this._syncRef) off(this._syncRef);
     this._syncRef = ref(this._db, 'groups/' + groupKey + '/data');
     this._listening = true;
     this._updateStatus('syncing');
 
-    // Poslouchej změny z ostatních zařízení
     onValue(this._syncRef, (snapshot) => {
       if (this._ignoreNextRemote) {
         this._ignoreNextRemote = false;
@@ -88,48 +90,48 @@ window.MFSync = {
       }
       const remoteTs = remote._syncTs || 0;
       const localTs = parseInt(localStorage.getItem('mf_sync_local_ts') || '0');
-      // Aplikuj remote data pouze pokud jsou novější než lokální
+      
       if (remoteTs > localTs && (Date.now() - this._lastLocalWrite) > 2000) {
         this._applyRemoteData(remote);
         this._updateStatus('online');
-        if (typeof showToast === 'function') showToast('🔄 Synchronizováno s jiným zařízením', 'success');
+        if (typeof showToast === 'function') showToast('🔄 Synchronizováno', 'success');
       } else {
         this._updateStatus('online');
       }
     });
   },
 
-  // Nahraje aktuální lokální data do Firebaseé
   async pushData() {
     if (!this._db || !this._syncRef || !SYNC_GROUP_KEY) return;
     this._updateStatus('syncing');
     this._lastLocalWrite = Date.now();
     this._ignoreNextRemote = true;
+
     const payload = this._collectLocalData();
     payload._syncTs = Date.now();
     localStorage.setItem('mf_sync_local_ts', payload._syncTs);
+
     try {
       await set(this._syncRef, payload);
       this._updateStatus('online');
+      console.log('[MFSync] Data úspěšně odeslána do cloudu');
     } catch (e) {
       console.warn('[MFSync] Push failed:', e);
       this._updateStatus('error');
     }
   },
 
-  // Sbírá všechna lokální data k synchronizaci
   _collectLocalData() {
     const keys = [];
+    const prefixes = ['mf_', 'watched_', 'watchlist', 'streak', 'aiMem'];
+    
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      if (k && (
-          k.startsWith('mf_') ||
-          k.startsWith('watched_') ||
-          k.startsWith('watchlist') ||
-          k.startsWith('streak') ||
-          k.startsWith('aiMem')
-        )) keys.push(k);
+      if (k && prefixes.some(p => k.startsWith(p))) {
+        keys.push(k);
+      }
     }
+    
     const data = {};
     keys.forEach(k => {
       try {
@@ -139,7 +141,6 @@ window.MFSync = {
     return data;
   },
 
-  // Aplikuje vzdálená data do localStorage
   _applyRemoteData(remote) {
     Object.entries(remote).forEach(([k, v]) => {
       if (k === '_syncTs') return;
@@ -148,7 +149,7 @@ window.MFSync = {
         localStorage.setItem(realKey, v);
       } catch (e) {}
     });
-    // Refresh UI po aplikaci dat
+    
     setTimeout(() => {
       if (typeof refreshUserContent === 'function') refreshUserContent();
       if (typeof updateWatchlistBadge === 'function') updateWatchlistBadge();
@@ -162,30 +163,15 @@ window.MFSync = {
     window._mfSyncStatus = status;
     const badge = document.getElementById('syncStatusBadge');
     if (!badge) return;
-    const icons = {
-      online: '☁️',
-      syncing: '🔄',
-      offline: '📴',
-      error: '⚠️',
-      'no-group': '🔗'
-    };
-    const labels = {
-      online: 'Sync ON',
-      syncing: 'Syncing…',
-      offline: 'Offline',
-      error: 'Chyba',
-      'no-group': 'Nastav sync'
-    };
-    const colors = {
-      online: '#007AFF',
-      syncing: '#007AFF',
-      offline: '#636e72',
-      error: '#e17055',
-      'no-group': '#a29bfe'
-    };
+    
+    const icons = { online: '☁️', syncing: '🔄', offline: '📴', error: '⚠️', 'no-group': '🔗' };
+    const labels = { online: 'Sync ON', syncing: 'Syncing…', offline: 'Offline', error: 'Chyba', 'no-group': 'Nastav sync' };
+    const colors = { online: '#007AFF', syncing: '#007AFF', offline: '#636e72', error: '#e17055', 'no-group': '#a29bfe' };
+    
     badge.innerHTML = `<span>${icons[status]||'☁️'}</span><span>${labels[status]||status}</span>`;
     badge.style.color = colors[status] || '#fff';
     badge.style.borderColor = (colors[status] || '#fff') + '44';
+    
     if (status === 'syncing') badge.classList.add('syncing');
     else badge.classList.remove('syncing');
   },
@@ -200,12 +186,29 @@ window.MFSync = {
   }
 };
 
-// Inicializuj po načtení stránky
+// ══════════════════════════════════════════════════════════════════
+// ⚡ AUTOMATICKÝ SYNC HOOK (Sledování změn v reálném čase)
+// ══════════════════════════════════════════════════════════════════
+
+const _origLS = localStorage.setItem.bind(localStorage);
+
+localStorage.setItem = function(key, value) {
+  // 1. Proveď standardní uložení
+  _origLS(key, value);
+
+  // 2. Pokud se mění data, která nás zajímají, spusť push
+  const prefixes = ['mf_', 'watched_', 'watchlist', 'streak', 'aiMem'];
+  if (prefixes.some(p => key.startsWith(p)) && SYNC_GROUP_KEY) {
+    
+    // Debouncing (pauza 1.5s před odesláním), aby se neposílalo moc dat naráz
+    clearTimeout(window.MFSync._syncDebounce);
+    window.MFSync._syncDebounce = setTimeout(() => {
+      window.MFSync.pushData();
+    }, 1500);
+  }
+};
+
+// Inicializace po načtení
 document.addEventListener('DOMContentLoaded', () => {
   window.MFSync.init();
 });
-
-// Automaticky push data při změně localStorage (debounced)
-let _syncDebounce = null;
-const _origLS = localStorage.setItem.bind(localStorage);
-// Hook se přidá po inicializaci (viz konec souboru)
