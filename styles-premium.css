@@ -1,0 +1,504 @@
+/* ═══════════════════════════════════════════════════════════════
+   MůjFlix — styles-premium.css
+   POUZE vizuální vylepšení — žádný layout, žádné position, žádné display
+   Přilinkuj HNED ZA styles.css:
+     <link rel="stylesheet" href="styles.css">
+     <link rel="stylesheet" href="styles-premium.css">
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+
+/* ─── CSS PROMĚNNÉ — přepis původních ──────────────────────── */
+:root {
+  --font-ui:      'DM Sans', -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+
+  /* Jemnější akcent */
+  --accent:          #0A84FF;
+  --accent2:         #40C8E0;
+  --accent-glow:     rgba(10,132,255,0.15);
+
+  /* Tmavší, vrstvené pozadí */
+  --bg:              #070709;
+  --bg2:             #0c0c10;
+
+  /* Subtilnější bordery */
+  --border:          rgba(255,255,255,0.044);
+  --border-hi:       rgba(255,255,255,0.088);
+
+  /* Přechody */
+  --ease-spring:     cubic-bezier(0.34, 1.42, 0.64, 1);
+  --ease-out:        cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft:       cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  /* Stíny */
+  --shadow:          0 2px 16px rgba(0,0,0,0.52), 0 1px 3px rgba(0,0,0,0.36);
+  --shadow-lg:       0 16px 64px rgba(0,0,0,0.82), 0 4px 16px rgba(0,0,0,0.55);
+  --shadow-xl:       0 32px 96px rgba(0,0,0,0.92), 0 8px 24px rgba(0,0,0,0.65);
+}
+
+/* ─── FONT RENDERING ────────────────────────────────────────── */
+*, *::before, *::after {
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+body, html {
+  font-family: var(--font-ui) !important;
+}
+
+/* ─── POZADÍ ────────────────────────────────────────────────── */
+.bg-glow {
+  background:
+    radial-gradient(ellipse 80% 45% at 20% 0%,   rgba(10,132,255,0.028) 0%, transparent 70%),
+    radial-gradient(ellipse 55% 65% at 82% 100%,  rgba(64,200,224,0.016) 0%, transparent 70%)
+    !important;
+  animation: none !important;
+}
+body::after { display: none !important; }
+
+/* ─── SCROLLBAR ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.11); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.20); }
+
+/* ─── TYPOGRAFIE ────────────────────────────────────────────── */
+.logo {
+  font-family: var(--font-ui) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.6px !important;
+  text-shadow: none !important;
+}
+.logo span { color: var(--accent) !important; filter: none !important; }
+
+.pg-logo { font-family: var(--font-ui) !important; font-weight: 900 !important; letter-spacing: -1.8px !important; }
+.pg-logo span { color: var(--accent) !important; filter: drop-shadow(0 0 14px rgba(10,132,255,0.58)) !important; }
+
+.mood-title, .notif-panel-title, .timer-panel-title, .pm-title, .sync-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.3px !important;
+}
+
+/* ─── HEADER BUTTONS ────────────────────────────────────────── */
+.mf-header-btn {
+  transition: color 140ms var(--ease-soft),
+              background 140ms var(--ease-soft),
+              transform 140ms var(--ease-spring) !important;
+}
+.mf-header-btn:active { transform: scale(0.88) !important; transition-duration: 65ms !important; }
+
+/* ─── DOCK BUTTONS ──────────────────────────────────────────── */
+.dock-btn { transition: color 260ms var(--ease-soft), transform 140ms var(--ease-spring) !important; }
+.dock-btn:active { transform: scale(0.86) !important; transition-duration: 60ms !important; }
+.dock-label { font-family: var(--font-ui) !important; font-weight: 500 !important; font-size: 0.59rem !important; }
+
+/* ─── POSTER DLAŽDICE ───────────────────────────────────────── */
+/* Rychlá odezva: transform pouze na compositor threadu, žádný drop-shadow */
+.ps-tile-wrapper {
+  transition: transform 0.18s var(--ease-spring) !important;
+  filter: none !important;
+}
+.ps-tile-wrapper:hover, .ps-tile-wrapper.kb-focus {
+  transform: translateY(-10px) scale(1.04) translateZ(0) !important;
+  filter: none !important; /* drop-shadow vynechán — způsoboval lag */
+}
+.ps-tile-wrapper:active {
+  transform: translateY(-2px) scale(1.00) translateZ(0) !important;
+  transition-duration: 60ms !important;
+}
+
+/* Highlight border místo drop-shadow — GPU-friendly */
+.ps-tile {
+  transition: box-shadow 0.18s var(--ease-soft), border-color 0.18s var(--ease-soft) !important;
+}
+.ps-tile-wrapper:hover .ps-tile, .ps-tile-wrapper.kb-focus .ps-tile {
+  box-shadow:
+    0 0 0 1.5px rgba(255,255,255,0.22),
+    0 20px 50px rgba(0,0,0,0.80) !important;
+  border-color: rgba(255,255,255,0.20) !important;
+}
+
+/* Tile-bg zoom — oddělená transition, kratší */
+.ps-tile .tile-bg {
+  transition: transform 0.22s var(--ease-soft), filter 0.22s var(--ease-soft) !important;
+}
+.ps-tile-wrapper:hover .tile-bg, .ps-tile-wrapper.kb-focus .tile-bg {
+  transform: scale(1.06) !important;
+  filter: saturate(1.20) brightness(1.06) contrast(1.02) !important;
+}
+
+/* Okolní dlaždice při hover — jemný fade, rychlý */
+.ps-menu:has(.ps-tile-wrapper:hover) .ps-tile-wrapper:not(:hover) {
+  opacity: 0.75;
+  transition: opacity 0.18s ease !important;
+}
+.ps-menu:not(:has(.ps-tile-wrapper:hover)) .ps-tile-wrapper {
+  opacity: 1;
+  transition: opacity 0.22s ease !important;
+}
+
+/* ─── DISCO KARTY ───────────────────────────────────────────── */
+.disco-card {
+  transition:
+    transform    0.16s var(--ease-spring),
+    box-shadow   0.16s var(--ease-soft),
+    border-color 0.16s var(--ease-soft),
+    opacity      0.16s ease !important;
+}
+.disco-card:hover {
+  transform: scale(1.06) translateY(-8px) translateZ(0) !important;
+  box-shadow:
+    0 20px 48px rgba(0,0,0,0.82),
+    0 0 0 1.5px rgba(255,255,255,0.20) !important;
+  border-color: rgba(255,255,255,0.20) !important;
+}
+/* Okolní karty v řadě */
+.disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
+  opacity: 0.72;
+  transform: scale(0.985) translateZ(0) !important;
+}
+.disco-card-img {
+  transition: transform 0.20s var(--ease-out), filter 0.18s ease !important;
+}
+.disco-card:hover .disco-card-img {
+  transform: scale(1.07) !important;
+  filter: brightness(1.10) saturate(1.25) !important;
+}
+.disco-card-glow {
+  filter: blur(8px) !important;
+  transition: opacity 0.18s ease !important;
+  background: radial-gradient(ellipse 90% 100% at 50% 0%, rgba(10,122,255,0.32) 0%, transparent 70%) !important;
+}
+
+/* ─── SHOW HERO KARTY ───────────────────────────────────────── */
+.sh-card {
+  transition: transform 0.16s var(--ease-spring), box-shadow 0.16s var(--ease-soft), opacity 0.16s ease !important;
+}
+.sh-card:hover, .sh-card.sh-focused {
+  transform: translateY(-7px) scale(1.03) translateZ(0) !important;
+  box-shadow:
+    0 18px 44px rgba(0,0,0,0.78),
+    0 0 0 1.5px rgba(255,255,255,0.18) !important;
+}
+.sh-card img { transition: filter 0.18s ease, transform 0.18s var(--ease-soft) !important; }
+.sh-card:hover img, .sh-card.sh-focused img {
+  filter: brightness(1.10) saturate(1.15) !important;
+  transform: scale(1.05) !important;
+}
+
+/* ─── EP KARTY ──────────────────────────────────────────────── */
+.ep-card {
+  transition: transform 0.14s var(--ease-spring), box-shadow 0.14s var(--ease-soft), background 0.14s ease !important;
+}
+.ep-card:hover {
+  transform: translateY(-3px) scale(1.015) translateZ(0) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.50), 0 0 0 1px rgba(255,255,255,0.09) !important;
+  background: rgba(255,255,255,0.04) !important;
+}
+
+/* ─── TLAČÍTKA ──────────────────────────────────────────────── */
+.btn, button, [role="button"] {
+  font-family: var(--font-ui) !important;
+  transition:
+    transform    120ms var(--ease-spring),
+    opacity      100ms ease,
+    background   120ms ease,
+    border-color 120ms ease,
+    box-shadow   120ms ease !important;
+}
+.btn:active, button:active { transform: scale(0.93) !important; transition-duration: 55ms !important; }
+
+/* Primární tlačítka */
+.sync-btn, .timer-start-btn {
+  box-shadow: 0 4px 18px rgba(10,132,255,0.24), inset 0 1px 0 rgba(255,255,255,0.16) !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+.sync-btn:hover, .timer-start-btn:hover {
+  box-shadow: 0 6px 26px rgba(10,132,255,0.34), inset 0 1px 0 rgba(255,255,255,0.20) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Watchlist button */
+.tile-watchlist-btn {
+  backdrop-filter: blur(20px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+  border: 0.5px solid rgba(255,255,255,0.13) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 3px 12px rgba(0,0,0,0.44) !important;
+  transition: transform 0.28s var(--ease-spring), background 140ms, border-color 140ms, box-shadow 140ms !important;
+}
+.tile-watchlist-btn:hover {
+  transform: scale(1.15) !important;
+  background: rgba(10,132,255,0.16) !important;
+  border-color: rgba(10,132,255,0.44) !important;
+  box-shadow: 0 0 16px rgba(10,132,255,0.26), inset 0 1px 0 rgba(255,255,255,0.20) !important;
+}
+.tile-watchlist-btn:active { transform: scale(0.88) !important; transition-duration: 70ms !important; }
+
+/* Disco hero */
+.disco-hero-btn { transition: all 0.30s var(--ease-spring) !important; }
+.disco-hero-btn:active { transform: scale(0.92) translateY(1px) !important; transition-duration: 72ms !important; }
+.disco-hero-btn.primary {
+  box-shadow: 0 5px 20px rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.40) !important;
+}
+.disco-hero-btn.primary:hover {
+  box-shadow: 0 7px 26px rgba(0,122,255,0.30), inset 0 1px 0 rgba(255,255,255,0.30) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* ─── PANELY & MODÁLY ───────────────────────────────────────── */
+.mood-box, .timer-panel, .sync-box, .notif-panel {
+  background: rgba(12,12,16,0.98) !important;
+  border: 0.5px solid rgba(255,255,255,0.08) !important;
+  box-shadow: var(--shadow-xl) !important;
+  border-radius: 22px !important;
+}
+
+/* ─── MOOD PICKER ───────────────────────────────────────────── */
+.mood-btn {
+  background: rgba(255,255,255,0.036) !important;
+  border: 0.5px solid rgba(255,255,255,0.07) !important;
+  border-radius: 14px !important;
+  transition: background 140ms, border-color 140ms, transform 140ms var(--ease-spring) !important;
+}
+.mood-btn:hover { background: rgba(10,132,255,0.07) !important; border-color: rgba(10,132,255,0.20) !important; transform: scale(1.03) !important; }
+.mood-btn.selected { background: rgba(10,132,255,0.09) !important; border-color: rgba(10,132,255,0.28) !important; box-shadow: none !important; transform: scale(1.03) !important; }
+.mood-btn.selected .mood-name { color: var(--accent) !important; }
+.mood-result-label { color: var(--accent) !important; }
+.mood-ep-card:hover { background: rgba(10,132,255,0.06) !important; border-color: rgba(10,132,255,0.18) !important; }
+.mood-ep-show { color: var(--accent) !important; }
+.mood-close-btn { border-radius: 12px !important; }
+
+/* ─── TIMER ─────────────────────────────────────────────────── */
+.timer-fab { transition: background 140ms, border-color 140ms, color 140ms, transform 140ms var(--ease-spring) !important; }
+.timer-fab:hover { background: rgba(10,132,255,0.07) !important; border-color: rgba(10,132,255,0.26) !important; color: var(--accent) !important; }
+.timer-fab.active { background: rgba(10,132,255,0.09) !important; border-color: rgba(10,132,255,0.36) !important; color: var(--accent) !important; box-shadow: 0 0 18px rgba(10,132,255,0.10), var(--shadow) !important; }
+.timer-display {
+  font-weight: 200 !important;
+  letter-spacing: -2px !important;
+  font-variant-numeric: tabular-nums !important;
+  text-shadow: none !important;
+}
+.timer-preset-btn:hover, .timer-preset-btn.active { background: rgba(10,132,255,0.07) !important; border-color: rgba(10,132,255,0.24) !important; color: var(--accent) !important; }
+
+/* ─── SYNC BADGE ────────────────────────────────────────────── */
+#syncStatusBadge { font-family: var(--font-ui) !important; font-weight: 500 !important; }
+
+@keyframes mf-sync-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+#syncStatusBadge.syncing { animation: mf-sync-pulse 1.5s var(--ease-soft) infinite !important; }
+.sync-status-dot.online { background: #30d158 !important; box-shadow: 0 0 7px rgba(48,209,88,0.44) !important; }
+
+/* ─── PROFILY ───────────────────────────────────────────────── */
+.pg-avatar {
+  transition: transform 0.36s var(--ease-spring), box-shadow 0.36s var(--ease-soft), border-color 0.22s !important;
+}
+.pg-profile-item:hover .pg-avatar {
+  border-color: rgba(255,255,255,0.24) !important;
+  transform: scale(1.07) translateY(-5px) !important;
+  box-shadow: 0 20px 52px rgba(0,0,0,0.80), inset 0 1px 0 rgba(255,255,255,0.10) !important;
+}
+.pm-dot.filled { background: var(--accent) !important; box-shadow: 0 0 9px rgba(10,132,255,0.36) !important; }
+.pm-num { transition: background 120ms, transform 120ms var(--ease-spring) !important; }
+.pm-num:active { transform: scale(0.88) !important; transition-duration: 60ms !important; }
+
+/* ─── TOAST ─────────────────────────────────────────────────── */
+.toast {
+  background: rgba(18,18,26,0.96) !important;
+  border: 0.5px solid rgba(255,255,255,0.07) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.64) !important;
+  font-family: var(--font-ui) !important;
+  font-weight: 500 !important;
+  backdrop-filter: blur(24px) !important;
+}
+
+/* ─── SEARCH ────────────────────────────────────────────────── */
+#searchInput, .search-bar, .search-input {
+  font-family: var(--font-ui) !important;
+  transition: background 140ms, border-color 140ms, box-shadow 140ms !important;
+}
+#searchInput:focus, .search-bar:focus, .search-input:focus {
+  border-color: rgba(10,132,255,0.28) !important;
+  box-shadow: 0 0 0 3px rgba(10,132,255,0.12) !important;
+}
+
+/* ─── SKELETON SHIMMER ──────────────────────────────────────── */
+@keyframes mf-shimmer-smooth {
+  0%   { background-position: -900px 0; }
+  100% { background-position:  900px 0; }
+}
+.mf-disco-skel {
+  background: linear-gradient(
+    108deg,
+    rgba(255,255,255,0.030) 0%,
+    rgba(255,255,255,0.030) 38%,
+    rgba(255,255,255,0.068) 50%,
+    rgba(255,255,255,0.030) 62%,
+    rgba(255,255,255,0.030) 100%
+  ) !important;
+  background-size: 900px 100% !important;
+  animation: mf-shimmer-smooth 1.8s ease-in-out infinite !important;
+}
+.mf-disco-skel::after { display: none !important; }
+
+/* ─── VSTUPNÍ ANIMACE ───────────────────────────────────────── */
+@keyframes mf-smooth-enter {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes mf-smooth-enter-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes mf-page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.disco-section  { animation: mf-smooth-enter      0.28s var(--ease-out) both; }
+.disco-row-header { animation: mf-smooth-enter-left 0.22s var(--ease-out) both; }
+#cinemaModal > *, #discoBody, #mainContent, #ratingOverlay, #watchlistOverlay {
+  animation: mf-page-enter 0.20s var(--ease-out) both;
+}
+
+/* ─── CHIPS / DISCO NAV ─────────────────────────────────────── */
+.disco-nav-item, [class*="nav-chip"] {
+  font-family: var(--font-ui) !important;
+  font-weight: 500 !important;
+  transition: background 110ms ease, border-color 110ms ease, color 110ms ease, transform 110ms var(--ease-spring) !important;
+}
+.disco-nav-item:active { transform: scale(0.91) !important; transition-duration: 55ms !important; }
+.mf-chip-optimistic { background: rgba(10,132,255,0.09) !important; border-color: rgba(10,132,255,0.22) !important; color: var(--accent) !important; }
+
+/* ─── TILE LOGO ─────────────────────────────────────────────── */
+.tile-logo { transition: opacity 0.28s var(--ease-soft), transform 0.32s var(--ease-spring) !important; }
+.ps-tile-wrapper:hover .tile-logo { transform: scale(1.03) translateY(-2px) !important; }
+
+/* ─── GPU COMPOSITING ───────────────────────────────────────── */
+.disco-card, .ep-card, .movie-tile, .ps-tile-wrapper, .sh-card {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ─── FOCUS ─────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid rgba(10,132,255,0.70) !important;
+  outline-offset: 3px !important;
+  transition: outline-color 0.14s var(--ease-soft) !important;
+}
+
+/* ─── CINEMA SOURCE BAR ─────────────────────────────────────── */
+#cinemaSourceBar button {
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  transition: all 0.18s var(--ease-soft) !important;
+}
+
+/* ─── INPUTS ────────────────────────────────────────────────── */
+input, textarea, select { font-family: var(--font-ui) !important; }
+
+/* ════════════════════════════════════════════════════════════
+   AI MATCH BADGE — přepis žluté/zelené na modrý design
+   ════════════════════════════════════════════════════════════ */
+
+/* Přebij inline barvu profilu — badge vždy modrý */
+.ai-match-badge {
+  background: linear-gradient(135deg, rgba(10,132,255,0.92), rgba(10,100,220,0.85)) !important;
+  color: #fff !important;
+  box-shadow: 0 0 0 1px rgba(10,132,255,0.4), 0 2px 8px rgba(0,0,0,0.5) !important;
+  /* Animace zastavena — žádné blikání */
+  animation: none !important;
+  /* Jemnější tvar */
+  border-radius: 6px !important;
+  font-size: 0.46rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.3px !important;
+  padding: 3px 6px !important;
+  backdrop-filter: none !important;
+}
+
+/* Odstraň pulsující animaci úplně */
+@keyframes aiMatchPulse {
+  0%, 100%, 50% { box-shadow: 0 0 0 1px rgba(10,132,255,0.35), 0 2px 8px rgba(0,0,0,0.4); }
+}
+
+/* ════════════════════════════════════════════════════════════
+   SEKCE "OBJEVOVÁNÍ" — nové animace
+   Cíl: okamžitý nástup, žádné zpoždění, slide-in efekt
+   ════════════════════════════════════════════════════════════ */
+
+/* Sekce fade+slide — rychlejší, žádné scale */
+@keyframes mf-section-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Karty — stagger slide zleva */
+@keyframes mf-card-slide-in {
+  from { opacity: 0; transform: translateX(-16px) scale(0.96); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Row header — fade zleva, okamžitě */
+@keyframes mf-header-enter {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Přepis původních pomalých animací */
+.disco-section {
+  animation: mf-section-enter 0.22s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+  animation-delay: 0ms !important; /* NULA delay */
+}
+
+.disco-row-header {
+  animation: mf-header-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+  animation-delay: 0ms !important;
+}
+
+/* Disco karty — rychlý stagger ale ne přes JS, přes CSS nth-child */
+.disco-row-scroll .disco-card:nth-child(1)  { animation: mf-card-slide-in 0.18s cubic-bezier(0.16,1,0.3,1) both; animation-delay: 0ms; }
+.disco-row-scroll .disco-card:nth-child(2)  { animation: mf-card-slide-in 0.18s cubic-bezier(0.16,1,0.3,1) both; animation-delay: 25ms; }
+.disco-row-scroll .disco-card:nth-child(3)  { animation: mf-card-slide-in 0.18s cubic-bezier(0.16,1,0.3,1) both; animation-delay: 50ms; }
+.disco-row-scroll .disco-card:nth-child(4)  { animation: mf-card-slide-in 0.18s cubic-bezier(0.16,1,0.3,1) both; animation-delay: 70ms; }
+.disco-row-scroll .disco-card:nth-child(5)  { animation: mf-card-slide-in 0.18s cubic-bezier(0.16,1,0.3,1) both; animation-delay: 88ms; }
+.disco-row-scroll .disco-card:nth-child(6)  { animation: mf-card-slide-in 0.18s cubic-bezier(0.16,1,0.3,1) both; animation-delay: 104ms; }
+.disco-row-scroll .disco-card:nth-child(7)  { animation: mf-card-slide-in 0.18s cubic-bezier(0.16,1,0.3,1) both; animation-delay: 118ms; }
+.disco-row-scroll .disco-card:nth-child(8)  { animation: mf-card-slide-in 0.18s cubic-bezier(0.16,1,0.3,1) both; animation-delay: 130ms; }
+.disco-row-scroll .disco-card:nth-child(n+9){ animation: mf-card-slide-in 0.18s cubic-bezier(0.16,1,0.3,1) both; animation-delay: 140ms; }
+
+/* Nav chipy — rychlý fade in bez zpoždění */
+.disco-nav-item {
+  animation: mf-section-enter 0.16s cubic-bezier(0.16,1,0.3,1) both !important;
+  animation-delay: 0ms !important;
+}
+
+/* Page enter animace — okamžitá */
+#discoBody, #mainContent {
+  animation: mf-section-enter 0.18s cubic-bezier(0.16,1,0.3,1) both !important;
+}
+
+/* Skeleton shimmer — jemnější, stejná rychlost */
+@keyframes mf-shimmer-smooth {
+  0%   { background-position: -900px 0; }
+  100% { background-position:  900px 0; }
+}
+.mf-disco-skel {
+  animation: mf-shimmer-smooth 1.4s ease-in-out infinite !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   HOVER ODEZVA — transition-delay nula všude
+   ════════════════════════════════════════════════════════════ */
+.ps-tile-wrapper,
+.disco-card,
+.sh-card,
+.ep-card,
+.disco-nav-item,
+.btn, button {
+  transition-delay: 0ms !important;
+}
