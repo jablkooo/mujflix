@@ -1,0 +1,2639 @@
+/* ═══════════════════════════════════════════════════════════════
+   MůjFlix — styles-premium.css  ·  REDESIGN v4 — FULL COVERAGE
+   Drop-in after styles.css. Pure visual overrides — no layout.
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+/* ────────────────────────────────────────────────────────────────
+   § 0 · DESIGN TOKENS
+──────────────────────────────────────────────────────────────── */
+:root {
+  --font-ui:   "Sora", -apple-system, "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", monospace;
+
+  /* Core palette — deep violet-black */
+  --bg:  #06060b;
+  --bg2: #0b0b14;
+
+  /* Accent system */
+  --accent:      #7c6fef;       /* indigo */
+  --accent2:     #38c8f0;       /* cyan   */
+  --accent-warm: #f06292;       /* pink   */
+  --accent-amber:#ffb347;       /* amber  */
+  --accent-glow: rgba(124,111,239,0.22);
+
+  /* Surfaces */
+  --glass:             rgba(12,12,22,0.86);
+  --glass-light:       rgba(255,255,255,0.026);
+  --plexi-bg:          rgba(14,14,28,0.78);
+  --plexi-border:      rgba(255,255,255,0.09);
+  --plexi-border-top:  rgba(255,255,255,0.17);
+  --plexi-blur:        blur(52px) saturate(2.2) brightness(0.87);
+  --plexi-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,0.13),
+    inset 0 -1px   0 rgba(0,0,0,0.3),
+    0 0 0 0.5px rgba(255,255,255,0.045),
+    0 30px 80px rgba(0,0,0,0.9),
+    0 8px 22px  rgba(0,0,0,0.65);
+
+  /* Borders */
+  --border:    rgba(255,255,255,0.04);
+  --border-hi: rgba(255,255,255,0.09);
+
+  /* Text */
+  --text:  rgba(255,255,255,0.96);
+  --muted: rgba(255,255,255,0.36);
+
+  /* Radii */
+  --radius:    20px;
+  --radius-lg: 28px;
+  --radius-sm: 12px;
+
+  /* Easing */
+  --ease-spring: cubic-bezier(0.34,1.52,0.64,1);
+  --ease-out:    cubic-bezier(0.16,1,0.3,1);
+  --ease-soft:   cubic-bezier(0.25,0.8,0.25,1);
+
+  /* Shadows */
+  --shadow:    0 2px 14px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.38);
+  --shadow-lg: 0 20px 72px rgba(0,0,0,0.88), 0 6px 20px rgba(0,0,0,0.58);
+  --shadow-xl: 0 40px 100px rgba(0,0,0,0.95), 0 12px 32px rgba(0,0,0,0.7);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   § 1 · BASE
+──────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+body, html {
+  font-family: var(--font-ui) !important;
+  background: var(--bg) !important;
+}
+
+/* Grain noise layer */
+body::before {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  opacity: 0.025 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E") !important;
+  background-size: 160px 160px !important;
+}
+
+/* Ambient glow */
+.bg-glow {
+  background:
+    radial-gradient(ellipse 90% 55% at 8% -8%, rgba(124,111,239,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 55% 70% at 98% 110%, rgba(56,200,240,0.032) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 52% 52%, rgba(240,98,146,0.018) 0%, transparent 65%) !important;
+  animation: none !important;
+}
+body::after { display: none !important; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(124,111,239,0.22); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(124,111,239,0.44); }
+
+/* ────────────────────────────────────────────────────────────────
+   § 2 · TYPOGRAPHY GLOBALS
+──────────────────────────────────────────────────────────────── */
+.logo, .mf-header-logo {
+  font-family: var(--font-ui) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.8px !important;
+  text-shadow: none !important;
+}
+.logo span, .mf-header-logo span { color: var(--accent) !important; filter: none !important; }
+.logo-progress-fill {
+  background: linear-gradient(90deg, var(--accent), var(--accent2)) !important;
+  box-shadow: 0 0 12px rgba(124,111,239,0.5) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   § 3 · PROFILE GATE
+──────────────────────────────────────────────────────────────── */
+#mfProfileGate { background: var(--bg) !important; }
+
+.pg-logo {
+  font-family: var(--font-ui) !important;
+  font-weight: 900 !important;
+  letter-spacing: -2.2px !important;
+  font-size: 2.6rem !important;
+}
+.pg-logo span {
+  color: var(--accent) !important;
+  filter: drop-shadow(0 0 22px rgba(124,111,239,0.62)) !important;
+}
+.pg-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 500 !important;
+  color: rgba(255,255,255,0.45) !important;
+  font-size: 0.88rem !important;
+  letter-spacing: -0.1px !important;
+}
+.pg-avatar {
+  border-radius: 22px !important;
+  background: linear-gradient(145deg, rgba(124,111,239,0.1) 0%, rgba(12,12,22,0.95) 100%) !important;
+  border: 1.5px solid rgba(255,255,255,0.065) !important;
+  transition: transform 0.3s var(--ease-spring), border-color 0.2s ease, box-shadow 0.3s ease !important;
+}
+.pg-profile-item:hover .pg-avatar {
+  border-color: rgba(124,111,239,0.5) !important;
+  transform: scale(1.07) translateY(-9px) !important;
+  box-shadow:
+    0 26px 64px rgba(0,0,0,0.9),
+    0 0 0 2px rgba(124,111,239,0.22),
+    0 0 44px rgba(124,111,239,0.14) !important;
+}
+.pg-name { font-family: var(--font-ui) !important; font-weight: 500 !important; }
+.pg-add-btn { border-radius: 22px !important; border: 2px dashed rgba(255,255,255,0.09) !important; }
+.pg-manage-btn {
+  font-family: var(--font-ui) !important; font-weight: 500 !important;
+  border-radius: 14px !important; font-size: 0.8rem !important;
+  background: rgba(124,111,239,0.1) !important;
+  border: 1px solid rgba(124,111,239,0.2) !important;
+  color: rgba(124,111,239,0.85) !important;
+  transition: all 0.18s ease !important;
+}
+.pg-manage-btn:hover { background: rgba(124,111,239,0.18) !important; border-color: rgba(124,111,239,0.38) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 4 · HEADER
+──────────────────────────────────────────────────────────────── */
+.mf-header {
+  background: linear-gradient(to bottom, rgba(6,6,11,0.97) 0%, rgba(6,6,11,0.7) 60%, transparent 100%) !important;
+  backdrop-filter: none !important;
+}
+.mf-header.scrolled {
+  background: rgba(7,7,13,0.98) !important;
+  backdrop-filter: blur(30px) saturate(2.2) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(2.2) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.042) !important;
+  box-shadow: 0 1px 0 rgba(124,111,239,0.055) !important;
+}
+.mf-header-logo { font-size: 1.2rem !important; font-weight: 900 !important; letter-spacing: -0.7px !important; }
+.mf-header-btn {
+  border-radius: 11px !important;
+  transition: color 130ms ease, background 130ms ease, transform 130ms var(--ease-spring) !important;
+}
+.mf-header-btn:hover { background: rgba(124,111,239,0.1) !important; color: var(--accent) !important; }
+.mf-header-btn:active { transform: scale(0.86) !important; transition-duration: 50ms !important; }
+.mf-header-btn.active-btn {
+  background: rgba(124,111,239,0.14) !important;
+  color: var(--accent) !important;
+  box-shadow: 0 0 0 1px rgba(124,111,239,0.24) !important;
+}
+/* Streak pill */
+#hdrStreakPill {
+  background: rgba(255,179,71,0.08) !important;
+  border: 1px solid rgba(255,179,71,0.2) !important;
+  border-radius: 20px !important;
+}
+#hdrStreakDays { font-family: var(--font-ui) !important; font-weight: 800 !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 5 · BOTTOM DOCK
+──────────────────────────────────────────────────────────────── */
+.mf-dock {
+  background: var(--plexi-bg) !important;
+  backdrop-filter: var(--plexi-blur) !important;
+  -webkit-backdrop-filter: var(--plexi-blur) !important;
+  border: 1px solid var(--plexi-border) !important;
+  border-top-color: var(--plexi-border-top) !important;
+  border-radius: 36px !important;
+  box-shadow: var(--plexi-shadow) !important;
+  padding: 6px 10px !important;
+  transition: padding 0.38s var(--ease-spring) !important;
+}
+.mf-dock:hover { padding: 8px 13px !important; }
+.dock-btn {
+  border-radius: 28px !important;
+  padding: 8px 14px !important;
+  color: rgba(255,255,255,0.3) !important;
+  transition: color 200ms ease, background 200ms ease, transform 170ms var(--ease-spring) !important;
+}
+.dock-btn svg {
+  transition: transform 200ms var(--ease-spring) !important;
+}
+.dock-btn:hover { color: var(--accent) !important; }
+.dock-btn:hover svg { transform: scale(1.12) !important; }
+.dock-btn.active { color: var(--accent) !important; background: rgba(124,111,239,0.1) !important; }
+.dock-btn:active { transform: scale(0.83) !important; transition-duration: 50ms !important; }
+.dock-label { font-family: var(--font-ui) !important; font-weight: 500 !important; font-size: 0.575rem !important; letter-spacing: -0.1px !important; }
+.dock-active-dot { background: var(--accent) !important; box-shadow: 0 0 8px rgba(124,111,239,0.7) !important; }
+.dock-badge { background: var(--accent-warm) !important; box-shadow: 0 0 8px rgba(240,98,146,0.55) !important; }
+
+/* AI dock button — special treatment */
+.dock-ai {
+  color: rgba(255,255,255,0.5) !important;
+}
+.dock-ai.active, .dock-ai:hover {
+  color: var(--accent2) !important;
+  background: rgba(56,200,240,0.1) !important;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   § 6 · DOCK MORE SHEET  (inline-styled, must override via id/attr)
+──────────────────────────────────────────────────────────────── */
+#dockMoreSheet {
+  background: rgba(9,9,18,0.97) !important;
+  backdrop-filter: blur(52px) saturate(2) !important;
+  -webkit-backdrop-filter: blur(52px) saturate(2) !important;
+  border-top: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 28px 28px 0 0 !important;
+  box-shadow: 0 -24px 80px rgba(0,0,0,0.92), inset 0 1px 0 rgba(124,111,239,0.1) !important;
+}
+/* Tool grid buttons inside dock-more — all inline-styled, target via child combinator */
+#dockMoreSheet button[style*="flex-direction: column"] {
+  background: rgba(255,255,255,0.038) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 18px !important;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.16s var(--ease-spring) !important;
+}
+#dockMoreSheet button[style*="flex-direction: column"]:hover {
+  background: rgba(124,111,239,0.1) !important;
+  border-color: rgba(124,111,239,0.22) !important;
+  transform: scale(1.05) !important;
+}
+/* Setting list rows */
+#dockMoreSheet button[style*="align-items: center"][style*="gap: 14"] {
+  border-radius: 0 !important;
+  transition: background 0.15s ease !important;
+  font-family: var(--font-ui) !important;
+}
+/* The settings list container */
+#dockMoreSheet div[style*="background: rgba(255, 255, 255, 0.04)"] {
+  background: rgba(255,255,255,0.028) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 18px !important;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   § 7 · POSTER TILES
+──────────────────────────────────────────────────────────────── */
+.ps-tile-wrapper {
+  animation: mf-fade-up 0.48s var(--ease-out) both;
+  transition: transform 0.2s var(--ease-spring) !important;
+}
+.ps-tile-wrapper:nth-child(1)  { animation-delay: 0.04s; }
+.ps-tile-wrapper:nth-child(2)  { animation-delay: 0.08s; }
+.ps-tile-wrapper:nth-child(3)  { animation-delay: 0.13s; }
+.ps-tile-wrapper:nth-child(4)  { animation-delay: 0.18s; }
+.ps-tile-wrapper:nth-child(5)  { animation-delay: 0.22s; }
+.ps-tile-wrapper:nth-child(6)  { animation-delay: 0.26s; }
+.ps-tile-wrapper:nth-child(n+7){ animation-delay: 0.30s; }
+.ps-tile-wrapper:hover, .ps-tile-wrapper.kb-focus {
+  transform: translateY(-13px) scale(1.045) translateZ(0) !important;
+}
+.ps-tile-wrapper:active { transform: translateY(-3px) scale(1.005) translateZ(0) !important; transition-duration: 50ms !important; }
+
+.ps-tile {
+  border-radius: var(--radius) !important;
+  border: 1px solid rgba(255,255,255,0.038) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.65), 0 14px 40px rgba(0,0,0,0.52) !important;
+  transition: box-shadow 0.2s var(--ease-soft), border-color 0.2s ease !important;
+}
+.ps-tile-wrapper:hover .ps-tile, .ps-tile-wrapper.kb-focus .ps-tile {
+  box-shadow:
+    0 0 0 1.5px rgba(124,111,239,0.38),
+    0 26px 64px rgba(0,0,0,0.9),
+    0 0 42px rgba(124,111,239,0.09) !important;
+  border-color: rgba(124,111,239,0.26) !important;
+}
+.ps-tile-wrapper.kb-focus .ps-tile { box-shadow: 0 0 0 2.5px rgba(124,111,239,0.8), 0 26px 64px rgba(0,0,0,0.9), 0 0 50px rgba(124,111,239,0.2) !important; }
+
+.ps-tile .tile-bg {
+  transition: transform 0.26s var(--ease-soft), filter 0.26s ease !important;
+}
+.ps-tile-wrapper:hover .tile-bg, .ps-tile-wrapper.kb-focus .tile-bg {
+  transform: scale(1.07) !important;
+  filter: saturate(1.28) brightness(1.08) contrast(1.03) !important;
+}
+
+/* Neighbour dim */
+.ps-menu:has(.ps-tile-wrapper:hover) .ps-tile-wrapper:not(:hover) {
+  opacity: 0.68; transition: opacity 0.2s ease !important;
+}
+.ps-menu:not(:has(.ps-tile-wrapper:hover)) .ps-tile-wrapper {
+  opacity: 1; transition: opacity 0.25s ease !important;
+}
+
+/* Progress */
+.tile-progress-fill {
+  background: linear-gradient(90deg, var(--accent), var(--accent2)) !important;
+  box-shadow: 0 0 8px rgba(124,111,239,0.5) !important;
+}
+/* Continue badge */
+.tile-continue-badge {
+  background: rgba(124,111,239,0.16) !important;
+  border: 1px solid rgba(124,111,239,0.26) !important;
+  border-radius: 10px !important;
+  backdrop-filter: blur(10px) !important;
+}
+.tcb-text { font-family: var(--font-mono) !important; font-size: 0.59rem !important; color: var(--accent) !important; font-weight: 500 !important; }
+/* Watchlist btn */
+.tile-watchlist-btn {
+  background: rgba(12,12,22,0.82) !important;
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  border-radius: 10px !important;
+  transition: all 0.17s ease !important;
+}
+.tile-watchlist-btn:hover { background: rgba(124,111,239,0.16) !important; border-color: rgba(124,111,239,0.32) !important; }
+.tile-watchlist-btn.in-watchlist { background: rgba(124,111,239,0.2) !important; border-color: rgba(124,111,239,0.44) !important; color: var(--accent) !important; }
+/* Tile logo */
+.ps-tile .tile-logo { transition: opacity 0.2s ease, filter 0.2s ease !important; }
+.ps-tile-wrapper:hover .tile-logo { filter: drop-shadow(0 2px 12px rgba(0,0,0,0.8)) !important; }
+
+/* Shimmer for unloaded images */
+@keyframes mf-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.ps-tile .tile-bg:not(.loaded) {
+  background: linear-gradient(90deg, rgba(255,255,255,0.028) 25%, rgba(124,111,239,0.055) 50%, rgba(255,255,255,0.028) 75%) !important;
+  background-size: 200% 100% !important;
+  animation: mf-shimmer 1.9s ease-in-out infinite !important;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   § 8 · DISCOVERY CARDS  (.disco-card)
+──────────────────────────────────────────────────────────────── */
+.disco-card {
+  border-radius: var(--radius) !important;
+  border: 1px solid rgba(255,255,255,0.048) !important;
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s var(--ease-soft), border-color 0.18s ease, opacity 0.18s ease !important;
+  animation: mf-fade-up 0.4s var(--ease-out) both;
+}
+.disco-card:nth-child(2) { animation-delay: 0.06s; }
+.disco-card:nth-child(3) { animation-delay: 0.12s; }
+.disco-card:nth-child(4) { animation-delay: 0.18s; }
+.disco-card:nth-child(n+5) { animation-delay: 0.22s; }
+.disco-card:hover {
+  transform: scale(1.056) translateY(-9px) translateZ(0) !important;
+  box-shadow: 0 22px 54px rgba(0,0,0,0.88), 0 0 0 1.5px rgba(124,111,239,0.32) !important;
+  border-color: rgba(124,111,239,0.24) !important;
+}
+.disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
+  opacity: 0.66; transform: scale(0.98) translateZ(0) !important;
+}
+.disco-card-img { transition: transform 0.22s var(--ease-out), filter 0.2s ease !important; }
+.disco-card:hover .disco-card-img { transform: scale(1.09) !important; filter: brightness(1.1) saturate(1.3) !important; }
+.disco-card-glow {
+  filter: blur(10px) !important;
+  background: radial-gradient(ellipse 90% 100% at 50% 0%, rgba(124,111,239,0.38) 0%, transparent 70%) !important;
+  transition: opacity 0.2s ease !important;
+}
+.disco-section-label, .sh-section-label {
+  font-family: var(--font-ui) !important; font-weight: 700 !important; letter-spacing: -0.4px !important;
+}
+.disco-see-all, .sh-see-all {
+  font-family: var(--font-ui) !important; font-weight: 500 !important;
+  color: var(--accent) !important; font-size: 0.76rem !important;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   § 9 · SHOW HERO CARDS  (.sh-card)
+──────────────────────────────────────────────────────────────── */
+.sh-card {
+  border-radius: var(--radius) !important;
+  border: 1px solid rgba(255,255,255,0.048) !important;
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s var(--ease-soft), opacity 0.18s ease !important;
+}
+.sh-card:hover, .sh-card.sh-focused {
+  transform: translateY(-9px) scale(1.035) translateZ(0) !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.86), 0 0 0 1.5px rgba(124,111,239,0.28) !important;
+}
+.sh-card img { transition: filter 0.2s ease, transform 0.2s var(--ease-soft) !important; }
+.sh-card:hover img, .sh-card.sh-focused img { filter: brightness(1.1) saturate(1.18) !important; transform: scale(1.06) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 10 · EPISODE CARDS
+──────────────────────────────────────────────────────────────── */
+.ep-card {
+  border-radius: 14px !important;
+  border: 1px solid rgba(255,255,255,0.038) !important;
+  transition: transform 0.14s var(--ease-spring), box-shadow 0.14s var(--ease-soft), background 0.14s ease, border-color 0.14s ease !important;
+}
+.ep-card:hover {
+  transform: translateY(-4px) scale(1.016) translateZ(0) !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.56), 0 0 0 1px rgba(124,111,239,0.18) !important;
+  background: rgba(124,111,239,0.038) !important;
+  border-color: rgba(124,111,239,0.14) !important;
+}
+.ep-card.watched { border-color: rgba(124,111,239,0.16) !important; }
+.ep-watched-dot { background: var(--accent) !important; box-shadow: 0 0 6px rgba(124,111,239,0.55) !important; }
+.ep-number { font-family: var(--font-mono) !important; font-weight: 500 !important; color: var(--accent) !important; }
+
+/* Season pills */
+.season-pill { font-family: var(--font-ui) !important; font-weight: 600 !important; border-radius: 12px !important; transition: all 0.15s ease !important; }
+.season-pill.active { background: var(--accent) !important; box-shadow: 0 0 16px rgba(124,111,239,0.4) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 11 · SERIES MODAL
+──────────────────────────────────────────────────────────────── */
+.modal-overlay {
+  backdrop-filter: blur(34px) saturate(1.9) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(1.9) !important;
+  background: rgba(0,0,0,0.76) !important;
+}
+.modal-panel, .modal-box {
+  background: rgba(9,9,16,0.99) !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-xl) !important;
+  animation: mf-scale-in 0.28s var(--ease-spring) both !important;
+}
+#sTitle { font-family: var(--font-ui) !important; font-weight: 800 !important; letter-spacing: -0.6px !important; }
+.panel-progress-fill { background: linear-gradient(90deg, var(--accent), var(--accent2)) !important; }
+.tmdb-badge {
+  font-family: var(--font-mono) !important; font-size: 0.66rem !important; font-weight: 500 !important;
+  background: rgba(255,213,0,0.1) !important; border: 1px solid rgba(255,213,0,0.22) !important;
+  border-radius: 8px !important; color: rgba(255,213,0,0.85) !important;
+}
+#modalRateBtn, #modalFindBtn {
+  border-radius: 14px !important; font-family: var(--font-ui) !important; font-weight: 600 !important;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   § 12 · UNIVERSE / DISCOVERY OVERLAY
+──────────────────────────────────────────────────────────────── */
+.universe-overlay {
+  background: rgba(5,5,9,0.98) !important;
+}
+.disco-header {
+  background: linear-gradient(to bottom, rgba(5,5,9,0.99) 0%, rgba(5,5,9,0.65) 80%, transparent 100%) !important;
+  backdrop-filter: blur(26px) !important;
+  -webkit-backdrop-filter: blur(26px) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.038) !important;
+}
+.disco-logo {
+  font-family: var(--font-ui) !important;
+  font-weight: 900 !important;
+  letter-spacing: 3px !important;
+  color: var(--accent) !important;
+  opacity: 0.7 !important;
+}
+.disco-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 900 !important;
+  letter-spacing: -1.8px !important;
+  font-size: 1.85rem !important;
+}
+.disco-title span { color: var(--accent) !important; }
+.disco-close {
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.044) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  transition: all 0.17s ease !important;
+}
+.disco-close:hover { background: rgba(255,255,255,0.09) !important; color: #fff !important; }
+
+/* Search input */
+.uni-search-wrap {
+  background: rgba(255,255,255,0.044) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 14px !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+}
+.uni-search-wrap:focus-within {
+  border-color: rgba(124,111,239,0.45) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.1) !important;
+}
+.uni-input {
+  font-family: var(--font-ui) !important;
+  font-weight: 500 !important;
+  color: var(--text) !important;
+  font-size: 0.92rem !important;
+}
+.uni-input::placeholder { color: rgba(255,255,255,0.28) !important; }
+.uni-clear-btn {
+  background: rgba(255,255,255,0.07) !important;
+  border-radius: 8px !important;
+  color: rgba(255,255,255,0.5) !important;
+  border: none !important;
+  transition: all 0.15s ease !important;
+}
+.uni-clear-btn:hover { background: rgba(124,111,239,0.15) !important; color: var(--accent) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 13 · AI FULLSCREEN PANEL
+──────────────────────────────────────────────────────────────── */
+.ai-fullscreen { background: var(--bg) !important; }
+
+/* Sidebar */
+.ai-sidebar {
+  background: rgba(255,255,255,0.022) !important;
+  border-right: 1px solid rgba(255,255,255,0.042) !important;
+}
+.ai-sidebar-header {
+  padding: 20px 18px 14px !important;
+  border-bottom: 1px solid rgba(255,255,255,0.042) !important;
+}
+.ai-sidebar-logo {
+  font-family: var(--font-ui) !important; font-weight: 900 !important;
+  letter-spacing: -0.4px !important; font-size: 1.08rem !important;
+}
+.ai-sidebar-logo span { color: var(--accent) !important; }
+.ai-status-badge {
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 12px !important;
+  transition: all 0.17s ease !important;
+}
+.ai-status-badge:hover { background: rgba(124,111,239,0.08) !important; border-color: rgba(124,111,239,0.22) !important; }
+.ai-status-dot { background: var(--accent) !important; box-shadow: 0 0 7px rgba(124,111,239,0.65) !important; }
+.ai-status-dot.warn  { background: var(--accent-amber) !important; box-shadow: 0 0 7px rgba(255,179,71,0.6) !important; }
+.ai-status-dot.error { background: #ff5f5f !important; box-shadow: 0 0 7px rgba(255,80,80,0.6) !important; }
+.ai-status-model { font-family: var(--font-ui) !important; font-weight: 700 !important; font-size: 0.68rem !important; }
+.ai-status-sub  { font-family: var(--font-ui) !important; font-size: 0.57rem !important; }
+.ai-sidebar-label {
+  font-family: var(--font-ui) !important; font-weight: 800 !important;
+  letter-spacing: 1.8px !important; font-size: 0.55rem !important;
+  color: rgba(255,255,255,0.28) !important;
+}
+.ai-watch-item { border-radius: 10px !important; transition: background 0.14s ease !important; }
+.ai-watch-item:hover { background: rgba(124,111,239,0.07) !important; }
+.ai-watch-poster { border-radius: 8px !important; }
+.ai-watch-name { font-family: var(--font-ui) !important; font-weight: 600 !important; font-size: 0.66rem !important; }
+.ai-watch-bar { background: rgba(255,255,255,0.07) !important; }
+.ai-watch-bar-fill { background: var(--accent) !important; }
+.ai-watch-pct { font-family: var(--font-mono) !important; font-size: 0.54rem !important; color: rgba(255,255,255,0.32) !important; }
+.ai-profile-textarea {
+  font-family: var(--font-ui) !important; font-size: 0.68rem !important;
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 12px !important; color: var(--text) !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+}
+.ai-profile-textarea:focus { border-color: rgba(124,111,239,0.38) !important; box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important; outline: none !important; }
+.ai-profile-save {
+  font-family: var(--font-ui) !important; font-weight: 700 !important; font-size: 0.64rem !important;
+  background: rgba(124,111,239,0.1) !important; border: 1px solid rgba(124,111,239,0.22) !important;
+  border-radius: 10px !important; color: var(--accent) !important;
+  transition: all 0.16s ease !important;
+}
+.ai-profile-save:hover { background: rgba(124,111,239,0.18) !important; }
+
+/* AI Main area */
+.ai-topbar { border-bottom: 1px solid rgba(255,255,255,0.042) !important; }
+.ai-topbar-title {
+  font-family: var(--font-ui) !important; font-weight: 800 !important;
+  letter-spacing: -0.4px !important; font-size: 0.98rem !important;
+}
+.ai-topbar-title span { color: var(--accent) !important; }
+.ai-topbar-sub { font-family: var(--font-ui) !important; color: rgba(255,255,255,0.3) !important; }
+.ai-topbar-btn {
+  border-radius: 11px !important;
+  background: rgba(255,255,255,0.038) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  transition: all 0.16s ease !important;
+}
+.ai-topbar-btn:hover { background: rgba(255,255,255,0.08) !important; color: var(--text) !important; border-color: rgba(255,255,255,0.12) !important; }
+.ai-topbar-btn.tts-on { color: var(--accent) !important; border-color: rgba(124,111,239,0.28) !important; background: rgba(124,111,239,0.07) !important; }
+
+/* Quick buttons */
+.ai-quick-row { border-bottom: 1px solid rgba(255,255,255,0.042) !important; gap: 6px !important; }
+.ai-quick-btn {
+  font-family: var(--font-ui) !important; font-weight: 600 !important; font-size: 0.67rem !important;
+  border-radius: 20px !important;
+  background: rgba(255,255,255,0.038) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  color: rgba(255,255,255,0.5) !important;
+  transition: all 0.16s ease !important;
+}
+.ai-quick-btn:hover {
+  background: rgba(124,111,239,0.1) !important;
+  border-color: rgba(124,111,239,0.28) !important;
+  color: var(--accent) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Messages */
+.ai-msg-wrap.ai .ai-msg-avatar {
+  background: rgba(124,111,239,0.12) !important;
+  border: 1px solid rgba(124,111,239,0.22) !important;
+  color: var(--accent) !important;
+  border-radius: 11px !important;
+}
+.ai-msg-wrap.user .ai-msg-avatar {
+  background: rgba(255,255,255,0.07) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 11px !important;
+}
+.ai-msg-wrap.ai .ai-msg-bubble {
+  background: rgba(255,255,255,0.038) !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 4px 18px 18px 18px !important;
+  font-family: var(--font-ui) !important;
+  font-size: 0.81rem !important;
+  line-height: 1.65 !important;
+}
+.ai-msg-wrap.user .ai-msg-bubble {
+  background: rgba(124,111,239,0.12) !important;
+  border: 1px solid rgba(124,111,239,0.2) !important;
+  border-radius: 18px 4px 18px 18px !important;
+  font-family: var(--font-ui) !important;
+  font-size: 0.81rem !important;
+}
+.ai-msg-label {
+  font-family: var(--font-ui) !important; font-weight: 800 !important;
+  letter-spacing: 1px !important; font-size: 0.51rem !important;
+  color: var(--accent) !important;
+}
+.ai-fb-btn {
+  font-family: var(--font-ui) !important; border-radius: 8px !important;
+  background: rgba(255,255,255,0.038) !important; border: 1px solid rgba(255,255,255,0.055) !important;
+  transition: all 0.15s ease !important;
+}
+.ai-fb-btn:hover { background: rgba(124,111,239,0.1) !important; color: var(--accent) !important; border-color: rgba(124,111,239,0.22) !important; }
+
+/* Thinking dots */
+.ai-thinking-bubble {
+  background: rgba(255,255,255,0.038) !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 4px 18px 18px 18px !important;
+}
+.ai-thinking-bubble span { background: var(--accent) !important; }
+
+/* Add form */
+.ai-add-form {
+  background: rgba(124,111,239,0.06) !important;
+  border: 1px solid rgba(124,111,239,0.18) !important;
+  border-radius: 14px !important;
+}
+.ai-add-input {
+  font-family: var(--font-ui) !important;
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 10px !important; color: var(--text) !important;
+  transition: border-color 0.17s ease !important;
+}
+.ai-add-input:focus { border-color: rgba(124,111,239,0.38) !important; outline: none !important; }
+.ai-add-confirm-btn {
+  font-family: var(--font-ui) !important; font-weight: 700 !important;
+  background: rgba(124,111,239,0.14) !important;
+  border: 1px solid rgba(124,111,239,0.28) !important;
+  border-radius: 10px !important; color: var(--accent) !important;
+  transition: all 0.16s ease !important;
+}
+.ai-add-confirm-btn:hover { background: rgba(124,111,239,0.24) !important; }
+
+/* Input area */
+.ai-input-area { border-top: 1px solid rgba(255,255,255,0.042) !important; }
+.ai-input-row {
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  border-radius: 18px !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+}
+.ai-input-row:focus-within {
+  border-color: rgba(124,111,239,0.38) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
+}
+.ai-input { font-family: var(--font-ui) !important; font-size: 0.85rem !important; color: var(--text) !important; }
+.ai-input::placeholder { color: rgba(255,255,255,0.26) !important; }
+.ai-voice-fab-btn {
+  border-radius: 11px !important;
+  background: rgba(255,255,255,0.044) !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  color: rgba(255,255,255,0.4) !important;
+  transition: all 0.16s ease !important;
+}
+.ai-voice-fab-btn:hover { background: rgba(124,111,239,0.1) !important; border-color: rgba(124,111,239,0.28) !important; color: var(--accent) !important; }
+.ai-voice-fab-btn.listening { background: rgba(124,111,239,0.18) !important; border-color: var(--accent) !important; color: var(--accent) !important; }
+.ai-send-btn {
+  border-radius: 11px !important;
+  background: linear-gradient(135deg, var(--accent), #9b8ffc) !important;
+  box-shadow: 0 4px 14px rgba(124,111,239,0.35) !important;
+  transition: all 0.17s ease !important;
+  color: #fff !important;
+}
+.ai-send-btn:hover { box-shadow: 0 6px 20px rgba(124,111,239,0.52) !important; transform: scale(1.06) !important; }
+.ai-send-btn:disabled { opacity: 0.38 !important; box-shadow: none !important; transform: none !important; }
+
+/* AI film link chips */
+.ai-film-link {
+  font-family: var(--font-ui) !important; font-weight: 600 !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(124,111,239,0.22) !important;
+  background: rgba(124,111,239,0.08) !important;
+  color: var(--accent) !important;
+  transition: all 0.16s ease !important;
+}
+.ai-film-link:hover { background: rgba(124,111,239,0.16) !important; border-color: rgba(124,111,239,0.38) !important; transform: translateY(-1px) !important; }
+
+/* API key overlay */
+.ai-apikey-overlay { backdrop-filter: blur(26px) !important; background: rgba(0,0,0,0.88) !important; }
+.ai-apikey-box {
+  background: rgba(10,10,18,0.99) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-xl) !important;
+}
+.ai-apikey-title { font-family: var(--font-ui) !important; font-weight: 800 !important; letter-spacing: -0.4px !important; }
+.ai-apikey-sub  { font-family: var(--font-ui) !important; }
+.ai-key-tab { font-family: var(--font-ui) !important; font-weight: 600 !important; border-radius: 12px !important; transition: all 0.15s ease !important; }
+.ai-key-tab.active { background: rgba(124,111,239,0.14) !important; border-color: rgba(124,111,239,0.3) !important; color: var(--accent) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 14 · WATCHLIST OVERLAY
+──────────────────────────────────────────────────────────────── */
+.watchlist-overlay { backdrop-filter: blur(32px) saturate(1.9) !important; background: rgba(0,0,0,0.78) !important; }
+.watchlist-box {
+  background: rgba(9,9,18,0.99) !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-xl) !important;
+  animation: mf-scale-in 0.28s var(--ease-spring) both !important;
+}
+.wl-title { font-family: var(--font-ui) !important; font-weight: 800 !important; letter-spacing: -0.5px !important; }
+.wl-title span { color: var(--accent) !important; }
+.wl-close {
+  border-radius: 50% !important;
+  background: rgba(255,255,255,0.044) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  transition: all 0.18s ease !important;
+}
+.wl-close:hover { background: rgba(255,255,255,0.09) !important; color: #fff !important; transform: rotate(90deg) !important; }
+.wl-empty { font-family: var(--font-ui) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 15 · RATING OVERLAY
+──────────────────────────────────────────────────────────────── */
+.rating-box {
+  background: rgba(10,10,18,0.99) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow-xl) !important;
+  backdrop-filter: blur(20px) !important;
+}
+.rating-title  { font-family: var(--font-ui) !important; font-weight: 800 !important; letter-spacing: -0.3px !important; }
+.rating-subtitle { font-family: var(--font-ui) !important; }
+.rating-label { font-family: var(--font-ui) !important; font-weight: 700 !important; letter-spacing: 1.8px !important; }
+.rating-btn {
+  border-radius: 14px !important;
+  border: 1.5px solid rgba(255,255,255,0.07) !important;
+  background: rgba(255,255,255,0.032) !important;
+  font-family: var(--font-ui) !important;
+  transition: all 0.18s var(--ease-spring) !important;
+}
+.rating-btn:hover { transform: scale(1.05) !important; }
+.rating-btn.loved.selected, .rating-btn.loved:hover { background: rgba(124,111,239,0.1) !important; border-color: rgba(124,111,239,0.4) !important; }
+.rating-btn.liked.selected, .rating-btn.liked:hover { background: rgba(56,200,240,0.08) !important; border-color: rgba(56,200,240,0.3) !important; }
+.rating-btn.ok.selected,    .rating-btn.ok:hover    { background: rgba(255,213,0,0.07) !important; border-color: rgba(255,213,0,0.28) !important; }
+.rating-btn.meh.selected,   .rating-btn.meh:hover   { background: rgba(240,98,146,0.07) !important; border-color: rgba(240,98,146,0.28) !important; }
+.rating-btn-label { font-family: var(--font-ui) !important; font-weight: 700 !important; }
+.rating-skip { font-family: var(--font-ui) !important; transition: color 0.15s ease !important; }
+.rating-skip:hover { color: var(--accent) !important; }
+.rating-movie-thumb { border-radius: 12px !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 16 · PIN MODAL
+──────────────────────────────────────────────────────────────── */
+.pm-box {
+  background: rgba(9,9,18,0.99) !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-xl) !important;
+  animation: mf-scale-in 0.26s var(--ease-spring) both !important;
+}
+.pm-title { font-family: var(--font-ui) !important; font-weight: 700 !important; letter-spacing: -0.2px !important; }
+.pm-dot { border: 2px solid rgba(255,255,255,0.16) !important; border-radius: 50% !important; transition: all 0.17s var(--ease-spring) !important; }
+.pm-dot.filled { background: var(--accent) !important; border-color: var(--accent) !important; box-shadow: 0 0 14px rgba(124,111,239,0.52) !important; }
+.pm-num {
+  font-family: var(--font-ui) !important; font-weight: 500 !important; border-radius: 16px !important;
+  transition: background 0.13s ease, transform 0.13s var(--ease-spring) !important;
+}
+.pm-num:active { transform: scale(0.87) !important; background: rgba(124,111,239,0.14) !important; transition-duration: 45ms !important; }
+.pm-cancel { font-family: var(--font-ui) !important; color: rgba(255,255,255,0.38) !important; transition: color 0.14s ease !important; }
+.pm-cancel:hover { color: var(--accent) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 17 · PROFILE CREATE MODAL
+──────────────────────────────────────────────────────────────── */
+.pc-title { font-family: var(--font-ui) !important; font-weight: 800 !important; letter-spacing: -0.5px !important; }
+.pc-emoji-btn { border-radius: 14px !important; transition: background 0.13s ease, transform 0.13s var(--ease-spring) !important; }
+.pc-emoji-btn.selected, .pc-emoji-btn:hover { background: rgba(124,111,239,0.14) !important; transform: scale(1.14) !important; }
+.pc-btn-save {
+  background: linear-gradient(135deg, var(--accent), #9b8ffc) !important;
+  border-radius: 14px !important; font-family: var(--font-ui) !important; font-weight: 700 !important;
+  box-shadow: 0 6px 18px rgba(124,111,239,0.32) !important; border: none !important;
+}
+.pc-btn-cancel { border-radius: 14px !important; font-family: var(--font-ui) !important; font-weight: 500 !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 18 · STREAK WIDGET
+──────────────────────────────────────────────────────────────── */
+.streak-widget {
+  background: rgba(12,12,22,0.86) !important;
+  border: 1px solid rgba(255,179,71,0.16) !important;
+  backdrop-filter: blur(24px) saturate(1.6) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,179,71,0.09) !important;
+}
+.streak-count {
+  color: var(--accent-amber) !important;
+  font-family: var(--font-ui) !important; font-weight: 900 !important;
+  text-shadow: 0 0 22px rgba(255,179,71,0.44) !important;
+}
+.streak-fire { filter: none !important; }
+.streak-today-count { color: var(--accent) !important; font-family: var(--font-mono) !important; font-weight: 500 !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 19 · MOOD OVERLAY
+──────────────────────────────────────────────────────────────── */
+.mood-box {
+  background: rgba(9,9,18,0.99) !important; border: 1px solid rgba(255,255,255,0.058) !important;
+  box-shadow: var(--shadow-xl) !important; border-radius: var(--radius-lg) !important;
+  animation: mf-scale-in 0.28s var(--ease-spring) both !important;
+}
+.mood-title { font-family: var(--font-ui) !important; font-weight: 800 !important; letter-spacing: -0.5px !important; }
+.mood-btn {
+  background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 16px !important;
+  transition: background 0.17s ease, border-color 0.17s ease, transform 0.17s var(--ease-spring) !important;
+}
+.mood-btn:hover { background: rgba(124,111,239,0.08) !important; border-color: rgba(124,111,239,0.22) !important; transform: translateY(-2px) scale(1.025) !important; }
+.mood-btn.selected { background: rgba(124,111,239,0.13) !important; border-color: rgba(124,111,239,0.38) !important; box-shadow: 0 0 0 1px rgba(124,111,239,0.14) !important; }
+.mood-btn.selected .mood-name { color: var(--accent) !important; }
+.mood-result-label { color: var(--accent) !important; font-family: var(--font-ui) !important; }
+.mood-ep-card { border-radius: 14px !important; border: 1px solid rgba(255,255,255,0.038) !important; transition: all 0.15s ease !important; }
+.mood-ep-card:hover { background: rgba(124,111,239,0.07) !important; border-color: rgba(124,111,239,0.2) !important; }
+.mood-ep-show { color: var(--accent) !important; }
+.mood-close-btn { border-radius: 14px !important; font-family: var(--font-ui) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 20 · TIMER FAB + PANEL
+──────────────────────────────────────────────────────────────── */
+.timer-fab {
+  background: rgba(11,11,20,0.92) !important; border: 1px solid rgba(255,255,255,0.075) !important;
+  border-radius: 18px !important; box-shadow: var(--shadow) !important;
+  transition: background 0.17s ease, border-color 0.17s ease, box-shadow 0.17s ease !important;
+}
+.timer-fab:hover { background: rgba(124,111,239,0.11) !important; border-color: rgba(124,111,239,0.3) !important; color: var(--accent) !important; }
+.timer-fab.active {
+  background: rgba(124,111,239,0.14) !important; border-color: rgba(124,111,239,0.4) !important;
+  color: var(--accent) !important;
+  box-shadow: 0 0 28px rgba(124,111,239,0.2), var(--shadow) !important;
+}
+.timer-fab-label { color: var(--accent) !important; font-family: var(--font-mono) !important; font-weight: 500 !important; }
+.timer-progress-ring { border-color: rgba(124,111,239,0.26) !important; }
+.timer-panel {
+  background: rgba(9,9,18,0.99) !important; border: 1px solid rgba(255,255,255,0.058) !important;
+  border-radius: var(--radius-lg) !important; box-shadow: var(--shadow-xl) !important;
+  animation: mf-scale-in 0.26s var(--ease-spring) both !important;
+}
+.timer-panel-title { font-family: var(--font-ui) !important; font-weight: 700 !important; letter-spacing: -0.3px !important; }
+.timer-display {
+  color: var(--accent) !important;
+  text-shadow: 0 0 32px rgba(124,111,239,0.38) !important;
+  font-family: var(--font-mono) !important; font-weight: 400 !important;
+  letter-spacing: -1px !important; font-size: 2.8rem !important;
+}
+.timer-preset-btn { border-radius: 12px !important; font-family: var(--font-ui) !important; font-weight: 500 !important; transition: all 0.14s ease !important; }
+.timer-preset-btn.active, .timer-preset-btn:hover { background: rgba(124,111,239,0.11) !important; border-color: rgba(124,111,239,0.28) !important; color: var(--accent) !important; }
+.timer-start-btn {
+  background: linear-gradient(135deg, var(--accent), #9b8ffc) !important;
+  border-radius: 14px !important; font-family: var(--font-ui) !important; font-weight: 700 !important;
+  box-shadow: 0 8px 24px rgba(124,111,239,0.36) !important;
+  transition: all 0.17s ease !important; border: none !important;
+}
+.timer-start-btn:hover { box-shadow: 0 12px 32px rgba(124,111,239,0.52) !important; transform: translateY(-1px) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 21 · SYNC BADGE + MODAL
+──────────────────────────────────────────────────────────────── */
+#syncStatusBadge {
+  background: rgba(9,9,18,0.84) !important; border: 1px solid rgba(255,255,255,0.065) !important;
+  backdrop-filter: blur(18px) !important; font-family: var(--font-ui) !important;
+  font-size: 0.59rem !important; font-weight: 500 !important; border-radius: 20px !important;
+}
+.sync-box {
+  background: rgba(9,9,18,0.99) !important; border: 1px solid rgba(255,255,255,0.058) !important;
+  border-radius: var(--radius-lg) !important; box-shadow: var(--shadow-xl) !important;
+  animation: mf-scale-in 0.28s var(--ease-spring) both !important;
+}
+.sync-title { font-family: var(--font-ui) !important; font-weight: 800 !important; letter-spacing: -0.5px !important; }
+.sync-btn {
+  background: linear-gradient(135deg, var(--accent), #9b8ffc) !important;
+  font-family: var(--font-ui) !important; font-weight: 700 !important; border-radius: 14px !important;
+  box-shadow: 0 6px 20px rgba(124,111,239,0.32) !important; border: none !important;
+  transition: all 0.17s ease !important;
+}
+.sync-btn:hover { box-shadow: 0 10px 28px rgba(124,111,239,0.48) !important; transform: translateY(-1px) !important; }
+.sync-code-input {
+  font-family: var(--font-mono) !important; border-radius: 12px !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  background: rgba(255,255,255,0.03) !important;
+  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
+}
+.sync-code-input:focus { border-color: rgba(124,111,239,0.4) !important; outline: none !important; box-shadow: 0 0 0 3px rgba(124,111,239,0.1) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 22 · NOTIFICATION PANEL
+──────────────────────────────────────────────────────────────── */
+.notif-bell {
+  background: rgba(11,11,20,0.9) !important; border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 16px !important; box-shadow: var(--shadow) !important; transition: all 0.17s ease !important;
+}
+.notif-bell:hover { background: rgba(124,111,239,0.1) !important; border-color: rgba(124,111,239,0.24) !important; }
+.notif-bell-badge { background: var(--accent-warm) !important; box-shadow: 0 0 9px rgba(240,98,146,0.56) !important; }
+.notif-panel {
+  background: rgba(9,9,18,0.99) !important; border: 1px solid rgba(255,255,255,0.058) !important;
+  border-radius: var(--radius-lg) !important; box-shadow: var(--shadow-xl) !important;
+  animation: mf-scale-in 0.26s var(--ease-spring) both !important;
+}
+.notif-panel-title { font-family: var(--font-ui) !important; font-weight: 700 !important; letter-spacing: -0.3px !important; }
+.notif-item { border-bottom: 1px solid rgba(255,255,255,0.038) !important; transition: background 0.14s ease !important; }
+.notif-item:hover { background: rgba(124,111,239,0.048) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 23 · ADMIN PANEL — full redesign
+──────────────────────────────────────────────────────────────── */
+
+/* ── Celý kontejner ── */
+#adminPanel {
+  background: var(--bg) !important;
+  font-family: var(--font-ui) !important;
+}
+
+/* ── Topbar (sticky, inline-styled — override přes child selectors) ── */
+#adminPanel > div:first-child {
+  background: rgba(7,7,13,0.97) !important;
+  backdrop-filter: blur(28px) saturate(2) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(2) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.055) !important;
+  box-shadow: 0 1px 0 rgba(124,111,239,0.07) !important;
+}
+
+/* Topbar — nadpis "⚙ Admin panel" */
+#adminPanel > div:first-child > div:first-child {
+  font-family: var(--font-ui) !important;
+  font-weight: 900 !important;
+  font-size: 1.05rem !important;
+  letter-spacing: -0.4px !important;
+  color: var(--text) !important;
+}
+
+/* Topbar — ADMIN badge */
+#adminPanel > div:first-child > div:nth-child(2) {
+  font-family: var(--font-ui) !important;
+  font-weight: 800 !important;
+  font-size: 0.55rem !important;
+  letter-spacing: 1.6px !important;
+  background: rgba(124,111,239,0.1) !important;
+  border: 1px solid rgba(124,111,239,0.26) !important;
+  color: var(--accent) !important;
+  border-radius: 20px !important;
+  padding: 3px 10px !important;
+}
+
+/* Topbar — session time */
+#adminSessionTime {
+  font-family: var(--font-mono) !important;
+  font-size: 0.6rem !important;
+  color: rgba(255,255,255,0.22) !important;
+}
+
+/* Topbar — Refresh button */
+#adminPanel > div:first-child button:first-of-type {
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  border-radius: 11px !important;
+  background: rgba(255,255,255,0.044) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.55) !important;
+  transition: all 0.16s ease !important;
+}
+#adminPanel > div:first-child button:first-of-type:hover {
+  background: rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.85) !important;
+}
+
+/* Topbar — Odhlásit button */
+#adminPanel > div:first-child button:last-of-type {
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  border-radius: 11px !important;
+  background: rgba(240,98,146,0.08) !important;
+  border: 1px solid rgba(240,98,146,0.22) !important;
+  color: rgba(240,98,146,0.85) !important;
+  transition: all 0.16s ease !important;
+}
+#adminPanel > div:first-child button:last-of-type:hover {
+  background: rgba(240,98,146,0.16) !important;
+  border-color: rgba(240,98,146,0.38) !important;
+  color: var(--accent-warm) !important;
+}
+
+/* ── Stats row ── */
+#adminStatsRow {
+  gap: 10px !important;
+}
+
+/* Stat cards — generované JS, cílíme přes kontejner */
+#adminStatsRow > div {
+  background: rgba(255,255,255,0.028) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 18px !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+#adminStatsRow > div:hover {
+  border-color: rgba(124,111,239,0.28) !important;
+  box-shadow: 0 0 0 1px rgba(124,111,239,0.1), 0 8px 24px rgba(0,0,0,0.4) !important;
+}
+/* Číslo ve stat kartě */
+#adminStatsRow > div > div:first-child {
+  font-family: var(--font-mono) !important;
+  font-weight: 600 !important;
+  color: var(--accent) !important;
+  font-size: 1.7rem !important;
+  letter-spacing: -1px !important;
+  line-height: 1 !important;
+}
+/* Label ve stat kartě */
+#adminStatsRow > div > div:last-child {
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  font-size: 0.58rem !important;
+  letter-spacing: 0.4px !important;
+  color: rgba(255,255,255,0.32) !important;
+  margin-top: 4px !important;
+}
+
+/* ── Tab tlačítka ── */
+.adm-tab, .adm-tab-btn {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.68rem !important;
+  letter-spacing: -0.1px !important;
+  border-radius: 12px !important;
+  padding: 8px 16px !important;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, transform 0.14s var(--ease-spring) !important;
+  cursor: pointer !important;
+}
+
+/* Neaktivní tab */
+.adm-tab:not(.active) {
+  background: rgba(255,255,255,0.032) !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  color: rgba(255,255,255,0.42) !important;
+}
+.adm-tab:not(.active):hover {
+  background: rgba(255,255,255,0.065) !important;
+  color: rgba(255,255,255,0.75) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+.adm-tab:active { transform: scale(0.94) !important; transition-duration: 45ms !important; }
+
+/* Aktivní tab */
+.adm-tab.active {
+  background: rgba(124,111,239,0.14) !important;
+  border: 1px solid rgba(124,111,239,0.32) !important;
+  color: var(--accent) !important;
+  box-shadow: 0 0 0 1px rgba(124,111,239,0.1), 0 4px 14px rgba(124,111,239,0.12) !important;
+}
+
+/* Tab content area */
+.adm-tab-content {
+  animation: mf-fade-up 0.22s var(--ease-out) both !important;
+}
+
+/* ── Section title (uvnitř tab obsahu) ── */
+.adm-section-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 800 !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.2px !important;
+  color: rgba(255,255,255,0.5) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.4px !important;
+  margin-bottom: 12px !important;
+}
+
+/* ── Obsah plocha (bílý inner box) ── */
+#adminTab_profiles > div,
+#adminTab_watchlist > div:first-child,
+#adminTab_history > div:first-child,
+#adminTab_storage > div:first-child,
+#adminTab_broadcast > div:first-child,
+#adminTab_devices > div:first-child {
+  background: rgba(255,255,255,0.022) !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 20px !important;
+}
+
+/* ── Profily list ── */
+#adminProfilesList > div {
+  border-radius: 14px !important;
+  border: 1px solid rgba(255,255,255,0.048) !important;
+  background: rgba(255,255,255,0.022) !important;
+  transition: border-color 0.16s ease, background 0.16s ease !important;
+}
+#adminProfilesList > div:hover {
+  border-color: rgba(124,111,239,0.22) !important;
+  background: rgba(124,111,239,0.04) !important;
+}
+
+/* ── Watchlist content ── */
+#adminWatchlistContent > div {
+  border-bottom: 1px solid rgba(255,255,255,0.042) !important;
+  transition: background 0.14s ease !important;
+}
+#adminWatchlistContent > div:hover { background: rgba(124,111,239,0.04) !important; }
+#adminWatchlistContent > div:last-child { border-bottom: none !important; }
+
+/* ── Historie ── */
+#adminHistoryContent {
+  font-family: var(--font-mono) !important;
+  font-size: 0.62rem !important;
+  color: rgba(255,255,255,0.5) !important;
+  line-height: 1.8 !important;
+}
+
+/* ── Storage: search input ── */
+#adminStorageSearch {
+  font-family: var(--font-ui) !important;
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 12px !important;
+  color: var(--text) !important;
+  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
+}
+#adminStorageSearch:focus {
+  border-color: rgba(124,111,239,0.4) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
+  outline: none !important;
+}
+
+/* Storage size badge */
+#adminStorageSize {
+  font-family: var(--font-mono) !important;
+  font-weight: 600 !important;
+  color: var(--accent) !important;
+}
+
+/* Storage list items */
+#adminStorageList > div {
+  border-bottom: 1px solid rgba(255,255,255,0.038) !important;
+  transition: background 0.13s ease !important;
+}
+#adminStorageList > div:hover { background: rgba(124,111,239,0.038) !important; }
+
+/* ── Nástroje (tools) — sekce s buttony ── */
+#adminTab_tools .adm-tool-btn,
+#adminTab_tools button {
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  border-radius: 13px !important;
+  transition: all 0.16s ease, transform 0.13s var(--ease-spring) !important;
+}
+#adminTab_tools button:hover { transform: translateY(-1px) !important; }
+#adminTab_tools button:active { transform: scale(0.93) !important; transition-duration: 45ms !important; }
+
+/* Custom accent color picker */
+#adminCustomAccent {
+  border-radius: 10px !important;
+  border: 2px solid rgba(255,255,255,0.1) !important;
+  background: rgba(255,255,255,0.05) !important;
+  transition: border-color 0.17s ease !important;
+  cursor: pointer !important;
+}
+#adminCustomAccent:hover { border-color: rgba(124,111,239,0.4) !important; }
+
+/* Toggle rows */
+#adminTab_tools > div [style*="border-bottom"],
+#adminTab_tools .toggle-row {
+  border-bottom: 1px solid rgba(255,255,255,0.042) !important;
+}
+
+/* Debug / FPS toggles */
+#adminDebugToggleLegacy,
+#adminFpsToggle {
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 11px !important;
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  transition: all 0.16s ease !important;
+}
+#adminDebugToggleLegacy:hover,
+#adminFpsToggle:hover {
+  background: rgba(124,111,239,0.1) !important;
+  border-color: rgba(124,111,239,0.25) !important;
+  color: var(--accent) !important;
+}
+
+/* ── Broadcast ── */
+#adminBroadcastMsg {
+  font-family: var(--font-ui) !important;
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 14px !important;
+  color: var(--text) !important;
+  resize: none !important;
+  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
+}
+#adminBroadcastMsg:focus {
+  border-color: rgba(124,111,239,0.4) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
+  outline: none !important;
+}
+#admBcastToast {
+  border-radius: 12px !important;
+  font-family: var(--font-ui) !important;
+  font-weight: 500 !important;
+  background: rgba(56,200,240,0.1) !important;
+  border: 1px solid rgba(56,200,240,0.22) !important;
+  color: var(--accent2) !important;
+}
+#admBcastBanner {
+  border-radius: 12px !important;
+  font-family: var(--font-ui) !important;
+  font-weight: 500 !important;
+  background: rgba(124,111,239,0.1) !important;
+  border: 1px solid rgba(124,111,239,0.22) !important;
+  color: var(--accent) !important;
+}
+#adminBroadcastHistory > div {
+  border-radius: 10px !important;
+  background: rgba(255,255,255,0.022) !important;
+  border: 1px solid rgba(255,255,255,0.048) !important;
+  font-family: var(--font-ui) !important;
+  font-size: 0.72rem !important;
+  transition: border-color 0.14s ease !important;
+}
+#adminBroadcastHistory > div:hover { border-color: rgba(124,111,239,0.2) !important; }
+
+/* ── API Keys tab ── */
+#adminTab_apikeys {
+  font-family: var(--font-ui) !important;
+}
+#adminApiKeysList > div {
+  border-radius: 14px !important;
+  background: rgba(255,255,255,0.022) !important;
+  border: 1px solid rgba(255,255,255,0.052) !important;
+  transition: border-color 0.15s ease !important;
+}
+#adminApiKeysList > div:hover { border-color: rgba(124,111,239,0.2) !important; }
+
+/* Gemini / OR / Groq / Jina / Tavily / TMDB key inputs */
+#adminGlobalGeminiKey,
+#adminGlobalOrKey,
+#adminGlobalGroqKey,
+#adminGlobalJinaKey,
+#adminGlobalTavilyKey,
+#adminGlobalTmdbKey {
+  font-family: var(--font-mono) !important;
+  font-size: 0.72rem !important;
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 11px !important;
+  color: var(--text) !important;
+  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
+}
+#adminGlobalGeminiKey:focus,
+#adminGlobalOrKey:focus,
+#adminGlobalGroqKey:focus,
+#adminGlobalJinaKey:focus,
+#adminGlobalTavilyKey:focus,
+#adminGlobalTmdbKey:focus {
+  border-color: rgba(124,111,239,0.42) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
+  outline: none !important;
+}
+
+/* Per-profile API klíče sekce */
+#adminTab_apikeys #mfPerProfileSection {
+  margin-top: 20px !important;
+}
+
+/* ── Zařízení (Devices) ── */
+#adminTab_devices {
+  font-family: var(--font-ui) !important;
+}
+#adminDevicesList > div {
+  border-radius: 14px !important;
+  background: rgba(255,255,255,0.022) !important;
+  border: 1px solid rgba(255,255,255,0.052) !important;
+  transition: border-color 0.15s ease, background 0.15s ease !important;
+}
+#adminDevicesList > div:hover {
+  border-color: rgba(124,111,239,0.2) !important;
+  background: rgba(124,111,239,0.03) !important;
+}
+
+/* Block device inputs */
+#adminBlockDeviceId,
+#adminBlockDeviceName {
+  font-family: var(--font-mono) !important;
+  font-size: 0.72rem !important;
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 11px !important;
+  color: var(--text) !important;
+  transition: border-color 0.17s ease !important;
+}
+#adminBlockDeviceId:focus,
+#adminBlockDeviceName:focus {
+  border-color: rgba(240,98,146,0.42) !important;
+  box-shadow: 0 0 0 3px rgba(240,98,146,0.09) !important;
+  outline: none !important;
+}
+
+/* Current device ID — monospace highlight */
+#adminCurrentDeviceId {
+  font-family: var(--font-mono) !important;
+  font-size: 0.65rem !important;
+  color: var(--accent2) !important;
+  background: rgba(56,200,240,0.06) !important;
+  border: 1px solid rgba(56,200,240,0.14) !important;
+  border-radius: 8px !important;
+  padding: 2px 8px !important;
+}
+
+/* ── FPS Counter (admin overlay) ── */
+#adminFpsCounter {
+  font-family: var(--font-mono) !important;
+  font-size: 0.62rem !important;
+  font-weight: 600 !important;
+  background: rgba(9,9,18,0.88) !important;
+  border: 1px solid rgba(124,111,239,0.2) !important;
+  border-radius: 10px !important;
+  color: var(--accent) !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+/* ── Admin overlay (starší overlay systém) ── */
+.admin-overlay {
+  background: rgba(0,0,0,0.88) !important;
+  backdrop-filter: blur(20px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+  font-family: var(--font-ui) !important;
+}
+.admin-box {
+  background: rgba(9,9,18,0.99) !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-xl) !important;
+  animation: mf-scale-in 0.26s var(--ease-spring) both !important;
+}
+.admin-header {
+  background: rgba(124,111,239,0.05) !important;
+  border-bottom: 1px solid rgba(124,111,239,0.14) !important;
+}
+.admin-header-badge {
+  background: linear-gradient(135deg, var(--accent), #9b8ffc) !important;
+  font-family: var(--font-ui) !important;
+  font-weight: 900 !important;
+  letter-spacing: 1.8px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 16px rgba(124,111,239,0.35) !important;
+}
+.admin-title, .admin-header-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.3px !important;
+}
+.admin-header-sub { font-family: var(--font-ui) !important; color: rgba(255,255,255,0.35) !important; }
+.admin-header-close, .admin-close {
+  border-radius: 50% !important;
+  background: rgba(255,255,255,0.044) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  transition: all 0.18s ease !important;
+}
+.admin-header-close:hover, .admin-close:hover {
+  background: rgba(240,98,146,0.14) !important;
+  color: var(--accent-warm) !important;
+  transform: rotate(90deg) !important;
+}
+
+/* Sidebar nav */
+.admin-sidebar {
+  border-right: 1px solid rgba(255,255,255,0.042) !important;
+  background: rgba(255,255,255,0.016) !important;
+}
+.admin-nav-item {
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  font-size: 0.73rem !important;
+  border-left: 3px solid transparent !important;
+  border-radius: 0 10px 10px 0 !important;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease !important;
+}
+.admin-nav-item:hover {
+  color: rgba(255,255,255,0.85) !important;
+  background: rgba(255,255,255,0.04) !important;
+}
+.admin-nav-item.active {
+  color: var(--accent) !important;
+  background: rgba(124,111,239,0.08) !important;
+  border-left-color: var(--accent) !important;
+}
+
+/* Content area */
+.admin-content { overflow-y: auto !important; }
+
+/* Section titles */
+.admin-section-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 900 !important;
+  font-size: 0.85rem !important;
+  letter-spacing: -0.2px !important;
+  color: rgba(255,255,255,0.88) !important;
+}
+.admin-section-title::after {
+  background: rgba(255,255,255,0.055) !important;
+}
+
+/* Stat cards */
+.admin-stats-grid { gap: 10px !important; }
+.admin-stat-card {
+  background: rgba(255,255,255,0.026) !important;
+  border: 1px solid rgba(255,255,255,0.058) !important;
+  border-radius: 16px !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+}
+.admin-stat-card:hover {
+  border-color: rgba(124,111,239,0.28) !important;
+  box-shadow: 0 0 0 1px rgba(124,111,239,0.1) !important;
+}
+.admin-stat-value {
+  font-family: var(--font-mono) !important;
+  font-weight: 600 !important;
+  font-size: 1.75rem !important;
+  letter-spacing: -1px !important;
+  color: var(--accent) !important;
+  line-height: 1 !important;
+}
+.admin-stat-label {
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  font-size: 0.58rem !important;
+  letter-spacing: 0.5px !important;
+  color: rgba(255,255,255,0.32) !important;
+  text-transform: uppercase !important;
+}
+.admin-stat-sub {
+  font-family: var(--font-ui) !important;
+  font-size: 0.54rem !important;
+  color: rgba(255,255,255,0.2) !important;
+}
+
+/* Stats bar (starší varianta) */
+.admin-stats-bar {
+  background: rgba(255,255,255,0.026) !important;
+  border: 1px solid rgba(255,255,255,0.058) !important;
+  border-radius: 14px !important;
+}
+.admin-stat { font-family: var(--font-ui) !important; }
+.admin-stat-num {
+  font-family: var(--font-mono) !important;
+  font-weight: 600 !important;
+  color: var(--accent) !important;
+  letter-spacing: -0.5px !important;
+}
+.admin-stat-label { font-family: var(--font-ui) !important; font-size: 0.58rem !important; }
+
+/* Table */
+.admin-table { font-family: var(--font-ui) !important; }
+.admin-table th {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.56rem !important;
+  letter-spacing: 0.8px !important;
+  color: rgba(255,255,255,0.3) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.058) !important;
+  text-transform: uppercase !important;
+}
+.admin-table td {
+  font-size: 0.7rem !important;
+  border-bottom: 1px solid rgba(255,255,255,0.035) !important;
+  color: rgba(255,255,255,0.72) !important;
+}
+.admin-table tr:hover td { background: rgba(124,111,239,0.03) !important; }
+
+/* Badges */
+.admin-badge {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.54rem !important;
+  border-radius: 6px !important;
+  padding: 2px 7px !important;
+}
+.admin-badge.green  { background: rgba(46,204,113,0.12) !important;  color: #5ee898 !important;  border: 1px solid rgba(46,204,113,0.22) !important; }
+.admin-badge.yellow { background: rgba(241,196,15,0.12) !important;  color: #fcd93a !important;  border: 1px solid rgba(241,196,15,0.22) !important; }
+.admin-badge.red    { background: rgba(240,98,146,0.12) !important;  color: var(--accent-warm) !important; border: 1px solid rgba(240,98,146,0.22) !important; }
+.admin-badge.blue   { background: rgba(56,200,240,0.12) !important;  color: var(--accent2) !important; border: 1px solid rgba(56,200,240,0.22) !important; }
+
+/* Input */
+.admin-input {
+  font-family: var(--font-ui) !important;
+  font-size: 0.75rem !important;
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 11px !important;
+  color: var(--text) !important;
+  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
+  outline: none !important;
+}
+.admin-input:focus {
+  border-color: rgba(124,111,239,0.42) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
+}
+
+/* Buttons */
+.admin-btn {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.7rem !important;
+  border-radius: 11px !important;
+  letter-spacing: 0 !important;
+  transition: all 0.17s ease, transform 0.13s var(--ease-spring) !important;
+  cursor: pointer !important;
+}
+.admin-btn:active { transform: scale(0.93) !important; transition-duration: 45ms !important; }
+.admin-btn.primary {
+  background: linear-gradient(135deg, var(--accent), #9b8ffc) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(124,111,239,0.3) !important;
+}
+.admin-btn.primary:hover {
+  box-shadow: 0 8px 24px rgba(124,111,239,0.48) !important;
+  transform: translateY(-1px) !important;
+}
+.admin-btn.secondary {
+  background: rgba(255,255,255,0.044) !important;
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  color: rgba(255,255,255,0.65) !important;
+}
+.admin-btn.secondary:hover { background: rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.88) !important; }
+.admin-btn.danger {
+  background: rgba(240,98,146,0.1) !important;
+  border: 1px solid rgba(240,98,146,0.26) !important;
+  color: var(--accent-warm) !important;
+}
+.admin-btn.danger:hover { background: rgba(240,98,146,0.18) !important; border-color: rgba(240,98,146,0.42) !important; }
+
+/* Code block */
+.admin-code {
+  font-family: var(--font-mono) !important;
+  font-size: 0.66rem !important;
+  background: rgba(0,0,0,0.45) !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  border-radius: 12px !important;
+  color: rgba(255,255,255,0.65) !important;
+  line-height: 1.65 !important;
+}
+
+/* Toggle */
+.admin-toggle-row {
+  border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+}
+.admin-toggle-label {
+  font-family: var(--font-ui) !important;
+  font-weight: 500 !important;
+  font-size: 0.72rem !important;
+  color: rgba(255,255,255,0.72) !important;
+}
+.admin-toggle-sub {
+  font-family: var(--font-ui) !important;
+  font-size: 0.57rem !important;
+  color: rgba(255,255,255,0.28) !important;
+}
+.admin-toggle {
+  background: rgba(255,255,255,0.08) !important;
+  border-radius: 11px !important;
+  transition: background 0.22s ease !important;
+}
+.admin-toggle.on {
+  background: var(--accent) !important;
+  box-shadow: 0 0 10px rgba(124,111,239,0.38) !important;
+}
+.admin-toggle::after {
+  background: #fff !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
+  transition: transform 0.22s var(--ease-spring) !important;
+}
+
+/* Algo bars */
+.admin-algo-bar-label { font-family: var(--font-ui) !important; color: rgba(255,255,255,0.45) !important; font-size: 0.62rem !important; }
+.admin-algo-bar-track { background: rgba(255,255,255,0.055) !important; border-radius: 4px !important; }
+.admin-algo-bar-fill { border-radius: 4px !important; }
+.admin-algo-bar-val { font-family: var(--font-mono) !important; font-size: 0.6rem !important; color: rgba(255,255,255,0.42) !important; }
+
+/* Log panel */
+.admin-log {
+  font-family: var(--font-mono) !important;
+  font-size: 0.62rem !important;
+  background: rgba(0,0,0,0.5) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 12px !important;
+  color: rgba(255,255,255,0.5) !important;
+  line-height: 1.75 !important;
+}
+.admin-log .log-info { color: rgba(56,200,240,0.85) !important; }
+.admin-log .log-warn { color: rgba(255,179,71,0.85) !important; }
+.admin-log .log-ok   { color: rgba(94,232,152,0.85) !important; }
+.admin-log .log-err  { color: rgba(240,98,146,0.85) !important; }
+
+/* Series grid */
+.admin-series-grid { gap: 10px !important; }
+.admin-series-card {
+  background: rgba(255,255,255,0.024) !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 14px !important;
+  transition: border-color 0.16s ease, background 0.16s ease !important;
+}
+.admin-series-card:hover {
+  border-color: rgba(124,111,239,0.24) !important;
+  background: rgba(124,111,239,0.03) !important;
+}
+.admin-series-card img { border-radius: 8px !important; }
+.admin-series-card-name { font-family: var(--font-ui) !important; font-weight: 700 !important; font-size: 0.72rem !important; }
+.admin-series-card-meta { font-family: var(--font-ui) !important; font-size: 0.54rem !important; color: rgba(255,255,255,0.3) !important; }
+.admin-series-action-btn {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.57rem !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: rgba(255,255,255,0.04) !important;
+  color: rgba(255,255,255,0.45) !important;
+  transition: all 0.15s ease !important;
+}
+.admin-series-action-btn:hover {
+  background: rgba(240,98,146,0.12) !important;
+  border-color: rgba(240,98,146,0.28) !important;
+  color: var(--accent-warm) !important;
+}
+
+/* Score result */
+.admin-score-result {
+  background: rgba(255,255,255,0.024) !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 14px !important;
+}
+.admin-score-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  color: var(--accent) !important;
+  font-size: 0.72rem !important;
+}
+
+/* Search row */
+.admin-search-row .admin-input { margin-bottom: 0 !important; }
+
+/* PIN gate */
+.admin-pin-gate {
+  background: rgba(0,0,0,0.94) !important;
+  backdrop-filter: blur(24px) !important;
+}
+.admin-pin-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.5px !important;
+  color: var(--accent) !important;
+  font-size: 1.4rem !important;
+}
+.admin-pin-sub { font-family: var(--font-ui) !important; color: rgba(255,255,255,0.35) !important; }
+.admin-pin-input {
+  font-family: var(--font-mono) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.6rem !important;
+  background: rgba(124,111,239,0.06) !important;
+  border: 2px solid rgba(124,111,239,0.28) !important;
+  border-radius: 16px !important;
+  color: var(--accent) !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+}
+.admin-pin-input:focus {
+  border-color: rgba(124,111,239,0.6) !important;
+  box-shadow: 0 0 0 4px rgba(124,111,239,0.12) !important;
+  outline: none !important;
+}
+.admin-pin-hint { font-family: var(--font-ui) !important; color: rgba(255,255,255,0.2) !important; }
+
+/* Admin FAB trigger */
+.admin-trigger {
+  background: rgba(124,111,239,0.1) !important;
+  border: 1px solid rgba(124,111,239,0.28) !important;
+  color: rgba(124,111,239,0.7) !important;
+  border-radius: 50% !important;
+  backdrop-filter: blur(12px) !important;
+  transition: all 0.22s ease !important;
+}
+.admin-trigger:hover {
+  background: rgba(124,111,239,0.2) !important;
+  color: var(--accent) !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 0 16px rgba(124,111,239,0.3) !important;
+}
+
+/* Admin FAB (floating) */
+.admin-fab {
+  background: linear-gradient(135deg, var(--accent), #9b8ffc) !important;
+  box-shadow: 0 6px 24px rgba(124,111,239,0.38) !important;
+  border: none !important;
+  border-radius: 18px !important;
+  transition: all 0.22s ease !important;
+}
+.admin-fab:hover { box-shadow: 0 10px 32px rgba(124,111,239,0.55) !important; transform: translateY(-2px) scale(1.04) !important; }
+.admin-fab .mf-fab-label { font-family: var(--font-ui) !important; font-weight: 700 !important; }
+
+/* Admin login modal (index.html inline) */
+#adminLoginModal > div {
+  background: rgba(9,9,18,0.99) !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-xl) !important;
+  animation: mf-scale-in 0.26s var(--ease-spring) both !important;
+}
+#adminUser, #adminPass {
+  font-family: var(--font-ui) !important;
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 12px !important;
+  color: var(--text) !important;
+  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
+}
+#adminUser:focus, #adminPass:focus {
+  border-color: rgba(124,111,239,0.42) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
+  outline: none !important;
+}
+#adminLoginErr {
+  font-family: var(--font-ui) !important;
+  font-size: 0.72rem !important;
+  color: var(--accent-warm) !important;
+}
+
+/* Edit mode topbar */
+.edit-topbar {
+  background: rgba(7,7,13,0.98) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(124,111,239,0.18) !important;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.8) !important;
+}
+.edit-topbar-title { font-family: var(--font-ui) !important; font-weight: 900 !important; letter-spacing: -0.2px !important; }
+.edit-topbar-badge {
+  font-family: var(--font-ui) !important; font-weight: 800 !important;
+  letter-spacing: 1.2px !important; text-transform: uppercase !important;
+  font-size: 0.46rem !important;
+  color: var(--accent) !important;
+  background: rgba(124,111,239,0.1) !important;
+  border: 1px solid rgba(124,111,239,0.24) !important;
+  border-radius: 20px !important;
+}
+.edit-topbar-hint { font-family: var(--font-ui) !important; color: rgba(255,255,255,0.22) !important; font-size: 0.57rem !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 24 · GLOBAL INPUTS + BUTTONS
+──────────────────────────────────────────────────────────────── */
+button, .btn, [role="button"] {
+  font-family: var(--font-ui) !important;
+  transition: transform 130ms var(--ease-spring), opacity 100ms ease, background 130ms ease, border-color 130ms ease, box-shadow 130ms ease !important;
+}
+button:active, .btn:active { transform: scale(0.93) !important; transition-duration: 48ms !important; }
+input, textarea, select {
+  font-family: var(--font-ui) !important; border-radius: 12px !important;
+  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
+}
+input:focus, textarea:focus {
+  outline: none !important;
+  border-color: rgba(124,111,239,0.4) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
+}
+
+/* Toasts */
+.mf-toast, .toast {
+  font-family: var(--font-ui) !important; font-weight: 500 !important;
+  background: rgba(16,16,28,0.97) !important;
+  border: 1px solid rgba(255,255,255,0.075) !important;
+  border-radius: 16px !important; box-shadow: var(--shadow-lg) !important;
+  backdrop-filter: blur(22px) !important;
+}
+
+/* Autosave */
+.autosave-indicator {
+  font-family: var(--font-ui) !important; font-weight: 500 !important;
+  background: rgba(9,9,18,0.84) !important; border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 20px !important; backdrop-filter: blur(14px) !important;
+}
+.autosave-dot { background: var(--accent) !important; box-shadow: 0 0 7px rgba(124,111,239,0.6) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 28 · ADMIN — ROZŠÍŘENÍ (Content, Movies, Series, Analytics,
+          Firebase, Logs, Subscribers, Modals, Inline edits)
+──────────────────────────────────────────────────────────────── */
+
+/* ── Label ── */
+.admin-label {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.62rem !important;
+  letter-spacing: 0.5px !important;
+  color: rgba(255,255,255,0.38) !important;
+  text-transform: uppercase !important;
+  margin-bottom: 6px !important;
+  display: block !important;
+}
+
+/* ── Select dropdown ── */
+.admin-select {
+  font-family: var(--font-ui) !important;
+  font-size: 0.74rem !important;
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 11px !important;
+  color: var(--text) !important;
+  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
+  outline: none !important;
+  cursor: pointer !important;
+}
+.admin-select:focus {
+  border-color: rgba(124,111,239,0.42) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
+}
+.admin-select option {
+  background: #0b0b14 !important;
+  color: rgba(255,255,255,0.85) !important;
+}
+
+/* ── Textarea ── */
+.admin-textarea {
+  font-family: var(--font-ui) !important;
+  font-size: 0.74rem !important;
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 13px !important;
+  color: var(--text) !important;
+  resize: vertical !important;
+  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
+  outline: none !important;
+  line-height: 1.6 !important;
+}
+.admin-textarea:focus {
+  border-color: rgba(124,111,239,0.42) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
+}
+.admin-textarea::placeholder { color: rgba(255,255,255,0.22) !important; }
+
+/* ── Divider ── */
+.admin-divider {
+  border: none !important;
+  border-top: 1px solid rgba(255,255,255,0.048) !important;
+  margin: 18px 0 !important;
+}
+
+/* ── Card wrapper (obecný) ── */
+.admin-card {
+  background: rgba(255,255,255,0.024) !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 16px !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+}
+.admin-card:hover {
+  border-color: rgba(124,111,239,0.22) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+}
+.admin-card.highlighted {
+  border-color: rgba(124,111,239,0.36) !important;
+  background: rgba(124,111,239,0.04) !important;
+  box-shadow: 0 0 0 1px rgba(124,111,239,0.1) !important;
+}
+
+/* ── Content tab (#adminTab_content) ── */
+#adminTab_content { font-family: var(--font-ui) !important; }
+
+/* Vyhledávací pole obsahu */
+#adminContentSearch {
+  font-family: var(--font-ui) !important;
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 13px !important;
+  color: var(--text) !important;
+  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
+  outline: none !important;
+}
+#adminContentSearch:focus {
+  border-color: rgba(124,111,239,0.42) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
+}
+#adminContentSearch::placeholder { color: rgba(255,255,255,0.22) !important; }
+
+/* Content list items */
+#adminContentList > div,
+.admin-content-row {
+  border-bottom: 1px solid rgba(255,255,255,0.038) !important;
+  transition: background 0.14s ease !important;
+}
+#adminContentList > div:hover,
+.admin-content-row:hover { background: rgba(124,111,239,0.04) !important; }
+#adminContentList > div:last-child,
+.admin-content-row:last-child { border-bottom: none !important; }
+
+/* Content thumbnail */
+.admin-content-thumb {
+  border-radius: 8px !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  object-fit: cover !important;
+}
+
+/* Content title */
+.admin-content-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.76rem !important;
+  color: rgba(255,255,255,0.88) !important;
+}
+
+/* Content meta (rok, žánr, …) */
+.admin-content-meta {
+  font-family: var(--font-ui) !important;
+  font-size: 0.58rem !important;
+  color: rgba(255,255,255,0.3) !important;
+}
+
+/* ── Movies tab (#adminTab_movies) ── */
+#adminTab_movies { font-family: var(--font-ui) !important; }
+
+#adminMovieSearch {
+  font-family: var(--font-ui) !important;
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 13px !important;
+  color: var(--text) !important;
+  outline: none !important;
+  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
+}
+#adminMovieSearch:focus {
+  border-color: rgba(124,111,239,0.42) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
+}
+#adminMovieSearch::placeholder { color: rgba(255,255,255,0.22) !important; }
+
+#adminMoviesList > div,
+.admin-movie-row {
+  border-bottom: 1px solid rgba(255,255,255,0.038) !important;
+  transition: background 0.14s ease !important;
+}
+#adminMoviesList > div:hover,
+.admin-movie-row:hover { background: rgba(124,111,239,0.04) !important; }
+
+/* TMDB výsledky */
+.admin-tmdb-result {
+  background: rgba(255,255,255,0.022) !important;
+  border: 1px solid rgba(255,255,255,0.052) !important;
+  border-radius: 13px !important;
+  transition: all 0.16s ease !important;
+  cursor: pointer !important;
+}
+.admin-tmdb-result:hover {
+  background: rgba(124,111,239,0.07) !important;
+  border-color: rgba(124,111,239,0.28) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35) !important;
+}
+.admin-tmdb-result img { border-radius: 8px !important; }
+.admin-tmdb-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.74rem !important;
+}
+.admin-tmdb-year,
+.admin-tmdb-meta {
+  font-family: var(--font-ui) !important;
+  font-size: 0.56rem !important;
+  color: rgba(255,255,255,0.3) !important;
+}
+.admin-tmdb-overview {
+  font-family: var(--font-ui) !important;
+  font-size: 0.62rem !important;
+  color: rgba(255,255,255,0.45) !important;
+  line-height: 1.5 !important;
+}
+
+/* Import progress bar */
+.admin-import-bar {
+  background: rgba(255,255,255,0.055) !important;
+  border-radius: 4px !important;
+  overflow: hidden !important;
+}
+.admin-import-bar-fill {
+  background: linear-gradient(90deg, var(--accent), var(--accent2)) !important;
+  border-radius: 4px !important;
+  transition: width 0.4s var(--ease-out) !important;
+  box-shadow: 0 0 10px rgba(124,111,239,0.45) !important;
+}
+
+/* ── Series tab rozšíření ── */
+#adminTab_series { font-family: var(--font-ui) !important; }
+
+/* Sezóny/epizody collapsible */
+.admin-season-block {
+  background: rgba(255,255,255,0.018) !important;
+  border: 1px solid rgba(255,255,255,0.048) !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+}
+.admin-season-header {
+  background: rgba(255,255,255,0.024) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.042) !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease !important;
+}
+.admin-season-header:hover { background: rgba(124,111,239,0.06) !important; }
+.admin-season-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 800 !important;
+  font-size: 0.72rem !important;
+  letter-spacing: -0.1px !important;
+}
+.admin-season-badge {
+  font-family: var(--font-mono) !important;
+  font-size: 0.56rem !important;
+  background: rgba(124,111,239,0.1) !important;
+  border: 1px solid rgba(124,111,239,0.22) !important;
+  border-radius: 8px !important;
+  color: var(--accent) !important;
+  padding: 2px 8px !important;
+}
+
+/* Epizody řádky */
+.admin-episode-row {
+  border-bottom: 1px solid rgba(255,255,255,0.032) !important;
+  transition: background 0.13s ease !important;
+}
+.admin-episode-row:hover { background: rgba(124,111,239,0.04) !important; }
+.admin-episode-row:last-child { border-bottom: none !important; }
+.admin-episode-num {
+  font-family: var(--font-mono) !important;
+  font-size: 0.58rem !important;
+  color: rgba(255,255,255,0.28) !important;
+  min-width: 26px !important;
+}
+.admin-episode-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  font-size: 0.7rem !important;
+  color: rgba(255,255,255,0.8) !important;
+}
+.admin-episode-meta {
+  font-family: var(--font-ui) !important;
+  font-size: 0.55rem !important;
+  color: rgba(255,255,255,0.28) !important;
+}
+
+/* ── Analytics tab (#adminTab_analytics) ── */
+#adminTab_analytics { font-family: var(--font-ui) !important; }
+
+.admin-chart-wrap {
+  background: rgba(255,255,255,0.018) !important;
+  border: 1px solid rgba(255,255,255,0.048) !important;
+  border-radius: 16px !important;
+}
+.admin-chart-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 800 !important;
+  font-size: 0.72rem !important;
+  letter-spacing: -0.1px !important;
+  color: rgba(255,255,255,0.75) !important;
+}
+.admin-chart-sub {
+  font-family: var(--font-ui) !important;
+  font-size: 0.56rem !important;
+  color: rgba(255,255,255,0.25) !important;
+}
+
+/* Mini stat chips (analytics) */
+.admin-mini-chip {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.58rem !important;
+  border-radius: 8px !important;
+  padding: 3px 9px !important;
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  color: rgba(255,255,255,0.42) !important;
+}
+.admin-mini-chip.up   { background: rgba(46,204,113,0.08) !important; border-color: rgba(46,204,113,0.18) !important; color: #5ee898 !important; }
+.admin-mini-chip.down { background: rgba(240,98,146,0.08) !important; border-color: rgba(240,98,146,0.18) !important; color: var(--accent-warm) !important; }
+
+/* Rank list (top filmy) */
+.admin-rank-row {
+  border-bottom: 1px solid rgba(255,255,255,0.036) !important;
+  transition: background 0.13s ease !important;
+}
+.admin-rank-row:hover { background: rgba(124,111,239,0.04) !important; }
+.admin-rank-num {
+  font-family: var(--font-mono) !important;
+  font-weight: 600 !important;
+  font-size: 0.64rem !important;
+  color: rgba(255,255,255,0.22) !important;
+  min-width: 22px !important;
+}
+.admin-rank-name {
+  font-family: var(--font-ui) !important;
+  font-weight: 600 !important;
+  font-size: 0.7rem !important;
+}
+.admin-rank-val {
+  font-family: var(--font-mono) !important;
+  font-size: 0.62rem !important;
+  color: var(--accent) !important;
+}
+
+/* ── Firebase / Sync tab (#adminTab_firebase) ── */
+#adminTab_firebase { font-family: var(--font-ui) !important; }
+
+.admin-firebase-status {
+  background: rgba(255,255,255,0.022) !important;
+  border: 1px solid rgba(255,255,255,0.052) !important;
+  border-radius: 14px !important;
+}
+.admin-firebase-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+}
+.admin-firebase-dot.online  { background: #5ee898 !important; box-shadow: 0 0 8px rgba(94,232,152,0.6) !important; }
+.admin-firebase-dot.offline { background: rgba(255,255,255,0.2) !important; }
+.admin-firebase-dot.error   { background: var(--accent-warm) !important; box-shadow: 0 0 8px rgba(240,98,146,0.55) !important; }
+
+#adminFirebaseKey,
+#adminFirebaseDb,
+#adminFirebaseProject {
+  font-family: var(--font-mono) !important;
+  font-size: 0.7rem !important;
+  background: rgba(255,255,255,0.036) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  border-radius: 11px !important;
+  color: var(--text) !important;
+  outline: none !important;
+  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
+}
+#adminFirebaseKey:focus,
+#adminFirebaseDb:focus,
+#adminFirebaseProject:focus {
+  border-color: rgba(124,111,239,0.42) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
+}
+
+/* ── Subscribers / Users tab (#adminTab_subscribers) ── */
+#adminTab_subscribers { font-family: var(--font-ui) !important; }
+
+.admin-user-row {
+  border-bottom: 1px solid rgba(255,255,255,0.038) !important;
+  transition: background 0.14s ease !important;
+}
+.admin-user-row:hover { background: rgba(124,111,239,0.04) !important; }
+.admin-user-avatar {
+  border-radius: 10px !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  background: rgba(124,111,239,0.08) !important;
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.72rem !important;
+  color: var(--accent) !important;
+}
+.admin-user-name {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.72rem !important;
+}
+.admin-user-sub {
+  font-family: var(--font-ui) !important;
+  font-size: 0.56rem !important;
+  color: rgba(255,255,255,0.28) !important;
+}
+.admin-user-last {
+  font-family: var(--font-mono) !important;
+  font-size: 0.56rem !important;
+  color: rgba(255,255,255,0.22) !important;
+}
+
+/* Tier badges */
+.admin-tier-badge {
+  font-family: var(--font-ui) !important;
+  font-weight: 800 !important;
+  font-size: 0.5rem !important;
+  letter-spacing: 0.8px !important;
+  text-transform: uppercase !important;
+  border-radius: 6px !important;
+  padding: 2px 7px !important;
+}
+.admin-tier-badge.free    { background: rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.38) !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+.admin-tier-badge.premium { background: rgba(124,111,239,0.12) !important; color: var(--accent) !important; border: 1px solid rgba(124,111,239,0.26) !important; }
+.admin-tier-badge.family  { background: rgba(56,200,240,0.1) !important; color: var(--accent2) !important; border: 1px solid rgba(56,200,240,0.22) !important; }
+.admin-tier-badge.admin   { background: rgba(255,179,71,0.1) !important; color: var(--accent-amber) !important; border: 1px solid rgba(255,179,71,0.24) !important; }
+
+/* ── Admin modal (editace obsahu) ── */
+.admin-modal-overlay {
+  background: rgba(0,0,0,0.82) !important;
+  backdrop-filter: blur(22px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.8) !important;
+}
+.admin-modal-box {
+  background: rgba(9,9,18,0.99) !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-xl) !important;
+  animation: mf-scale-in 0.26s var(--ease-spring) both !important;
+  max-width: 560px !important;
+  width: 100% !important;
+}
+.admin-modal-header {
+  border-bottom: 1px solid rgba(255,255,255,0.052) !important;
+  padding: 18px 20px !important;
+}
+.admin-modal-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 900 !important;
+  font-size: 0.95rem !important;
+  letter-spacing: -0.3px !important;
+}
+.admin-modal-body { padding: 20px !important; }
+.admin-modal-footer {
+  border-top: 1px solid rgba(255,255,255,0.048) !important;
+  padding: 14px 20px !important;
+  gap: 10px !important;
+}
+
+/* Inline edit cell */
+.admin-edit-cell {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 8px !important;
+  font-family: var(--font-ui) !important;
+  font-size: 0.7rem !important;
+  color: var(--text) !important;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease !important;
+  outline: none !important;
+  padding: 3px 8px !important;
+}
+.admin-edit-cell:hover {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+.admin-edit-cell:focus {
+  background: rgba(124,111,239,0.06) !important;
+  border-color: rgba(124,111,239,0.38) !important;
+  box-shadow: 0 0 0 3px rgba(124,111,239,0.08) !important;
+}
+
+/* ── Notification / broadcast banner (admin) ── */
+.admin-broadcast-preview {
+  background: rgba(124,111,239,0.07) !important;
+  border: 1px solid rgba(124,111,239,0.2) !important;
+  border-radius: 13px !important;
+  font-family: var(--font-ui) !important;
+  font-size: 0.72rem !important;
+  line-height: 1.5 !important;
+  color: rgba(255,255,255,0.72) !important;
+}
+.admin-broadcast-type-row { gap: 8px !important; }
+.admin-broadcast-type-btn {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.64rem !important;
+  border-radius: 10px !important;
+  padding: 7px 14px !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  background: rgba(255,255,255,0.04) !important;
+  color: rgba(255,255,255,0.42) !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+.admin-broadcast-type-btn.active,
+.admin-broadcast-type-btn:hover {
+  background: rgba(124,111,239,0.12) !important;
+  border-color: rgba(124,111,239,0.3) !important;
+  color: var(--accent) !important;
+}
+
+/* ── Danger zone sekce ── */
+.admin-danger-zone {
+  background: rgba(240,98,146,0.04) !important;
+  border: 1px solid rgba(240,98,146,0.18) !important;
+  border-radius: 16px !important;
+}
+.admin-danger-zone-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 900 !important;
+  font-size: 0.7rem !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase !important;
+  color: rgba(240,98,146,0.7) !important;
+}
+
+/* ── Empty state (žádný obsah) ── */
+.admin-empty {
+  font-family: var(--font-ui) !important;
+  color: rgba(255,255,255,0.22) !important;
+  font-size: 0.74rem !important;
+  text-align: center !important;
+  padding: 32px 16px !important;
+}
+.admin-empty-icon {
+  font-size: 2rem !important;
+  margin-bottom: 10px !important;
+  opacity: 0.4 !important;
+}
+
+/* ── Skeleton loadery ── */
+.admin-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.028) 25%,
+    rgba(124,111,239,0.055) 50%,
+    rgba(255,255,255,0.028) 75%
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: mf-shimmer 1.9s ease-in-out infinite !important;
+  border-radius: 8px !important;
+}
+.admin-skeleton.line-sm { height: 10px !important; }
+.admin-skeleton.line-md { height: 14px !important; }
+.admin-skeleton.line-lg { height: 20px !important; }
+.admin-skeleton.avatar  { width: 38px !important; height: 38px !important; border-radius: 10px !important; }
+.admin-skeleton.thumb   { width: 52px !important; height: 74px !important; border-radius: 8px !important; }
+
+/* ── Confirm dialog ── */
+.admin-confirm-box {
+  background: rgba(9,9,18,0.99) !important;
+  border: 1px solid rgba(255,255,255,0.065) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--shadow-xl) !important;
+  animation: mf-scale-in 0.22s var(--ease-spring) both !important;
+}
+.admin-confirm-title {
+  font-family: var(--font-ui) !important;
+  font-weight: 900 !important;
+  font-size: 0.9rem !important;
+  letter-spacing: -0.2px !important;
+}
+.admin-confirm-body {
+  font-family: var(--font-ui) !important;
+  font-size: 0.72rem !important;
+  color: rgba(255,255,255,0.42) !important;
+  line-height: 1.55 !important;
+}
+
+/* ── Progress kroky (import wizard) ── */
+.admin-step-row { gap: 8px !important; }
+.admin-step {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+  font-size: 0.6rem !important;
+  border-radius: 8px !important;
+  padding: 4px 12px !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  background: rgba(255,255,255,0.032) !important;
+  color: rgba(255,255,255,0.28) !important;
+}
+.admin-step.active {
+  background: rgba(124,111,239,0.12) !important;
+  border-color: rgba(124,111,239,0.3) !important;
+  color: var(--accent) !important;
+}
+.admin-step.done {
+  background: rgba(94,232,152,0.08) !important;
+  border-color: rgba(94,232,152,0.2) !important;
+  color: #5ee898 !important;
+}
+
+/* ── Tooltip (admin) ── */
+.admin-tooltip {
+  font-family: var(--font-ui) !important;
+  font-size: 0.62rem !important;
+  background: rgba(9,9,18,0.98) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 9px !important;
+  color: rgba(255,255,255,0.75) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6) !important;
+  backdrop-filter: blur(18px) !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+  z-index: 9999 !important;
+}
+
+/* ── JSON / raw data viewer ── */
+.admin-json-viewer {
+  font-family: var(--font-mono) !important;
+  font-size: 0.62rem !important;
+  background: rgba(0,0,0,0.48) !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
+  border-radius: 12px !important;
+  color: rgba(255,255,255,0.55) !important;
+  line-height: 1.75 !important;
+  overflow: auto !important;
+}
+.admin-json-key    { color: rgba(124,111,239,0.85) !important; }
+.admin-json-string { color: rgba(94,232,152,0.82) !important; }
+.admin-json-number { color: rgba(56,200,240,0.85) !important; }
+.admin-json-bool   { color: rgba(255,179,71,0.85) !important; }
+.admin-json-null   { color: rgba(255,255,255,0.22) !important; }
+
+/* ────────────────────────────────────────────────────────────────
+   § 29 · OPRAVY — Timer FAB schování + Discover klikatelnost
+──────────────────────────────────────────────────────────────── */
+
+/*
+ * PROBLÉM: .timer-fab má z-index:9000 !important a překrývá
+ * .universe-overlay (z-index:500) → karty v Objevování nejdou kliknout.
+ *
+ * OPRAVA 1: Timer schovat přes body.disco-open (JS patch přidává třídu)
+ */
+body.disco-open #timerFab,
+body.disco-open .timer-fab,
+body.disco-open #timerPanel,
+body.disco-open .timer-panel {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/*
+ * OPRAVA 2 (záloha CSS sibling): funguje pokud timer je sourozenec overlay
+ */
+.universe-overlay.open ~ #timerFab,
+.universe-overlay.open ~ .timer-fab,
+.universe-overlay.open ~ #timerPanel,
+.universe-overlay.open ~ .timer-panel {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/*
+ * OPRAVA 3: Snížit z-index timeru pod overlay (z-index:500)
+ * když není body.disco-open → neblokuje nic za normálu
+ */
+#timerFab,
+button.timer-fab {
+  z-index: 490 !important;
+}
+#timerPanel,
+.timer-panel {
+  z-index: 491 !important;
+}
+
+/*
+ * OPRAVA 4: Disco karty — garantovat klikatelnost uvnitř overlay
+ */
+.universe-overlay.open,
+.universe-overlay.visible {
+  pointer-events: auto !important;
+}
+.universe-overlay.open .disco-card,
+.universe-overlay.open .disco-row-scroll,
+.universe-overlay.open #discoBody,
+.universe-overlay.open .disco-body {
+  pointer-events: auto !important;
+}
+.universe-overlay.open .disco-card * {
+  pointer-events: auto !important;
+}
+.universe-overlay.open .disco-card-finder-btn {
+  pointer-events: auto !important;
+  z-index: 10 !important;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   § 30 · TRAILER VYLEPŠENÍ — crop YouTube UI + lepší vizuál
+──────────────────────────────────────────────────────────────── */
+
+/*
+ * PROBLÉM: YouTube iframe 200% nestačí — logo, info karty a
+ * watermark YouTube zůstávají viditelné v rozích.
+ *
+ * ŘEŠENÍ: Zvětšit iframe na 280% a oříznout přes overflow:hidden
+ * na kontejneru. Tím vše co YouTube přidává (controls=0 nestačí
+ * pro info karty / suggested videos) vypadne mimo visible area.
+ */
+
+/* Tile trailer (hover na poster tiles v hlavní nabídce) */
+.tr-video-container {
+  position: relative !important;
+  overflow: hidden !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.tr-video-container iframe {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  /* 350% → YouTube controls/watermark/info karty mimo ořez */
+  width: 350% !important;
+  height: 350% !important;
+  transform: translate(-50%, -50%) !important;
+  border: none !important;
+  pointer-events: none !important;
+  display: block !important;
+  filter: contrast(1.06) saturate(1.12) brightness(1.02) !important;
+}
+
+/* Blokovat jakýkoliv YT overlay přes pseudo vrstvu */
+.tr-video-container::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 3 !important;
+  pointer-events: none !important;
+  /* Jemný vignette efekt */
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    transparent 40%,
+    rgba(0,0,0,0.22) 100%
+  ) !important;
+}
+
+/* Gradient overlay pro tile trailer — čitelnější info dole */
+.tr-grad {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 4 !important;
+  pointer-events: none !important;
+  background:
+    linear-gradient(
+      to top,
+      rgba(0,0,0,0.82) 0%,
+      rgba(0,0,0,0.28) 35%,
+      transparent 58%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.35) 0%,
+      transparent 22%
+    ) !important;
+}
+
+/* Plynulejší fade-in/out */
+.tile-trailer {
+  transition: opacity 0.65s cubic-bezier(0.16,1,0.3,1) !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+}
+
+/* Disco-card trailer kontejner (hover v Objevování) */
+/* Vnější div který obaluje iframe v discover sekci */
+.universe-overlay .disco-card [style*="overflow:hidden"] iframe,
+.universe-overlay .disco-card [style*="overflow: hidden"] iframe {
+  width: 280% !important;
+  height: 280% !important;
+  pointer-events: none !important;
+  display: block !important;
+  filter: contrast(1.06) saturate(1.12) !important;
+}
+
+/* Gradient overlay pro discover karty (přidán JS inline) —
+   posílíme přes attr selector */
+.universe-overlay .disco-card [style*="linear-gradient"] {
+  pointer-events: none !important;
+}
+
+
+@keyframes mf-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes mf-scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes mf-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   § 26 · RESPONSIVE
+──────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .mf-dock { border-radius: 30px !important; padding: 5px 8px !important; }
+  .dock-btn { padding: 7px 11px !important; }
+  .ps-tile-wrapper:hover, .ps-tile-wrapper.kb-focus {
+    transform: translateY(-8px) scale(1.03) translateZ(0) !important;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   § 27 · REDUCED MOTION
+──────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
