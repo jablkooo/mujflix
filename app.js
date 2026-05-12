@@ -11174,3 +11174,217 @@ document.addEventListener("keydown", function(e) {
 
   console.log('[MůjFlix Fix] ✓ Timer FAB + Discover click fix načten');
 })();
+
+// ══════════════════════════════════════════════════════════════════
+// 📝 CHANGELOG SYSTEM — MůjFlix Update Notifications
+// Správce: adminSaveChangelog() přidá záznam, uživatel ho vidí
+// při příštím načtení přes modal (pokud je novější než posledně viděný).
+// ══════════════════════════════════════════════════════════════════
+
+const MF_CHANGELOG_KEY = 'mf_changelog_v1';
+const MF_CHANGELOG_SEEN_KEY = 'mf_changelog_seen_ts';
+let _clSelectedType = 'feature';
+
+// ── Typy changelogů — ikona + barva ──────────────────────────────
+const CL_TYPES = {
+  feature:     { label: '✨ Novinka',        color: '#4da6ff', bg: 'rgba(0,122,255,0.12)',  border: 'rgba(0,122,255,0.3)'  },
+  fix:         { label: '🐛 Oprava bugu',    color: '#5fffb0', bg: 'rgba(0,200,100,0.1)',   border: 'rgba(0,200,100,0.3)'  },
+  improvement: { label: '⚡ Vylepšení',      color: '#ffd166', bg: 'rgba(255,180,0,0.1)',   border: 'rgba(255,180,0,0.3)'  },
+  breaking:    { label: '⚠️ Změna chování', color: '#ff8c69', bg: 'rgba(255,100,60,0.1)',   border: 'rgba(255,100,60,0.3)' },
+};
+
+// ── Výběr typu v admin panelu ─────────────────────────────────────
+function clSetType(type) {
+  _clSelectedType = type;
+  Object.keys(CL_TYPES).forEach(t => {
+    const btn = document.getElementById('clType_' + t);
+    if (!btn) return;
+    if (t === type) {
+      btn.style.background = CL_TYPES[t].bg;
+      btn.style.borderColor = CL_TYPES[t].border;
+      btn.style.color = CL_TYPES[t].color;
+    } else {
+      btn.style.background = 'rgba(255,255,255,0.04)';
+      btn.style.borderColor = 'rgba(255,255,255,0.08)';
+      btn.style.color = 'rgba(255,255,255,0.4)';
+    }
+  });
+}
+
+// ── Uložení nového záznamu (volá admin) ──────────────────────────
+function adminSaveChangelog() {
+  const version = document.getElementById('clVersion')?.value?.trim();
+  const title   = document.getElementById('clTitle')?.value?.trim();
+  const desc    = document.getElementById('clDesc')?.value?.trim();
+
+  if (!title) return void (typeof showToast === 'function' && showToast('⚠ Zadej alespoň nadpis změny!'));
+
+  const entry = {
+    id:      Date.now(),
+    version: version || '',
+    title,
+    desc:    desc || '',
+    type:    _clSelectedType,
+    ts:      Date.now(),
+  };
+
+  try {
+    const all = JSON.parse(localStorage.getItem(MF_CHANGELOG_KEY) || '[]');
+    all.unshift(entry);
+    localStorage.setItem(MF_CHANGELOG_KEY, JSON.stringify(all.slice(0, 50)));
+    // Vymazat pole po uložení
+    document.getElementById('clVersion').value = '';
+    document.getElementById('clTitle').value   = '';
+    document.getElementById('clDesc').value    = '';
+    adminRenderChangelogHistory();
+    typeof showToast === 'function' && showToast('📝 Changelog přidán! Uživatelé uvidí notifikaci.', 'success');
+  } catch (e) {
+    console.warn('[Changelog] Uložení selhalo:', e);
+  }
+}
+
+// ── Smazání záznamu z changelogu ─────────────────────────────────
+function adminDeleteChangelog(id) {
+  try {
+    const all = JSON.parse(localStorage.getItem(MF_CHANGELOG_KEY) || '[]');
+    localStorage.setItem(MF_CHANGELOG_KEY, JSON.stringify(all.filter(e => e.id !== id)));
+    adminRenderChangelogHistory();
+    typeof showToast === 'function' && showToast('🗑 Záznam smazán');
+  } catch (e) {}
+}
+
+// ── Render historie v admin panelu ────────────────────────────────
+function adminRenderChangelogHistory() {
+  const el = document.getElementById('adminChangelogHistory');
+  if (!el) return;
+  try {
+    const all = JSON.parse(localStorage.getItem(MF_CHANGELOG_KEY) || '[]');
+    if (!all.length) {
+      el.innerHTML = '<div style="font-size:0.72rem;color:rgba(255,255,255,0.25);text-align:center;padding:20px 0;">Zatím žádné záznamy</div>';
+      return;
+    }
+    el.innerHTML = all.slice(0, 20).map(e => {
+      const ct = CL_TYPES[e.type] || CL_TYPES.feature;
+      const d  = new Date(e.ts);
+      const dateStr = d.toLocaleDateString('cs-CZ') + ' ' + d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+      return `
+        <div style="padding:12px 14px;border-radius:11px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);margin-bottom:8px;position:relative;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:${e.desc ? '6px' : '0'};">
+            <span style="font-size:0.6rem;font-weight:700;padding:2px 8px;border-radius:20px;background:${ct.bg};border:1px solid ${ct.border};color:${ct.color};">${ct.label}</span>
+            ${e.version ? `<span style="font-size:0.58rem;color:rgba(255,255,255,0.3);font-family:monospace;">${e.version}</span>` : ''}
+            <span style="font-size:0.58rem;color:rgba(255,255,255,0.2);margin-left:auto;">${dateStr}</span>
+          </div>
+          <div style="font-size:0.8rem;font-weight:700;color:#fff;margin-bottom:${e.desc ? '4px' : '0'};">${e.title}</div>
+          ${e.desc ? `<div style="font-size:0.7rem;color:rgba(255,255,255,0.45);line-height:1.5;">${e.desc}</div>` : ''}
+          <button onclick="adminDeleteChangelog(${e.id})" style="position:absolute;top:10px;right:10px;background:rgba(255,50,50,0.12);border:none;border-radius:6px;padding:3px 8px;color:rgba(255,100,100,0.7);font-size:0.6rem;cursor:pointer;">✕</button>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    el.innerHTML = '';
+  }
+}
+
+// ── Zobrazení changelog modalu pro uživatele ──────────────────────
+function openChangelog() {
+  try {
+    const all = JSON.parse(localStorage.getItem(MF_CHANGELOG_KEY) || '[]');
+    if (!all.length) return;
+
+    const seenTs  = parseInt(localStorage.getItem(MF_CHANGELOG_SEEN_KEY) || '0');
+    // Nepřečtené = novější než poslední viděný timestamp
+    const unseen  = all.filter(e => e.ts > seenTs);
+    const toShow  = unseen.length ? unseen : all.slice(0, 5);
+
+    const modal   = document.getElementById('mfChangelogModal');
+    const body    = document.getElementById('clModalBody');
+    const subtitle = document.getElementById('clModalSubtitle');
+    if (!modal || !body) return;
+
+    subtitle.textContent = unseen.length
+      ? `${unseen.length} nová změna${unseen.length > 1 ? 's' : ''} od tvé poslední návštěvy`
+      : 'Historie posledních změn';
+
+    body.innerHTML = toShow.map(e => {
+      const ct = CL_TYPES[e.type] || CL_TYPES.feature;
+      const d  = new Date(e.ts);
+      const dateStr = d.toLocaleDateString('cs-CZ');
+      return `
+        <div style="margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.05);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+            <span style="font-size:0.62rem;font-weight:700;padding:3px 10px;border-radius:20px;background:${ct.bg};border:1px solid ${ct.border};color:${ct.color};">${ct.label}</span>
+            ${e.version ? `<span style="font-size:0.65rem;font-weight:700;color:rgba(255,255,255,0.4);font-family:monospace;background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;">${e.version}</span>` : ''}
+            <span style="font-size:0.6rem;color:rgba(255,255,255,0.25);margin-left:auto;">${dateStr}</span>
+          </div>
+          <div style="font-size:0.92rem;font-weight:800;color:#fff;margin-bottom:6px;font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;">${e.title}</div>
+          ${e.desc ? `<div style="font-size:0.78rem;color:rgba(255,255,255,0.5);line-height:1.6;">${e.desc}</div>` : ''}
+        </div>`;
+    }).join('');
+
+    modal.style.display = 'flex';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      modal.style.opacity = '1';
+    }));
+  } catch (e) {
+    console.warn('[Changelog] openChangelog chyba:', e);
+  }
+}
+
+// ── Zavření modalu — uložení timestamp "viděno" ───────────────────
+function closeChangelog() {
+  const modal = document.getElementById('mfChangelogModal');
+  if (!modal) return;
+  modal.style.display = 'none';
+  localStorage.setItem(MF_CHANGELOG_SEEN_KEY, Date.now().toString());
+  // Skrýt badge na profilu
+  const badge = document.getElementById('clNewBadge');
+  if (badge) badge.style.display = 'none';
+}
+
+// ── Automatická kontrola nepřečtených změn po načtení ────────────
+function checkChangelogOnLoad() {
+  try {
+    const all = JSON.parse(localStorage.getItem(MF_CHANGELOG_KEY) || '[]');
+    if (!all.length) return;
+    const seenTs = parseInt(localStorage.getItem(MF_CHANGELOG_SEEN_KEY) || '0');
+    const unseen = all.filter(e => e.ts > seenTs);
+    if (!unseen.length) return;
+
+    // Zobrazí toast s možností otevřít changelog po 4s (aby se stránka stihla načíst)
+    setTimeout(() => {
+      if (typeof showToast !== 'function') return;
+      // Přidáme klikatelný toast ručně
+      let t = document.getElementById('mf-toast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'mf-toast';
+        t.style.cssText = "position:fixed;bottom:85px;left:50%;transform:translateX(-50%) translateY(12px);z-index:99999;background:rgba(10,10,12,0.96);color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.8rem;padding:10px 22px;border-radius:50px;opacity:0;transition:opacity 0.25s,transform 0.3s cubic-bezier(0.34,1.4,0.64,1);pointer-events:auto;backdrop-filter:blur(20px);white-space:nowrap;max-width:90vw;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.7);cursor:pointer;";
+        document.body.appendChild(t);
+      }
+      t.style.border = '1px solid rgba(0,122,255,0.35)';
+      t.textContent  = `🆕 ${unseen.length} nová změna — klikni pro detail`;
+      t.style.opacity   = '1';
+      t.style.transform = 'translateX(-50%) translateY(0)';
+      t.onclick = () => { openChangelog(); t.style.opacity = '0'; };
+      clearTimeout(t._tm);
+      t._tm = setTimeout(() => {
+        t.style.opacity   = '0';
+        t.style.transform = 'translateX(-50%) translateY(12px)';
+        t.onclick = null;
+      }, 7000);
+    }, 4000);
+  } catch (e) {}
+}
+
+// Zavolej při načtení (po DOMContentLoaded)
+document.addEventListener('DOMContentLoaded', () => {
+  checkChangelogOnLoad();
+  // Načti historii v adminu pokud je tab aktivní
+  const obs = new MutationObserver(() => {
+    const tab = document.getElementById('adminTab_changelog');
+    if (tab && tab.style.display !== 'none') adminRenderChangelogHistory();
+  });
+  const panel = document.getElementById('adminPanel');
+  if (panel) obs.observe(panel, { attributes: true, subtree: true, attributeFilter: ['style'] });
+});
+
+console.log('[MůjFlix Changelog] ✓ Changelog systém načten');
