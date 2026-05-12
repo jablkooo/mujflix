@@ -597,6 +597,23 @@
           >
             📱 Zařízení
           </button>
+          <button
+            class="adm-tab"
+            onclick="adminSwitchTab('changelog', this)"
+            style="
+              padding: 8px 18px;
+              border-radius: 10px;
+              background: rgba(255, 255, 255, 0.04);
+              border: 1px solid rgba(255, 255, 255, 0.08);
+              color: rgba(255, 255, 255, 0.5);
+              font-size: 0.7rem;
+              font-weight: 800;
+              cursor: pointer;
+              letter-spacing: 0.5px;
+            "
+          >
+            📝 Changelog
+          </button>
         </div>
 
         <!-- TAB: Profily -->
@@ -1936,6 +1953,43 @@
             ></div>
           </div>
         </div>
+
+        <!-- TAB: Changelog -->
+        <div
+          id="adminTab_changelog"
+          class="adm-tab-content"
+          style="display: none"
+        >
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;margin-bottom:14px;">
+            <div style="font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;font-size:0.95rem;font-weight:800;margin-bottom:4px;">📝 Přidat záznam do changelogu</div>
+            <div style="font-size:0.66rem;color:rgba(255,255,255,0.35);margin-bottom:16px;">Uživatelé uvidí notifikaci s popisem změny při příštím načtení aplikace.</div>
+
+            <div style="font-size:0.6rem;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.35);margin-bottom:6px;text-transform:uppercase;">Verze (např. v1.4.2)</div>
+            <input id="clVersion" placeholder="v1.0.0" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:11px;padding:10px 14px;color:#fff;font-family:'Outfit',sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:12px;">
+
+            <div style="font-size:0.6rem;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.35);margin-bottom:6px;text-transform:uppercase;">Nadpis změny</div>
+            <input id="clTitle" placeholder="Přidáno přihlašování přes profil…" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:11px;padding:10px 14px;color:#fff;font-family:'Outfit',sans-serif;font-size:0.82rem;outline:none;box-sizing:border-box;margin-bottom:12px;">
+
+            <div style="font-size:0.6rem;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.35);margin-bottom:6px;text-transform:uppercase;">Popis (co to dělá a k čemu slouží)</div>
+            <textarea id="clDesc" placeholder="Podrobný popis změny — co bylo opraveno, přidáno nebo vylepšeno a proč…" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:11px;padding:12px 14px;color:#fff;font-family:'Outfit',sans-serif;font-size:0.82rem;resize:vertical;min-height:80px;outline:none;box-sizing:border-box;"></textarea>
+
+            <div style="font-size:0.6rem;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.35);margin-bottom:6px;margin-top:12px;text-transform:uppercase;">Typ</div>
+            <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;">
+              <button id="clType_feature" onclick="clSetType('feature')" style="padding:6px 14px;border-radius:8px;background:rgba(0,122,255,0.15);border:1px solid rgba(0,122,255,0.4);color:#4da6ff;font-size:0.67rem;font-weight:700;cursor:pointer;">✨ Novinka</button>
+              <button id="clType_fix" onclick="clSetType('fix')" style="padding:6px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);font-size:0.67rem;font-weight:700;cursor:pointer;">🐛 Oprava bugu</button>
+              <button id="clType_improvement" onclick="clSetType('improvement')" style="padding:6px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);font-size:0.67rem;font-weight:700;cursor:pointer;">⚡ Vylepšení</button>
+              <button id="clType_breaking" onclick="clSetType('breaking')" style="padding:6px 14px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);font-size:0.67rem;font-weight:700;cursor:pointer;">⚠️ Změna chování</button>
+            </div>
+
+            <button onclick="adminSaveChangelog()" style="padding:10px 22px;border-radius:11px;background:var(--accent);border:none;color:#000;font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;font-weight:900;font-size:0.82rem;cursor:pointer;">📝 Přidat do changelogu</button>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;">
+            <div style="font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;font-size:0.88rem;font-weight:800;margin-bottom:4px;">📋 Historie changelogu</div>
+            <div style="font-size:0.66rem;color:rgba(255,255,255,0.35);margin-bottom:14px;">Posledních 20 záznamů</div>
+            <div id="adminChangelogHistory"></div>
+          </div>
+        </div>
       </div>
       <!-- FPS counter (volitelný) -->
       <div
@@ -1956,6 +2010,25 @@
         "
       >
         FPS: –
+      </div>
+    </div>
+
+    <!-- CHANGELOG MODAL -->
+    <div id="mfChangelogModal" style="display:none;position:fixed;inset:0;z-index:100010;background:rgba(0,0,0,0.75);backdrop-filter:blur(16px);align-items:center;justify-content:center;">
+      <div style="background:linear-gradient(160deg,#141418 0,#0e0e12 100%);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:0;width:min(480px,94vw);max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,0.9);">
+        <div style="padding:26px 28px 18px;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;font-size:1.15rem;font-weight:900;letter-spacing:-0.3px;">🆕 Co je nového</div>
+              <div style="font-size:0.68rem;color:rgba(255,255,255,0.35);margin-top:3px;" id="clModalSubtitle">Aktualizace aplikace</div>
+            </div>
+            <button onclick="closeChangelog()" style="background:rgba(255,255,255,0.07);border:none;border-radius:50%;width:32px;height:32px;color:rgba(255,255,255,0.6);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+          </div>
+        </div>
+        <div id="clModalBody" style="overflow-y:auto;padding:20px 28px;flex:1;"></div>
+        <div style="padding:16px 28px;border-top:1px solid rgba(255,255,255,0.06);">
+          <button onclick="closeChangelog()" style="width:100%;padding:12px;border-radius:12px;background:var(--accent);border:none;color:#000;font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;font-weight:900;font-size:0.88rem;cursor:pointer;">Rozumím, pojďme na to 👍</button>
+        </div>
       </div>
     </div>
 
