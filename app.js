@@ -5817,6 +5817,10 @@ const ProfileGate = {
   }
 };
 
+// OPRAVA: const ProfileGate není automaticky na window — inline onclick="window.ProfileGate?.xyz()"
+// by jinak tiše selhalo (optional chaining skryje undefined). Explicitní přiřazení to opravuje.
+window.ProfileGate = ProfileGate;
+
 function _renderUserBadge() {
   ProfileGate.renderBadge()
 }
