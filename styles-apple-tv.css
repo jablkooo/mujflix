@@ -1,0 +1,581 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════
+ * MŮJFLIX — Apple TV+ Design System
+ * ═══════════════════════════════════════════════════════════════════
+ *
+ * Přidat do index.html PO styles.css a styles-premium.css:
+ * <link rel="stylesheet" href="styles-apple-tv.css" />
+ *
+ * Vizuální filozofie:
+ * - Minimální, vzdušný, prémiový
+ * - Místo "bílého prostoru" - "tmavý prostor"
+ * - Frosted glass efekt
+ * - Cinematický hover
+ * - San Francisco font
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&family=SF+Pro+Text:wght@300;400;500;600&display=swap');
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 1 — DESIGN TOKENS (Apple TV+ Palette)
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Apple TV+ base — almost pure black */
+  --atvp-bg:          #000000;
+  --atvp-bg-secondary:#050505;
+  --atvp-surface:     #0a0a0a;
+  --atvp-elevated:    #141414;
+
+  /* Typography — San Francisco */
+  --atvp-font-display: "SF Pro Display", -apple-system, "Helvetica Neue", sans-serif;
+  --atvp-font-text:    "SF Pro Text", -apple-system, "Helvetica Neue", sans-serif;
+
+  /* Text colors — subtle, layered */
+  --atvp-text-primary:   rgba(255, 255, 255, 0.92);
+  --atvp-text-secondary: rgba(255, 255, 255, 0.60);
+  --atvp-text-tertiary:  rgba(255, 255, 255, 0.38);
+
+  /* Accent — Apple Blue */
+  --atvp-accent:    #0a84ff;
+  --atvp-accent-glow: rgba(10, 132, 255, 0.25);
+
+  /* Frosted Glass — Apple's signature */
+  --atvp-glass: rgba(20, 20, 20, 0.72);
+  --atvp-glass-blur: blur(80px) saturate(180%);
+  --atvp-glass-border: rgba(255, 255, 255, 0.08);
+
+  /* Radii — Apple uses generous rounding */
+  --atvp-radius-sm:  10px;
+  --atvp-radius-md:  14px;
+  --atvp-radius-lg:  20px;
+  --atvp-radius-xl:  28px;
+
+  /* Spacing — lots of breathing room */
+  --atvp-space-xs:  4px;
+  --atvp-space-sm:  8px;
+  --atvp-space-md:  16px;
+  --atvp-space-lg:  24px;
+  --atvp-space-xl:  40px;
+  --atvp-space-xxl: 60px;
+
+  /* Shadows — subtle, layered */
+  --atvp-shadow-sm:  0 2px 8px rgba(0, 0, 0, 0.3);
+  --atvp-shadow-md:  0 8px 24px rgba(0, 0, 0, 0.4);
+  --atvp-shadow-lg:  0 20px 48px rgba(0, 0, 0, 0.5);
+
+  /* Transitions — smooth, cinematic */
+  --atvp-ease:       cubic-bezier(0.25, 1, 0.5, 1);
+  --atvp-ease-slow:  cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 2 — BASE OVERRIDES
+   ═══════════════════════════════════════════════════════════════════ */
+
+body, html {
+  background: var(--atvp-bg) !important;
+  font-family: var(--atvp-font-display) !important;
+  color: var(--atvp-text-primary) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove ambient glow — Apple keeps it cleaner */
+body::before,
+body::after,
+.bg-glow {
+  display: none !important;
+}
+
+/* Scrollbar — minimal */
+::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 3 — FROSTED GLASS (Apple's key visual element)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.mood-box,
+.sync-box,
+.dock-inner,
+#mfHeader,
+.notif-panel {
+  background: var(--atvp-glass) !important;
+  backdrop-filter: var(--atvp-glass-blur) !important;
+  -webkit-backdrop-filter: var(--atvp-glass-blur) !important;
+  border: 1px solid var(--atvp-glass-border) !important;
+  border-radius: var(--atvp-radius-lg) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 4 — TILES / CARDS — Apple Style
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Increase tile spacing — Apple gives cards room to breathe */
+.ps-tile-wrapper {
+  margin: 0 var(--atvp-space-md) !important;
+}
+
+/* Card styling — larger, cleaner */
+.disco-card {
+  width: 180px !important;
+  height: 270px !important;
+  border-radius: var(--atvp-radius-md) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transition:
+    transform 0.4s var(--atvp-ease-slow),
+    box-shadow 0.4s var(--atvp-ease-slow) !important;
+}
+
+/* Cinematic hover — Apple style expansion */
+.disco-card:hover {
+  transform: scale(1.12) translateY(-12px) !important;
+  box-shadow: var(--atvp-shadow-lg) !important;
+  z-index: 100;
+}
+
+.disco-card-inner {
+  border-radius: var(--atvp-radius-md) !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* Image — subtle zoom on hover */
+.disco-card-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  transition: transform 0.5s var(--atvp-ease-slow) !important;
+}
+
+.disco-card:hover .disco-card-img {
+  transform: scale(1.08);
+  filter: brightness(1.05);
+}
+
+/* Overlay — more subtle gradient */
+.disco-card-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.3) 40%,
+    transparent 100%
+  ) !important;
+  border-radius: var(--atvp-radius-md) !important;
+}
+
+/* Card info — appears elegantly on hover */
+.disco-card-info {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.35s var(--atvp-ease-slow) !important;
+  padding: var(--atvp-space-md) !important;
+}
+
+.disco-card:hover .disco-card-info {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Card name — cleaner typography */
+.disco-card-name {
+  font-family: var(--atvp-font-text) !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  color: var(--atvp-text-primary) !important;
+  text-shadow: none !important;
+  letter-spacing: -0.2px;
+}
+
+/* Card meta — smaller, more subtle */
+.disco-card-meta {
+  gap: var(--atvp-space-sm) !important;
+}
+
+.disco-card-type {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--atvp-text-secondary) !important;
+  font-size: 0.55rem !important;
+  font-weight: 500 !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+}
+
+.disco-card-rating {
+  color: var(--atvp-text-tertiary) !important;
+  font-size: 0.65rem !important;
+  font-weight: 500 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 5 — TYPOGRAPHY
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Logo — cleaner, smaller */
+.logo {
+  font-family: var(--atvp-font-display) !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.4px !important;
+  color: var(--atvp-text-primary) !important;
+}
+
+.logo span {
+  color: var(--atvp-accent) !important;
+  font-weight: 700 !important;
+}
+
+/* Section titles — Apple's editorial style */
+.disco-section-title,
+.disco-row-title {
+  font-family: var(--atvp-font-display) !important;
+  font-size: 1.4rem !important;
+  font-weight: 600 !important;
+  color: var(--atvp-text-primary) !important;
+  letter-spacing: -0.3px !important;
+  margin-bottom: var(--atvp-space-md) !important;
+  padding: 0 var(--atvp-space-lg) !important;
+}
+
+/* Subtext — more subtle */
+.muted,
+.text-muted,
+.atvp-text-secondary {
+  color: var(--atvp-text-secondary) !important;
+  font-size: 0.85rem !important;
+  font-weight: 400 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 6 — NAVIGATION & HEADER
+   ═══════════════════════════════════════════════════════════════════ */
+
+#mfHeader {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  padding: var(--atvp-space-md) var(--atvp-space-xl) !important;
+}
+
+/* Apple uses minimal navigation — hide non-essential */
+#hdrSearch,
+#hdrDiscover {
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+#hdrSearch:hover,
+#hdrDiscover:hover {
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 7 — HERO / FOR YOU SECTION
+   ═══════════════════════════════════════════════════════════════════ */
+
+.fyi-container {
+  height: 50vh !important;
+  margin-bottom: var(--atvp-space-xl) !important;
+}
+
+.fyi-bg {
+  object-fit: cover;
+  filter: brightness(0.7);
+}
+
+.fyi-gradient {
+  background: linear-gradient(
+    to top,
+    var(--atvp-bg) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    transparent 100%
+  ) !important;
+}
+
+.fyi-title {
+  font-family: var(--atvp-font-display) !important;
+  font-size: 2.5rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.8px !important;
+  color: var(--atvp-text-primary) !important;
+}
+
+.fyi-genre {
+  font-family: var(--atvp-font-text) !important;
+  font-size: 1rem !important;
+  font-weight: 400 !important;
+  color: var(--atvp-text-secondary) !important;
+}
+
+.fyi-badge {
+  background: var(--atvp-accent) !important;
+  color: #fff !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 8 — BUTTONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+button,
+.btn,
+.fab,
+.fab-small {
+  font-family: var(--atvp-font-text) !important;
+  font-weight: 500 !important;
+  border-radius: var(--atvp-radius-sm) !important;
+  transition: all 0.25s var(--atvp-ease) !important;
+}
+
+/* Primary button — Apple style */
+button.primary,
+.btn-primary {
+  background: var(--atvp-accent) !important;
+  color: #fff !important;
+  padding: 12px 24px !important;
+  font-size: 0.95rem !important;
+  border: none !important;
+}
+
+button.primary:hover,
+.btn-primary:hover {
+  background: #3395ff !important;
+  transform: scale(1.02);
+}
+
+/* Secondary button */
+button.secondary {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--atvp-text-primary) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+button.secondary:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 9 — MODALS & OVERLAYS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.overlay,
+.modal,
+#ratingOverlay,
+#watchlistOverlay,
+.universe-overlay {
+  background: rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: blur(40px) !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+}
+
+/* Modal content — Apple style card */
+.overlay-content,
+.modal-content {
+  background: var(--atvp-surface) !important;
+  border-radius: var(--atvp-radius-xl) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: var(--atvp-shadow-lg) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 10 — PROFILE GATE (Entry point)
+   ═══════════════════════════════════════════════════════════════════ */
+
+#mfProfileGate {
+  background: var(--atvp-bg) !important;
+}
+
+.pg-logo {
+  font-family: var(--atvp-font-display) !important;
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -1px !important;
+}
+
+.pg-logo span {
+  color: var(--atvp-accent) !important;
+}
+
+.pg-title {
+  font-family: var(--atvp-font-text) !important;
+  font-size: 1.1rem !important;
+  font-weight: 400 !important;
+  color: var(--atvp-text-secondary) !important;
+  margin-bottom: var(--atvp-space-lg) !important;
+}
+
+/* Profile avatars */
+.pg-avatar {
+  width: 100px !important;
+  height: 100px !important;
+  font-size: 3rem !important;
+  border-radius: 50% !important;
+  background: var(--atvp-surface) !important;
+  border: 2px solid transparent !important;
+  transition: all 0.3s var(--atvp-ease) !important;
+}
+
+.pg-avatar:hover {
+  transform: scale(1.05);
+  border-color: var(--atvp-accent) !important;
+}
+
+.pg-name {
+  font-family: var(--atvp-font-text) !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  color: var(--atvp-text-primary) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 11 — WIDGETS (Streak, AI Panel)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.streak-widget {
+  background: var(--atvp-glass) !important;
+  backdrop-filter: var(--atvp-glass-blur) !important;
+  border-radius: var(--atvp-radius-lg) !important;
+  padding: var(--atvp-space-md) !important;
+}
+
+.streak-count {
+  font-family: var(--atvp-font-display) !important;
+  font-size: 1.8rem !important;
+  font-weight: 700 !important;
+  color: #ff9f0a !important;
+}
+
+.streak-label {
+  font-family: var(--atvp-font-text) !important;
+  font-size: 0.75rem !important;
+  color: var(--atvp-text-tertiary) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 12 — ROWS & SCROLLING
+   ═══════════════════════════════════════════════════════════════════ */
+
+.disco-row {
+  padding: var(--atvp-space-md) 0;
+}
+
+.disco-row-scroll {
+  padding: 0 var(--atvp-space-lg);
+  gap: var(--atvp-space-md) !important;
+}
+
+/* Hide scrollbar but keep functionality */
+.disco-row-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 13 — TOAST NOTIFICATIONS
+   ═══════════════════════════════════════════════════════════════════ */
+
+#mf-toast {
+  background: rgba(30, 30, 30, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border-radius: var(--atvp-radius-lg) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  font-family: var(--atvp-font-text) !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  padding: 14px 24px !important;
+  box-shadow: var(--atvp-shadow-md) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 14 — ANIMATIONS (Cinematic feel)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Fade in — Apple style */
+@keyframes atvp-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Scale in — for cards */
+@keyframes atvp-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Apply to key elements */
+.disco-section,
+.disco-card,
+.fyi-container,
+.overlay {
+  animation: atvp-fade-in 0.5s var(--atvp-ease-slow) forwards;
+}
+
+/* Staggered animation for cards */
+.disco-card:nth-child(1) { animation-delay: 0.00s; }
+.disco-card:nth-child(2) { animation-delay: 0.05s; }
+.disco-card:nth-child(3) { animation-delay: 0.10s; }
+.disco-card:nth-child(4) { animation-delay: 0.15s; }
+.disco-card:nth-child(5) { animation-delay: 0.20s; }
+.disco-card:nth-child(6) { animation-delay: 0.25s; }
+.disco-card:nth-child(7) { animation-delay: 0.30s; }
+.disco-card:nth-child(8) { animation-delay: 0.35s; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 15 — MOBILE OPTIMIZATION
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .disco-card {
+    width: 140px !important;
+    height: 210px !important;
+  }
+
+  .disco-card:hover {
+    transform: scale(1.06) translateY(-8px) !important;
+  }
+
+  .fyi-title {
+    font-size: 1.8rem !important;
+  }
+
+  .disco-section-title {
+    font-size: 1.2rem !important;
+    padding: 0 var(--atvp-space-md) !important;
+  }
+
+  .disco-row-scroll {
+    padding: 0 var(--atvp-space-md);
+    gap: var(--atvp-space-sm) !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   § 16 — DARK MODE (Always on — this IS the design)
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Force dark even if system prefers light — this IS the design */
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SUMMARY — Apple TV+ Design Principles Applied:
+   ═══════════════════════════════════════════════════════════════════
+
+   ✓ Pure black background (#000000)
+   ✓ San Francisco font (system)
+   ✓ Frosted glass (blur 80px, subtle opacity)
+   ✓ Large card radius (14-20px)
+   ✓ Cinematic hover (scale 1.12 + translate -12px)
+   ✓ Minimal text (more subtle colors)
+   ✓ More spacing between elements
+   ✓ Smooth animations (cubic-bezier easing)
+   ✓ Staggered card animations
+   ✓ Cleaner overlays and modals
+
+   ═══════════════════════════════════════════════════════════════════ */
