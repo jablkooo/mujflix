@@ -5715,6 +5715,9 @@ const ProfileGate = {
     this._editingId = e || null, this._selectedEmoji = PROFILE_EMOJIS[0], this._selectedColor = PROFILE_COLORS[0];
     const t = document.getElementById("mfProfileCreate");
     if (!t) return;
+    // FIX: Disable pointer-events on gate so it doesn't swallow clicks on the create modal
+    const _gate = document.getElementById("mfProfileGate");
+    if (_gate) _gate.style.pointerEvents = "none";
     document.getElementById("pcModalTitle").textContent = e ? "Upravit profil" : "Nový profil";
     const n = document.getElementById("pcName");
     if (e) {
@@ -5729,7 +5732,10 @@ const ProfileGate = {
   },
   closeCreate() {
     const e = document.getElementById("mfProfileCreate");
-    e && e.classList.remove("show"), this._editingId = null
+    e && e.classList.remove("show"), this._editingId = null;
+    // FIX: Restore pointer-events on gate
+    const _gate = document.getElementById("mfProfileGate");
+    if (_gate) _gate.style.pointerEvents = "";
   },
   _pickEmoji(e, t) {
     this._selectedEmoji = e, document.querySelectorAll(".pc-emoji-btn").forEach(e => e.classList.remove("selected")), t.classList.add("selected")
