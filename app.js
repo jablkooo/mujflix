@@ -229,6 +229,7 @@ function getWatched() {
 function saveWatched(e) {
   showAutosave("saving"), safeSetItem(uKey("mf_watched"), JSON.stringify(e)), clearTimeout(asTimer), asTimer = setTimeout(() => showAutosave("saved"), 280)
 }
+// ══ TMDB CACHE S LRU A TIMESTAMP ══
 // ══ PROXY CONFIG - Pro server-side API volání ══
 // Nastaveno na Cloudflare Pages Functions
 window.MF_PROXY = {
@@ -3168,7 +3169,7 @@ async function aiSend() {
             text: e.content
           }]
         })),
-        i = ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash-latest", "gemini-1.5-flash-8b-latest"];
+        i = ["gemini-2.5-flash-preview-05-20", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash"];
       let a = "";
       for (const t of i) {
         let i, s;
