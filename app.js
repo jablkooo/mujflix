@@ -3169,7 +3169,7 @@ async function aiSend() {
             text: e.content
           }]
         })),
-        i = ["gemini-2.5-flash-preview-05-20", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash"];
+        i = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash"];
       let a = "";
       for (const t of i) {
         let i, s;
@@ -3198,15 +3198,17 @@ async function aiSend() {
           continue;
         }
         // 429 = kvóta, 404 = model neexistuje → zkus další
-        if (429 === i.status || 404 === i.status) {
+        if (429 === i.status || 404 === i.status || 400 === i.status) {
           a = 429 === i.status
             ? `⚠ Gemini kvóta překročena (${t}). Zkouším záložní model...`
-            : `⚠ Model ${t} nedostupný. Zkouším záložní...`;
+            : 404 === i.status
+            ? `⚠ Model ${t} nedostupný. Zkouším záložní...`
+            : `⚠ Chyba požadavku (${t}). Zkouším záložní model...`;
           continue;
         }
         if (!i.ok) {
           const e = s?.error?.message || "Chyba API";
-          n = 400 === i.status || 403 === i.status ? `❗ Chyba Gemini klíče: ${e}. Zkontroluj klic v nastaveni.` : `⚠ Gemini API chyba (${i.status}): ${e}`;
+          n = 403 === i.status ? `❗ Chyba Gemini klíče: ${e}. Zkontroluj klic v nastaveni.` : `⚠ Gemini API chyba (${i.status}): ${e}`;
           break
         }
         if (n = s?.candidates?.[0]?.content?.parts?.[0]?.text || "", !n) {
