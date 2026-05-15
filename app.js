@@ -3197,10 +3197,12 @@ async function aiSend() {
             text: e.content
           }]
         })),
-        i = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
+        i = ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash-latest", "gemini-1.5-flash-8b-latest"];
       let a = "";
       for (const t of i) {
-        const i = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${t}:generateContent?key=${e}`, {
+        let i, s;
+        try {
+          i = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${t}:generateContent?key=${e}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
@@ -3217,21 +3219,29 @@ async function aiSend() {
                 temperature: .85
               }
             })
-          }),
+          });
           s = await i.json();
-        if (429 !== i.status) {
-          if (!i.ok) {
-            const e = s?.error?.message || "Chyba API";
-            n = 400 === i.status || 403 === i.status ? `❗ Chyba Gemini klíče: ${e}. Zkontroluj klic v nastaveni.` : `⚠ Gemini API chyba (${i.status}): ${e}`;
-            break
-          }
-          if (n = s?.candidates?.[0]?.content?.parts?.[0]?.text || "", !n) {
-            const e = s?.promptFeedback?.blockReason;
-            n = e ? `⚠ Zpráva zablokována: ${e}` : "⚠ Prázdná odpověď. Zkus to jinak."
-          }
+        } catch (fetchErr) {
+          a = `⚠ Síťová chyba (${t}): ${fetchErr.message}`;
+          continue;
+        }
+        // 429 = kvóta, 404 = model neexistuje → zkus další
+        if (429 === i.status || 404 === i.status) {
+          a = 429 === i.status
+            ? `⚠ Gemini kvóta překročena (${t}). Zkouším záložní model...`
+            : `⚠ Model ${t} nedostupný. Zkouším záložní...`;
+          continue;
+        }
+        if (!i.ok) {
+          const e = s?.error?.message || "Chyba API";
+          n = 400 === i.status || 403 === i.status ? `❗ Chyba Gemini klíče: ${e}. Zkontroluj klic v nastaveni.` : `⚠ Gemini API chyba (${i.status}): ${e}`;
           break
         }
-        a = `⚠ Gemini kvóta překročena (${t}). Zkouším záložní model...`
+        if (n = s?.candidates?.[0]?.content?.parts?.[0]?.text || "", !n) {
+          const e = s?.promptFeedback?.blockReason;
+          n = e ? `⚠ Zpráva zablokována: ${e}` : "⚠ Prázdná odpověď. Zkus to jinak."
+        }
+        break
       }
       if (!n && a && t) try {
         const e = await fetch("https://openrouter.ai/api/v1/chat/completions", {
