@@ -229,35 +229,6 @@ function getWatched() {
 function saveWatched(e) {
   showAutosave("saving"), safeSetItem(uKey("mf_watched"), JSON.stringify(e)), clearTimeout(asTimer), asTimer = setTimeout(() => showAutosave("saved"), 280)
 }
-// ══ TMDB CACHE S LRU A TIMESTAMP ══
-const _tmdbMemCache = new Map();
-const TMDB_CACHE_MAX = 100;
-const TMDB_CACHE_TTL = 30 * 60 * 1000; // 30 minut
-
-function _tmdbMemSet(key, value) {
-  // TTL-based cleanup
-  const now = Date.now();
-  for (const [k, v] of _tmdbMemCache) {
-    if (now - v._ts > TMDB_CACHE_TTL) _tmdbMemCache.delete(k);
-  }
-  // LRU cleanup when full
-  if (_tmdbMemCache.size >= TMDB_CACHE_MAX) {
-    const firstKey = _tmdbMemCache.keys().next().value;
-    _tmdbMemCache.delete(firstKey);
-  }
-  _tmdbMemCache.set(key, { data: value, _ts: now });
-}
-
-function _tmdbMemGet(key) {
-  const entry = _tmdbMemCache.get(key);
-  if (!entry) return null;
-  if (Date.now() - entry._ts > TMDB_CACHE_TTL) {
-    _tmdbMemCache.delete(key);
-    return null;
-  }
-  return entry.data;
-}
-
 // ══ PROXY CONFIG - Pro server-side API volání ══
 // Nastaveno na Cloudflare Pages Functions
 window.MF_PROXY = {
