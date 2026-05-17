@@ -230,6 +230,34 @@ function saveWatched(e) {
   showAutosave("saving"), safeSetItem(uKey("mf_watched"), JSON.stringify(e)), clearTimeout(asTimer), asTimer = setTimeout(() => showAutosave("saved"), 280)
 }
 // ══ TMDB CACHE S LRU A TIMESTAMP ══
+const _tmdbMemCache = new Map();
+const TMDB_CACHE_MAX = 100;
+const TMDB_CACHE_TTL = 30 * 60 * 1000; // 30 minut
+
+function _tmdbMemSet(key, value) {
+  // TTL-based cleanup
+  const now = Date.now();
+  for (const [k, v] of _tmdbMemCache) {
+    if (now - v._ts > TMDB_CACHE_TTL) _tmdbMemCache.delete(k);
+  }
+  // LRU cleanup when full
+  if (_tmdbMemCache.size >= TMDB_CACHE_MAX) {
+    const firstKey = _tmdbMemCache.keys().next().value;
+    _tmdbMemCache.delete(firstKey);
+  }
+  _tmdbMemCache.set(key, { data: value, _ts: now });
+}
+
+function _tmdbMemGet(key) {
+  const entry = _tmdbMemCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry._ts > TMDB_CACHE_TTL) {
+    _tmdbMemCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
 // ══ PROXY CONFIG - Pro server-side API volání ══
 // Nastaveno na Cloudflare Pages Functions
 window.MF_PROXY = {
@@ -2453,6 +2481,9 @@ function initUniversalHover(e) {
   // Klik na tile → vždy rovnou do cinema mode / finder (ne jen při trailerech)
   e.addEventListener("click", function(ev) {
     if (!i || i === "__search__" || i === "__foryou__") return;
+    // Ignoruj klik pokud je ProfileGate viditelný
+    const _gateEl = document.getElementById("mfProfileGate");
+    if (_gateEl && _gateEl.style.display === "flex") return;
     ev.preventDefault();
     ev.stopImmediatePropagation();
     var tmdbId = e.dataset.tmdbId;
@@ -3169,12 +3200,10 @@ async function aiSend() {
             text: e.content
           }]
         })),
-        i = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash"];
+        i = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
       let a = "";
       for (const t of i) {
-        let i, s;
-        try {
-          i = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${t}:generateContent?key=${e}`, {
+        const i = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${t}:generateContent?key=${e}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
@@ -3191,31 +3220,21 @@ async function aiSend() {
                 temperature: .85
               }
             })
-          });
+          }),
           s = await i.json();
-        } catch (fetchErr) {
-          a = `⚠ Síťová chyba (${t}): ${fetchErr.message}`;
-          continue;
-        }
-        // 429 = kvóta, 404 = model neexistuje → zkus další
-        if (429 === i.status || 404 === i.status || 400 === i.status) {
-          a = 429 === i.status
-            ? `⚠ Gemini kvóta překročena (${t}). Zkouším záložní model...`
-            : 404 === i.status
-            ? `⚠ Model ${t} nedostupný. Zkouším záložní...`
-            : `⚠ Chyba požadavku (${t}). Zkouším záložní model...`;
-          continue;
-        }
-        if (!i.ok) {
-          const e = s?.error?.message || "Chyba API";
-          n = 403 === i.status ? `❗ Chyba Gemini klíče: ${e}. Zkontroluj klic v nastaveni.` : `⚠ Gemini API chyba (${i.status}): ${e}`;
+        if (429 !== i.status) {
+          if (!i.ok) {
+            const e = s?.error?.message || "Chyba API";
+            n = 400 === i.status || 403 === i.status ? `❗ Chyba Gemini klíče: ${e}. Zkontroluj klic v nastaveni.` : `⚠ Gemini API chyba (${i.status}): ${e}`;
+            break
+          }
+          if (n = s?.candidates?.[0]?.content?.parts?.[0]?.text || "", !n) {
+            const e = s?.promptFeedback?.blockReason;
+            n = e ? `⚠ Zpráva zablokována: ${e}` : "⚠ Prázdná odpověď. Zkus to jinak."
+          }
           break
         }
-        if (n = s?.candidates?.[0]?.content?.parts?.[0]?.text || "", !n) {
-          const e = s?.promptFeedback?.blockReason;
-          n = e ? `⚠ Zpráva zablokována: ${e}` : "⚠ Prázdná odpověď. Zkus to jinak."
-        }
-        break
+        a = `⚠ Gemini kvóta překročena (${t}). Zkouším záložní model...`
       }
       if (!n && a && t) try {
         const e = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -9601,7 +9620,11 @@ window.adminSavePerKey = function(e, t) {
         "function" == typeof closeDockOverlays && closeDockOverlays()
       },
       "#serialy": () => {
-        "function" == typeof closeDockOverlays && closeDockOverlays(), "function" == typeof setDockActive && setDockActive("dockHome")
+        "function" == typeof closeDockOverlays && closeDockOverlays();
+        "function" == typeof setDockActive && setDockActive("dockHome");
+        "function" == typeof window._mfShowSection_orig
+          ? window._mfShowSection_orig("serialy")
+          : "function" == typeof mfShowSection && mfShowSection("serialy");
       },
       "#filmy": () => {
         "function" == typeof openUniverse && (openUniverse(), setTimeout(() => {
@@ -9694,7 +9717,16 @@ window.adminSavePerKey = function(e, t) {
         })(ProfileGate, "show", "#profily");
         const t = ProfileGate.hide.bind(ProfileGate);
         ProfileGate.hide = function(...n) {
-          return e("#serialy"), t(...n)
+          // Přímo zobrazíme sekci bez push do hash (aby se nespustil hashchange → show gate znovu)
+          "function" == typeof closeDockOverlays && closeDockOverlays();
+          "function" == typeof setDockActive && setDockActive("dockHome");
+          if ("function" == typeof window._mfShowSection_orig) {
+            window._mfShowSection_orig("serialy");
+          } else if ("function" == typeof mfShowSection) {
+            mfShowSection("serialy");
+          }
+          if (location.hash !== "#serialy") history.replaceState(null, "", "#serialy");
+          return t(...n);
         };
         const n = ProfileGate.activateProfile.bind(ProfileGate);
         ProfileGate.activateProfile = function(...t) {
