@@ -1,305 +1,246 @@
-import {
-  initializeApp
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import {
-  getDatabase,
-  ref,
-  set,
-  get,
-  onValue,
-  off
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getDatabase, ref, set, get, onValue, off }
+                            from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
-// ══════════════════════════════════════════════════════════════════
-// 🔥 FIREBASE SYNC ENGINE — MůjFlix Cross-Device Sync
-// ══════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+//  MůjFlix Firebase — kompletní sync engine v2
+//
+//  Struktura v Realtime DB:
+//  /global/
+//    profiles   → profily (sdílené, všechna zařízení čtou i píší)
+//    apikeys    → API klíče base64 (sdílené)
+//    changelog  → changelog entries (admin pushuje, všichni čtou)
+//
+//  /devices/{deviceId}/
+//    meta       → { label, ts, online }
+//    data       → localStorage data tohoto zařízení (watched, watchlist, ratings...)
+//
+//  Jak sync funguje:
+//  PC1 změní data → pushne do /devices/PC1/data
+//  PC2 poslouchá onValue na /devices/PC1/data → aplikuje změny
+//  Vyhrává vždy novější timestamp → žádné konflikty
+// ════════════════════════════════════════════════════════════════════
 
-// 1. Bezpečné načtení konfigurace
-const _fbCfgStored = (function() {
+const FIREBASE_CONFIG = (() => {
   try {
-    const stored = localStorage.getItem('mf_firebase_cfg');
-    return stored ? JSON.parse(stored) : {};
-  } catch (e) {
-    return {};
-  }
+    const s = JSON.parse(localStorage.getItem('mf_firebase_cfg') || '{}');
+    return {
+      apiKey:            s.apiKey            || "AIzaSyCqbrI7B5DY7WsWOgHZZzGl0TpW20Sax9w",
+      authDomain:        s.authDomain        || "mujflix.firebaseapp.com",
+      databaseURL:       s.databaseURL       || "https://mujflix-default-rtdb.firebaseio.com",
+      projectId:         s.projectId         || "mujflix",
+      storageBucket:     s.storageBucket     || "mujflix.firebasestorage.app",
+      messagingSenderId: s.messagingSenderId || "730605839292",
+      appId:             s.appId             || "1:730605839292:web:9ca2f0c189a121ed4d81b9"
+    };
+  } catch(e) { return {}; }
 })();
 
-const FIREBASE_CONFIG = {
-  apiKey: _fbCfgStored.apiKey || "AIzaSyCqbrI7B5DY7WsWOgHZZzGl0TpW20Sax9w",
-  authDomain: _fbCfgStored.authDomain || "mujflix.firebaseapp.com",
-  databaseURL: _fbCfgStored.databaseURL || "https://mujflix-default-rtdb.firebaseio.com",
-  projectId: _fbCfgStored.projectId || "mujflix",
-  storageBucket: _fbCfgStored.storageBucket || "mujflix.firebasestorage.app",
-  messagingSenderId: _fbCfgStored.messagingSenderId || "730605839292",
-  appId: _fbCfgStored.appId || "1:730605839292:web:9ca2f0c189a121ed4d81b9"
-};
+// Unikátní ID zařízení — přežije refresh ale ne vymazání localStorage
+const DEVICE_ID = (() => {
+  let id = localStorage.getItem('mf_device_id');
+  if (!id) {
+    id = 'dev_' + Math.random().toString(36).slice(2,10) + '_' + Date.now().toString(36);
+    localStorage.setItem('mf_device_id', id);
+  }
+  return id;
+})();
 
-// Klíč pro identifikaci sync skupiny
-let SYNC_GROUP_KEY = localStorage.getItem('mf_sync_group') || null;
+// Co synchronizujeme mezi zařízeními (watched, watchlist, ratings, streak...)
+const SYNC_PREFIXES = ['mf_watched_','mf_watchlist','mf_ratings','mf_streak',
+                       'mf_ai_brain','mf_user_profile','mf_continue_'];
+
+// Co NESYNCHRONIZUJEME (device-specific nebo globální věci)
+const NOSYNC = new Set(['mf_device_id','mf_sync_local_ts','mf_firebase_cfg',
+                        'mf_sync_group','mf_active_pid','mf_changelog_seen',
+                        'mf_last_push_day','mf_pending_changes','mf_profiles_v2']);
 
 window.MFSync = {
-  _db: null,
-  _app: null,
-  _syncRef: null,
-  _listening: false,
-  _lastLocalWrite: 0,
-  _ignoreNextRemote: false,
-  _syncDebounce: null,
+  _db:           null,
+  _app:          null,
+  _deviceRef:    null,
+  _otherDevices: {},    // devId → ref
+  _pushDebounce: null,
+  _applying:     false,
 
+  // ── INIT ────────────────────────────────────────────────────────
   init() {
-    if (!FIREBASE_CONFIG.apiKey || !FIREBASE_CONFIG.databaseURL) {
-      console.info('[MFSync] Firebase config není nastaven — sync vypnut.');
-      this._updateStatus('offline');
-      return;
+    if (!FIREBASE_CONFIG.apiKey) {
+      this._status('offline'); return;
     }
     try {
       this._app = initializeApp(FIREBASE_CONFIG, 'mujflix');
-      this._db = getDatabase(this._app);
-      console.info('[MFSync] Firebase inicializován ✓');
-      
-      if (SYNC_GROUP_KEY) {
-        this.connectGroup(SYNC_GROUP_KEY);
-      } else {
-        this._updateStatus('no-group');
-      }
-    } catch (e) {
-      console.warn('[MFSync] Firebase init chyba:', e);
-      this._updateStatus('error');
+      this._db  = getDatabase(this._app);
+      console.info('[MFSync] Firebase OK, zařízení:', DEVICE_ID);
+      this._status('syncing');
+      this._setup();
+    } catch(e) {
+      console.error('[MFSync] Init chyba:', e);
+      this._status('error');
     }
   },
 
-  connectGroup(groupKey) {
-    if (!this._db) return;
-    SYNC_GROUP_KEY = groupKey;
-    localStorage.setItem('mf_sync_group', groupKey);
-    
-    if (this._syncRef) off(this._syncRef);
-    this._syncRef = ref(this._db, 'groups/' + groupKey + '/data');
-    this._listening = true;
-    this._updateStatus('syncing');
+  async _setup() {
+    const db = this._db;
 
-    onValue(this._syncRef, (snapshot) => {
-      if (this._ignoreNextRemote) {
-        this._ignoreNextRemote = false;
-        return;
-      }
-      const remote = snapshot.val();
-      if (!remote) {
-        this._updateStatus('online');
-        return;
-      }
-      const remoteTs = remote._syncTs || 0;
-      const localTs = parseInt(localStorage.getItem('mf_sync_local_ts') || '0');
-      
-      if (remoteTs > localTs && (Date.now() - this._lastLocalWrite) > 2000) {
-        this._applyRemoteData(remote);
-        this._updateStatus('online');
-        if (typeof showToast === 'function') showToast('🔄 Synchronizováno', 'success');
-      } else {
-        this._updateStatus('online');
-      }
-    });
-  },
-
-  async pushData() {
-    if (!this._db || !this._syncRef || !SYNC_GROUP_KEY) return;
-    this._updateStatus('syncing');
-    this._lastLocalWrite = Date.now();
-    this._ignoreNextRemote = true;
-
-    const payload = this._collectLocalData();
-    payload._syncTs = Date.now();
-    localStorage.setItem('mf_sync_local_ts', payload._syncTs);
-
-    try {
-      await set(this._syncRef, payload);
-      this._updateStatus('online');
-      console.log('[MFSync] Data úspěšně odeslána do cloudu');
-    } catch (e) {
-      console.error('[MFSync] Push failed:', e);
-      this._updateStatus('error');
-      // User-facing error
-      if (typeof showToast === 'function') {
-        const msg = e.code === 'PERMISSION_DENIED' ? '⚠️ Sync: Nemáš oprávnění' :
-                    e.code === 'QUOTA_EXCEEDED' ? '⚠️ Sync: Překročen limit' :
-                    e.message?.includes('net') ? '⚠️ Sync: Chyba sítě' :
-                    '⚠️ Sync chyba';
-        showToast(msg, 'error');
-      }
-    }
-  },
-
-  _collectLocalData() {
-    const keys = [];
-    const prefixes = ['mf_', 'watched_', 'watchlist', 'streak', 'aiMem'];
-    
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && prefixes.some(p => k.startsWith(p))) {
-        keys.push(k);
-      }
-    }
-    
-    const data = {};
-    keys.forEach(k => {
-      try {
-        data[k.replace(/\./g, '__DOT__')] = localStorage.getItem(k);
-      } catch (e) {}
-    });
-    return data;
-  },
-
-  _applyRemoteData(remote) {
-    Object.entries(remote).forEach(([k, v]) => {
-      if (k === '_syncTs') return;
-      const realKey = k.replace(/__DOT__/g, '.');
-      try {
-        localStorage.setItem(realKey, v);
-      } catch (e) {}
+    // 1. Zaregistruj toto zařízení
+    const label = localStorage.getItem('mf_device_label') || _autoLabel();
+    await set(ref(db, `devices/${DEVICE_ID}/meta`), { label, ts: Date.now(), online: true }).catch(()=>{});
+    this._deviceRef = ref(db, `devices/${DEVICE_ID}/data`);
+    window.addEventListener('beforeunload', () => {
+      set(ref(db, `devices/${DEVICE_ID}/meta/online`), false).catch(()=>{});
     });
 
-    // ── KDO SE DÍVÁ: extrahuj watched data všech profilů ze sync dat ──
-    this._buildWatchersMap(remote);
-    
-    setTimeout(() => {
-      if (typeof refreshUserContent === 'function') refreshUserContent();
-      if (typeof updateWatchlistBadge === 'function') updateWatchlistBadge();
-      if (typeof updateLogoProgress === 'function') updateLogoProgress();
-      if (typeof updateContinueWidget === 'function') updateContinueWidget();
-      if (typeof ProfileGate !== 'undefined') ProfileGate.renderBadge();
-      if (typeof updateWatcherBadges === 'function') updateWatcherBadges();
-    }, 200);
-  },
-
-  _buildWatchersMap(remote) {
-    try {
-      // Profily jsou sdílené v sync skupině — vždy pod klíčem mf_profiles_v2
-      const profilesRaw = remote['mf_profiles_v2'];
-      if (!profilesRaw) return;
-      const profiles = JSON.parse(profilesRaw);
-      if (!Array.isArray(profiles) || !profiles.length) return;
-
-      const activeId = localStorage.getItem('mf_active_pid') || null;
-      // watchers: slug → [{ pid, name, avatar, avatarIsUrl, color }]
-      const watchers = {};
-
-      profiles.forEach(profile => {
-        // Přeskočit aktuální profil — nechceme zobrazovat sami sebe
-        if (profile.id === activeId) return;
-
-        // watched klíč = "mf_watched_" + profileId, tečky escapované jako __DOT__
-        const rawKey = 'mf_watched_' + profile.id;
-        const escapedKey = rawKey.replace(/\./g, '__DOT__');
-        const watchedRaw = remote[escapedKey];
-        if (!watchedRaw) return;
-
-        let watched;
-        try { watched = JSON.parse(watchedRaw); } catch (e) { return; }
-
-        // Watched data jsou flat: { "slug-S1-E1": true, "slug-S1-E2": true, "movie-slug": true }
-        // Extrahujeme unikátní slugy — TV slug je část před "-S\d"
-        const slugsSeen = new Set();
-
-        Object.keys(watched).forEach(watchKey => {
-          if (watched[watchKey] !== true) return;
-          // Pro TV epizody: "the-simpsons-S1-E1" → slug = "the-simpsons"
-          const tvMatch = watchKey.match(/^(.+)-S\d+-E\d+$/);
-          if (tvMatch) {
-            slugsSeen.add(tvMatch[1]);
-          } else {
-            // Film nebo jiný přímý slug: "some-movie" → slug = "some-movie"
-            slugsSeen.add(watchKey);
-          }
-        });
-
-        slugsSeen.forEach(slug => {
-          if (!watchers[slug]) watchers[slug] = [];
-          if (!watchers[slug].find(w => w.pid === profile.id)) {
-            watchers[slug].push({
-              pid: profile.id,
-              name: profile.name || '?',
-              avatar: profile.avatar || '🎬',
-              avatarIsUrl: false,
-              color: profile.color || '#007AFF'
-            });
+    // 2. Poslouchej na všechna ostatní zařízení (i budoucí)
+    onValue(ref(db, 'devices'), snap => {
+      const devs = snap.val() || {};
+      Object.keys(devs).forEach(devId => {
+        if (devId === DEVICE_ID || this._otherDevices[devId]) return;
+        const dataRef = ref(db, `devices/${devId}/data`);
+        this._otherDevices[devId] = dataRef;
+        onValue(dataRef, dataSnap => {
+          if (this._applying) return;
+          const remote = dataSnap.val();
+          if (!remote) return;
+          const remoteTs = remote._ts || 0;
+          const localTs  = parseInt(localStorage.getItem('mf_sync_local_ts') || '0');
+          if (remoteTs > localTs) {
+            console.info(`[MFSync] Data od ${devs[devId]?.meta?.label || devId}`);
+            this._apply(remote);
           }
         });
       });
+    });
 
-      window._mfWatchers = watchers;
-      console.info('[MFSync] Watchers:', Object.keys(watchers).length, 'titulů');
-    } catch (e) {
-      console.warn('[MFSync] _buildWatchersMap chyba:', e);
-    }
-  },
+    // 3. Init subsystémů
+    MFProfilesDB.init(db);
+    MFApiKeysDB.init(db);
+    MFChangelog.init(db);
 
-  _updateStatus(status) {
-    window._mfSyncStatus = status;
-    const badge = document.getElementById('syncStatusBadge');
-    if (!badge) return;
-    
-    const icons = { online: '☁️', syncing: '🔄', offline: '📴', error: '⚠️', 'no-group': '🔗' };
-    const labels = { online: 'Sync ON', syncing: 'Syncing…', offline: 'Offline', error: 'Chyba', 'no-group': 'Nastav sync' };
-    const colors = { online: '#007AFF', syncing: '#007AFF', offline: '#636e72', error: '#e17055', 'no-group': '#a29bfe' };
-    
-    badge.innerHTML = `<span>${icons[status]||'☁️'}</span><span>${labels[status]||status}</span>`;
-    badge.style.color = colors[status] || '#fff';
-    badge.style.borderColor = (colors[status] || '#fff') + '44';
-    
-    if (status === 'syncing') badge.classList.add('syncing');
-    else badge.classList.remove('syncing');
-  },
-
-  disconnect() {
-    if (this._syncRef) {
-      off(this._syncRef);
-      this._syncRef = null;
-    }
-    localStorage.removeItem('mf_sync_group');
-    this._updateStatus('offline');
-  }
-};
-
-// ══════════════════════════════════════════════════════════════════
-// ⚡ AUTOMATICKÝ SYNC HOOK (Sledování změn v reálném čase)
-// ══════════════════════════════════════════════════════════════════
-
-const _origLS = localStorage.setItem.bind(localStorage);
-
-localStorage.setItem = function(key, value) {
-  // 1. Proveď standardní uložení
-  _origLS(key, value);
-
-  // 2. Pokud se mění data, která nás zajímají, spusť push
-  const prefixes = ['mf_', 'watched_', 'watchlist', 'streak', 'aiMem'];
-  if (prefixes.some(p => key.startsWith(p)) && SYNC_GROUP_KEY) {
-    
-    // Debouncing (pauza 1.5s před odesláním), aby se neposílalo moc dat naráz
-    clearTimeout(window.MFSync._syncDebounce);
-    window.MFSync._syncDebounce = setTimeout(() => {
-      window.MFSync.pushData();
+    // 4. Migrace z localStorage → Firebase
+    setTimeout(async () => {
+      await MFProfilesDB.migrate();
+      await MFApiKeysDB.migrate();
+      if (typeof ProfileGate !== 'undefined') ProfileGate.renderGate?.();
     }, 1500);
-  }
+
+    this._status('online');
+
+    // 5. Ihned pushni svá data
+    setTimeout(() => this.pushNow(), 2000);
+  },
+
+  // ── Naplánuj push (debounce 1.5s) ────────────────────────────────
+  schedulePush() {
+    clearTimeout(this._pushDebounce);
+    this._pushDebounce = setTimeout(() => this.pushNow(), 1500);
+  },
+
+  // ── Pushni lokální data do Firebase ──────────────────────────────
+  async pushNow() {
+    if (!this._db || !this._deviceRef) return;
+    this._status('syncing');
+    const data = { _ts: Date.now(), _device: DEVICE_ID };
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || NOSYNC.has(k)) continue;
+      if (!SYNC_PREFIXES.some(p => k.startsWith(p))) continue;
+      try { data[k.replace(/\./g,'__D__')] = localStorage.getItem(k); } catch(e) {}
+    }
+
+    localStorage.setItem('mf_sync_local_ts', data._ts);
+
+    try {
+      await set(this._deviceRef, data);
+      this._status('online');
+    } catch(e) {
+      this._status('error');
+      const msg = e.code === 'PERMISSION_DENIED'
+        ? '⚠️ Firebase: Nastav DB Rules (read/write: true)'
+        : '⚠️ Sync chyba: ' + (e.message || e.code);
+      typeof showToast === 'function' && showToast(msg, 'error');
+    }
+  },
+
+  // ── Aplikuj data z jiného zařízení ────────────────────────────────
+  _apply(remote) {
+    this._applying = true;
+    let changed = 0;
+    Object.entries(remote).forEach(([k, v]) => {
+      if (k === '_ts' || k === '_device') return;
+      const key = k.replace(/__D__/g, '.');
+      try {
+        if (localStorage.getItem(key) !== v) { localStorage.setItem(key, v); changed++; }
+      } catch(e) {}
+    });
+    localStorage.setItem('mf_sync_local_ts', remote._ts || Date.now());
+
+    setTimeout(() => {
+      this._applying = false;
+      if (!changed) return;
+      typeof refreshUserContent   === 'function' && refreshUserContent();
+      typeof updateWatchlistBadge === 'function' && updateWatchlistBadge();
+      typeof updateLogoProgress   === 'function' && updateLogoProgress();
+      typeof updateContinueWidget === 'function' && updateContinueWidget();
+      typeof updateWatcherBadges  === 'function' && updateWatcherBadges();
+      typeof ProfileGate !== 'undefined' && ProfileGate.renderBadge?.();
+      typeof showToast === 'function' &&
+        showToast('🔄 Synchronizováno (' + changed + ' změn)', 'success');
+    }, 150);
+  },
+
+  // ── Status badge ──────────────────────────────────────────────────
+  _status(s) {
+    window._mfSyncStatus = s;
+    const b = document.getElementById('syncStatusBadge');
+    if (!b) return;
+    const ic = {online:'☁️',syncing:'🔄',offline:'📴',error:'⚠️','no-group':'🔗'};
+    const lb = {online:'Sync ON',syncing:'Syncing…',offline:'Offline',error:'Chyba','no-group':'Nastav sync'};
+    const cl = {online:'#007AFF',syncing:'#007AFF',offline:'#636e72',error:'#e17055','no-group':'#a29bfe'};
+    b.innerHTML = `<span>${ic[s]||'☁️'}</span><span>${lb[s]||s}</span>`;
+    b.style.color = cl[s]||'#fff';
+    b.style.borderColor = (cl[s]||'#fff') + '44';
+    s === 'syncing' ? b.classList.add('syncing') : b.classList.remove('syncing');
+  },
+
+  // Vrátí seznam zařízení (pro admin panel)
+  async getDevices() {
+    if (!this._db) return [];
+    const snap = await get(ref(this._db, 'devices')).catch(()=>null);
+    if (!snap?.val()) return [];
+    return Object.entries(snap.val()).map(([id, d]) => ({
+      id, isMe: id === DEVICE_ID,
+      label:  d.meta?.label  || id,
+      online: d.meta?.online || false,
+      ts:     d.meta?.ts     || 0
+    }));
+  },
+
+  setDeviceLabel(label) {
+    localStorage.setItem('mf_device_label', label);
+    if (this._db) set(ref(this._db, `devices/${DEVICE_ID}/meta/label`), label).catch(()=>{});
+  },
+
+  // Zpětná kompatibilita
+  connectGroup(key) { localStorage.setItem('mf_sync_group', key); },
+  disconnect()      { Object.values(this._otherDevices).forEach(r => off(r)); this._status('offline'); }
 };
 
-// Inicializace po načtení
-document.addEventListener('DOMContentLoaded', () => {
-  window.MFSync.init();
-});
-
-// ══════════════════════════════════════════════════════════════════
-// 👥 PROFILES DB — Profily přímo ve Firebase
-// ══════════════════════════════════════════════════════════════════
-window.MFProfilesDB = {
-  _db: null, _cache: null, _listeners: [], _ref: null,
+// ════════════════════════════════════════════════════════════════════
+//  👥 PROFILES DB
+// ════════════════════════════════════════════════════════════════════
+const MFProfilesDB = window.MFProfilesDB = {
+  _db: null, _cache: null, _cbs: [],
 
   init(db) {
     this._db = db;
-    this._ref = ref(db, 'global/profiles');
-    onValue(this._ref, snap => {
+    onValue(ref(db, 'global/profiles'), snap => {
       const d = snap.val();
       this._cache = Array.isArray(d) ? d : d ? Object.values(d) : [];
-      this._listeners.forEach(fn => { try { fn(this._cache); } catch(e){} });
+      this._cbs.forEach(fn => { try { fn(this._cache); } catch(e){} });
+      // Re-render gate pokud je otevřený
+      if (typeof ProfileGate !== 'undefined') ProfileGate.renderGate?.();
     });
   },
 
@@ -307,258 +248,182 @@ window.MFProfilesDB = {
     if (this._cache !== null) return this._cache;
     if (!this._db) return this._local();
     try {
-      const snap = await get(ref(this._db, 'global/profiles'));
-      const d = snap.val();
+      const d = (await get(ref(this._db, 'global/profiles'))).val();
       this._cache = Array.isArray(d) ? d : d ? Object.values(d) : [];
       return this._cache;
     } catch(e) { return this._local(); }
   },
 
-  async saveProfiles(profiles) {
-    try { localStorage.setItem('mf_profiles_v2', JSON.stringify(profiles)); } catch(e) {}
-    this._cache = profiles;
-    if (!this._db) return;
-    try { await set(ref(this._db, 'global/profiles'), profiles); } catch(e) { console.warn('[MFProfilesDB]', e); }
+  async saveProfiles(p) {
+    try { localStorage.setItem('mf_profiles_v2', JSON.stringify(p)); } catch(e) {}
+    this._cache = p;
+    if (this._db) await set(ref(this._db, 'global/profiles'), p).catch(e => console.warn('[MFProfilesDB]', e));
   },
 
-  getSync() {
-    return this._cache !== null ? this._cache : this._local();
-  },
-
-  onChange(fn) { this._listeners.push(fn); },
-
-  _local() {
-    try { return JSON.parse(localStorage.getItem('mf_profiles_v2') || '[]'); } catch(e) { return []; }
-  },
+  getSync()       { return this._cache ?? this._local(); },
+  onChange(fn)    { this._cbs.push(fn); },
+  _local()        { try { return JSON.parse(localStorage.getItem('mf_profiles_v2') || '[]'); } catch(e) { return []; } },
 
   async migrate() {
     const local = this._local();
     if (!local.length) return;
     const fb = await this.getProfiles();
-    if (!fb.length) {
-      console.info('[MFProfilesDB] Migrace', local.length, 'profilů z localStorage');
-      await this.saveProfiles(local);
-    }
+    if (!fb.length) { await this.saveProfiles(local); console.info('[MFProfilesDB] Migrace OK'); }
   }
 };
 
-// ══════════════════════════════════════════════════════════════════
-// 🔑 API KEYS DB — API klíče ve Firebase (šifrované base64)
-// ══════════════════════════════════════════════════════════════════
-window.MFApiKeysDB = {
-  _db: null, _cache: null,
-  _keys: ['mf_gemini_key','mf_or_key','mf_groq_key','mf_jina_key','mf_tavily_key','mf_tmdb_key','mf_openai_key'],
+// ════════════════════════════════════════════════════════════════════
+//  🔑 API KEYS DB
+// ════════════════════════════════════════════════════════════════════
+const MFApiKeysDB = window.MFApiKeysDB = {
+  _db: null,
+  KEYS: ['mf_gemini_key','mf_or_key','mf_groq_key','mf_jina_key',
+         'mf_tavily_key','mf_tmdb_key','mf_openai_key','mf_anthropic_key','mf_jsonbin_key'],
 
   init(db) {
     this._db = db;
-    // Realtime sync klíčů
+    // Realtime → při změně klíče na PC1 se PC2 okamžitě aktualizuje
     onValue(ref(db, 'global/apikeys'), snap => {
       const d = snap.val();
       if (!d) return;
-      this._cache = d;
-      // Aplikuj do localStorage pro zpětnou kompatibilitu s app.js
-      this._keys.forEach(k => {
-        const enc = d[k.replace(/\./g,'__')];
-        if (enc) {
-          try { localStorage.setItem(k, atob(enc)); } catch(e) {}
-        }
+      this.KEYS.forEach(k => {
+        const v = d[k.replace(/\./g,'__')];
+        if (v) try { localStorage.setItem(k, atob(v)); } catch(e) {}
       });
+      console.info('[MFApiKeysDB] Klíče sync ✓');
     });
   },
 
-  async saveKey(keyName, value) {
-    // Ulož lokálně
-    try { localStorage.setItem(keyName, value); } catch(e) {}
-    if (!this._db) return;
-    // Ulož do Firebase jako base64 (lehká obfuskace)
-    const path = keyName.replace(/\./g, '__');
-    try {
-      await set(ref(this._db, 'global/apikeys/' + path), btoa(value));
-      console.info('[MFApiKeysDB] Klíč uložen:', keyName);
-    } catch(e) { console.warn('[MFApiKeysDB]', e); }
+  async saveKey(name, value) {
+    try { localStorage.setItem(name, value); } catch(e) {}
+    if (!this._db || !value) return;
+    await set(ref(this._db, 'global/apikeys/' + name.replace(/\./g,'__')), btoa(value)).catch(e => console.warn('[MFApiKeysDB]', e));
   },
 
-  async loadAll() {
-    if (!this._db) return;
-    try {
-      const snap = await get(ref(this._db, 'global/apikeys'));
-      const d = snap.val();
-      if (!d) return;
-      this._keys.forEach(k => {
-        const enc = d[k.replace(/\./g,'__')];
-        if (enc) { try { localStorage.setItem(k, atob(enc)); } catch(e) {} }
-      });
-    } catch(e) {}
+  async deleteKey(name) {
+    try { localStorage.removeItem(name); } catch(e) {}
+    if (this._db) await set(ref(this._db, 'global/apikeys/' + name.replace(/\./g,'__')), null).catch(()=>{});
   },
 
   async migrate() {
     if (!this._db) return;
-    const snap = await get(ref(this._db, 'global/apikeys'));
-    if (snap.val()) return; // už jsou ve Firebase
-    const updates = {};
-    this._keys.forEach(k => {
-      const v = localStorage.getItem(k);
-      if (v) updates[k.replace(/\./g,'__')] = btoa(v);
-    });
-    if (Object.keys(updates).length) {
-      await set(ref(this._db, 'global/apikeys'), updates);
-      console.info('[MFApiKeysDB] Migrace klíčů do Firebase');
-    }
+    const snap = await get(ref(this._db, 'global/apikeys')).catch(()=>null);
+    if (snap?.val()) return;
+    const u = {};
+    this.KEYS.forEach(k => { const v = localStorage.getItem(k); if (v) u[k.replace(/\./g,'__')] = btoa(v); });
+    if (Object.keys(u).length) await set(ref(this._db, 'global/apikeys'), u).catch(()=>{});
   }
 };
 
-// ══════════════════════════════════════════════════════════════════
-// 📢 CHANGELOG / OZNÁMENÍ — Firebase realtime notifikace o změnách
-// ══════════════════════════════════════════════════════════════════
-window.MFChangelog = {
-  _db: null,
-  SEEN_KEY: 'mf_changelog_seen',
+// ════════════════════════════════════════════════════════════════════
+//  📢 CHANGELOG
+// ════════════════════════════════════════════════════════════════════
+const MFChangelog = window.MFChangelog = {
+  _db: null, SEEN: 'mf_changelog_seen',
 
   init(db) {
     this._db = db;
     onValue(ref(db, 'global/changelog'), snap => {
-      const entries = snap.val();
-      if (!entries) return;
-      const list = Array.isArray(entries) ? entries : Object.values(entries);
-      this._checkNew(list);
+      const v = snap.val();
+      if (!v) return;
+      const list = Array.isArray(v) ? v : Object.values(v);
+      this._check(list);
     });
   },
 
-  // Admin: přidat nový changelog entry
-  async push(entry) {
+  async push(e) {
     if (!this._db) return;
-    const e = {
-      id: Date.now().toString(),
-      ts: Date.now(),
-      title: entry.title || 'Aktualizace',
-      body: entry.body || '',
-      type: entry.type || 'update', // update | fix | feature | security
-      icon: entry.icon || '📦',
-      version: entry.version || ''
-    };
-    try {
-      const snap = await get(ref(this._db, 'global/changelog'));
-      const existing = snap.val() || [];
-      const arr = Array.isArray(existing) ? existing : Object.values(existing);
-      arr.unshift(e); // nejnovější první
-      if (arr.length > 50) arr.length = 50; // max 50 záznamů
-      await set(ref(this._db, 'global/changelog'), arr);
-      console.info('[MFChangelog] Přidán entry:', e.title);
-    } catch(err) { console.warn('[MFChangelog]', err); }
+    const entry = { id: Date.now()+'', ts: Date.now(),
+      title: e.title||'Aktualizace', body: e.body||'',
+      type: e.type||'update', icon: e.icon||'📦', version: e.version||'' };
+    const snap = await get(ref(this._db, 'global/changelog')).catch(()=>null);
+    const arr = (() => { const v = snap?.val(); return Array.isArray(v)?v:v?Object.values(v):[]; })();
+    arr.unshift(entry);
+    if (arr.length > 50) arr.length = 50;
+    await set(ref(this._db, 'global/changelog'), arr).catch(e => console.warn('[MFChangelog]', e));
   },
 
-  _checkNew(list) {
-    const seen = parseInt(localStorage.getItem(this.SEEN_KEY) || '0');
-    const newEntries = list.filter(e => e.ts > seen);
-    if (!newEntries.length) return;
+  markSeen() { localStorage.setItem(this.SEEN, Date.now()+''); this._badge(0); },
 
-    // Aktualizuj notif bell badge
-    this._updateBadge(newEntries.length);
-
-    // Inject do notif panelu
-    this._injectToNotifPanel(newEntries, list);
-
-    // Toast pro nejnovější
-    const latest = newEntries[0];
-    setTimeout(() => {
-      if (typeof showToast === 'function') {
-        showToast(latest.icon + ' ' + latest.title + (latest.body ? ' — ' + latest.body.substring(0,60) : ''), 'info', 6000);
-      }
-    }, 3000);
+  _check(list) {
+    const seen = parseInt(localStorage.getItem(this.SEEN)||'0');
+    const news = list.filter(e => (e.ts||0) > seen);
+    if (!news.length) return;
+    this._badge(news.length);
+    this._injectPanel(list);
+    const latest = news[0];
+    setTimeout(() => typeof showToast === 'function' &&
+      showToast(`${latest.icon} ${latest.title}${latest.body?' — '+latest.body.slice(0,60):''}`, 'info', 7000), 3000);
   },
 
-  markSeen() {
-    localStorage.setItem(this.SEEN_KEY, Date.now().toString());
-    this._updateBadge(0);
-  },
-
-  _updateBadge(count) {
-    // Přidej extra badge na notif bell
+  _badge(n) {
     const bell = document.getElementById('notifBell');
     if (!bell) return;
-    let badge = document.getElementById('mfChangelogBadge');
-    if (count > 0) {
-      if (!badge) {
-        badge = document.createElement('span');
-        badge.id = 'mfChangelogBadge';
-        badge.style.cssText = 'position:absolute;top:-4px;right:-4px;background:#0a84ff;color:#fff;font-size:10px;font-weight:700;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;z-index:10;';
+    let b = document.getElementById('mfChangelogBadge');
+    if (n > 0) {
+      if (!b) {
+        b = Object.assign(document.createElement('span'), { id:'mfChangelogBadge' });
+        b.style.cssText = 'position:absolute;top:-4px;right:-4px;background:#0a84ff;color:#fff;font-size:10px;font-weight:700;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;z-index:10';
         bell.style.position = 'relative';
-        bell.appendChild(badge);
+        bell.appendChild(b);
       }
-      badge.textContent = count > 9 ? '9+' : count;
-    } else if (badge) {
-      badge.remove();
-    }
+      b.textContent = n > 9 ? '9+' : n;
+    } else b?.remove();
   },
 
-  _injectToNotifPanel(newEntries, allEntries) {
-    // Hookneme renderNotifPanel aby zobrazoval i changelog
-    if (window._mfChangelogInjected) return;
-    window._mfChangelogInjected = true;
-    window._mfChangelogEntries = allEntries;
-
-    const origRender = window.renderNotifPanel;
+  _injectPanel(all) {
+    window._mfCLEntries = all;
+    if (window._mfCLInjected) return;
+    window._mfCLInjected = true;
+    const orig = window.renderNotifPanel;
     window.renderNotifPanel = function() {
-      if (typeof origRender === 'function') origRender();
-      const panel = document.getElementById('notifPanelList');
-      if (!panel || !window._mfChangelogEntries?.length) return;
-
-      const seen = parseInt(localStorage.getItem(window.MFChangelog.SEEN_KEY) || '0');
-      const html = window._mfChangelogEntries.slice(0, 10).map(e => {
-        const isNew = e.ts > seen;
-        const date = new Date(e.ts).toLocaleDateString('cs-CZ', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
-        const colors = { feature:'#30d158', fix:'#ff9f0a', update:'#0a84ff', security:'#ff375f' };
-        const color = colors[e.type] || '#0a84ff';
-        return `
-          <div class="notif-item mf-changelog-item" style="border-left:3px solid ${color};${isNew?'background:rgba(10,132,255,0.06)':''}" onclick="window.MFChangelog.markSeen()">
-            <div style="font-size:22px;flex-shrink:0">${e.icon}</div>
-            <div class="notif-item-info">
-              <div class="notif-item-name" style="display:flex;align-items:center;gap:8px">
-                ${e.title}
-                ${isNew ? '<span style="background:#0a84ff;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px">NOVÉ</span>' : ''}
-                ${e.version ? '<span style="color:rgba(255,255,255,0.3);font-size:11px">'+e.version+'</span>' : ''}
-              </div>
-              ${e.body ? '<div class="notif-item-ep" style="white-space:normal;line-height:1.4">'+e.body+'</div>' : ''}
-              <div class="notif-item-date">📅 ${date}</div>
+      typeof orig === 'function' && orig();
+      const p = document.getElementById('notifPanelList');
+      if (!p || !window._mfCLEntries?.length) return;
+      const seen = parseInt(localStorage.getItem(window.MFChangelog.SEEN)||'0');
+      const clr  = { feature:'#30d158', fix:'#ff9f0a', update:'#0a84ff', security:'#ff375f' };
+      const div  = document.createElement('div');
+      div.style.cssText = 'padding:10px 16px 4px;font-size:11px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,0.3);text-transform:uppercase';
+      div.textContent = 'Changelog & aktualizace';
+      p.insertAdjacentElement('afterbegin', div);
+      div.insertAdjacentHTML('afterend', window._mfCLEntries.slice(0,10).map(e => {
+        const isNew = (e.ts||0) > seen;
+        const date  = new Date(e.ts||0).toLocaleDateString('cs-CZ',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+        return `<div class="notif-item mf-changelog-item" style="border-left:3px solid ${clr[e.type]||'#0a84ff'};${isNew?'background:rgba(10,132,255,0.06)':''}" onclick="window.MFChangelog.markSeen()">
+          <div style="font-size:22px;flex-shrink:0">${e.icon||'📦'}</div>
+          <div class="notif-item-info">
+            <div class="notif-item-name" style="display:flex;align-items:center;gap:8px">${e.title}
+              ${isNew?'<span style="background:#0a84ff;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px">NOVÉ</span>':''}
+              ${e.version?`<span style="color:rgba(255,255,255,0.3);font-size:11px">${e.version}</span>`:''}
             </div>
-          </div>`;
-      }).join('');
-
-      if (html) {
-        const divider = document.createElement('div');
-        divider.style.cssText = 'padding:10px 16px 4px;font-size:11px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,0.3);text-transform:uppercase';
-        divider.textContent = 'Changelog & aktualizace';
-        panel.insertAdjacentElement('afterbegin', divider);
-        divider.insertAdjacentHTML('afterend', html);
-      }
+            ${e.body?`<div class="notif-item-ep" style="white-space:normal;line-height:1.4">${e.body}</div>`:''}
+            <div class="notif-item-date">📅 ${date}</div>
+          </div>
+        </div>`;
+      }).join(''));
     };
   }
 };
 
-// ══════════════════════════════════════════════════════════════════
-// ⚡ INIT HOOK — spustí vše po Firebase init
-// ══════════════════════════════════════════════════════════════════
-const _origMFSyncInit = window.MFSync.init.bind(window.MFSync);
-window.MFSync.init = async function() {
-  _origMFSyncInit();
-  await new Promise(r => setTimeout(r, 500)); // počkej na DB
-  const db = window.MFSync._db;
-  if (!db) { console.warn('[MFInit] Firebase DB není dostupná'); return; }
-
-  window.MFProfilesDB.init(db);
-  window.MFApiKeysDB.init(db);
-  window.MFChangelog.init(db);
-
-  await Promise.all([
-    window.MFProfilesDB.migrate(),
-    window.MFApiKeysDB.migrate()
-  ]);
-
-  // Re-render profile gate s Firebase daty
-  await new Promise(r => setTimeout(r, 800));
-  if (typeof ProfileGate !== 'undefined' && typeof ProfileGate.renderGate === 'function') {
-    ProfileGate.renderGate();
-  }
-
-  console.info('[MFInit] Firebase subsystémy inicializovány ✓');
+// ════════════════════════════════════════════════════════════════════
+//  ⚡ HOOK — každý localStorage.setItem → push do Firebase
+// ════════════════════════════════════════════════════════════════════
+const _origLS = localStorage.setItem.bind(localStorage);
+localStorage.setItem = function(key, value) {
+  _origLS(key, value);
+  if (window.MFSync?._applying || NOSYNC.has(key)) return;
+  if (SYNC_PREFIXES.some(p => key.startsWith(p))) window.MFSync?.schedulePush();
 };
+
+// ════════════════════════════════════════════════════════════════════
+//  🚀 START
+// ════════════════════════════════════════════════════════════════════
+function _autoLabel() {
+  const ua = navigator.userAgent;
+  if (/TV|SmartTV|Tizen|WebOS/i.test(ua)) return 'TV';
+  if (/Mobile|Android/i.test(ua)) return 'Mobil';
+  if (/iPad|Tablet/i.test(ua)) return 'Tablet';
+  return 'PC';
+}
+
+document.addEventListener('DOMContentLoaded', () => window.MFSync.init());
