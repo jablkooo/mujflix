@@ -272,9 +272,6 @@ window.MF_PROXY = {
 // 1. Vytvoř: functions/api/tmdb/[[catchall]].js
 // 2. wrangler secret put TMDB_KEY
 // 3. Push na GitHub → auto deploy
-// 4. Nastav enabled: true výše
-
-
 
 async function tmdbGet(e, forceDirect = false) {
   // Automaticky použít proxy pokud je povolena (pokud forceDirect není true)
@@ -2044,7 +2041,7 @@ function closeSyncOverlay() {
 
 function saveSyncKey() {
   const e = document.getElementById("syncKeyInput").value.trim();
-  e && (localStorage.setItem("mf_jsonbin_key", e), showToast("✓ JSONBin klíč uložen!"))
+  e && (localStorage.setItem("mf_jsonbin_key", e), window.MFApiKeysDB && window.MFApiKeysDB.saveKey("mf_jsonbin_key", e), showToast("✓ JSONBin klíč uložen!"))
 }
 
 function importHistory(e) {
@@ -2452,8 +2449,8 @@ function initUniversalHover(e) {
   // Klik na tile → vždy rovnou do cinema mode / finder (ne jen při trailerech)
   e.addEventListener("click", function(ev) {
     if (!i || i === "__search__" || i === "__foryou__") return;
-    const _gateEl = document.getElementById("mfProfileGate");
-    if (_gateEl && _gateEl.style.display === "flex") return;
+    const _gEl = document.getElementById("mfProfileGate");
+    if (_gEl && _gEl.style.display === "flex") return;
     ev.preventDefault();
     ev.stopImmediatePropagation();
     var tmdbId = e.dataset.tmdbId;
@@ -3040,27 +3037,27 @@ function aiTraktDisconnect() {
 
 function saveGeminiKey() {
   const e = document.getElementById("aiGeminiKeyInput").value.trim();
-  e && (localStorage.setItem("mf_gemini_key", e), closeApikeyOverlay(), updateStatusBadge(), showToast("✦ Gemini aktivován!"))
+  e && (localStorage.setItem("mf_gemini_key", e), window.MFApiKeysDB && window.MFApiKeysDB.saveKey("mf_gemini_key", e), closeApikeyOverlay(), updateStatusBadge(), showToast("✦ Gemini aktivován!"))
 }
 
 function saveOrKey() {
   const e = document.getElementById("aiOrKeyInput").value.trim();
-  e && (localStorage.setItem("mf_or_key", e), closeApikeyOverlay(), updateStatusBadge(), showToast("↻ OpenRouter přidán!"))
+  e && (localStorage.setItem("mf_or_key", e), window.MFApiKeysDB && window.MFApiKeysDB.saveKey("mf_or_key", e), closeApikeyOverlay(), updateStatusBadge(), showToast("↻ OpenRouter přidán!"))
 }
 
 function saveGroqKey() {
   const e = document.getElementById("aiGroqKeyInput").value.trim();
-  e && (localStorage.setItem("mf_groq_key", e), showToast("⚡ Groq aktivován! Slugy se budou čistit AI."), document.getElementById("groqStatus").textContent = "✅ Groq aktivní — automatické čištění URL slugů", updateStatusBadge())
+  e && (localStorage.setItem("mf_groq_key", e), window.MFApiKeysDB && window.MFApiKeysDB.saveKey("mf_groq_key", e), showToast("⚡ Groq aktivován! Slugy se budou čistit AI."), document.getElementById("groqStatus").textContent = "✅ Groq aktivní — automatické čištění URL slugů", updateStatusBadge())
 }
 
 function saveJinaKey() {
   const e = document.getElementById("aiJinaKeyInput").value.trim() || "__enabled__";
-  localStorage.setItem("mf_jina_key", e), closeApikeyOverlay(), showToast("👁 Jina Reader aktivována! Budu ověřovat odkazy.")
+  localStorage.setItem("mf_jina_key", e), window.MFApiKeysDB && window.MFApiKeysDB.saveKey("mf_jina_key", e), closeApikeyOverlay(), showToast("👁 Jina Reader aktivována! Budu ověřovat odkazy.")
 }
 
 function saveTavilyKey() {
   const e = document.getElementById("aiTavilyKeyInput").value.trim();
-  e && (localStorage.setItem("mf_tavily_key", e), closeApikeyOverlay(), showToast("🌐 Tavily aktivován! Záložní vyhledávač odkazů."))
+  e && (localStorage.setItem("mf_tavily_key", e), window.MFApiKeysDB && window.MFApiKeysDB.saveKey("mf_tavily_key", e), closeApikeyOverlay(), showToast("🌐 Tavily aktivován! Záložní vyhledávač odkazů."))
 }
 
 function toggleAiPanel() {
@@ -3616,7 +3613,7 @@ function getAnthropicKey() {
 }
 
 function setAnthropicKey(e) {
-  localStorage.setItem("mf_anthropic_key", e)
+  localStorage.setItem("mf_anthropic_key", e), window.MFApiKeysDB && window.MFApiKeysDB.saveKey("mf_anthropic_key", e)
 }
 
 function getGroqKey() {
@@ -5557,23 +5554,13 @@ const PROFILES_KEY = "mf_profiles_v2",
   PROFILE_EMOJIS = ["🎬", "🍿", "🎭", "🎪", "🎡", "🃏", "🎲", "🎰", "🦁", "🐺", "🦊", "🐸", "👾", "🤖", "🦸", "🧙", "🧛", "🤡", "👻", "🤩", "😎", "🥷", "🦄", "🐉"];
 
 function _getProfiles() {
-  // Firebase first, localStorage fallback
   if (window.MFProfilesDB) return window.MFProfilesDB.getSync();
   try { return safeLS(PROFILES_KEY, "[]"); } catch(e) { return []; }
 }
 
-async function _getProfilesAsync() {
-  if (window.MFProfilesDB) return await window.MFProfilesDB.getProfiles();
-  return _getProfiles();
-}
-
 function _saveProfiles(profiles) {
-  // Ulož do Firebase (a localStorage jako záloha)
-  if (window.MFProfilesDB) {
-    window.MFProfilesDB.saveProfiles(profiles);
-  } else {
-    try { localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles)); } catch(e) {}
-  }
+  if (window.MFProfilesDB) { window.MFProfilesDB.saveProfiles(profiles); return; }
+  try { localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles)); } catch(e) {}
 }
 
 function getActiveProfileId() {
@@ -5791,19 +5778,6 @@ function clearTraktToken() {
     localStorage.removeItem(getTraktTokenKey())
   } catch (e) {}
 }
-
-// ── Firebase realtime: aktualizuj gate při změně profilů ──
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => {
-    if (window.MFProfilesDB) {
-      window.MFProfilesDB.onChange(() => {
-        if (typeof ProfileGate !== "undefined") {
-          ProfileGate.renderGate();
-        }
-      });
-    }
-  }, 3000);
-});
 const ProfileGate = {
   _pinBuffer: "",
   _pinTargetId: null,
@@ -8591,11 +8565,11 @@ function adminLoadApiKeys() {
 }
 
 function adminSetGlobalKey(e, t) {
-  t && t.trim() ? (localStorage.setItem(e, t.trim()), showToast?.("✓ Klíč uložen: " + e.replace("mf_", "").replace("_key", "").toUpperCase()), adminLoadApiKeys(), adminLog("API klíč nastaven: " + e, "ok")) : showToast?.("❌ Zadej hodnotu klíče")
+  t && t.trim() ? (localStorage.setItem(e, t.trim()), window.MFApiKeysDB && window.MFApiKeysDB.saveKey(e, t.trim()), showToast?.("✓ Klíč uložen: " + e.replace("mf_", "").replace("_key", "").toUpperCase()), adminLoadApiKeys(), adminLog("API klíč nastaven: " + e, "ok")) : showToast?.("❌ Zadej hodnotu klíče")
 }
 
 function adminClearAllApiKeys() {
-  confirm("Smazat VŠECHNY API klíče? (Gemini, OpenRouter, Groq, Jina, Tavily, TMDB)") && (["mf_gemini_key", "mf_or_key", "mf_groq_key", "mf_jina_key", "mf_tavily_key", "mf_tmdb_key"].forEach(e => localStorage.removeItem(e)), showToast?.("🗑 Všechny API klíče smazány"), adminLoadApiKeys(), adminLog("Všechny API klíče smazány", "warn"))
+  confirm("Smazat VŠECHNY API klíče? (Gemini, OpenRouter, Groq, Jina, Tavily, TMDB)") && (["mf_gemini_key", "mf_or_key", "mf_groq_key", "mf_jina_key", "mf_tavily_key", "mf_tmdb_key"].forEach(e => { localStorage.removeItem(e); if(window.MFApiKeysDB && window.MFSync && window.MFSync._db) { import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js").then(m => m.set(m.ref(window.MFSync._db, "global/apikeys/" + e.replace(/[.]/g,"__")), null)).catch(()=>{}); } }), showToast?.("🗑 Všechny API klíče smazány"), adminLoadApiKeys(), adminLog("Všechny API klíče smazány", "warn"))
 }
 document.querySelector(".logo")?.addEventListener("click", () => {
   if (_logoClickCount++, clearTimeout(_logoClickTimer), _logoClickTimer = setTimeout(() => {
@@ -9594,7 +9568,7 @@ window.adminSavePerKey = function(e, t) {
       const e = localStorage.getItem("mf_active_pid");
       e && _PP_KEYS.forEach(t => {
         const n = localStorage.getItem(t.key + "_" + e);
-        n && localStorage.setItem(t.key, n)
+        n && (localStorage.setItem(t.key, n), window.MFApiKeysDB && window.MFApiKeysDB.saveKey(t.key, n))
       })
     }
     document.addEventListener("DOMContentLoaded", () => setTimeout(e, 400));
@@ -9611,8 +9585,8 @@ window.adminSavePerKey = function(e, t) {
       "#serialy": () => {
         "function" == typeof closeDockOverlays && closeDockOverlays();
         "function" == typeof setDockActive && setDockActive("dockHome");
-        if ("function" == typeof window._mfShowSection_orig) window._mfShowSection_orig("serialy");
-        else if ("function" == typeof mfShowSection) mfShowSection("serialy");
+        if (typeof window._mfShowSection_orig === "function") window._mfShowSection_orig("serialy");
+        else if (typeof mfShowSection === "function") mfShowSection("serialy");
       },
       "#filmy": () => {
         "function" == typeof openUniverse && (openUniverse(), setTimeout(() => {
@@ -9707,8 +9681,8 @@ window.adminSavePerKey = function(e, t) {
         ProfileGate.hide = function(...n) {
           "function" == typeof closeDockOverlays && closeDockOverlays();
           "function" == typeof setDockActive && setDockActive("dockHome");
-          if ("function" == typeof window._mfShowSection_orig) window._mfShowSection_orig("serialy");
-          else if ("function" == typeof mfShowSection) mfShowSection("serialy");
+          if (typeof window._mfShowSection_orig === "function") window._mfShowSection_orig("serialy");
+          else if (typeof mfShowSection === "function") mfShowSection("serialy");
           if (location.hash !== "#serialy") history.replaceState(null, "", "#serialy");
           return t(...n);
         };
