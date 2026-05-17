@@ -286,3 +286,106 @@ localStorage.setItem = function(key, value) {
 document.addEventListener('DOMContentLoaded', () => {
   window.MFSync.init();
 });
+// ══════════════════════════════════════════════════════════════════
+// 👥 PROFILES DB — Profily uložené ve Firebase (ne localStorage)
+// ══════════════════════════════════════════════════════════════════
+
+window.MFProfilesDB = {
+  _db: null,
+  _ref: null,
+  _cache: null,          // in-memory cache
+  _listeners: [],        // callbacks při změně
+
+  // Inicializace — zavolá se po MFSync.init()
+  init(db) {
+    this._db = db;
+    this._ref = ref(db, 'global/profiles');
+
+    // Realtime listener — aktualizuje cache a notifikuje
+    onValue(this._ref, (snapshot) => {
+      const data = snapshot.val();
+      this._cache = Array.isArray(data) ? data : (data ? Object.values(data) : []);
+      this._listeners.forEach(fn => { try { fn(this._cache); } catch(e) {} });
+    });
+  },
+
+  // Načti profily — vrátí Promise<Array>
+  async getProfiles() {
+    if (this._cache !== null) return this._cache;
+    if (!this._db) return this._localFallback();
+    try {
+      const { get } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
+      const snap = await get(ref(this._db, 'global/profiles'));
+      const data = snap.val();
+      this._cache = Array.isArray(data) ? data : (data ? Object.values(data) : []);
+      return this._cache;
+    } catch(e) {
+      console.warn('[MFProfilesDB] getProfiles chyba, fallback na localStorage:', e);
+      return this._localFallback();
+    }
+  },
+
+  // Ulož profily — vrátí Promise
+  async saveProfiles(profiles) {
+    // Vždy ulož i do localStorage jako záloha
+    try { localStorage.setItem('mf_profiles_v2', JSON.stringify(profiles)); } catch(e) {}
+    this._cache = profiles;
+
+    if (!this._db) return;
+    try {
+      await set(ref(this._db, 'global/profiles'), profiles);
+      console.info('[MFProfilesDB] Profily uloženy do Firebase ✓', profiles.length);
+    } catch(e) {
+      console.warn('[MFProfilesDB] saveProfiles chyba:', e);
+    }
+  },
+
+  // Synchronní getter (pro zpětnou kompatibilitu) — vrátí cache nebo localStorage
+  getSync() {
+    if (this._cache !== null) return this._cache;
+    return this._localFallback();
+  },
+
+  // Přihlásit callback při změně profilů (pro realtime update gate)
+  onChange(fn) {
+    this._listeners.push(fn);
+  },
+
+  _localFallback() {
+    try {
+      const raw = localStorage.getItem('mf_profiles_v2');
+      return raw ? JSON.parse(raw) : [];
+    } catch(e) { return []; }
+  },
+
+  // Migruj existující profily z localStorage do Firebase (jednorázově)
+  async migrateFromLocal() {
+    const local = this._localFallback();
+    if (!local.length) return;
+    const fb = await this.getProfiles();
+    if (fb.length > 0) {
+      console.info('[MFProfilesDB] Firebase už má profily, migrace přeskočena');
+      return;
+    }
+    console.info('[MFProfilesDB] Migrace', local.length, 'profilů z localStorage do Firebase');
+    await this.saveProfiles(local);
+  }
+};
+
+// Hook: inicializuj ProfilesDB hned jak MFSync inicializuje Firebase
+const _origMFSyncInit = window.MFSync.init.bind(window.MFSync);
+window.MFSync.init = function() {
+  _origMFSyncInit();
+  if (window.MFSync._db) {
+    window.MFProfilesDB.init(window.MFSync._db);
+    window.MFProfilesDB.migrateFromLocal();
+  } else {
+    // Retry po 2s pokud DB ještě není ready
+    setTimeout(() => {
+      if (window.MFSync._db && !window.MFProfilesDB._db) {
+        window.MFProfilesDB.init(window.MFSync._db);
+        window.MFProfilesDB.migrateFromLocal();
+      }
+    }, 2000);
+  }
+};
