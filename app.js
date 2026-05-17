@@ -274,36 +274,6 @@ window.MF_PROXY = {
 // 3. Push na GitHub → auto deploy
 // 4. Nastav enabled: true výše
 
-// ══ TMDB CACHE S LRU A TIMESTAMP ══
-const _tmdbMemCache = new Map();
-const TMDB_CACHE_MAX = 100;
-const TMDB_CACHE_TTL = 30 * 60 * 1000; // 30 minut
-
-function _tmdbMemSet(key, value) {
-  // Validate response structure before caching
-  if (!value || typeof value !== 'object') return;
-  // TTL-based cleanup
-  const now = Date.now();
-  for (const [k, v] of _tmdbMemCache) {
-    if (now - v._ts > TMDB_CACHE_TTL) _tmdbMemCache.delete(k);
-  }
-  // LRU cleanup when full
-  if (_tmdbMemCache.size >= TMDB_CACHE_MAX) {
-    const firstKey = _tmdbMemCache.keys().next().value;
-    _tmdbMemCache.delete(firstKey);
-  }
-  _tmdbMemCache.set(key, { data: value, _ts: now });
-}
-
-function _tmdbMemGet(key) {
-  const entry = _tmdbMemCache.get(key);
-  if (!entry) return null;
-  if (Date.now() - entry._ts > TMDB_CACHE_TTL) {
-    _tmdbMemCache.delete(key);
-    return null;
-  }
-  return entry.data;
-}
 
 async function tmdbGet(e, forceDirect = false) {
   // Automaticky použít proxy pokud je povolena (pokud forceDirect není true)
@@ -2481,7 +2451,6 @@ function initUniversalHover(e) {
   // Klik na tile → vždy rovnou do cinema mode / finder (ne jen při trailerech)
   e.addEventListener("click", function(ev) {
     if (!i || i === "__search__" || i === "__foryou__") return;
-    // Ignoruj klik pokud je ProfileGate viditelný
     const _gateEl = document.getElementById("mfProfileGate");
     if (_gateEl && _gateEl.style.display === "flex") return;
     ev.preventDefault();
@@ -9622,9 +9591,8 @@ window.adminSavePerKey = function(e, t) {
       "#serialy": () => {
         "function" == typeof closeDockOverlays && closeDockOverlays();
         "function" == typeof setDockActive && setDockActive("dockHome");
-        "function" == typeof window._mfShowSection_orig
-          ? window._mfShowSection_orig("serialy")
-          : "function" == typeof mfShowSection && mfShowSection("serialy");
+        if ("function" == typeof window._mfShowSection_orig) window._mfShowSection_orig("serialy");
+        else if ("function" == typeof mfShowSection) mfShowSection("serialy");
       },
       "#filmy": () => {
         "function" == typeof openUniverse && (openUniverse(), setTimeout(() => {
@@ -9717,14 +9685,10 @@ window.adminSavePerKey = function(e, t) {
         })(ProfileGate, "show", "#profily");
         const t = ProfileGate.hide.bind(ProfileGate);
         ProfileGate.hide = function(...n) {
-          // Přímo zobrazíme sekci bez push do hash (aby se nespustil hashchange → show gate znovu)
           "function" == typeof closeDockOverlays && closeDockOverlays();
           "function" == typeof setDockActive && setDockActive("dockHome");
-          if ("function" == typeof window._mfShowSection_orig) {
-            window._mfShowSection_orig("serialy");
-          } else if ("function" == typeof mfShowSection) {
-            mfShowSection("serialy");
-          }
+          if ("function" == typeof window._mfShowSection_orig) window._mfShowSection_orig("serialy");
+          else if ("function" == typeof mfShowSection) mfShowSection("serialy");
           if (location.hash !== "#serialy") history.replaceState(null, "", "#serialy");
           return t(...n);
         };
