@@ -35,7 +35,7 @@
   --tv-card-w:       210px;
   --tv-card-h:       315px;
   --tv-card-r:       12px;
-  --tv-gap:          22px;
+  --tv-gap:          12px;
   --tv-px:           64px;
   --tv-header-h:     76px;
   --tv-dock-h:       84px;
@@ -236,7 +236,7 @@ body::before, body::after { display: none !important; }
 ─────────────────────────────────────────────────────────────── */
 .ps-list {
   padding: 8px var(--tv-px) 24px !important;
-  gap: var(--tv-gap) !important;
+  gap: 12px !important;
   scroll-snap-type: x mandatory !important;
   scroll-padding-left: var(--tv-px) !important;
   scroll-behavior: smooth !important;
@@ -287,7 +287,7 @@ body::before, body::after { display: none !important; }
 ─────────────────────────────────────────────────────────────── */
 .disco-row-scroll {
   padding: 10px var(--tv-px) 24px !important;
-  gap: 18px !important;
+  gap: 12px !important;
   scroll-snap-type: x mandatory !important;
   scroll-padding-left: var(--tv-px) !important;
   scroll-behavior: smooth !important;
