@@ -286,106 +286,279 @@ localStorage.setItem = function(key, value) {
 document.addEventListener('DOMContentLoaded', () => {
   window.MFSync.init();
 });
-// ══════════════════════════════════════════════════════════════════
-// 👥 PROFILES DB — Profily uložené ve Firebase (ne localStorage)
-// ══════════════════════════════════════════════════════════════════
 
+// ══════════════════════════════════════════════════════════════════
+// 👥 PROFILES DB — Profily přímo ve Firebase
+// ══════════════════════════════════════════════════════════════════
 window.MFProfilesDB = {
-  _db: null,
-  _ref: null,
-  _cache: null,          // in-memory cache
-  _listeners: [],        // callbacks při změně
+  _db: null, _cache: null, _listeners: [], _ref: null,
 
-  // Inicializace — zavolá se po MFSync.init()
   init(db) {
     this._db = db;
     this._ref = ref(db, 'global/profiles');
-
-    // Realtime listener — aktualizuje cache a notifikuje
-    onValue(this._ref, (snapshot) => {
-      const data = snapshot.val();
-      this._cache = Array.isArray(data) ? data : (data ? Object.values(data) : []);
-      this._listeners.forEach(fn => { try { fn(this._cache); } catch(e) {} });
+    onValue(this._ref, snap => {
+      const d = snap.val();
+      this._cache = Array.isArray(d) ? d : d ? Object.values(d) : [];
+      this._listeners.forEach(fn => { try { fn(this._cache); } catch(e){} });
     });
   },
 
-  // Načti profily — vrátí Promise<Array>
   async getProfiles() {
     if (this._cache !== null) return this._cache;
-    if (!this._db) return this._localFallback();
+    if (!this._db) return this._local();
     try {
-      const { get } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js');
       const snap = await get(ref(this._db, 'global/profiles'));
-      const data = snap.val();
-      this._cache = Array.isArray(data) ? data : (data ? Object.values(data) : []);
+      const d = snap.val();
+      this._cache = Array.isArray(d) ? d : d ? Object.values(d) : [];
       return this._cache;
-    } catch(e) {
-      console.warn('[MFProfilesDB] getProfiles chyba, fallback na localStorage:', e);
-      return this._localFallback();
-    }
+    } catch(e) { return this._local(); }
   },
 
-  // Ulož profily — vrátí Promise
   async saveProfiles(profiles) {
-    // Vždy ulož i do localStorage jako záloha
     try { localStorage.setItem('mf_profiles_v2', JSON.stringify(profiles)); } catch(e) {}
     this._cache = profiles;
-
     if (!this._db) return;
-    try {
-      await set(ref(this._db, 'global/profiles'), profiles);
-      console.info('[MFProfilesDB] Profily uloženy do Firebase ✓', profiles.length);
-    } catch(e) {
-      console.warn('[MFProfilesDB] saveProfiles chyba:', e);
-    }
+    try { await set(ref(this._db, 'global/profiles'), profiles); } catch(e) { console.warn('[MFProfilesDB]', e); }
   },
 
-  // Synchronní getter (pro zpětnou kompatibilitu) — vrátí cache nebo localStorage
   getSync() {
-    if (this._cache !== null) return this._cache;
-    return this._localFallback();
+    return this._cache !== null ? this._cache : this._local();
   },
 
-  // Přihlásit callback při změně profilů (pro realtime update gate)
-  onChange(fn) {
-    this._listeners.push(fn);
+  onChange(fn) { this._listeners.push(fn); },
+
+  _local() {
+    try { return JSON.parse(localStorage.getItem('mf_profiles_v2') || '[]'); } catch(e) { return []; }
   },
 
-  _localFallback() {
-    try {
-      const raw = localStorage.getItem('mf_profiles_v2');
-      return raw ? JSON.parse(raw) : [];
-    } catch(e) { return []; }
-  },
-
-  // Migruj existující profily z localStorage do Firebase (jednorázově)
-  async migrateFromLocal() {
-    const local = this._localFallback();
+  async migrate() {
+    const local = this._local();
     if (!local.length) return;
     const fb = await this.getProfiles();
-    if (fb.length > 0) {
-      console.info('[MFProfilesDB] Firebase už má profily, migrace přeskočena');
-      return;
+    if (!fb.length) {
+      console.info('[MFProfilesDB] Migrace', local.length, 'profilů z localStorage');
+      await this.saveProfiles(local);
     }
-    console.info('[MFProfilesDB] Migrace', local.length, 'profilů z localStorage do Firebase');
-    await this.saveProfiles(local);
   }
 };
 
-// Hook: inicializuj ProfilesDB hned jak MFSync inicializuje Firebase
-const _origMFSyncInit = window.MFSync.init.bind(window.MFSync);
-window.MFSync.init = function() {
-  _origMFSyncInit();
-  if (window.MFSync._db) {
-    window.MFProfilesDB.init(window.MFSync._db);
-    window.MFProfilesDB.migrateFromLocal();
-  } else {
-    // Retry po 2s pokud DB ještě není ready
-    setTimeout(() => {
-      if (window.MFSync._db && !window.MFProfilesDB._db) {
-        window.MFProfilesDB.init(window.MFSync._db);
-        window.MFProfilesDB.migrateFromLocal();
-      }
-    }, 2000);
+// ══════════════════════════════════════════════════════════════════
+// 🔑 API KEYS DB — API klíče ve Firebase (šifrované base64)
+// ══════════════════════════════════════════════════════════════════
+window.MFApiKeysDB = {
+  _db: null, _cache: null,
+  _keys: ['mf_gemini_key','mf_or_key','mf_groq_key','mf_jina_key','mf_tavily_key','mf_tmdb_key','mf_openai_key'],
+
+  init(db) {
+    this._db = db;
+    // Realtime sync klíčů
+    onValue(ref(db, 'global/apikeys'), snap => {
+      const d = snap.val();
+      if (!d) return;
+      this._cache = d;
+      // Aplikuj do localStorage pro zpětnou kompatibilitu s app.js
+      this._keys.forEach(k => {
+        const enc = d[k.replace(/\./g,'__')];
+        if (enc) {
+          try { localStorage.setItem(k, atob(enc)); } catch(e) {}
+        }
+      });
+    });
+  },
+
+  async saveKey(keyName, value) {
+    // Ulož lokálně
+    try { localStorage.setItem(keyName, value); } catch(e) {}
+    if (!this._db) return;
+    // Ulož do Firebase jako base64 (lehká obfuskace)
+    const path = keyName.replace(/\./g, '__');
+    try {
+      await set(ref(this._db, 'global/apikeys/' + path), btoa(value));
+      console.info('[MFApiKeysDB] Klíč uložen:', keyName);
+    } catch(e) { console.warn('[MFApiKeysDB]', e); }
+  },
+
+  async loadAll() {
+    if (!this._db) return;
+    try {
+      const snap = await get(ref(this._db, 'global/apikeys'));
+      const d = snap.val();
+      if (!d) return;
+      this._keys.forEach(k => {
+        const enc = d[k.replace(/\./g,'__')];
+        if (enc) { try { localStorage.setItem(k, atob(enc)); } catch(e) {} }
+      });
+    } catch(e) {}
+  },
+
+  async migrate() {
+    if (!this._db) return;
+    const snap = await get(ref(this._db, 'global/apikeys'));
+    if (snap.val()) return; // už jsou ve Firebase
+    const updates = {};
+    this._keys.forEach(k => {
+      const v = localStorage.getItem(k);
+      if (v) updates[k.replace(/\./g,'__')] = btoa(v);
+    });
+    if (Object.keys(updates).length) {
+      await set(ref(this._db, 'global/apikeys'), updates);
+      console.info('[MFApiKeysDB] Migrace klíčů do Firebase');
+    }
   }
+};
+
+// ══════════════════════════════════════════════════════════════════
+// 📢 CHANGELOG / OZNÁMENÍ — Firebase realtime notifikace o změnách
+// ══════════════════════════════════════════════════════════════════
+window.MFChangelog = {
+  _db: null,
+  SEEN_KEY: 'mf_changelog_seen',
+
+  init(db) {
+    this._db = db;
+    onValue(ref(db, 'global/changelog'), snap => {
+      const entries = snap.val();
+      if (!entries) return;
+      const list = Array.isArray(entries) ? entries : Object.values(entries);
+      this._checkNew(list);
+    });
+  },
+
+  // Admin: přidat nový changelog entry
+  async push(entry) {
+    if (!this._db) return;
+    const e = {
+      id: Date.now().toString(),
+      ts: Date.now(),
+      title: entry.title || 'Aktualizace',
+      body: entry.body || '',
+      type: entry.type || 'update', // update | fix | feature | security
+      icon: entry.icon || '📦',
+      version: entry.version || ''
+    };
+    try {
+      const snap = await get(ref(this._db, 'global/changelog'));
+      const existing = snap.val() || [];
+      const arr = Array.isArray(existing) ? existing : Object.values(existing);
+      arr.unshift(e); // nejnovější první
+      if (arr.length > 50) arr.length = 50; // max 50 záznamů
+      await set(ref(this._db, 'global/changelog'), arr);
+      console.info('[MFChangelog] Přidán entry:', e.title);
+    } catch(err) { console.warn('[MFChangelog]', err); }
+  },
+
+  _checkNew(list) {
+    const seen = parseInt(localStorage.getItem(this.SEEN_KEY) || '0');
+    const newEntries = list.filter(e => e.ts > seen);
+    if (!newEntries.length) return;
+
+    // Aktualizuj notif bell badge
+    this._updateBadge(newEntries.length);
+
+    // Inject do notif panelu
+    this._injectToNotifPanel(newEntries, list);
+
+    // Toast pro nejnovější
+    const latest = newEntries[0];
+    setTimeout(() => {
+      if (typeof showToast === 'function') {
+        showToast(latest.icon + ' ' + latest.title + (latest.body ? ' — ' + latest.body.substring(0,60) : ''), 'info', 6000);
+      }
+    }, 3000);
+  },
+
+  markSeen() {
+    localStorage.setItem(this.SEEN_KEY, Date.now().toString());
+    this._updateBadge(0);
+  },
+
+  _updateBadge(count) {
+    // Přidej extra badge na notif bell
+    const bell = document.getElementById('notifBell');
+    if (!bell) return;
+    let badge = document.getElementById('mfChangelogBadge');
+    if (count > 0) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.id = 'mfChangelogBadge';
+        badge.style.cssText = 'position:absolute;top:-4px;right:-4px;background:#0a84ff;color:#fff;font-size:10px;font-weight:700;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;z-index:10;';
+        bell.style.position = 'relative';
+        bell.appendChild(badge);
+      }
+      badge.textContent = count > 9 ? '9+' : count;
+    } else if (badge) {
+      badge.remove();
+    }
+  },
+
+  _injectToNotifPanel(newEntries, allEntries) {
+    // Hookneme renderNotifPanel aby zobrazoval i changelog
+    if (window._mfChangelogInjected) return;
+    window._mfChangelogInjected = true;
+    window._mfChangelogEntries = allEntries;
+
+    const origRender = window.renderNotifPanel;
+    window.renderNotifPanel = function() {
+      if (typeof origRender === 'function') origRender();
+      const panel = document.getElementById('notifPanelList');
+      if (!panel || !window._mfChangelogEntries?.length) return;
+
+      const seen = parseInt(localStorage.getItem(window.MFChangelog.SEEN_KEY) || '0');
+      const html = window._mfChangelogEntries.slice(0, 10).map(e => {
+        const isNew = e.ts > seen;
+        const date = new Date(e.ts).toLocaleDateString('cs-CZ', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+        const colors = { feature:'#30d158', fix:'#ff9f0a', update:'#0a84ff', security:'#ff375f' };
+        const color = colors[e.type] || '#0a84ff';
+        return `
+          <div class="notif-item mf-changelog-item" style="border-left:3px solid ${color};${isNew?'background:rgba(10,132,255,0.06)':''}" onclick="window.MFChangelog.markSeen()">
+            <div style="font-size:22px;flex-shrink:0">${e.icon}</div>
+            <div class="notif-item-info">
+              <div class="notif-item-name" style="display:flex;align-items:center;gap:8px">
+                ${e.title}
+                ${isNew ? '<span style="background:#0a84ff;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px">NOVÉ</span>' : ''}
+                ${e.version ? '<span style="color:rgba(255,255,255,0.3);font-size:11px">'+e.version+'</span>' : ''}
+              </div>
+              ${e.body ? '<div class="notif-item-ep" style="white-space:normal;line-height:1.4">'+e.body+'</div>' : ''}
+              <div class="notif-item-date">📅 ${date}</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      if (html) {
+        const divider = document.createElement('div');
+        divider.style.cssText = 'padding:10px 16px 4px;font-size:11px;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,0.3);text-transform:uppercase';
+        divider.textContent = 'Changelog & aktualizace';
+        panel.insertAdjacentElement('afterbegin', divider);
+        divider.insertAdjacentHTML('afterend', html);
+      }
+    };
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════
+// ⚡ INIT HOOK — spustí vše po Firebase init
+// ══════════════════════════════════════════════════════════════════
+const _origMFSyncInit = window.MFSync.init.bind(window.MFSync);
+window.MFSync.init = async function() {
+  _origMFSyncInit();
+  await new Promise(r => setTimeout(r, 500)); // počkej na DB
+  const db = window.MFSync._db;
+  if (!db) { console.warn('[MFInit] Firebase DB není dostupná'); return; }
+
+  window.MFProfilesDB.init(db);
+  window.MFApiKeysDB.init(db);
+  window.MFChangelog.init(db);
+
+  await Promise.all([
+    window.MFProfilesDB.migrate(),
+    window.MFApiKeysDB.migrate()
+  ]);
+
+  // Re-render profile gate s Firebase daty
+  await new Promise(r => setTimeout(r, 800));
+  if (typeof ProfileGate !== 'undefined' && typeof ProfileGate.renderGate === 'function') {
+    ProfileGate.renderGate();
+  }
+
+  console.info('[MFInit] Firebase subsystémy inicializovány ✓');
 };
