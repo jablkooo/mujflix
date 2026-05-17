@@ -275,6 +275,7 @@ window.MF_PROXY = {
 // 4. Nastav enabled: true výše
 
 
+
 async function tmdbGet(e, forceDirect = false) {
   // Automaticky použít proxy pokud je povolena (pokud forceDirect není true)
   const useProxy = window.MF_PROXY?.enabled && !forceDirect;
@@ -5556,17 +5557,23 @@ const PROFILES_KEY = "mf_profiles_v2",
   PROFILE_EMOJIS = ["🎬", "🍿", "🎭", "🎪", "🎡", "🃏", "🎲", "🎰", "🦁", "🐺", "🦊", "🐸", "👾", "🤖", "🦸", "🧙", "🧛", "🤡", "👻", "🤩", "😎", "🥷", "🦄", "🐉"];
 
 function _getProfiles() {
-  try {
-    return safeLS(PROFILES_KEY, "[]")
-  } catch (e) {
-    return []
-  }
+  // Firebase first, localStorage fallback
+  if (window.MFProfilesDB) return window.MFProfilesDB.getSync();
+  try { return safeLS(PROFILES_KEY, "[]"); } catch(e) { return []; }
 }
 
-function _saveProfiles(e) {
-  try {
-    localStorage.setItem(PROFILES_KEY, JSON.stringify(e))
-  } catch (e) {}
+async function _getProfilesAsync() {
+  if (window.MFProfilesDB) return await window.MFProfilesDB.getProfiles();
+  return _getProfiles();
+}
+
+function _saveProfiles(profiles) {
+  // Ulož do Firebase (a localStorage jako záloha)
+  if (window.MFProfilesDB) {
+    window.MFProfilesDB.saveProfiles(profiles);
+  } else {
+    try { localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles)); } catch(e) {}
+  }
 }
 
 function getActiveProfileId() {
@@ -5784,6 +5791,19 @@ function clearTraktToken() {
     localStorage.removeItem(getTraktTokenKey())
   } catch (e) {}
 }
+
+// ── Firebase realtime: aktualizuj gate při změně profilů ──
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    if (window.MFProfilesDB) {
+      window.MFProfilesDB.onChange(() => {
+        if (typeof ProfileGate !== "undefined") {
+          ProfileGate.renderGate();
+        }
+      });
+    }
+  }, 3000);
+});
 const ProfileGate = {
   _pinBuffer: "",
   _pinTargetId: null,
