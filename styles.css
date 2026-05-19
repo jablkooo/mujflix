@@ -951,7 +951,7 @@ body::after {
 }
 .mf-dock {
   position: fixed;
-  bottom: max(20px, env(safe-area-inset-bottom, 20px));
+  bottom: max(16px, env(safe-area-inset-bottom, 16px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
@@ -963,34 +963,34 @@ body::after {
   -webkit-backdrop-filter: var(--plexi-blur);
   border: 1px solid var(--plexi-border);
   border-top-color: var(--plexi-border-top);
-  border-radius: 32px;
-  padding: 6px 8px;
+  border-radius: 28px;
+  padding: 4px 6px;
   box-shadow: var(--plexi-shadow);
   transition:
     padding 0.4s cubic-bezier(0.34, 1.24, 0.64, 1),
     gap 0.4s cubic-bezier(0.34, 1.24, 0.64, 1);
 }
 .mf-dock:hover {
-  padding: 8px 10px;
+  padding: 6px 8px;
 }
 .dock-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 9px 16px;
-  border-radius: 24px;
+  gap: 2px;
+  padding: 7px 11px;
+  border-radius: 22px;
   border: none;
   background: 0 0;
   color: rgba(255, 255, 255, 0.32);
   cursor: pointer;
   transition: all 0.26s cubic-bezier(0.34, 1.4, 0.64, 1);
   position: relative;
-  min-width: 56px;
+  min-width: 46px;
 }
 .dock-btn svg {
-  width: 22px;
-  height: 22px;
+  width: 19px;
+  height: 19px;
   stroke: currentColor;
   fill: none;
   stroke-width: 1.6;
