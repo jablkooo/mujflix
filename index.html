@@ -2325,6 +2325,37 @@
         <span class="dock-label">Plex</span>
       </button>
 
+      <!-- Vzhled -->
+      <button
+        class="dock-btn"
+        id="dockGivenled"
+        onclick="openCustomize()"
+        title="Přizpůsobit vzhled"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="13.5" cy="6.5" r="2.5" fill="currentColor" stroke="none" style="color:#ff4488"/>
+          <circle cx="17.5" cy="13.5" r="2.5" fill="currentColor" stroke="none" style="color:#44aaff"/>
+          <circle cx="8.5" cy="16" r="2.5" fill="currentColor" stroke="none" style="color:#44ffaa"/>
+          <circle cx="6" cy="9" r="2.5" fill="currentColor" stroke="none" style="color:#ffaa44"/>
+        </svg>
+        <span class="dock-label">Vzhled</span>
+      </button>
+
+      <!-- Sync kód -->
+      <button
+        class="dock-btn"
+        id="dockSync"
+        onclick="openSyncOverlay()"
+        title="Sync kód"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 4v6h-6" />
+          <path d="M1 20v-6h6" />
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+        </svg>
+        <span class="dock-label">Sync</span>
+      </button>
+
       <!-- Více / Menu -->
       <button
         class="dock-btn"
@@ -2938,12 +2969,12 @@
     >
       🎤
     </button>
-    <!-- ZVONČEK — oznámení -->
+    <!-- ZVONČEK — nové epizody -->
     <div
       class="notif-bell"
       id="notifBell"
       onclick="openNotifPanel()"
-      title="Oznámení"
+      title="Nové epizody"
     >
       <svg
         viewBox="0 0 24 24"
@@ -2963,7 +2994,7 @@
     <!-- NOTIF PANEL -->
     <div class="notif-panel" id="notifPanel">
       <div class="notif-panel-header">
-        <div class="notif-panel-title">🔔 Oznámení</div>
+        <div class="notif-panel-title">🔔 Nové epizody</div>
         <button class="notif-panel-close" onclick="closeNotifPanel()">✕</button>
       </div>
       <div class="notif-panel-list" id="notifPanelList">
@@ -2985,11 +3016,12 @@
       </div>
       <span class="logo-progress-text" id="logoProgressText">0%</span>
     </div>
-    <!-- ☁️ SYNC STATUS BADGE -->
+    <!-- ☁️ SYNC STATUS BADGE — skryto, přesunuto do sync overlay -->
     <div
       id="syncStatusBadge"
       onclick="openSyncModal()"
       title="Nastavení synchronizace"
+      style="display:none"
     >
       <span>📴</span><span>Offline</span>
     </div>
@@ -4241,13 +4273,13 @@
         </div>
       </div>
     </div>
-    <!-- SYNC KÓD BUTTON -->
+    <!-- SYNC KÓD BUTTON — přesunuto do docku -->
     <button
       class="import-trigger"
       id="syncBtn"
       onclick="openSyncOverlay()"
       title="Sync kód — synchronizace mezi zařízeními"
-      style="right: 20px"
+      style="right: 20px; display:none"
     >
       <svg
         viewBox="0 0 24 24"
@@ -4333,7 +4365,8 @@
               id="syncCodeInput"
               type="text"
               placeholder="A7X-9B2"
-              maxlength="7"
+              maxlength="8"
+              value="3MANHXHN"
               style="
                 text-transform: uppercase;
                 letter-spacing: 3px;
@@ -4369,6 +4402,29 @@
             >jsonbin.io/app/sign-up</a
           >
           → API Keys → Master Key
+        </div>
+        <!-- Cross-Device Firebase Sync odkaz -->
+        <div
+          onclick="closeSyncOverlay(); openSyncModal();"
+          style="
+            margin-top:10px;
+            padding:10px 14px;
+            background:rgba(255,255,255,0.04);
+            border:1px solid rgba(255,255,255,0.08);
+            border-radius:12px;
+            cursor:pointer;
+            display:flex;align-items:center;gap:10px;
+            transition:background 0.18s;
+          "
+          onmouseenter="this.style.background='rgba(255,255,255,0.08)'"
+          onmouseleave="this.style.background='rgba(255,255,255,0.04)'"
+        >
+          <span style="font-size:1.1rem">☁️</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.85)">Cross-Device Sync</div>
+            <div id="syncOverlayCDStatus" style="font-size:0.6rem;color:rgba(255,255,255,0.35);margin-top:1px">Synchronizace přes Firebase</div>
+          </div>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </div>
       </div>
     </div>
@@ -7647,12 +7703,13 @@
       <span class="mf-fab-label">Admin</span>
     </button>
 
-    <!-- CUSTOMIZE FAB -->
+    <!-- CUSTOMIZE FAB — přesunuto do docku -->
     <button
       class="customize-fab"
       id="customizeFab"
       onclick="openCustomize()"
       title="Přizpůsobit vzhled"
+      style="display:none"
     >
       <div class="mf-fab-icon">
         <svg
@@ -9665,6 +9722,5 @@ document.addEventListener('DOMContentLoaded', () => {
       })();
     </script>
     <script src="legal-streaming-providers.js"></script>
-    <script src="notifications-changelog.js"></script>
   </body>
 </html>
