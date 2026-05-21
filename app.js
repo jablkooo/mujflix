@@ -4248,11 +4248,9 @@ document.addEventListener("keydown", e => {
 }), document.addEventListener("keydown", e => {
   if ("Escape" === e.key) {
     const e = document.getElementById("universeOverlay");
-    if (e?.classList.contains("open")) return void closeDiscover();
-    const t = document.getElementById("screensaver");
-    if (t?.classList.contains("open")) return void hideScreensaver()
+    if (e?.classList.contains("open")) return void closeDiscover()
   }
-  if (document.getElementById("screensaver")?.classList.contains("open") && hideScreensaver(), "ArrowDown" === e.key) {
+  if ("ArrowDown" === e.key) {
     const t = document.getElementById("universeOverlay").classList.contains("open"),
       n = document.getElementById("seriesModal").classList.contains("open"),
       o = document.getElementById("aiFullscreen")?.classList.contains("open");
@@ -4264,53 +4262,12 @@ document.addEventListener("keydown", e => {
 }, {
   capture: !0
 });
-let _ssTimer = null,
-  _ssActive = !1,
-  _ssImgIdx = 0;
-const SS_IDLE_MS = 24e4;
-
-function resetSsTimer() {
-  clearTimeout(_ssTimer), _ssActive && hideScreensaver(), _ssTimer = setTimeout(showScreensaver, 24e4)
-}
-
-function showScreensaver() {
-  _ssActive = !0;
-  const e = Object.values(db).map(e => e._backdrop || e._poster || e.poster).filter(Boolean);
-  if (!e.length) return;
-  const t = document.getElementById("ssImg1"),
-    n = document.getElementById("ssImg2"),
-    o = document.getElementById("screensaver");
-  t.src = e[0], t.classList.add("active"), o.classList.add("open"), requestAnimationFrame(() => requestAnimationFrame(() => o.classList.add("visible"))), updateSsClock(), _ssClockTimer = setInterval(updateSsClock, 3e4), _ssCycleTimer = setInterval(() => {
-    _ssImgIdx = (_ssImgIdx + 1) % e.length;
-    const o = _ssImgIdx % 2 == 0 ? t : n,
-      i = _ssImgIdx % 2 == 0 ? n : t;
-    o.src = e[_ssImgIdx], setTimeout(() => {
-      o.classList.add("active"), i.classList.remove("active")
-    }, 100)
-  }, 8e3)
-}
-let _ssClockTimer = null,
-  _ssCycleTimer = null;
-
-function hideScreensaver() {
-  _ssActive = !1, clearInterval(_ssClockTimer), clearInterval(_ssCycleTimer);
-  const e = document.getElementById("screensaver");
-  e.classList.remove("visible"), setTimeout(() => {
-    e.classList.remove("open"), document.getElementById("ssImg1").classList.remove("active")
-  }, 1200), resetSsTimer()
-}
-
+function resetSsTimer() {}
+function showScreensaver() {}
+function hideScreensaver() {}
 function updateSsClock() {
-  const e = document.getElementById("ssClock");
-  if (!e) return;
-  const t = new Date;
-  e.textContent = t.toLocaleTimeString("cs-CZ", {
-    hour: "2-digit",
-    minute: "2-digit"
-  })
 } ["mousemove", "mousedown", "keydown", "touchstart", "wheel"].forEach(e => {
   document.addEventListener(e, () => {
-    _ssActive || resetSsTimer()
   }, {
     passive: !0
   })
@@ -4946,6 +4903,12 @@ function saveGenrePrefs() {
   }), aiBrain.save(), closeGenreEditor(), showToast("✦ AI preference uloženy!")
 }
 let _notifData = [];
+async function checkNewEpisodes() {
+  // Epizody odstraněny — panel používá pouze changelog (notifications-changelog.js)
+}
+function renderNotifPanel() {
+  // Epizody odstraněny — panel renderuje notifications-changelog.js
+}
 
 function openNotifPanel() {
   const e = document.getElementById("notifPanel");
@@ -4965,49 +4928,7 @@ function _notifOutsideClick(e) {
     n = document.getElementById("notifBell");
   !t || t.contains(e.target) || n.contains(e.target) || closeNotifPanel()
 }
-async function checkNewEpisodes() {
-  const e = getWatchlist().filter(e => "series" === e.type || e.slug);
-  _notifData = [];
-  const t = new Date;
-  t.setHours(0, 0, 0, 0);
-  const n = new Date(t);
-  n.setDate(t.getDate() - 1);
-  for (const o of e) {
-    const e = o.slug;
-    if (e && db[e] && db[e].tmdbId) try {
-      const i = await fetch(`${TMDB}/tv/${db[e].tmdbId}?api_key=${TMDB_KEY}&language=cs`);
-      if (!i.ok) continue;
-      const a = (await i.json()).last_episode_to_air;
-      if (!a || !a.air_date) continue;
-      const s = new Date(a.air_date);
-      s.setHours(0, 0, 0, 0), s >= n && _notifData.push({
-        name: o.name,
-        slug: e,
-        poster: db[e]._poster || db[e].poster || "",
-        ep: `S${a.season_number}·E${a.episode_number}: ${a.name||""}`,
-        date: a.air_date,
-        isToday: s >= t
-      })
-    } catch {}
-  }
-  const o = document.getElementById("notifBell"),
-    i = document.getElementById("notifBellBadge");
-  if (_notifData.length > 0) {
-    o.classList.add("has-notifs"), i.classList.add("visible"), renderNotifPanel();
-    const e = (new Date).toISOString().slice(0, 10);
-    if (localStorage.getItem("mf_last_push_day") !== e && "function" == typeof window.mfNotify) {
-      const t = _notifData.filter(e => e.isToday);
-      t.length > 0 && (localStorage.setItem("mf_last_push_day", e), setTimeout(() => {
-        1 === t.length ? window.mfNotify(`🎬 ${t[0].name} — nová epizoda!`, t[0].ep, t[0].slug) : window.mfNotify(`🎬 ${t.length} nové epizody dnes!`, t.map(e => e.name).join(", "), null)
-      }, 3e3))
-    }
-  } else o.classList.remove("has-notifs"), i.classList.remove("visible")
-}
 
-function renderNotifPanel() {
-  const e = document.getElementById("notifPanelList");
-  e && (_notifData.length ? e.innerHTML = _notifData.map(e => `\n        <div class="notif-item" onclick="closeNotifPanel();openSeries('${e.slug}')">\n          <img class="notif-item-poster" src="${e.poster}" alt="" loading="lazy" onerror="this.style.display='none'">\n          <div class="notif-item-info">\n            <div class="notif-item-name">${e.name}</div>\n            <div class="notif-item-ep">${e.ep}</div>\n            <div class="notif-item-date">${e.isToday?"🔴 Dnes":"🟡 Včera"} · ${e.date}</div>\n          </div>\n        </div>\n      `).join("") : e.innerHTML = '<div class="notif-empty">Žádné nové epizody v posledních 2 dnech.</div>')
-}
 
 function buildEpCard(e, t, n, o, i, a, s) {
   const r = _buildEpCardBase(e, t, n, o, i, a, s),
