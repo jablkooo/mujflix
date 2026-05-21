@@ -2194,15 +2194,27 @@
         >
       </div>
 
-      <div class="mf-header-spacer"></div>
-
-      <!-- Search icon -->
-      <button class="mf-header-btn" onclick="openUniverse()" title="Hledat">
-        <svg viewBox="0 0 24 24">
+      <!-- Search bar — center of header -->
+      <div id="hdrSearchBar" onclick="openUniverse()" style="
+        flex: 1;
+        max-width: 340px;
+        margin: 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 14px;
+        background: rgba(255,255,255,0.07);
+        border: 0.5px solid rgba(255,255,255,0.12);
+        border-radius: 22px;
+        cursor: pointer;
+        transition: background 0.2s;
+      " onmouseenter="this.style.background='rgba(255,255,255,0.11)'" onmouseleave="this.style.background='rgba(255,255,255,0.07)'">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0">
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
-      </button>
+        <span style="font-size:0.8rem;color:rgba(255,255,255,0.38);font-family:-apple-system,'SF Pro Text',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Hledat filmy, seriály…</span>
+      </div>
 
       <!-- Notifications -->
       <button
@@ -2302,59 +2314,6 @@
         <span class="dock-label">Pro tebe</span>
       </button>
 
-      <!-- Plex knihovna -->
-      <button
-        class="dock-btn"
-        id="dockPlex"
-        data-hash="#plex"
-        onclick="mfShowSection('plex')"
-        title="Moje Plex"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M12 2L2 7l10 5 10-5-10-5z" />
-          <path d="M2 17l10 5 10-5" />
-          <path d="M2 12l10 5 10-5" />
-        </svg>
-        <span class="dock-label">Plex</span>
-      </button>
-
-      <!-- Vzhled -->
-      <button
-        class="dock-btn"
-        id="dockGivenled"
-        onclick="openCustomize()"
-        title="Přizpůsobit vzhled"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="13.5" cy="6.5" r="2.5" fill="currentColor" stroke="none" style="color:#ff4488"/>
-          <circle cx="17.5" cy="13.5" r="2.5" fill="currentColor" stroke="none" style="color:#44aaff"/>
-          <circle cx="8.5" cy="16" r="2.5" fill="currentColor" stroke="none" style="color:#44ffaa"/>
-          <circle cx="6" cy="9" r="2.5" fill="currentColor" stroke="none" style="color:#ffaa44"/>
-        </svg>
-        <span class="dock-label">Vzhled</span>
-      </button>
-
-      <!-- Sync kód -->
-      <button
-        class="dock-btn"
-        id="dockSync"
-        onclick="openSyncOverlay()"
-        title="Sync kód"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M23 4v6h-6" />
-          <path d="M1 20v-6h6" />
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-        </svg>
-        <span class="dock-label">Sync</span>
-      </button>
 
       <!-- Více / Menu -->
       <button
