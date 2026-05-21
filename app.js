@@ -2026,17 +2026,12 @@ function showSyncCodeResult(e, t) {
 }
 
 function openSyncOverlay() {
-  const e = document.getElementById("syncOverlay");
-  e.classList.add("open"), requestAnimationFrame(() => requestAnimationFrame(() => e.classList.add("visible")));
-  const t = getSyncKey();
-  t && (document.getElementById("syncKeyInput").value = t);
-  const n = localStorage.getItem("mf_sync_code");
-  n && (document.getElementById("syncCodeDisplay").style.display = "block", document.getElementById("syncCodeValue").textContent = n), pauseBgParticles()
+  // Přesměrováno na Firebase sync modal
+  openSyncModal();
 }
 
 function closeSyncOverlay() {
-  const e = document.getElementById("syncOverlay");
-  e.classList.remove("visible"), setTimeout(() => e.classList.remove("open"), 280), resumeBgParticles()
+  closeSyncModal();
 }
 
 function saveSyncKey() {
