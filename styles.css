@@ -4804,7 +4804,7 @@ body::after {
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding: 6px 10px 120px;
+  padding: 4px 0 120px;
   background: transparent;
 }
 .episode-card {
@@ -4813,36 +4813,38 @@ body::after {
   background: transparent;
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
-  gap: 12px;
-  overflow: visible;
-  border-radius: 13px;
+  align-items: center;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 0;
   border: none;
-  padding: 9px 10px;
-  transition: background 0.18s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0;
+  transition: background 0.15s ease;
   z-index: 1;
 }
+.episode-card:last-child {
+  border-bottom: none;
+}
 .episode-card:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.03);
   z-index: 10;
   filter: none;
 }
 .episode-card.next-ep {
-  background: rgba(0, 122, 255, 0.05);
-  border: 1px solid rgba(0, 122, 255, 0.12);
+  background: rgba(0, 122, 255, 0.04);
 }
 .episode-card.next-ep::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 10px;
-  bottom: 10px;
+  top: 0;
+  bottom: 0;
   width: 3px;
   background: var(--accent);
-  box-shadow: 0 0 10px
-    color-mix(in srgb, var(--accent, #007aff) 65%, transparent);
+  box-shadow: none;
   z-index: 6;
-  border-radius: 0 3px 3px 0;
+  border-radius: 0;
 }
 .episode-card.watched {
   opacity: 0.32;
@@ -4856,14 +4858,14 @@ body::after {
   outline-offset: -1.5px;
 }
 .ep-thumb {
-  width: 112px;
-  min-width: 112px;
+  width: 130px;
+  min-width: 130px;
   aspect-ratio: 16/9;
   position: relative;
   overflow: hidden;
   background: #080812;
   flex-shrink: 0;
-  border-radius: 9px;
+  border-radius: 0;
 }
 .ep-thumb img {
   width: 100%;
@@ -4911,20 +4913,19 @@ body::after {
 .ep-next-tag {
   display: none;
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: 6px;
   z-index: 5;
   background: var(--accent);
-  color: #000;
-  padding: 3px 9px;
-  font-size: 0.42rem;
-  font-weight: 900;
-  letter-spacing: 2px;
+  color: #fff;
+  padding: 2px 7px;
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  border-radius: 20px;
-  box-shadow: 0 2px 10px
-    color-mix(in srgb, var(--accent, #007aff) 55%, transparent);
+  border-radius: 3px;
+  box-shadow: none;
 }
 .next-ep .ep-next-tag {
   display: block;
@@ -5003,10 +5004,10 @@ body::after {
 }
 .ep-body {
   flex: 1;
-  padding: 2px 0 4px;
+  padding: 0 16px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
 }
 .ep-meta-row {
@@ -5016,35 +5017,50 @@ body::after {
 }
 .ep-num {
   font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  font-size: 0.48rem;
-  font-weight: 900;
-  color: rgba(255, 255, 255, 0.28);
-  letter-spacing: 1.5px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 1px;
   text-transform: uppercase;
 }
 .next-ep .ep-num {
   color: var(--accent);
 }
 .ep-runtime {
-  font-size: 0.46rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.18);
+  font-size: 0.58rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.25);
 }
 .ep-rating {
-  font-size: 0.46rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.38);
+}
+/* Netflix right-side play chevron */
+.episode-card::after {
+  content: "";
+  width: 40px;
+  min-width: 40px;
+  height: 100%;
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.18)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: background-image 0.15s;
+}
+.episode-card:hover::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'/%3E%3C/svg%3E");
 }
 .ep-title {
   font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.3;
-  transition: color 0.18s;
+  transition: color 0.15s;
 }
 .episode-card:hover .ep-title {
   color: #fff;
@@ -5052,20 +5068,20 @@ body::after {
 }
 .ep-desc {
   font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.38);
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-top: 2px;
+  margin-top: 3px;
   opacity: 1;
-  max-height: 36px;
+  max-height: 40px;
 }
 .episode-card:hover .ep-desc {
-  color: rgba(255, 255, 255, 0.52);
+  color: rgba(255, 255, 255, 0.55);
 }
 .ep-actions {
   display: flex;
