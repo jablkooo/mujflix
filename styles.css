@@ -964,33 +964,30 @@ body::after {
   border: 1px solid var(--plexi-border);
   border-top-color: var(--plexi-border-top);
   border-radius: 28px;
-  padding: 3px 5px;
+  padding: 6px 8px;
   box-shadow: var(--plexi-shadow);
-  transition:
-    padding 0.4s cubic-bezier(0.34, 1.24, 0.64, 1),
-    gap 0.4s cubic-bezier(0.34, 1.24, 0.64, 1);
 }
 .mf-dock:hover {
-  padding: 4px 6px;
+  padding: 6px 8px;
 }
 .dock-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 5px 10px;
-  border-radius: 20px;
+  gap: 3px;
+  padding: 10px 16px;
+  border-radius: 22px;
   border: none;
   background: 0 0;
   color: rgba(255, 255, 255, 0.32);
   cursor: pointer;
   transition: all 0.26s cubic-bezier(0.34, 1.4, 0.64, 1);
   position: relative;
-  min-width: 46px;
+  min-width: 56px;
 }
 .dock-btn svg {
-  width: 19px;
-  height: 19px;
+  width: 22px;
+  height: 22px;
   stroke: currentColor;
   fill: none;
   stroke-width: 1.6;
@@ -1002,7 +999,7 @@ body::after {
     stroke 0.2s;
 }
 .dock-btn .dock-label {
-  font-size: 0.5rem;
+  font-size: 0.56rem;
   font-weight: 600;
   letter-spacing: 0.2px;
   white-space: nowrap;
@@ -1108,8 +1105,9 @@ body::after {
   z-index: 11;
   display: flex;
   align-items: center;
-  padding: max(16px, env(safe-area-inset-top, 16px)) 20px 16px;
-  gap: 10px;
+  padding: max(16px, env(safe-area-inset-top, 16px)) 28px 16px;
+  padding-right: 120px;
+  gap: 12px;
   background: linear-gradient(
     to bottom,
     rgba(8, 8, 8, 0.92) 0,
@@ -1138,41 +1136,8 @@ body::after {
 .mf-header-logo span {
   color: var(--accent);
 }
-#hdrSearchBar {
+.mf-header-spacer {
   flex: 1;
-  max-width: 320px;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 7px 13px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 0.5px solid rgba(255, 255, 255, 0.11);
-  border-radius: 22px;
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
-  overflow: hidden;
-}
-#hdrSearchBar:hover {
-  background: rgba(255, 255, 255, 0.11);
-  border-color: rgba(255, 255, 255, 0.18);
-}
-#hdrSearchBar svg {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  stroke: rgba(255, 255, 255, 0.38);
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-#hdrSearchBar span {
-  font-size: 0.79rem;
-  color: rgba(255, 255, 255, 0.35);
-  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .mf-header-btn {
   width: 36px;
@@ -12009,51 +11974,55 @@ body.grain-off::after {
 }
 #mfProfileBadge {
   position: fixed;
-  top: max(10px, env(safe-area-inset-top, 10px));
+  top: max(11px, env(safe-area-inset-top, 11px));
   right: 16px;
   z-index: 9500;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
+  gap: 6px;
   background: var(--plexi-bg);
   border: 1px solid var(--plexi-border);
   border-top-color: var(--plexi-border-top);
-  border-radius: 12px;
-  padding: 0;
+  border-radius: 28px;
+  padding: 5px 10px 5px 5px;
   cursor: pointer;
   backdrop-filter: var(--plexi-blur);
   -webkit-backdrop-filter: var(--plexi-blur);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 6px 20px rgba(0, 0, 0, 0.5);
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 2px 8px rgba(0, 0, 0, 0.4);
   transition:
-    transform 0.22s cubic-bezier(0.34, 1.3, 0.64, 1),
-    box-shadow 0.2s ease;
+    transform 0.28s cubic-bezier(0.34, 1.3, 0.64, 1),
+    box-shadow 0.25s ease;
 }
 #mfProfileBadge:hover {
-  transform: translateY(-1px) scale(1.05);
+  transform: translateY(-2px) scale(1.03);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    0 10px 28px rgba(0, 0, 0, 0.65);
+    0 12px 40px rgba(0, 0, 0, 0.7);
 }
 .mpb-avatar {
   width: 26px;
   height: 26px;
-  border-radius: 7px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  border: none;
+  font-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .mpb-name {
-  display: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: -0.2px;
 }
 .mpb-arrow {
-  display: none;
+  font-size: 0.45rem;
+  color: rgba(255, 255, 255, 0.28);
+  margin-left: 1px;
 }
 .trakt-profile-pill {
   display: inline-flex;
@@ -13654,8 +13623,8 @@ nav.mf-dock {
 .dock-btn .dock-icon,
 .dock-btn svg {
   stroke: rgba(255, 255, 255, 0.38) !important;
-  width: 20px !important;
-  height: 20px !important;
+  width: 22px !important;
+  height: 22px !important;
   transition:
     transform 0.24s cubic-bezier(0.34, 1.5, 0.64, 1),
     stroke 0.2s !important;
