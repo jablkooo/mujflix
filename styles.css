@@ -4494,6 +4494,8 @@ body::after {
 .episode-grid {
   min-height: 100px;
   background: 0 0 !important;
+  display: flex;
+  flex-direction: column;
 }
 .modal-body::-webkit-scrollbar {
   width: 3px;
@@ -4799,57 +4801,48 @@ body::after {
   fill: #000;
 }
 .episode-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  padding: 4px 4px 120px;
-  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 6px 10px 120px;
+  background: transparent;
 }
 .episode-card {
   position: relative;
   cursor: pointer;
-  background: #0c0c14;
+  background: transparent;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
   overflow: visible;
-  border-radius: 4px;
+  border-radius: 13px;
   border: none;
-  transition:
-    background 0.28s ease,
-    z-index 0s 0.28s;
+  padding: 9px 10px;
+  transition: background 0.18s ease;
   z-index: 1;
-  clip-path: inset(0 round 4px);
-  transition:
-    background 0.28s ease,
-    clip-path 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .episode-card:hover {
-  background: #13131f;
+  background: rgba(255, 255, 255, 0.04);
   z-index: 10;
-  clip-path: inset(-12px -10px -24px -10px round 14px);
-  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.9))
-    drop-shadow(0 0 0 1px rgba(255, 255, 255, 0.07));
-  transition:
-    background 0.28s ease,
-    clip-path 0.38s cubic-bezier(0.34, 1.2, 0.64, 1),
-    filter 0.35s ease,
-    z-index 0s 0s;
+  filter: none;
 }
 .episode-card.next-ep {
-  background: color-mix(in srgb, var(--accent, #007aff) 4%, #0c0c14);
+  background: rgba(0, 122, 255, 0.05);
+  border: 1px solid rgba(0, 122, 255, 0.12);
 }
 .episode-card.next-ep::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 0;
-  bottom: 0;
+  top: 10px;
+  bottom: 10px;
   width: 3px;
   background: var(--accent);
-  box-shadow: 0 0 12px
+  box-shadow: 0 0 10px
     color-mix(in srgb, var(--accent, #007aff) 65%, transparent);
   z-index: 6;
-  border-radius: 3px 0 0 3px;
+  border-radius: 0 3px 3px 0;
 }
 .episode-card.watched {
   opacity: 0.32;
@@ -4863,12 +4856,14 @@ body::after {
   outline-offset: -1.5px;
 }
 .ep-thumb {
-  width: 100%;
+  width: 112px;
+  min-width: 112px;
   aspect-ratio: 16/9;
   position: relative;
   overflow: hidden;
   background: #080812;
   flex-shrink: 0;
+  border-radius: 9px;
 }
 .ep-thumb img {
   width: 100%;
@@ -4890,14 +4885,13 @@ body::after {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 55%;
-  background: linear-gradient(to top, #0c0c14 0, transparent 100%);
+  height: 45%;
+  background: linear-gradient(to top, rgba(0,0,0,0.55) 0, transparent 100%);
   z-index: 1;
   pointer-events: none;
-  transition: background 0.28s;
 }
 .episode-card:hover .ep-thumb::after {
-  background: linear-gradient(to top, #13131f 0, transparent 100%);
+  background: linear-gradient(to top, rgba(0,0,0,0.45) 0, transparent 100%);
 }
 .ep-badge {
   position: absolute;
@@ -4965,17 +4959,17 @@ body::after {
   opacity: 1;
 }
 .ep-play-ring {
-  width: 52px;
-  height: 52px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.22s cubic-bezier(0.34, 1.3, 0.64, 1);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
 }
 .ep-play-ring:hover {
   background: var(--accent);
@@ -5009,7 +5003,7 @@ body::after {
 }
 .ep-body {
   flex: 1;
-  padding: 8px 12px 10px;
+  padding: 2px 0 4px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -5043,60 +5037,54 @@ body::after {
 }
 .ep-title {
   font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, 0.85);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.3;
-  transition: color 0.2s;
+  transition: color 0.18s;
 }
 .episode-card:hover .ep-title {
   color: #fff;
-  white-space: normal;
+  white-space: nowrap;
 }
 .ep-desc {
   font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
   font-size: 0.62rem;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.38);
-  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  margin-top: 0;
-  transition:
-    max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.28s ease,
-    margin-top 0.28s ease;
+  margin-top: 2px;
+  opacity: 1;
+  max-height: 36px;
 }
 .episode-card:hover .ep-desc {
-  max-height: 60px;
-  opacity: 1;
-  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.52);
 }
 .ep-actions {
   display: flex;
-  gap: 7px;
+  gap: 6px;
   align-items: center;
   max-height: 0;
   opacity: 0;
   overflow: hidden;
   margin-top: 0;
   transition:
-    max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.28s 40ms ease,
-    margin-top 0.28s ease;
+    max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.22s 20ms ease,
+    margin-top 0.22s ease;
 }
 .episode-card:hover .ep-actions {
-  max-height: 40px;
+  max-height: 34px;
   opacity: 1;
   overflow: visible;
-  margin-top: 8px;
+  margin-top: 7px;
 }
 .ep-btn-play-hbo {
   display: inline-flex;
@@ -13887,7 +13875,7 @@ nav.mf-dock {
 .episode-grid {
   background: var(--sys-bg) !important;
   gap: 0 !important;
-  grid-template-columns: 1fr !important;
+  flex-direction: column !important;
   border-radius: 12px !important;
   overflow: hidden !important;
 }
@@ -15872,7 +15860,7 @@ html {
 .episode-grid {
   background: rgba(12, 12, 18, 0) !important;
   gap: 0 !important;
-  grid-template-columns: 1fr !important;
+  flex-direction: column !important;
   border-radius: 0 !important;
   overflow: visible !important;
   padding: 8px 12px 120px !important;
