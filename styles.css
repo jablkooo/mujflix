@@ -19770,3 +19770,66 @@ button:active {
   outline-offset: 3px !important;
   transition: outline-color 0.15s ease !important;
 }
+
+/* ═══════════════════════════════════════
+   DOCK — trvale zvětšená velikost, bez hover animací
+   ═══════════════════════════════════════ */
+.mf-dock,
+nav.mf-dock {
+  padding: 8px 10px !important;
+  border-radius: 32px !important;
+  transition: none !important;
+}
+.mf-dock:hover {
+  padding: 8px 10px !important;
+  border-radius: 32px !important;
+  box-shadow: var(--plexi-shadow) !important;
+}
+.dock-btn {
+  padding: 10px 16px !important;
+  min-width: 58px !important;
+  border-radius: 22px !important;
+  transform: none !important;
+  transition: background 0.18s ease, color 0.18s ease !important;
+  will-change: unset !important;
+}
+.dock-btn:hover {
+  transform: none !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+.dock-btn svg,
+.dock-btn .dock-icon {
+  width: 22px !important;
+  height: 22px !important;
+  transition: none !important;
+  will-change: unset !important;
+}
+.dock-btn:hover svg,
+.dock-btn:hover .dock-icon {
+  transform: none !important;
+}
+.mf-dock:hover .dock-btn svg,
+.mf-dock:hover .dock-btn .dock-icon {
+  width: 22px !important;
+  height: 22px !important;
+}
+.dock-btn .dock-label {
+  font-size: 0.56rem !important;
+  font-weight: 600 !important;
+  transition: none !important;
+}
+.mf-dock:hover .dock-btn .dock-label {
+  font-size: 0.56rem !important;
+}
+.dock-btn:active {
+  transform: scale(0.92) !important;
+  transition: transform 70ms ease !important;
+}
+.dock-btn.dock-ai {
+  padding: 11px 22px !important;
+  min-width: 72px !important;
+}
+.dock-btn.dock-ai:hover {
+  transform: none !important;
+}
