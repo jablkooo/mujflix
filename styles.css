@@ -11974,17 +11974,17 @@ body.grain-off::after {
 }
 #mfProfileBadge {
   position: fixed;
-  top: max(11px, env(safe-area-inset-top, 11px));
-  right: 16px;
+  top: max(8px, env(safe-area-inset-top, 8px));
+  right: 14px;
   z-index: 9500;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   background: var(--plexi-bg);
   border: 1px solid var(--plexi-border);
   border-top-color: var(--plexi-border-top);
-  border-radius: 28px;
-  padding: 5px 10px 5px 5px;
+  border-radius: 14px;  /* čtvereček */
+  padding: 5px 11px 5px 5px;
   cursor: pointer;
   backdrop-filter: var(--plexi-blur);
   -webkit-backdrop-filter: var(--plexi-blur);
@@ -12003,20 +12003,27 @@ body.grain-off::after {
     0 12px 40px rgba(0, 0, 0, 0.7);
 }
 .mpb-avatar {
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  width: 36px;   /* větší */
+  height: 36px;
+  border-radius: 10px;  /* čtvereček */
+  background: rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 1.3rem;  /* větší emoji */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.mpb-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
 }
 .mpb-name {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   letter-spacing: -0.2px;
 }
 .mpb-arrow {
@@ -18055,6 +18062,22 @@ body.modal-open .ruleta-fab,
 body.modal-open .timer-fab {
   z-index: 100 !important;
   pointer-events: none !important;
+}
+
+/* ── Skryj dock při otevřeném detailu seriálu/filmu ── */
+body.modal-open .mf-dock,
+body.modal-open #mfDock,
+body.modal-open nav.mf-dock {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(100%) !important;
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.4, 0, 1, 1) !important;
+}
+
+/* ── Skryj "Další epizoda" popup ── */
+.next-ep-overlay,
+#nextEpOverlay {
+  display: none !important;
 }
 #syncStatusBadge {
   right: 220px !important;
