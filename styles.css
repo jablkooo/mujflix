@@ -19864,3 +19864,113 @@ nav.mf-dock {
 .dock-btn.dock-ai:hover {
   transform: none !important;
 }
+
+/* ══ EPISODE REDESIGN OVERRIDE ══
+   Musí být na konci — přebíjí TV/AppleTV bloky které schovávají ep-thumb */
+body:not(.tv-mode):not(.appletv-mode) .episode-card {
+  flex-direction: row !important;
+  align-items: center !important;
+  background: rgba(255,255,255,0.02) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  padding: 0 !important;
+  clip-path: none !important;
+  margin-bottom: 2px;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover {
+  background: rgba(255,255,255,0.055) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  transform: translateX(3px) !important;
+  filter: none !important;
+  clip-path: none !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-thumb {
+  display: block !important;
+  width: 160px !important;
+  min-width: 160px !important;
+  aspect-ratio: 16/9 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  background: #080812 !important;
+  position: relative !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-thumb img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  filter: brightness(0.82) saturate(0.85) !important;
+  transition: transform 0.4s ease, filter 0.3s ease !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover .ep-thumb img {
+  transform: scale(1.08) !important;
+  filter: brightness(0.55) saturate(0.7) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-body {
+  flex: 1 !important;
+  padding: 0 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  width: auto !important;
+  align-items: flex-start !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-meta-row {
+  flex-direction: row !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-num {
+  font-size: 0.62rem !important;
+  font-weight: 500 !important;
+  color: rgba(255,255,255,0.28) !important;
+  letter-spacing: 0.5px !important;
+  min-width: unset !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card.next-ep .ep-num {
+  color: var(--accent) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-title {
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+  color: rgba(255,255,255,0.92) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  flex: unset !important;
+  width: 100% !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-desc {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  opacity: 1 !important;
+  max-height: 44px !important;
+  font-size: 0.68rem !important;
+  color: rgba(255,255,255,0.38) !important;
+  margin-top: 2px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-actions {
+  flex-direction: row !important;
+  max-height: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  margin-top: 0 !important;
+  flex-shrink: unset !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover .ep-actions {
+  max-height: 34px !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  margin-top: 7px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  padding: 8px 16px 120px !important;
+  background: transparent !important;
+  grid-template-columns: unset !important;
+}
