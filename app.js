@@ -11457,25 +11457,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 console.log('[MůjFlix Changelog] ✓ Changelog systém načten');
 
-// ── Skryj dock při otevřeném detailu seriálu ──
+// ── Skryj dock při otevřeném detailu seriálu (MutationObserver) ──
 (function() {
   function updateDockVisibility() {
     const modal = document.getElementById('seriesModal');
     const dock = document.getElementById('mfDock');
     if (!modal || !dock) return;
     if (modal.classList.contains('open')) {
-      dock.style.opacity = '0';
-      dock.style.pointerEvents = 'none';
-      dock.style.transform = 'translateY(110%)';
-      dock.style.visibility = 'hidden';
+      dock.style.cssText = 'opacity:0 !important;pointer-events:none !important;transform:translateY(110%) !important;visibility:hidden !important;transition:opacity 0.2s ease,transform 0.25s cubic-bezier(0.4,0,1,1) !important;';
     } else {
-      dock.style.opacity = '';
-      dock.style.pointerEvents = '';
-      dock.style.transform = '';
-      dock.style.visibility = '';
+      dock.style.cssText = '';
     }
   }
-
   document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('seriesModal');
     if (!modal) return;
