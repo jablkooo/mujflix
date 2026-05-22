@@ -1475,7 +1475,7 @@ function openSeries(e) {
   try {
     db[e]._genres && aiBrain.boostGenresFromTmdb(db[e]._genres, .04), aiBrain.recordWatchTime()
   } catch (e) {}
-  activeSeries = e, showAllSeasons = !1, modalOpen = !0;
+  activeSeries = e, showAllSeasons = !1, modalOpen = !0; document.body.classList.add('modal-open');
   const t = db[e],
     n = findNextEp(e);
   activeSeason = n ? n.se : 1, document.getElementById("sTitle").textContent = t.name, document.getElementById("sInfo").textContent = `${totalSeasons(e)} serii · ~${t.totalEps} epizod`;
@@ -1498,7 +1498,7 @@ function closeModal() {
   const e = document.getElementById("seriesModal");
   e.classList.remove("visible");
   const t = e.querySelector(".modal-hero-content");
-  t && (t.style.transition = "", t.style.opacity = "", t.style.transform = ""), setTimeout(() => e.classList.remove("open"), 380), kbLayer = "menu", kbEpIndex = -1, kbSeasonIndex = -1, modalOpen = !1
+  t && (t.style.transition = "", t.style.opacity = "", t.style.transform = ""), setTimeout(() => e.classList.remove("open"), 380), kbLayer = "menu", kbEpIndex = -1, kbSeasonIndex = -1, modalOpen = !1; document.body.classList.remove('modal-open');
 }
 
 function renderSeasons() {
