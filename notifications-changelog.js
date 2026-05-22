@@ -10,8 +10,9 @@
   // CONFIG
   // ─────────────────────────────────────────────
 
-  const CL_KEY      = 'mf_changelog_entries';
-  const CL_READ_KEY = 'mf_changelog_read_ts';
+  const CL_KEY         = 'mf_changelog_entries';
+  const CL_READ_KEY    = 'mf_changelog_read_ts';
+  const CL_INSTALL_KEY = 'mf_changelog_install_ts';
 
   // SVG ikony pro typy — místo emoji
   const TYPE_META = {
@@ -184,8 +185,21 @@
     return entry;
   }
 
+  function _getInstallTs() {
+    let ts = parseInt(localStorage.getItem(CL_INSTALL_KEY) || '0', 10);
+    if (!ts) {
+      // První spuštění – vše starší než 48 h považujeme za přečtené,
+      // novější položky zůstanou jako "nové".
+      ts = Date.now() - 48 * 60 * 60 * 1000;
+      localStorage.setItem(CL_INSTALL_KEY, ts.toString());
+    }
+    return ts;
+  }
+
   function getUnreadCount() {
-    const lastRead = parseInt(localStorage.getItem(CL_READ_KEY) || '0', 10);
+    const rawRead  = localStorage.getItem(CL_READ_KEY);
+    // Pokud uživatel ještě nikdy panel neotevřel, použijeme install timestamp
+    const lastRead = rawRead ? parseInt(rawRead, 10) : _getInstallTs();
     return getChangelog().filter(e => e.ts > lastRead).length;
   }
 
@@ -282,9 +296,12 @@
       return;
     }
 
+    const rawRead  = localStorage.getItem(CL_READ_KEY);
+    const lastRead = rawRead ? parseInt(rawRead, 10) : _getInstallTs();
+
     list.innerHTML = entries.map((e, i) => {
       const m = _meta(e.type);
-      const isFirst = i === 0;
+      const isUnread = e.ts > lastRead;
       return `
         <div
           onclick="MFNotifications.openDetail(${e.id})"
@@ -293,10 +310,10 @@
             padding:12px 16px;
             border-bottom:1px solid rgba(255,255,255,0.04);
             cursor:pointer;transition:background .15s;
-            ${isFirst ? 'background:rgba(255,255,255,0.025);' : ''}
+            ${isUnread ? 'background:rgba(255,255,255,0.025);' : ''}
           "
           onmouseenter="this.style.background='rgba(255,255,255,0.05)'"
-          onmouseleave="this.style.background='${isFirst ? 'rgba(255,255,255,0.025)' : 'transparent'}'"
+          onmouseleave="this.style.background='${isUnread ? 'rgba(255,255,255,0.025)' : 'transparent'}'"
         >
           <!-- Ikona -->
           <div style="
@@ -316,7 +333,7 @@
                 color:${m.color};
                 text-transform:uppercase;letter-spacing:.6px;
               ">${m.label}</span>
-              ${isFirst ? `<span style="
+              ${isUnread ? `<span style="
                 font-size:0.52rem;font-weight:800;color:#30d158;
                 background:rgba(48,209,88,0.12);border:1px solid rgba(48,209,88,0.25);
                 padding:1px 6px;border-radius:50px;letter-spacing:.3px;
