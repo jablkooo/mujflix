@@ -11974,17 +11974,17 @@ body.grain-off::after {
 }
 #mfProfileBadge {
   position: fixed;
-  top: max(8px, env(safe-area-inset-top, 8px));
-  right: 14px;
+  top: max(11px, env(safe-area-inset-top, 11px));
+  right: 16px;
   z-index: 9500;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   background: var(--plexi-bg);
   border: 1px solid var(--plexi-border);
   border-top-color: var(--plexi-border-top);
-  border-radius: 14px;  /* čtvereček */
-  padding: 5px 11px 5px 5px;
+  border-radius: 28px;
+  padding: 5px 10px 5px 5px;
   cursor: pointer;
   backdrop-filter: var(--plexi-blur);
   -webkit-backdrop-filter: var(--plexi-blur);
@@ -12003,27 +12003,20 @@ body.grain-off::after {
     0 12px 40px rgba(0, 0, 0, 0.7);
 }
 .mpb-avatar {
-  width: 36px;   /* větší */
-  height: 36px;
-  border-radius: 10px;  /* čtvereček */
-  background: rgba(255, 255, 255, 0.08);
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;  /* větší emoji */
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-.mpb-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 10px;
+  font-size: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .mpb-name {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.8);
   letter-spacing: -0.2px;
 }
 .mpb-arrow {
@@ -18063,22 +18056,6 @@ body.modal-open .timer-fab {
   z-index: 100 !important;
   pointer-events: none !important;
 }
-
-/* ── Skryj dock při otevřeném detailu seriálu/filmu ── */
-body.modal-open .mf-dock,
-body.modal-open #mfDock,
-body.modal-open nav.mf-dock {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: translateY(100%) !important;
-  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.4, 0, 1, 1) !important;
-}
-
-/* ── Skryj "Další epizoda" popup ── */
-.next-ep-overlay,
-#nextEpOverlay {
-  display: none !important;
-}
 #syncStatusBadge {
   right: 220px !important;
   top: max(22px, env(safe-area-inset-top, 22px)) !important;
@@ -19857,11 +19834,608 @@ nav.mf-dock {
   transform: none !important;
 }
 
-/* ════════════════════════════════════════════════
-   OVERRIDES — přepisují vše výše
-   ════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   EPISODE PICKER — FULL REMAKE (Apple TV+ / HBO Max style)
+   Přepisuje vše výše pro ssv-* a episode-* selektory
+   ════════════════════════════════════════════════════════════ */
 
-/* 1) Profil badge — čtvereček */
+/* ── Modal body reset ── */
+.modal-body {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-behavior: smooth !important;
+}
+
+/* ════════ SEZÓNY — pill tabs ════════ */
+.season-select-view {
+  display: none !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  gap: 0 !important;
+}
+.season-select-view.active {
+  display: flex !important;
+}
+.ssv-label {
+  font-size: 0.55rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase !important;
+  color: rgba(255,255,255,0.2) !important;
+  padding: 20px 20px 14px !important;
+  margin: 0 !important;
+}
+
+/* Grid sezón — větší karty, 2 sloupce na mobilu */
+.ssv-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+  gap: 10px !important;
+  padding: 0 16px 32px !important;
+}
+
+/* Karta sezóny */
+.ssv-card {
+  position: relative !important;
+  cursor: pointer !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
+  transition: transform 0.3s cubic-bezier(0.34,1.3,0.64,1), border-color 0.2s, box-shadow 0.3s !important;
+  aspect-ratio: 2/3 !important;
+  flex-shrink: 0 !important;
+}
+.ssv-card:hover {
+  transform: translateY(-8px) scale(1.02) !important;
+  border-color: rgba(255,255,255,0.18) !important;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.1) !important;
+  z-index: 2 !important;
+}
+.ssv-card.ssv-active {
+  border-color: var(--accent, #007aff) !important;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--accent,#007aff) 30%, transparent),
+    0 16px 48px color-mix(in srgb, var(--accent,#007aff) 35%, transparent) !important;
+}
+.ssv-card img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  filter: brightness(0.72) saturate(0.85) !important;
+  transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), filter 0.3s !important;
+}
+.ssv-card:hover img {
+  transform: scale(1.08) !important;
+  filter: brightness(1) saturate(1.1) !important;
+}
+.ssv-card.ssv-active img {
+  filter: brightness(0.95) saturate(1.1) !important;
+}
+.ssv-card::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(to top, rgba(0,0,0,0.92) 0, rgba(0,0,0,0.2) 50%, transparent 75%) !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+.ssv-info {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 2 !important;
+  padding: 12px 12px 14px !important;
+}
+.ssv-num {
+  font-size: 0.52rem !important;
+  font-weight: 800 !important;
+  color: rgba(255,255,255,0.4) !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  margin-bottom: 3px !important;
+}
+.ssv-card.ssv-active .ssv-num {
+  color: var(--accent, #007aff) !important;
+}
+.ssv-name {
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  letter-spacing: -0.3px !important;
+  line-height: 1.2 !important;
+}
+.ssv-ep-count {
+  font-size: 0.55rem !important;
+  font-weight: 600 !important;
+  color: rgba(255,255,255,0.32) !important;
+  margin-top: 4px !important;
+}
+.ssv-active-badge {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  z-index: 3 !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  background: var(--accent, #007aff) !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 0 16px rgba(0,122,255,0.8) !important;
+}
+.ssv-card.ssv-active .ssv-active-badge {
+  display: flex !important;
+}
+.ssv-active-badge svg {
+  width: 12px !important; height: 12px !important;
+  fill: none !important; stroke: #000 !important; stroke-width: 3 !important; stroke-linecap: round !important;
+}
+.ssv-play-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 3 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0 !important;
+  transition: opacity 0.2s !important;
+  background: rgba(0,0,0,0.15) !important;
+}
+.ssv-card:hover .ssv-play-overlay {
+  opacity: 1 !important;
+}
+.ssv-play-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  background: rgba(255,255,255,0.95) !important;
+  color: #000 !important;
+  border: none !important;
+  border-radius: 24px !important;
+  padding: 10px 20px !important;
+  font-size: 0.76rem !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  letter-spacing: 0.2px !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5) !important;
+  transition: transform 0.18s, background 0.18s !important;
+}
+.ssv-play-btn:hover {
+  background: #fff !important;
+  transform: scale(1.06) !important;
+}
+.ssv-play-btn svg {
+  width: 12px !important; height: 12px !important; fill: #000 !important;
+}
+
+/* ════════ EP VIEW BAR — sticky header ════════ */
+.ep-view-bar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 20 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px 16px !important;
+  background: rgba(8,8,14,0.96) !important;
+  backdrop-filter: blur(28px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  flex-shrink: 0 !important;
+}
+.ep-view-back {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: rgba(255,255,255,0.07) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 20px !important;
+  padding: 6px 12px 6px 8px !important;
+  color: rgba(255,255,255,0.75) !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition: background 0.18s, color 0.18s !important;
+}
+.ep-view-back:hover {
+  background: rgba(255,255,255,0.13) !important;
+  color: #fff !important;
+}
+.ep-view-back svg {
+  width: 14px !important; height: 14px !important; stroke: currentColor !important; flex-shrink: 0 !important;
+}
+.ep-view-title {
+  flex: 1 !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  color: rgba(255,255,255,0.6) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  min-width: 0 !important;
+}
+.ep-view-season-badge {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 20px !important;
+  padding: 5px 12px !important;
+  flex-shrink: 0 !important;
+}
+.ep-view-season-badge-dot {
+  width: 5px !important; height: 5px !important;
+  border-radius: 50% !important;
+  background: var(--accent, #007aff) !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 0 6px var(--accent, #007aff) !important;
+}
+.ep-view-season-text {
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  color: rgba(255,255,255,0.75) !important;
+  white-space: nowrap !important;
+}
+.season-all-btn {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 20px !important;
+  padding: 6px 12px !important;
+  color: rgba(255,255,255,0.5) !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition: all 0.18s !important;
+}
+.season-all-btn.active {
+  background: rgba(0,122,255,0.15) !important;
+  border-color: rgba(0,122,255,0.35) !important;
+  color: var(--accent, #007aff) !important;
+}
+
+/* ════════ EPISODE GRID — vertikální list ════════ */
+.episode-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  padding: 8px 0 32px !important;
+  min-height: 100px !important;
+  background: transparent !important;
+}
+
+/* Episode card — horizontální layout, Apple TV+ styl */
+.episode-card {
+  position: relative !important;
+  cursor: pointer !important;
+  background: transparent !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+  border-radius: 0 !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+  padding: 12px 16px !important;
+  transition: background 0.2s ease !important;
+  clip-path: none !important;
+  z-index: 1 !important;
+  min-height: 88px !important;
+}
+.episode-card:hover {
+  background: rgba(255,255,255,0.04) !important;
+  z-index: 2 !important;
+  clip-path: none !important;
+  filter: none !important;
+}
+.episode-card:last-child {
+  border-bottom: none !important;
+}
+
+/* Watched opacity */
+.episode-card.watched {
+  opacity: 0.38 !important;
+}
+.episode-card.watched:hover {
+  opacity: 0.65 !important;
+}
+
+/* Next ep highlight */
+.episode-card.next-ep {
+  background: color-mix(in srgb, var(--accent,#007aff) 6%, transparent) !important;
+}
+.episode-card.next-ep::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important; top: 0 !important; bottom: 0 !important;
+  width: 3px !important;
+  background: var(--accent, #007aff) !important;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent,#007aff) 70%, transparent) !important;
+  border-radius: 0 !important;
+}
+.episode-card.kb-focus {
+  outline: 1.5px solid rgba(0,122,255,0.45) !important;
+  outline-offset: -1.5px !important;
+}
+
+/* Thumbnail — 16:9, pevná šírka */
+.ep-thumb {
+  width: 148px !important;
+  min-width: 148px !important;
+  aspect-ratio: 16/9 !important;
+  position: relative !important;
+  overflow: hidden !important;
+  background: rgba(255,255,255,0.04) !important;
+  flex-shrink: 0 !important;
+  border-radius: 10px !important;
+}
+.ep-thumb img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  filter: brightness(0.78) saturate(0.82) !important;
+  transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94), filter 0.3s !important;
+}
+.episode-card:hover .ep-thumb img {
+  transform: scale(1.06) !important;
+  filter: brightness(1) saturate(1.1) !important;
+}
+.ep-thumb::after {
+  display: none !important;
+}
+
+/* Hover play overlay na thumbnailu */
+.ep-hover-play {
+  position: absolute !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(0,0,0,0.28) !important;
+  opacity: 0 !important;
+  transition: opacity 0.22s !important;
+  z-index: 2 !important;
+}
+.episode-card:hover .ep-hover-play {
+  opacity: 1 !important;
+}
+.ep-play-ring {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,0.92) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+  transition: transform 0.18s !important;
+}
+.ep-play-ring:hover { transform: scale(1.1) !important; }
+.ep-play-ring svg {
+  width: 11px !important; height: 12px !important;
+  fill: #000 !important;
+  margin-left: 2px !important;
+}
+
+/* Next tag badge */
+.ep-next-tag {
+  position: absolute !important;
+  top: 7px !important; left: 7px !important;
+  background: var(--accent, #007aff) !important;
+  color: #fff !important;
+  font-size: 0.5rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  padding: 3px 7px !important;
+  border-radius: 6px !important;
+  z-index: 3 !important;
+}
+
+/* Watched dot */
+.ep-seen-dot {
+  position: absolute !important;
+  bottom: 7px !important; right: 7px !important;
+  width: 18px !important; height: 18px !important;
+  border-radius: 50% !important;
+  background: rgba(52,199,89,0.85) !important;
+  color: #fff !important;
+  font-size: 0.55rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0 !important;
+  z-index: 3 !important;
+}
+.episode-card.watched .ep-seen-dot {
+  opacity: 1 !important;
+}
+
+/* Spoiler blur */
+.spoiler-blur .ep-thumb img {
+  filter: blur(16px) brightness(0.4) !important;
+}
+.spoiler-label {
+  position: absolute !important;
+  inset: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  z-index: 2 !important;
+}
+.spoiler-label span:last-child {
+  font-size: 0.58rem !important;
+  font-weight: 700 !important;
+  color: rgba(255,255,255,0.5) !important;
+}
+
+/* Body epizody */
+.ep-body {
+  flex: 1 !important;
+  padding: 2px 0 2px 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  min-width: 0 !important;
+  justify-content: flex-start !important;
+}
+.ep-meta-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  margin-bottom: 1px !important;
+}
+.ep-num {
+  font-size: 0.56rem !important;
+  font-weight: 800 !important;
+  color: rgba(255,255,255,0.3) !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+}
+.next-ep .ep-num {
+  color: var(--accent, #007aff) !important;
+}
+.ep-runtime {
+  font-size: 0.56rem !important;
+  font-weight: 500 !important;
+  color: rgba(255,255,255,0.2) !important;
+}
+.ep-rating {
+  font-size: 0.56rem !important;
+  font-weight: 700 !important;
+  color: rgba(255,200,60,0.7) !important;
+}
+.ep-title {
+  font-size: 0.86rem !important;
+  font-weight: 700 !important;
+  color: rgba(255,255,255,0.88) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.3 !important;
+  transition: color 0.18s !important;
+}
+.episode-card:hover .ep-title {
+  color: #fff !important;
+  white-space: normal !important;
+}
+.ep-desc {
+  font-size: 0.68rem !important;
+  font-weight: 400 !important;
+  color: rgba(255,255,255,0.38) !important;
+  line-height: 1.55 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  max-height: 0 !important;
+  opacity: 0 !important;
+  margin-top: 0 !important;
+  transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, margin-top 0.25s ease !important;
+}
+.episode-card:hover .ep-desc {
+  max-height: 55px !important;
+  opacity: 1 !important;
+  margin-top: 4px !important;
+}
+
+/* Action buttons — vždy viditelné v novém layoutu */
+.ep-actions {
+  display: flex !important;
+  gap: 6px !important;
+  align-items: center !important;
+  max-height: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  margin-top: 0 !important;
+  transition: max-height 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.22s 30ms ease, margin-top 0.22s ease !important;
+}
+.episode-card:hover .ep-actions {
+  max-height: 36px !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  margin-top: 8px !important;
+}
+.ep-btn-play-hbo {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: #fff !important;
+  color: #000 !important;
+  border: none !important;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+  font-size: 0.68rem !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  letter-spacing: 0.2px !important;
+  transition: all 0.18s !important;
+  flex-shrink: 0 !important;
+}
+.ep-btn-play-hbo:hover {
+  background: rgba(255,255,255,0.88) !important;
+  transform: scale(1.03) !important;
+}
+.ep-btn-mark {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,0.06) !important;
+  border: 1.5px solid rgba(255,255,255,0.15) !important;
+  color: rgba(255,255,255,0.4) !important;
+  font-size: 0.7rem !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.18s !important;
+  flex-shrink: 0 !important;
+}
+.ep-btn-mark:hover {
+  background: rgba(52,199,89,0.12) !important;
+  border-color: rgba(52,199,89,0.5) !important;
+  color: rgba(52,199,89,0.9) !important;
+}
+.watched .ep-btn-mark {
+  background: rgba(52,199,89,0.1) !important;
+  border-color: rgba(52,199,89,0.4) !important;
+  color: rgba(52,199,89,0.8) !important;
+}
+
+/* Season group header (v "Vše" módu) */
+.episode-grid > div[style*="grid-column"],
+.episode-grid > div[style*="font-size:0.84rem"] {
+  grid-column: unset !important;
+  display: block !important;
+  font-size: 0.6rem !important;
+  font-weight: 800 !important;
+  color: rgba(255,255,255,0.22) !important;
+  letter-spacing: 2.5px !important;
+  text-transform: uppercase !important;
+  padding: 18px 16px 8px !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  margin-bottom: 0 !important;
+  background: transparent !important;
+  font-family: -apple-system, "SF Pro Text", sans-serif !important;
+}
+
+/* ── Trailer preview area ── */
+.ep-view-trailer-container {
+  display: none !important;
+}
+
+/* ── Profil badge override (čtvereček) ── */
 #mfProfileBadge {
   border-radius: 14px !important;
 }
@@ -19878,20 +20452,3 @@ nav.mf-dock {
   object-fit: cover !important;
 }
 
-/* 2) Skryj dock při otevřeném seriálu — dvojitá pojistka */
-body.modal-open .mf-dock,
-body.modal-open #mfDock,
-body.modal-open nav.mf-dock,
-#seriesModal.open ~ nav.mf-dock,
-#seriesModal.open ~ #mfDock {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: translateY(110%) !important;
-  visibility: hidden !important;
-}
-
-/* 3) Skryj next-ep popup */
-.next-ep-overlay,
-#nextEpOverlay {
-  display: none !important;
-}
