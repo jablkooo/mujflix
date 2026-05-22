@@ -11456,3 +11456,31 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 console.log('[MůjFlix Changelog] ✓ Changelog systém načten');
+
+// ── Skryj dock při otevřeném detailu seriálu ──
+(function() {
+  function updateDockVisibility() {
+    const modal = document.getElementById('seriesModal');
+    const dock = document.getElementById('mfDock');
+    if (!modal || !dock) return;
+    if (modal.classList.contains('open')) {
+      dock.style.opacity = '0';
+      dock.style.pointerEvents = 'none';
+      dock.style.transform = 'translateY(110%)';
+      dock.style.visibility = 'hidden';
+    } else {
+      dock.style.opacity = '';
+      dock.style.pointerEvents = '';
+      dock.style.transform = '';
+      dock.style.visibility = '';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('seriesModal');
+    if (!modal) return;
+    const obs = new MutationObserver(updateDockVisibility);
+    obs.observe(modal, { attributes: true, attributeFilter: ['class'] });
+    updateDockVisibility();
+  });
+})();
