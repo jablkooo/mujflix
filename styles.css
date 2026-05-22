@@ -19856,3 +19856,42 @@ nav.mf-dock {
 .dock-btn.dock-ai:hover {
   transform: none !important;
 }
+
+/* ════════════════════════════════════════════════
+   OVERRIDES — přepisují vše výše
+   ════════════════════════════════════════════════ */
+
+/* 1) Profil badge — čtvereček */
+#mfProfileBadge {
+  border-radius: 14px !important;
+}
+.mpb-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  font-size: 1.3rem !important;
+}
+.mpb-avatar img {
+  border-radius: 10px !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* 2) Skryj dock při otevřeném seriálu — dvojitá pojistka */
+body.modal-open .mf-dock,
+body.modal-open #mfDock,
+body.modal-open nav.mf-dock,
+#seriesModal.open ~ nav.mf-dock,
+#seriesModal.open ~ #mfDock {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(110%) !important;
+  visibility: hidden !important;
+}
+
+/* 3) Skryj next-ep popup */
+.next-ep-overlay,
+#nextEpOverlay {
+  display: none !important;
+}
