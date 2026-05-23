@@ -327,28 +327,41 @@
   }
 
   // ══ HOOK INTO CINEMA MODE ══
-  // Override openMovieInCinema to add providers
-  const originalOpenMovieInCinema = window.openMovieInCinema;
-  window.openMovieInCinema = function(tmdbId, title, type) {
-    // Call original
-    if (originalOpenMovieInCinema) {
-      originalOpenMovieInCinema.apply(this, arguments);
+  // app.js má defer → musíme počkat na DOMContentLoaded než hookujeme
+  function hookCinema() {
+    const originalOpenMovieInCinema = window.openMovieInCinema;
+    if (!originalOpenMovieInCinema) {
+      console.warn('[MFLegalProviders] openMovieInCinema nenalezena, hook přeskočen');
+      return;
     }
+    window.openMovieInCinema = function(tmdbId, title, type) {
+      // Zavolej originál
+      originalOpenMovieInCinema.apply(this, arguments);
 
-    // Extract actual tmdbId (handle tv_ep format: id/season/ep)
-    const actualTmdbId = String(tmdbId).split('/')[0];
+      // Vytáhni čisté tmdbId (tv_ep formát: id/season/ep)
+      const actualTmdbId = String(tmdbId).split('/')[0];
+      const actualType = (type === 'tv_ep') ? 'tv' : (type || 'movie');
 
-    // Add legal providers after a short delay to let modal render
-    setTimeout(() => {
-      renderLegalProviders(actualTmdbId, title, type);
-    }, 800);
-  };
+      // Počkej až se modal vykreslí, pak přidej sekci
+      setTimeout(() => {
+        renderLegalProviders(actualTmdbId, title, actualType);
+      }, 800);
+    };
+    console.log('[MFLegalProviders] Hook na openMovieInCinema aktivní ✓');
+  }
 
   // ══ EXPORT FOR MANUAL USE ══
   window.MFLegalProviders = {
     show: renderLegalProviders,
     providers: STREAMING_PROVIDERS
   };
+
+  // Spustit hook až po načtení app.js (defer)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hookCinema);
+  } else {
+    hookCinema();
+  }
 
   console.log('[MFLegalProviders] Legal streaming providers loaded');
 })();
