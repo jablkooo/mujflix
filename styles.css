@@ -336,8 +336,8 @@ body::after {
 }
 .movie-tile:hover,
 .tile:hover {
-  transform: scale(1.01) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  transform: scale(1.025) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65) !important;
 }
 #seriesModal .modal-inner,
 .modal-box,
@@ -376,7 +376,6 @@ button:not(.mood-btn):not(.timer-preset-btn):not(.pg-add-btn):not(
 .ep-card:hover {
   background: #181824 !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
-  transform: none !important;
 }
 .ep-card.watched {
   opacity: 0.45 !important;
@@ -964,31 +963,31 @@ body::after {
   -webkit-backdrop-filter: var(--plexi-blur);
   border: 1px solid var(--plexi-border);
   border-top-color: var(--plexi-border-top);
-  border-radius: 28px;
-  padding: 6px 8px;
+  border-radius: 24px;
+  padding: 4px 6px;
   box-shadow: var(--plexi-shadow);
 }
 .mf-dock:hover {
-  padding: 6px 8px;
+  padding: 4px 6px;
 }
 .dock-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 10px 16px;
-  border-radius: 22px;
+  gap: 2px;
+  padding: 7px 12px;
+  border-radius: 18px;
   border: none;
   background: 0 0;
   color: rgba(255, 255, 255, 0.32);
   cursor: pointer;
   transition: all 0.26s cubic-bezier(0.34, 1.4, 0.64, 1);
   position: relative;
-  min-width: 56px;
+  min-width: 46px;
 }
 .dock-btn svg {
-  width: 22px;
-  height: 22px;
+  width: 19px;
+  height: 19px;
   stroke: currentColor;
   fill: none;
   stroke-width: 1.6;
@@ -1000,7 +999,7 @@ body::after {
     stroke 0.2s;
 }
 .dock-btn .dock-label {
-  font-size: 0.56rem;
+  font-size: 0.5rem;
   font-weight: 600;
   letter-spacing: 0.2px;
   white-space: nowrap;
@@ -1012,7 +1011,7 @@ body::after {
   background: rgba(255, 255, 255, 0.07);
 }
 .dock-btn:hover svg {
-  transform: scale(1.16);
+  transform: scale(1.08);
 }
 .dock-btn:active {
   transform: scale(0.88);
@@ -1037,21 +1036,21 @@ body::after {
     rgba(0, 102, 204, 0.95) 100%
   );
   color: #fff;
-  padding: 9px 20px;
-  border-radius: 24px;
+  padding: 7px 16px;
+  border-radius: 20px;
   border: 1px solid rgba(10, 132, 255, 0.5);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.12) inset,
     0 1.5px 0 rgba(255, 255, 255, 0.25) inset,
     0 8px 28px rgba(10, 132, 255, 0.45),
     0 2px 10px rgba(0, 0, 0, 0.5);
-  min-width: 68px;
+  min-width: 58px;
 }
 .dock-btn.dock-ai svg {
   stroke: #fff !important;
   filter: none !important;
-  width: 21px;
-  height: 21px;
+  width: 19px;
+  height: 19px;
 }
 .dock-btn.dock-ai .dock-label {
   color: rgba(255, 255, 255, 0.9) !important;
@@ -1059,7 +1058,7 @@ body::after {
 }
 .dock-btn.dock-ai:hover {
   background: linear-gradient(145deg, #34aadc 0, #0a84ff 60%, #007aff 100%);
-  transform: translateY(-5px) scale(1.08);
+  transform: translateY(-3px) scale(1.04);
   box-shadow:
     0 0 0 1px rgba(0, 122, 255, 0.8),
     0 12px 36px rgba(0, 122, 255, 0.62),
@@ -1804,7 +1803,7 @@ body::after {
     transform 0.44s cubic-bezier(0.34, 1.28, 0.64, 1),
     filter 0.38s ease,
     z-index 0s 0s;
-  transform: translateY(-6px) scale(1.02) translateZ(0);
+  transform: translateY(-14px) scale(1.05) translateZ(0);
 }
 .ps-tile-wrapper:active {
   transform: translateY(-4px) scale(1.01) translateZ(0) !important;
@@ -19595,8 +19594,9 @@ button {
 }
 .ps-tile-wrapper.kb-focus,
 .ps-tile-wrapper:hover {
-  transform: translateY(-6px) scale(1.02) translateZ(0) !important;
-  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.6)) !important;
+  transform: translateY(-16px) scale(1.07) translateZ(0) !important;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.7))
+    drop-shadow(0 0 24px rgba(10, 132, 255, 0.22)) !important;
   z-index: 10;
 }
 .ps-tile-wrapper:active {
@@ -19753,10 +19753,10 @@ button {
     box-shadow 0.2s ease !important;
 }
 .ep-card:hover {
-  transform: none !important;
+  transform: translateY(-3px) scale(1.015) !important;
   box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+    0 8px 28px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1) !important;
 }
 .btn,
 [role="button"],
@@ -20019,30 +20019,33 @@ body.modal-open [class*="dock"]:not(.dock-btn) {
   visibility: hidden !important;
 }
 
-/* ══ MODAL FULLSCREEN — dock + profil schované ══ */
-body.modal-open #mfDock,
-body.modal-open .mf-dock,
-body.modal-open nav.mf-dock {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: translateY(110%) !important;
-  visibility: hidden !important;
-  transition: all 0.25s ease !important;
+/* ══ PROFIL BADGE — skrytý natrvalo ══ */
+#mfProfileBadge,
+.mf-profile-badge {
+  display: none !important;
 }
 
-body.modal-open #mfProfileBadge,
-body.modal-open .mf-profile-badge {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transition: opacity 0.2s ease !important;
+/* ══ DOCK — kompaktnější přebití pozdějších bloků ══ */
+.mf-dock {
+  padding: 4px 6px !important;
+  border-radius: 22px !important;
 }
-
-/* ══ MODAL FULLSCREEN ══ */
-#seriesModal .modal-content {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: 100vh !important;
-  border-radius: 0 !important;
-  border: none !important;
-  box-shadow: none !important;
+.dock-btn {
+  padding: 7px 11px !important;
+  min-width: 44px !important;
+}
+.dock-btn svg {
+  width: 19px !important;
+  height: 19px !important;
+}
+.dock-btn .dock-label {
+  font-size: 0.49rem !important;
+}
+.dock-btn.dock-ai {
+  padding: 7px 15px !important;
+  min-width: 56px !important;
+}
+.dock-btn.dock-ai svg {
+  width: 19px !important;
+  height: 19px !important;
 }
