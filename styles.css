@@ -20046,3 +20046,8 @@ body.modal-open .mf-profile-badge {
   border: none !important;
   box-shadow: none !important;
 }
+
+/* ══ SERIAL DETAIL — užší hero fotka ══ */
+.modal-hero {
+  height: 180px !important;
+}
