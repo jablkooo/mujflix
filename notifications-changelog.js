@@ -241,9 +241,6 @@
       }
     };
 
-    // Vždy znovu vyrenderuj — odstraňujeme starý guard který způsoboval "Načítám..."
-    panel.dataset.mfV3 = '1';
-
     // Header
     const header = panel.querySelector('.notif-panel-header');
     if (header) {
@@ -504,15 +501,26 @@
   }
 
   // ─────────────────────────────────────────────
-  // OVERRIDE openNotifPanel
+  // HOOK — čeká na otevření panelu přes MutationObserver
+  // (spolehlivější než override funkce zachycené dřív/pozdějc)
   // ─────────────────────────────────────────────
 
+  function _hookPanel() {
+    const panel = document.getElementById('notifPanel');
+    if (!panel) { setTimeout(_hookPanel, 300); return; }
+
+    new MutationObserver(() => {
+      if (panel.classList.contains('open')) {
+        requestAnimationFrame(() => _injectPanel());
+      }
+    }).observe(panel, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  // Fallback override — zachytí původní funkci i pokud se script načte po app.js
   const _origOpen = window.openNotifPanel;
   window.openNotifPanel = function () {
     if (_origOpen) _origOpen.apply(this, arguments);
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      _injectPanel();
-    }));
+    setTimeout(() => _injectPanel(), 50);
   };
 
   // ─────────────────────────────────────────────
@@ -640,6 +648,7 @@
 
   function init() {
     _hookStreak();
+    _hookPanel();
     _updateBell();
     setTimeout(() => {
       try { checkStreakMilestone(JSON.parse(localStorage.getItem('mf_streak_v1') || '{}').streak || 0); } catch {}
