@@ -5,7 +5,6 @@
 (function() {
   'use strict';
 
-  // Skutečná výška z CSS (.modal-hero { height: 260px })
   var HERO_CSS_H = 260;
   var SCROLL_END = 300;
   var _interval  = null;
@@ -14,29 +13,37 @@
   // ── CSS ──
   var style = document.createElement('style');
   style.textContent = [
-    '#seriesModal .modal-hero,',
-    '.modal-hero {',
+    '#seriesModal .modal-hero {',
     '  transition: none !important;',
-    '  overflow: hidden !important;',
+    '  overflow: hidden !important;',  /* ořízne img při zmenšení */
     '  will-change: height !important;',
     '  min-height: 0 !important;',
     '  flex-shrink: 1 !important;',
+    '  position: relative !important;',
     '}',
+    /* img v normálním flow, height:100% = kopíruje výšku hero */
     '#seriesModal .modal-hero-img {',
-    '  position: absolute !important;',
-    '  top: 0 !important;',
-    '  left: 0 !important;',
+    '  position: relative !important;', /* NE absolute — musí jít s height hero */
     '  width: 100% !important;',
-    '  height: ' + HERO_CSS_H + 'px !important;',
+    '  height: 100% !important;',
+    '  min-height: ' + HERO_CSS_H + 'px !important;', /* zachová aspect při zmenšení */
     '  object-fit: cover !important;',
     '  object-position: center 22% !important;',
     '  display: block !important;',
+    '  transform: none !important;',
     '}',
-    '#seriesModal .modal-hero-content,',
-    '.modal-hero-content {',
+    '#seriesModal .modal-hero-overlay {',
+    '  position: absolute !important;',
+    '  inset: 0 !important;',
+    '}',
+    '#seriesModal .modal-hero-content {',
     '  transition: none !important;',
     '  will-change: opacity, transform !important;',
-    '}'
+    '  position: absolute !important;',
+    '  bottom: 0 !important;',
+    '  left: 0 !important;',
+    '  right: 0 !important;',
+    '}',
   ].join('\n');
   document.head
     ? document.head.appendChild(style)
@@ -74,9 +81,9 @@
     var content = hero && hero.querySelector('.modal-hero-content');
     if (!hero) { _ticking = false; return; }
 
-    // Vždy používáme HERO_CSS_H — žádné měření které může být špatně
     var raw = Math.min(1, Math.max(0, mb.scrollTop / SCROLL_END));
 
+    // Zmenšujeme hero výšku — overflow:hidden ořízne img shora
     hero.style.setProperty('height', (HERO_CSS_H * (1 - raw)) + 'px', 'important');
 
     if (content) {
@@ -93,11 +100,8 @@
     var mb = document.getElementById('modalBody');
     if (!mb || mb._mfPatch) return;
     mb._mfPatch = true;
-
-    // Reset hero výšky na plnou hodnotu při každém otevření
     var hero = document.querySelector('#seriesModal .modal-hero');
     if (hero) hero.style.setProperty('height', HERO_CSS_H + 'px', 'important');
-
     mb.addEventListener('scroll', function() {
       if (!_ticking) {
         _ticking = true;
@@ -127,10 +131,9 @@
         var hero    = document.querySelector('#seriesModal .modal-hero');
         var content = hero && hero.querySelector('.modal-hero-content');
         var mb      = document.getElementById('modalBody');
-        // Reset vše
         if (hero)    hero.style.setProperty('height', HERO_CSS_H + 'px', 'important');
         if (content) { content.style.opacity = '1'; content.style.transform = ''; content.style.pointerEvents = ''; }
-        if (mb)      { mb._mfPatch = false; }
+        if (mb)      mb._mfPatch = false;
       }
     }).observe(modal, { attributes: true, attributeFilter: ['class'] });
   }
@@ -138,5 +141,5 @@
   if (document.readyState !== 'loading') setTimeout(init, 50);
   else document.addEventListener('DOMContentLoaded', function() { setTimeout(init, 50); });
 
-  console.log('[MFPatch] hero 260→0 ✓');
+  console.log('[MFPatch] hero 260→0 v2 ✓');
 })();
