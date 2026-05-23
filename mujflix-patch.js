@@ -1,35 +1,36 @@
 /**
  * MůjFlix — UI Patch
- * Sleduje #seriesModal.open (ne body.modal-open)
+ * Sleduje #seriesModal.open + smooth hero scroll
  */
 (function() {
   'use strict';
 
-  var HERO_FULL = 180;
-  var HERO_MIN  = 52;
-  var SCROLL_START = 0;   // scroll od kdy začíná zmenšovat
-  var SCROLL_END   = 120; // scroll kdy je plně minimalizováno
-  var _interval = null;
+  var HERO_FULL    = 180;
+  var HERO_MIN     = 0;    // úplně zmizí
+  var SCROLL_END   = 160;  // px kdy je plně minimalizováno
+  var _interval    = null;
+  var _ticking     = false;
+  var _lastScroll  = 0;
 
-  // ── CSS ──
-  var style = document.createElement('style');
-  style.textContent =
-    '#seriesModal.open ~ * #mfDock,' +
-    '#seriesModal.open ~ * #mfProfileBadge { opacity: 0 !important; }' +
-    '.modal-hero { overflow: hidden !important; }' +
-    '.modal-hero-img { height: 100% !important; width: 100% !important; object-fit: cover !important; }' +
-    '.modal-hero-content { transition: none !important; }';
-  (document.head || document.documentElement).appendChild(style);
-
-  function isModalOpen() {
-    var m = document.getElementById('seriesModal');
-    return m && m.classList.contains('open');
+  // ── Easing: ease-in-out cubic ──
+  function easeInOut(t) {
+    return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
   }
 
+  // ── CSS injekce ──
+  var style = document.createElement('style');
+  style.textContent = [
+    '.modal-hero { overflow: hidden !important; will-change: height; }',
+    '.modal-hero-img { position: absolute !important; top: 0; left: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; }',
+    '.modal-hero-content { will-change: opacity, transform; }'
+  ].join('\n');
+  (document.head || document.documentElement).appendChild(style);
+
+  // ── Dock + profil hide/show ──
   function forceHide() {
     var dock  = document.getElementById('mfDock');
     var badge = document.getElementById('mfProfileBadge');
-    if (dock)  { dock.style.setProperty('opacity','0','important');  dock.style.setProperty('transform','translateY(120%)','important');  dock.style.setProperty('pointer-events','none','important'); }
+    if (dock)  { dock.style.setProperty('opacity','0','important'); dock.style.setProperty('transform','translateY(120%)','important'); dock.style.setProperty('pointer-events','none','important'); }
     if (badge) { badge.style.setProperty('opacity','0','important'); badge.style.setProperty('transform','translateY(-10px)','important'); badge.style.setProperty('pointer-events','none','important'); }
   }
 
@@ -47,40 +48,51 @@
     forceHide();
     if (_interval) clearInterval(_interval);
     _interval = setInterval(function() {
-      if (isModalOpen()) forceHide();
+      var m = document.getElementById('seriesModal');
+      if (m && m.classList.contains('open')) forceHide();
       else { clearInterval(_interval); _interval = null; forceShow(); }
     }, 150);
   }
 
-  // ── Hero scroll ──
+  // ── Hero scroll s rAF ──
+  function updateHero(mb) {
+    var hero    = document.querySelector('#seriesModal .modal-hero');
+    var content = hero && hero.querySelector('.modal-hero-content');
+    if (!hero) { _ticking = false; return; }
+
+    var scrolled = mb.scrollTop;
+    var raw      = Math.min(1, Math.max(0, scrolled / SCROLL_END));
+    var progress = easeInOut(raw);
+
+    // Výška: 180 → 0
+    hero.style.height = (HERO_FULL * (1 - progress)) + 'px';
+
+    // Content: fade + posun nahoru, začne mizet od 20% progressu
+    if (content) {
+      var op = Math.max(0, 1 - (raw - 0.15) / 0.45);
+      content.style.opacity      = op;
+      content.style.transform    = 'translateY(' + (-12 * progress) + 'px)';
+      content.style.pointerEvents = op < 0.1 ? 'none' : '';
+    }
+
+    _ticking = false;
+  }
+
   function setupHeroScroll() {
     var mb = document.getElementById('modalBody');
     if (!mb || mb._mfPatch) return;
     mb._mfPatch = true;
+
     mb.addEventListener('scroll', function() {
-      var hero    = document.querySelector('#seriesModal .modal-hero');
-      var content = hero && hero.querySelector('.modal-hero-content');
-      if (!hero) return;
-
-      var scrolled = mb.scrollTop;
-      // Clamp progress 0→1
-      var progress = Math.min(1, Math.max(0, (scrolled - SCROLL_START) / (SCROLL_END - SCROLL_START)));
-
-      // Plynulá výška
-      var newH = Math.round(HERO_FULL - (HERO_FULL - HERO_MIN) * progress);
-      hero.style.height = newH + 'px';
-
-      // Content fade — začne mizet od progress 0.2, zmizí při 0.7
-      if (content) {
-        var contentOpacity = Math.max(0, 1 - (progress - 0.2) / 0.5);
-        content.style.opacity      = contentOpacity;
-        content.style.transform    = 'translateY(' + (-8 * progress) + 'px)';
-        content.style.pointerEvents = progress > 0.8 ? 'none' : '';
+      _lastScroll = mb.scrollTop;
+      if (!_ticking) {
+        _ticking = true;
+        requestAnimationFrame(function() { updateHero(mb); });
       }
     }, { passive: true });
   }
 
-  // ── Sleduj #seriesModal classList ──
+  // ── Sleduj #seriesModal.open ──
   function init() {
     var modal = document.getElementById('seriesModal');
     if (!modal) { setTimeout(init, 200); return; }
@@ -98,11 +110,12 @@
       } else {
         forceShow();
         if (_interval) { clearInterval(_interval); _interval = null; }
-        // Reset hero
-        var hero = document.querySelector('#seriesModal .modal-hero');
-        var mb   = document.getElementById('modalBody');
-        if (hero) hero.style.height = HERO_FULL + 'px';
-        if (mb)   mb._mfPatch = false;
+        var hero    = document.querySelector('#seriesModal .modal-hero');
+        var content = hero && hero.querySelector('.modal-hero-content');
+        var mb      = document.getElementById('modalBody');
+        if (hero)    hero.style.height = HERO_FULL + 'px';
+        if (content) { content.style.opacity = '1'; content.style.transform = ''; content.style.pointerEvents = ''; }
+        if (mb)      mb._mfPatch = false;
       }
     }).observe(modal, { attributes: true, attributeFilter: ['class'] });
   }
@@ -110,5 +123,5 @@
   if (document.readyState !== 'loading') setTimeout(init, 50);
   else document.addEventListener('DOMContentLoaded', function() { setTimeout(init, 50); });
 
-  console.log('[MFPatch] sleduje #seriesModal.open ✓');
+  console.log('[MFPatch] smooth hero scroll ✓');
 })();
