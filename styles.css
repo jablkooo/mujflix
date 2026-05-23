@@ -4494,6 +4494,8 @@ body::after {
 .episode-grid {
   min-height: 100px;
   background: 0 0 !important;
+  display: flex;
+  flex-direction: column;
 }
 .modal-body::-webkit-scrollbar {
   width: 3px;
@@ -4799,44 +4801,43 @@ body::after {
   fill: #000;
 }
 .episode-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  padding: 4px 4px 120px;
-  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 16px 120px;
+  background: transparent;
 }
 .episode-card {
   position: relative;
   cursor: pointer;
-  background: #0c0c14;
+  background: rgba(255, 255, 255, 0.02);
   display: flex;
-  flex-direction: column;
-  overflow: visible;
-  border-radius: 4px;
-  border: none;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0;
   transition:
-    background 0.28s ease,
-    z-index 0s 0.28s;
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
   z-index: 1;
-  clip-path: inset(0 round 4px);
-  transition:
-    background 0.28s ease,
-    clip-path 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.episode-card:last-child {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 .episode-card:hover {
-  background: #13131f;
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(255, 255, 255, 0.1);
   z-index: 10;
-  clip-path: inset(-12px -10px -24px -10px round 14px);
-  filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.9))
-    drop-shadow(0 0 0 1px rgba(255, 255, 255, 0.07));
-  transition:
-    background 0.28s ease,
-    clip-path 0.38s cubic-bezier(0.34, 1.2, 0.64, 1),
-    filter 0.35s ease,
-    z-index 0s 0s;
+  filter: none;
+  transform: translateX(3px);
 }
 .episode-card.next-ep {
-  background: color-mix(in srgb, var(--accent, #007aff) 4%, #0c0c14);
+  background: rgba(0, 122, 255, 0.07);
+  border-color: rgba(0, 122, 255, 0.2);
 }
 .episode-card.next-ep::before {
   content: "";
@@ -4846,10 +4847,9 @@ body::after {
   bottom: 0;
   width: 3px;
   background: var(--accent);
-  box-shadow: 0 0 12px
-    color-mix(in srgb, var(--accent, #007aff) 65%, transparent);
+  box-shadow: none;
   z-index: 6;
-  border-radius: 3px 0 0 3px;
+  border-radius: 0;
 }
 .episode-card.watched {
   opacity: 0.32;
@@ -4863,26 +4863,28 @@ body::after {
   outline-offset: -1.5px;
 }
 .ep-thumb {
-  width: 100%;
+  width: 160px;
+  min-width: 160px;
   aspect-ratio: 16/9;
   position: relative;
   overflow: hidden;
   background: #080812;
   flex-shrink: 0;
+  border-radius: 0;
 }
 .ep-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: brightness(0.72) saturate(0.75);
+  filter: brightness(0.82) saturate(0.85);
   transition:
-    transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
     filter 0.3s ease;
 }
 .episode-card:hover .ep-thumb img {
-  transform: scale(1.07);
-  filter: brightness(1) saturate(1.15);
+  transform: scale(1.08);
+  filter: brightness(0.55) saturate(0.7);
 }
 .ep-thumb::after {
   content: "";
@@ -4890,14 +4892,13 @@ body::after {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 55%;
-  background: linear-gradient(to top, #0c0c14 0, transparent 100%);
+  height: 45%;
+  background: linear-gradient(to top, rgba(0,0,0,0.55) 0, transparent 100%);
   z-index: 1;
   pointer-events: none;
-  transition: background 0.28s;
 }
 .episode-card:hover .ep-thumb::after {
-  background: linear-gradient(to top, #13131f 0, transparent 100%);
+  background: linear-gradient(to top, rgba(0,0,0,0.45) 0, transparent 100%);
 }
 .ep-badge {
   position: absolute;
@@ -4917,20 +4918,19 @@ body::after {
 .ep-next-tag {
   display: none;
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: 6px;
   z-index: 5;
   background: var(--accent);
-  color: #000;
-  padding: 3px 9px;
-  font-size: 0.42rem;
-  font-weight: 900;
-  letter-spacing: 2px;
+  color: #fff;
+  padding: 2px 7px;
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  border-radius: 20px;
-  box-shadow: 0 2px 10px
-    color-mix(in srgb, var(--accent, #007aff) 55%, transparent);
+  border-radius: 3px;
+  box-shadow: none;
 }
 .next-ep .ep-next-tag {
   display: block;
@@ -4959,38 +4959,60 @@ body::after {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.22s;
+  transition: opacity 0.2s ease;
+  background: rgba(0,0,0,0.15);
 }
 .episode-card:hover .ep-hover-play {
   opacity: 1;
 }
 .ep-play-ring {
-  width: 52px;
-  height: 52px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.92);
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.22s cubic-bezier(0.34, 1.3, 0.64, 1);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+  transition: transform 0.2s cubic-bezier(0.34, 1.3, 0.64, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 .ep-play-ring:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  transform: scale(1.12);
+  background: #fff;
+  transform: scale(1.1);
 }
 .ep-play-ring:hover svg {
   fill: #000;
 }
 .ep-play-ring svg {
-  width: 15px;
-  height: 15px;
-  fill: #fff;
-  margin-left: 2px;
+  width: 13px;
+  height: 13px;
+  fill: #111;
+  margin-left: 3px;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .spoiler-blur .ep-thumb img {
   filter: blur(20px) brightness(0.3) saturate(0);
 }
@@ -5009,56 +5031,71 @@ body::after {
 }
 .ep-body {
   flex: 1;
-  padding: 8px 12px 10px;
+  padding: 0 18px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   min-width: 0;
 }
 .ep-meta-row {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
 .ep-num {
   font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  font-size: 0.48rem;
-  font-weight: 900;
+  font-size: 0.62rem;
+  font-weight: 500;
   color: rgba(255, 255, 255, 0.28);
-  letter-spacing: 1.5px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 .next-ep .ep-num {
   color: var(--accent);
 }
 .ep-runtime {
-  font-size: 0.46rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.18);
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.22);
 }
 .ep-rating {
-  font-size: 0.46rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: rgba(255, 200, 60, 0.6);
+}
+/* Netflix right-side play chevron */
+.episode-card::after {
+  content: "";
+  width: 44px;
+  min-width: 44px;
+  height: 100%;
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.15)' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: background-image 0.15s;
+}
+.episode-card:hover::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'/%3E%3C/svg%3E");
 }
 .ep-title {
   font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  font-size: 0.84rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, 0.92);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.3;
-  transition: color 0.2s;
+  transition: color 0.15s;
 }
 .episode-card:hover .ep-title {
   color: #fff;
-  white-space: normal;
+  white-space: nowrap;
 }
 .ep-desc {
   font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.38);
   line-height: 1.55;
@@ -5066,37 +5103,31 @@ body::after {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  margin-top: 0;
-  transition:
-    max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.28s ease,
-    margin-top 0.28s ease;
+  margin-top: 2px;
+  opacity: 1;
+  max-height: 44px;
 }
 .episode-card:hover .ep-desc {
-  max-height: 60px;
-  opacity: 1;
-  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.58);
 }
 .ep-actions {
   display: flex;
-  gap: 7px;
+  gap: 6px;
   align-items: center;
   max-height: 0;
   opacity: 0;
   overflow: hidden;
   margin-top: 0;
   transition:
-    max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.28s 40ms ease,
-    margin-top 0.28s ease;
+    max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.22s 20ms ease,
+    margin-top 0.22s ease;
 }
 .episode-card:hover .ep-actions {
-  max-height: 40px;
+  max-height: 34px;
   opacity: 1;
   overflow: visible;
-  margin-top: 8px;
+  margin-top: 7px;
 }
 .ep-btn-play-hbo {
   display: inline-flex;
@@ -13887,7 +13918,7 @@ nav.mf-dock {
 .episode-grid {
   background: var(--sys-bg) !important;
   gap: 0 !important;
-  grid-template-columns: 1fr !important;
+  flex-direction: column !important;
   border-radius: 12px !important;
   overflow: hidden !important;
 }
@@ -15872,7 +15903,7 @@ html {
 .episode-grid {
   background: rgba(12, 12, 18, 0) !important;
   gap: 0 !important;
-  grid-template-columns: 1fr !important;
+  flex-direction: column !important;
   border-radius: 0 !important;
   overflow: visible !important;
   padding: 8px 12px 120px !important;
@@ -19832,4 +19863,158 @@ nav.mf-dock {
 }
 .dock-btn.dock-ai:hover {
   transform: none !important;
+}
+
+/* ══ EPISODE REDESIGN OVERRIDE ══
+   Musí být na konci — přebíjí TV/AppleTV bloky které schovávají ep-thumb */
+body:not(.tv-mode):not(.appletv-mode) .episode-card {
+  flex-direction: row !important;
+  align-items: center !important;
+  background: rgba(255,255,255,0.02) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  padding: 0 !important;
+  clip-path: none !important;
+  margin-bottom: 2px;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover {
+  background: rgba(255,255,255,0.055) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  transform: translateX(3px) !important;
+  filter: none !important;
+  clip-path: none !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-thumb {
+  display: block !important;
+  width: 160px !important;
+  min-width: 160px !important;
+  aspect-ratio: 16/9 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  background: #080812 !important;
+  position: relative !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-thumb img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  filter: brightness(0.82) saturate(0.85) !important;
+  transition: transform 0.4s ease, filter 0.3s ease !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover .ep-thumb img {
+  transform: scale(1.08) !important;
+  filter: brightness(0.55) saturate(0.7) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-body {
+  flex: 1 !important;
+  padding: 0 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  width: auto !important;
+  align-items: flex-start !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-meta-row {
+  flex-direction: row !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-num {
+  font-size: 0.62rem !important;
+  font-weight: 500 !important;
+  color: rgba(255,255,255,0.28) !important;
+  letter-spacing: 0.5px !important;
+  min-width: unset !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card.next-ep .ep-num {
+  color: var(--accent) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-title {
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+  color: rgba(255,255,255,0.92) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  flex: unset !important;
+  width: 100% !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-desc {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  opacity: 1 !important;
+  max-height: 44px !important;
+  font-size: 0.68rem !important;
+  color: rgba(255,255,255,0.38) !important;
+  margin-top: 2px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-actions {
+  flex-direction: row !important;
+  max-height: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  margin-top: 0 !important;
+  flex-shrink: unset !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover .ep-actions {
+  max-height: 34px !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  margin-top: 7px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  padding: 8px 16px 120px !important;
+  background: transparent !important;
+  grid-template-columns: unset !important;
+}
+
+/* ══ SKRYTÍ DOCKU + PROFILU PŘI OTEVŘENÉM MODALU ══ */
+body.modal-open #mfDock,
+body.modal-open .mf-dock,
+body.modal-open nav.mf-dock,
+body.modal-open [id*="Dock"],
+body.modal-open .dock {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(120%) !important;
+  visibility: hidden !important;
+  transition: opacity 0.2s ease, transform 0.25s ease !important;
+}
+
+body.modal-open #mfProfileBadge {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(-12px) scale(0.88) !important;
+  visibility: hidden !important;
+  transition: opacity 0.18s ease, transform 0.2s ease !important;
+}
+
+/* Smooth show when modal closes */
+#mfProfileBadge {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+/* ══ FINÁLNÍ OVERRIDE — modal-open skrývání ══ */
+body.modal-open #mfProfileBadge,
+body.modal-open .mpb-wrap {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(-10px) scale(0.9) !important;
+  visibility: hidden !important;
+}
+
+body.modal-open #mfDock,
+body.modal-open .mf-dock,
+body.modal-open [class*="dock"]:not(.dock-btn) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(100%) !important;
+  visibility: hidden !important;
 }
