@@ -1,6 +1,6 @@
 /**
- * MůjFlix — UI Patch v4
- * Hero scroll: plynulá animace synchronizovaná se scrollem
+ * MůjFlix — UI Patch v5
+ * Hero scroll: lerp interpolace = máslovitá plynulost i při rychlém scrollu
  */
 (function() {
   'use strict';
@@ -10,14 +10,18 @@
 
   var HERO_CSS_H = 260;
   var SCROLL_END = 320;
-  var _interval  = null;
-  var _ticking   = false;
+  var LERP_SPEED = 0.12;  // 0.0–1.0: nižší = plynulejší/pomalejší dotah
 
-  // ── CSS — transition: none všude, animujeme přes JS ──
+  var _current   = 0;     // aktuálně vykreslená hodnota (0–1)
+  var _target    = 0;     // cílová hodnota ze scrollTop
+  var _rafId     = null;
+  var _interval  = null;
+
+  // ── CSS ──
   var old = document.getElementById('mf-patch-style');
   if (old) old.remove();
   var style = document.createElement('style');
-  style.id  = 'mf-patch-style';
+  style.id = 'mf-patch-style';
   style.textContent = [
     '#seriesModal .modal-hero {',
     '  transition: none !important;',
@@ -55,6 +59,48 @@
   ].join('\n');
   document.head.appendChild(style);
 
+  // ── Lerp ──
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  // ── Render loop — běží dokud current ≈ target ──
+  function renderLoop() {
+    _current = lerp(_current, _target, LERP_SPEED);
+
+    // Zastavit loop když jsme dost blízko cíli
+    if (Math.abs(_current - _target) < 0.0005) {
+      _current = _target;
+      _rafId = null;
+    } else {
+      _rafId = requestAnimationFrame(renderLoop);
+    }
+
+    applyHero(_current);
+  }
+
+  function applyHero(raw) {
+    var hero    = document.querySelector('#seriesModal .modal-hero');
+    var overlay = hero && hero.querySelector('.modal-hero-overlay');
+    var content = hero && hero.querySelector('.modal-hero-content');
+    if (!hero) return;
+
+    hero.style.setProperty('height', (HERO_CSS_H * (1 - raw)) + 'px', 'important');
+
+    if (overlay) overlay.style.opacity = String(1 - raw);
+
+    if (content) {
+      var op = Math.max(0, 1 - (raw / 0.4));
+      content.style.opacity       = op;
+      content.style.transform     = 'translateY(' + (-12 * raw) + 'px)';
+      content.style.pointerEvents = op < 0.05 ? 'none' : '';
+    }
+  }
+
+  function startLoop() {
+    if (!_rafId) _rafId = requestAnimationFrame(renderLoop);
+  }
+
   // ── Dock + profil ──
   function forceHide() {
     var dock  = document.getElementById('mfDock');
@@ -81,48 +127,18 @@
     }, 150);
   }
 
-  // ── Hero scroll — čistě lineární, každý pixel scrollu = pohyb ──
-  function updateHero(mb) {
-    var hero    = document.querySelector('#seriesModal .modal-hero');
-    var overlay = hero && hero.querySelector('.modal-hero-overlay');
-    var content = hero && hero.querySelector('.modal-hero-content');
-    if (!hero) { _ticking = false; return; }
-
-    // Lineární 0→1 bez jakéhokoliv easingu = přesně sleduje prst
-    var raw = Math.min(1, Math.max(0, mb.scrollTop / SCROLL_END));
-
-    // Hero výška: 260 → 0
-    hero.style.setProperty('height', (HERO_CSS_H * (1 - raw)) + 'px', 'important');
-
-    // Overlay fade
-    if (overlay) overlay.style.opacity = String(1 - raw);
-
-    // Content: zmizí rychleji (v první třetině scrollu)
-    if (content) {
-      var op = Math.max(0, 1 - (raw / 0.4));
-      content.style.opacity       = op;
-      content.style.transform     = 'translateY(' + (-12 * raw) + 'px)';
-      content.style.pointerEvents = op < 0.05 ? 'none' : '';
-    }
-
-    _ticking = false;
-  }
-
-  function onScroll(mb) {
-    if (!_ticking) {
-      _ticking = true;
-      // requestAnimationFrame = 60fps, bez throttlingu, plynulé
-      requestAnimationFrame(function() { updateHero(mb); });
-    }
-  }
-
   function setupHeroScroll() {
     var mb = document.getElementById('modalBody');
     if (!mb || mb._mfPatch) return;
     mb._mfPatch = true;
     var hero = document.querySelector('#seriesModal .modal-hero');
     if (hero) hero.style.setProperty('height', HERO_CSS_H + 'px', 'important');
-    mb.addEventListener('scroll', function() { onScroll(mb); }, { passive: true });
+
+    mb.addEventListener('scroll', function() {
+      // Aktualizuj pouze target — loop se postará o plynulé dotažení
+      _target = Math.min(1, Math.max(0, mb.scrollTop / SCROLL_END));
+      startLoop();
+    }, { passive: true });
   }
 
   function init() {
@@ -142,6 +158,8 @@
       } else {
         forceShow();
         if (_interval) { clearInterval(_interval); _interval = null; }
+        if (_rafId)    { cancelAnimationFrame(_rafId); _rafId = null; }
+        _current = 0; _target = 0;
         var hero    = document.querySelector('#seriesModal .modal-hero');
         var overlay = hero && hero.querySelector('.modal-hero-overlay');
         var content = hero && hero.querySelector('.modal-hero-content');
@@ -157,5 +175,5 @@
   if (document.readyState !== 'loading') setTimeout(init, 50);
   else document.addEventListener('DOMContentLoaded', function() { setTimeout(init, 50); });
 
-  console.log('[MFPatch] v4 smooth ✓');
+  console.log('[MFPatch] v5 lerp ✓');
 })();
