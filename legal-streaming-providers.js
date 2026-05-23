@@ -187,181 +187,211 @@
     return null;
   }
 
-  // ══ RENDER PROVIDERS IN CINEMA MODAL ══
+  // ══ RENDER PROVIDERS — floating badge v pravém dolním rohu ══
   function renderLegalProviders(tmdbId, title, type) {
-    // Remove existing
+    // Odstraň existující
     const existing = document.getElementById('legalProvidersSection');
     if (existing) existing.remove();
 
-    // Create section
-    const section = document.createElement('div');
-    section.id = 'legalProvidersSection';
-    section.style.cssText = `
-      padding: 16px 20px;
-      background: rgba(10, 10, 12, 0.85);
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    const cinemaModal = document.getElementById('cinemaModal');
+    if (!cinemaModal) return;
+
+    // ── Wrapper: fixně v pravém dolním rohu cinema modalu ──
+    const wrap = document.createElement('div');
+    wrap.id = 'legalProvidersSection';
+    wrap.style.cssText = `
+      position: absolute;
+      bottom: 72px;
+      right: 16px;
+      z-index: 50;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      align-items: flex-end;
+      gap: 8px;
+      pointer-events: none;
     `;
 
-    // Title
-    const titleEl = document.createElement('div');
-    titleEl.style.cssText = `
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.5);
+    // ── Rozbalený panel (skrytý dokud nejsou data) ──
+    const panel = document.createElement('div');
+    panel.id = 'legalProvidersPanel';
+    panel.style.cssText = `
+      background: rgba(10,10,16,0.92);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+      pointer-events: auto;
+      max-width: 260px;
+    `;
+
+    const panelLabel = document.createElement('div');
+    panelLabel.style.cssText = `
+      font-size: 0.52rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 2px;
     `;
-    titleEl.textContent = '🎬 Legálně dostupné na';
-    section.appendChild(titleEl);
+    panelLabel.textContent = 'Legálně dostupné na';
+    panel.appendChild(panelLabel);
 
-    // Loading state
-    const loadingEl = document.createElement('div');
-    loadingEl.id = 'legalProvidersLoading';
-    loadingEl.style.cssText = `
-      font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.35);
-      padding: 10px 0;
+    const providersRow = document.createElement('div');
+    providersRow.style.cssText = `
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     `;
-    loadingEl.textContent = 'Hledám dostupné služby...';
-    section.appendChild(loadingEl);
+    panel.appendChild(providersRow);
 
-    // Find the cinema modal and add our section before the player
-    const cinemaModal = document.getElementById('cinemaModal');
-    const frameWrap = document.getElementById('cinemaFrameWrap');
-    if (cinemaModal && frameWrap) {
-      cinemaModal.insertBefore(section, frameWrap.nextSibling);
-    }
+    // ── Toggle badge ──
+    const badge = document.createElement('button');
+    badge.id = 'legalProvidersBadge';
+    badge.title = 'Kde legálně sledovat';
+    badge.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px 7px 9px;
+      background: rgba(10,10,16,0.88);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50px;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      color: rgba(255,255,255,0.55);
+      font-size: 0.68rem;
+      font-weight: 600;
+      font-family: -apple-system, sans-serif;
+      white-space: nowrap;
+    `;
+    badge.innerHTML = `
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+      </svg>
+      <span id="legalBadgeText">Kde sledovat?</span>
+    `;
+    badge.onmouseenter = () => {
+      badge.style.background = 'rgba(20,20,30,0.95)';
+      badge.style.borderColor = 'rgba(255,255,255,0.18)';
+      badge.style.color = 'rgba(255,255,255,0.85)';
+    };
+    badge.onmouseleave = () => {
+      badge.style.background = 'rgba(10,10,16,0.88)';
+      badge.style.borderColor = 'rgba(255,255,255,0.1)';
+      badge.style.color = 'rgba(255,255,255,0.55)';
+    };
 
-    // Fetch providers
+    let panelOpen = false;
+    badge.onclick = () => {
+      panelOpen = !panelOpen;
+      panel.style.display = panelOpen ? 'flex' : 'none';
+    };
+
+    wrap.appendChild(panel);
+    wrap.appendChild(badge);
+    cinemaModal.appendChild(wrap);
+
+    // ── Fetch providers ──
     fetchWatchProviders(tmdbId, type).then(data => {
       const czData = getCzechProviders(data);
 
       if (!czData?.providers?.length) {
-        loadingEl.textContent = 'V ČR nejsou dostupné žádné legální služby';
-        loadingEl.style.color = 'rgba(255, 255, 255, 0.25)';
+        badge.style.display = 'none'; // Skryj badge pokud nic není
         return;
       }
 
-      // Update loading text
-      loadingEl.textContent = `Dostupné v: ${czData.region === 'CZ' ? 'Česko' : czData.region === 'SK' ? 'Slovensko' : czData.region}`;
-      loadingEl.style.color = 'rgba(10, 132, 255, 0.8)';
+      // Aktualizuj badge text
+      const badgeText = document.getElementById('legalBadgeText');
+      if (badgeText) badgeText.textContent = `Dostupné v ${czData.region === 'CZ' ? 'ČR' : czData.region}`;
 
-      // Create providers row
-      const providersRow = document.createElement('div');
-      providersRow.style.cssText = `
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-      `;
+      // Zvýrazni badge — jsou data
+      badge.style.borderColor = 'rgba(0,122,255,0.3)';
+      badge.querySelector('svg').style.stroke = '#007aff';
 
+      // Přidej provider tlačítka
       czData.providers.forEach(provider => {
-        const providerInfo = STREAMING_PROVIDERS[provider.provider_id];
-        if (!providerInfo) return; // Skip unknown providers
+        const info = STREAMING_PROVIDERS[provider.provider_id];
+        if (!info) return;
 
         const btn = document.createElement('a');
-        btn.href = providerInfo.url(title, type);
+        btn.href = info.url(title, type);
         btn.target = '_blank';
         btn.rel = 'noopener noreferrer';
+        btn.title = info.name;
         btn.style.cssText = `
           display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 8px 14px;
-          background: rgba(255, 255, 255, 0.06);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 22px;
+          gap: 6px;
+          padding: 6px 10px;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 20px;
           text-decoration: none;
-          transition: all 0.2s ease;
+          transition: all 0.18s;
           cursor: pointer;
         `;
         btn.onmouseenter = () => {
-          btn.style.background = 'rgba(255, 255, 255, 0.12)';
-          btn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-          btn.style.transform = 'translateY(-2px)';
+          btn.style.background = 'rgba(255,255,255,0.1)';
+          btn.style.borderColor = 'rgba(255,255,255,0.18)';
         };
         btn.onmouseleave = () => {
-          btn.style.background = 'rgba(255, 255, 255, 0.06)';
-          btn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-          btn.style.transform = 'translateY(0)';
+          btn.style.background = 'rgba(255,255,255,0.05)';
+          btn.style.borderColor = 'rgba(255,255,255,0.08)';
         };
 
-        // Logo
         const logo = document.createElement('img');
-        logo.src = providerInfo.logo;
-        logo.alt = providerInfo.name;
-        logo.style.cssText = `
-          width: 28px;
-          height: 28px;
-          object-fit: contain;
-          border-radius: 6px;
-          background: transparent;
-        `;
-        logo.onerror = () => {
-          logo.style.display = 'none'; // Hide if logo fails
-        };
+        logo.src = info.logo;
+        logo.alt = info.name;
+        logo.style.cssText = `width:20px;height:20px;object-fit:contain;border-radius:4px;`;
+        logo.onerror = () => logo.style.display = 'none';
 
-        // Name
         const name = document.createElement('span');
-        name.style.cssText = `
-          font-size: 0.75rem;
-          font-weight: 500;
-          color: rgba(255, 255, 255, 0.85);
-          white-space: nowrap;
-        `;
-        name.textContent = providerInfo.name;
+        name.style.cssText = `font-size:0.65rem;font-weight:600;color:rgba(255,255,255,0.8);white-space:nowrap;font-family:-apple-system,sans-serif;`;
+        name.textContent = info.name;
 
         btn.appendChild(logo);
         btn.appendChild(name);
         providersRow.appendChild(btn);
       });
 
-      section.appendChild(providersRow);
-    }).catch(err => {
-      loadingEl.textContent = 'Nepodařilo se načíst';
-      loadingEl.style.color = 'rgba(255, 255, 255, 0.25)';
+    }).catch(() => {
+      badge.style.display = 'none';
     });
   }
 
   // ══ HOOK INTO CINEMA MODE ══
-  // app.js má defer → musíme počkat na DOMContentLoaded než hookujeme
-  function hookCinema() {
-    const originalOpenMovieInCinema = window.openMovieInCinema;
-    if (!originalOpenMovieInCinema) {
-      console.warn('[MFLegalProviders] openMovieInCinema nenalezena, hook přeskočen');
-      return;
-    }
-    window.openMovieInCinema = function(tmdbId, title, type) {
-      // Zavolej originál
+  // Override openMovieInCinema to add providers
+  const originalOpenMovieInCinema = window.openMovieInCinema;
+  window.openMovieInCinema = function(tmdbId, title, type) {
+    // Call original
+    if (originalOpenMovieInCinema) {
       originalOpenMovieInCinema.apply(this, arguments);
+    }
 
-      // Vytáhni čisté tmdbId (tv_ep formát: id/season/ep)
-      const actualTmdbId = String(tmdbId).split('/')[0];
-      const actualType = (type === 'tv_ep') ? 'tv' : (type || 'movie');
+    // Extract actual tmdbId (handle tv_ep format: id/season/ep)
+    const actualTmdbId = String(tmdbId).split('/')[0];
 
-      // Počkej až se modal vykreslí, pak přidej sekci
-      setTimeout(() => {
-        renderLegalProviders(actualTmdbId, title, actualType);
-      }, 800);
-    };
-    console.log('[MFLegalProviders] Hook na openMovieInCinema aktivní ✓');
-  }
+    // Add legal providers after a short delay to let modal render
+    setTimeout(() => {
+      renderLegalProviders(actualTmdbId, title, type);
+    }, 800);
+  };
 
   // ══ EXPORT FOR MANUAL USE ══
   window.MFLegalProviders = {
     show: renderLegalProviders,
     providers: STREAMING_PROVIDERS
   };
-
-  // Spustit hook až po načtení app.js (defer)
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', hookCinema);
-  } else {
-    hookCinema();
-  }
 
   console.log('[MFLegalProviders] Legal streaming providers loaded');
 })();
