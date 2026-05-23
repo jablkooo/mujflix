@@ -20919,3 +20919,505 @@ body:not(.tv-mode):not(.appletv-mode) .ep-seen-dot {
   border-radius: 0 !important;
 }
 
+
+/* ════════════════════════════════════════════════════════════
+   HBO MAX REDESIGN — Dark, purple accents, premium feel
+   Final override — wins over everything above
+   ════════════════════════════════════════════════════════════ */
+
+/* ── SEASON SELECTOR ── */
+body:not(.tv-mode):not(.appletv-mode) .season-select-view {
+  padding: 0 !important;
+  background: transparent !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-label {
+  font-size: 0.42rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 7px !important;
+  color: rgba(180,130,255,0.4) !important;
+  text-transform: uppercase !important;
+  padding: 22px 22px 12px !important;
+  margin: 0 !important;
+  display: block !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-grid {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  padding: 4px 22px 30px !important;
+  scroll-snap-type: x mandatory !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  grid-template-columns: unset !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-grid::-webkit-scrollbar { display: none !important; }
+
+body:not(.tv-mode):not(.appletv-mode) .ssv-card {
+  flex-shrink: 0 !important;
+  width: 115px !important;
+  height: 168px !important;
+  aspect-ratio: unset !important;
+  border-radius: 12px !important;
+  border: 1.5px solid rgba(140,80,255,0.12) !important;
+  background: #0d0a18 !important;
+  scroll-snap-align: start !important;
+  transition: transform 0.32s cubic-bezier(0.34,1.2,0.64,1), border-color 0.22s, box-shadow 0.32s !important;
+  overflow: hidden !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-card:hover {
+  transform: translateY(-8px) scale(1.05) !important;
+  border-color: rgba(140,80,255,0.5) !important;
+  box-shadow: 0 20px 50px rgba(100,40,200,0.35), 0 0 0 1px rgba(140,80,255,0.2) !important;
+  z-index: 5 !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-card.ssv-active {
+  border-color: rgba(160,100,255,0.8) !important;
+  box-shadow: 0 0 0 2px rgba(140,80,255,0.3), 0 12px 40px rgba(100,40,200,0.4) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-card img {
+  width: 100% !important; height: 100% !important;
+  object-fit: cover !important;
+  filter: brightness(0.6) saturate(0.7) !important;
+  transition: transform 0.45s ease, filter 0.3s ease !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-card:hover img {
+  transform: scale(1.1) !important;
+  filter: brightness(0.85) saturate(1.1) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-card.ssv-active img {
+  filter: brightness(0.8) saturate(1) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-card::after {
+  background: linear-gradient(to top, rgba(8,4,20,0.97) 0, rgba(8,4,20,0.3) 55%, transparent 80%) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-info { padding: 0 10px 12px !important; }
+body:not(.tv-mode):not(.appletv-mode) .ssv-num {
+  font-size: 0.4rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 3px !important;
+  color: rgba(160,100,255,0.55) !important;
+  margin-bottom: 2px !important;
+  text-transform: uppercase !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-card.ssv-active .ssv-num {
+  color: rgba(190,140,255,0.9) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-name {
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.1px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-ep-count {
+  font-size: 0.46rem !important;
+  color: rgba(255,255,255,0.22) !important;
+  margin-top: 3px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-active-badge {
+  top: 8px !important; right: 8px !important;
+  width: 20px !important; height: 20px !important;
+  background: rgba(160,100,255,0.9) !important;
+  box-shadow: 0 0 14px rgba(140,80,255,0.7) !important;
+  border-radius: 50% !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-active-badge svg { stroke: #fff !important; width: 9px !important; height: 9px !important; }
+body:not(.tv-mode):not(.appletv-mode) .ssv-play-overlay { background: rgba(8,4,20,0.3) !important; }
+body:not(.tv-mode):not(.appletv-mode) .ssv-play-btn {
+  background: rgba(140,80,255,0.92) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  font-size: 0.65rem !important;
+  font-weight: 900 !important;
+  box-shadow: 0 4px 24px rgba(120,60,220,0.6) !important;
+  gap: 6px !important;
+  letter-spacing: 0.3px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ssv-play-btn svg { fill: #fff !important; }
+body:not(.tv-mode):not(.appletv-mode) .ssv-play-btn:hover {
+  background: rgba(160,100,255,1) !important;
+  transform: scale(1.07) !important;
+}
+
+/* ── NAV BAR ── */
+body:not(.tv-mode):not(.appletv-mode) .ep-view-bar {
+  position: sticky !important;
+  top: 0 !important; z-index: 20 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 11px 18px !important;
+  background: rgba(6,3,16,0.97) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid rgba(140,80,255,0.1) !important;
+  box-shadow: 0 1px 30px rgba(80,30,160,0.15) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ep-view-back {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: rgba(140,80,255,0.08) !important;
+  border: 1px solid rgba(140,80,255,0.2) !important;
+  border-radius: 8px !important;
+  padding: 5px 12px 5px 8px !important;
+  color: rgba(180,130,255,0.7) !important;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.18s !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ep-view-back:hover {
+  background: rgba(140,80,255,0.16) !important;
+  border-color: rgba(160,100,255,0.4) !important;
+  color: rgba(210,170,255,1) !important;
+  transform: none !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ep-view-title {
+  flex: 1 !important;
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.2px !important;
+  color: rgba(255,255,255,0.9) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ep-view-season-badge {
+  background: rgba(140,80,255,0.1) !important;
+  border: 1px solid rgba(140,80,255,0.25) !important;
+  border-radius: 7px !important;
+  padding: 4px 10px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ep-view-season-badge-dot {
+  background: rgb(160,100,255) !important;
+  box-shadow: 0 0 8px rgba(160,100,255,0.8) !important;
+  animation: hboPulse 2s ease-in-out infinite !important;
+}
+@keyframes hboPulse {
+  0%,100% { opacity: 1; box-shadow: 0 0 8px rgba(160,100,255,0.8); }
+  50% { opacity: 0.5; box-shadow: 0 0 4px rgba(160,100,255,0.3); }
+}
+body:not(.tv-mode):not(.appletv-mode) .ep-view-season-text {
+  font-size: 0.6rem !important;
+  font-weight: 900 !important;
+  color: rgba(190,145,255,0.9) !important;
+  letter-spacing: 0.3px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .season-all-btn {
+  background: rgba(140,80,255,0.06) !important;
+  border: 1px solid rgba(140,80,255,0.15) !important;
+  border-radius: 7px !important;
+  font-size: 0.58rem !important;
+  font-weight: 800 !important;
+  color: rgba(180,130,255,0.45) !important;
+  height: 28px !important;
+  padding: 0 12px !important;
+  letter-spacing: 0.5px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .season-all-btn:hover,
+body:not(.tv-mode):not(.appletv-mode) .season-all-btn.active {
+  background: rgba(140,80,255,0.14) !important;
+  border-color: rgba(160,100,255,0.35) !important;
+  color: rgba(200,160,255,0.85) !important;
+}
+
+/* ═══════════════════════════════════════════
+   HBO MAX EPISODE CARDS
+   ═══════════════════════════════════════════ */
+body:not(.tv-mode):not(.appletv-mode) .episode-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  padding: 12px 16px 130px !important;
+  background: transparent !important;
+  grid-template-columns: unset !important;
+}
+
+body:not(.tv-mode):not(.appletv-mode) .episode-card {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  background: rgba(140,80,255,0.03) !important;
+  border: 1px solid rgba(140,80,255,0.1) !important;
+  border-radius: 12px !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+  clip-path: none !important;
+  cursor: pointer !important;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s !important;
+  min-height: 86px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover {
+  background: rgba(140,80,255,0.07) !important;
+  border-color: rgba(160,100,255,0.28) !important;
+  box-shadow: 0 4px 32px rgba(100,40,200,0.2) !important;
+  transform: none !important;
+  filter: none !important;
+  clip-path: none !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card.next-ep {
+  background: rgba(140,80,255,0.08) !important;
+  border-color: rgba(160,100,255,0.35) !important;
+  box-shadow: 0 0 30px rgba(100,40,200,0.2) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card.next-ep::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important; top: 0 !important; bottom: 0 !important;
+  width: 3px !important;
+  background: linear-gradient(to bottom, rgba(180,120,255,1), rgba(120,60,220,1)) !important;
+  z-index: 6 !important;
+  border-radius: 12px 0 0 12px !important;
+  box-shadow: 2px 0 12px rgba(150,80,255,0.5) !important;
+}
+
+/* THUMBNAIL */
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-thumb {
+  display: block !important;
+  width: 170px !important;
+  min-width: 170px !important;
+  height: auto !important;
+  aspect-ratio: 16/9 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  background: #0a0614 !important;
+  position: relative !important;
+  align-self: stretch !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-thumb img {
+  width: 100% !important; height: 100% !important;
+  object-fit: cover !important;
+  filter: brightness(0.68) saturate(0.75) !important;
+  transition: transform 0.45s ease, filter 0.3s ease !important;
+  display: block !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover .ep-thumb img {
+  transform: scale(1.07) !important;
+  filter: brightness(0.4) saturate(0.5) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-thumb::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(105deg, transparent 45%, rgba(10,5,25,0.75) 100%) !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+/* PLAY BUTTON */
+body:not(.tv-mode):not(.appletv-mode) .ep-hover-play {
+  opacity: 0 !important;
+  transition: opacity 0.2s !important;
+  z-index: 4 !important;
+  background: rgba(8,4,20,0.2) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover .ep-hover-play { opacity: 1 !important; }
+body:not(.tv-mode):not(.appletv-mode) .ep-play-ring {
+  width: 44px !important; height: 44px !important;
+  border-radius: 50% !important;
+  background: rgba(140,80,255,0.9) !important;
+  border: none !important;
+  box-shadow: 0 0 0 8px rgba(140,80,255,0.15), 0 4px 24px rgba(100,40,200,0.7) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform 0.22s cubic-bezier(0.34,1.3,0.64,1), background 0.15s !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ep-play-ring:hover {
+  transform: scale(1.14) !important;
+  background: rgba(160,100,255,1) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ep-play-ring svg {
+  fill: #fff !important;
+  width: 13px !important; height: 13px !important; margin-left: 3px !important;
+}
+
+/* EP NUMBER */
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-num {
+  position: absolute !important;
+  bottom: 7px !important; left: 9px !important;
+  font-size: 0.48rem !important;
+  font-weight: 900 !important;
+  color: rgba(180,130,255,0.6) !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  z-index: 3 !important;
+  min-width: unset !important;
+  line-height: 1 !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card.next-ep .ep-num {
+  color: rgba(200,160,255,0.9) !important;
+}
+
+/* BODY */
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-body {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  padding: 12px 14px 12px 17px !important;
+  gap: 3px !important;
+  min-width: 0 !important;
+  width: auto !important;
+  align-items: flex-start !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-meta-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 2px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-title {
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+  color: rgba(255,255,255,0.88) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  width: 100% !important;
+  flex: unset !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.2px !important;
+  transition: color 0.15s !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover .ep-title { color: #fff !important; }
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-desc {
+  font-size: 0.65rem !important;
+  color: rgba(255,255,255,0.3) !important;
+  line-height: 1.55 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  max-height: 42px !important;
+  opacity: 1 !important;
+  margin-top: 1px !important;
+  transition: color 0.15s !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover .ep-desc { color: rgba(255,255,255,0.5) !important; }
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-runtime {
+  font-size: 0.57rem !important;
+  font-weight: 500 !important;
+  color: rgba(180,130,255,0.35) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-rating {
+  font-size: 0.57rem !important;
+  font-weight: 600 !important;
+  color: rgba(200,160,255,0.55) !important;
+}
+
+/* ACTIONS */
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-actions {
+  flex-direction: row !important;
+  max-height: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  margin-top: 0 !important;
+  gap: 6px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover .ep-actions {
+  max-height: 34px !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  margin-top: 8px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ep-btn-play-hbo {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: rgba(140,80,255,0.85) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 7px !important;
+  padding: 5px 14px !important;
+  font-size: 0.67rem !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  letter-spacing: 0.2px !important;
+  font-family: inherit !important;
+  transition: background 0.15s !important;
+  box-shadow: 0 2px 14px rgba(120,60,220,0.45) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ep-btn-play-hbo:hover { background: rgba(160,100,255,1) !important; }
+body:not(.tv-mode):not(.appletv-mode) .ep-btn-mark {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(140,80,255,0.07) !important;
+  border: 1px solid rgba(140,80,255,0.2) !important;
+  border-radius: 7px !important;
+  padding: 5px 10px !important;
+  font-size: 0.67rem !important;
+  font-weight: 700 !important;
+  color: rgba(180,130,255,0.5) !important;
+  cursor: pointer !important;
+  font-family: inherit !important;
+  transition: all 0.15s !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .ep-btn-mark:hover {
+  background: rgba(140,80,255,0.15) !important;
+  color: rgba(200,160,255,0.85) !important;
+  border-color: rgba(160,100,255,0.35) !important;
+}
+
+/* RIGHT CHEVRON */
+body:not(.tv-mode):not(.appletv-mode) .episode-card::after {
+  content: "" !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  flex-shrink: 0 !important;
+  align-self: stretch !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(160,100,255,0.2)' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  border-radius: 0 !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(180,120,255,0.6)' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'/%3E%3C/svg%3E") !important;
+}
+
+/* WATCHED */
+body:not(.tv-mode):not(.appletv-mode) .episode-card.watched,
+body:not(.tv-mode):not(.appletv-mode) .episode-card.ep-watched {
+  opacity: 0.35 !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card.watched:hover,
+body:not(.tv-mode):not(.appletv-mode) .episode-card.ep-watched:hover {
+  opacity: 0.72 !important;
+}
+
+/* NEXT TAG */
+body:not(.tv-mode):not(.appletv-mode) .ep-next-tag {
+  display: none !important;
+  position: absolute !important;
+  top: 7px !important; right: 7px !important;
+  z-index: 5 !important;
+  background: rgba(140,80,255,0.85) !important;
+  color: #fff !important;
+  padding: 2px 8px !important;
+  font-size: 0.42rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 12px rgba(140,80,255,0.5) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .next-ep .ep-next-tag { display: block !important; }
+
+/* SEEN DOT */
+body:not(.tv-mode):not(.appletv-mode) .ep-seen-dot {
+  position: absolute !important;
+  bottom: 6px !important; right: 6px !important;
+  z-index: 5 !important;
+  font-size: 0.55rem !important;
+  color: rgba(180,130,255,0.5) !important;
+  background: transparent !important;
+  width: auto !important; height: auto !important;
+  border-radius: 0 !important;
+}
+
