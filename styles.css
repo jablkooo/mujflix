@@ -20047,34 +20047,10 @@ body.modal-open .mf-profile-badge {
   box-shadow: none !important;
 }
 
-/* ══ SERIAL DETAIL — užší hero fotka ══ */
-.modal-hero {
-  height: 180px !important;
-}
-
-/* ══ SKRÝT DOCK A PROFIL PŘI OTEVŘENÉM DETAILU ══ */
-body.modal-open #mfDock,
-body.modal-open .mf-dock,
-body.modal-open nav.mf-dock {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: translateY(120%) !important;
-  visibility: hidden !important;
-  transition: opacity 0.2s ease, transform 0.25s ease !important;
-}
-
-body.modal-open #mfProfileBadge {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: translateY(-10px) !important;
-  visibility: hidden !important;
-  transition: opacity 0.2s ease, transform 0.2s ease !important;
-  z-index: 0 !important;
-}
-
 /* ══ Hero scroll transition ══ */
 .modal-hero {
   transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  overflow: hidden !important;
 }
 .modal-hero-content {
   transition: opacity 0.2s ease, transform 0.2s ease !important;
