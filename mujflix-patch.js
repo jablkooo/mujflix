@@ -59,28 +59,12 @@
     mb.addEventListener('scroll', function() {
       var hero    = document.querySelector('#seriesModal .modal-hero');
       var content = hero && hero.querySelector('.modal-hero-content');
-      var img     = hero && hero.querySelector('.modal-hero-img');
       if (!hero) return;
       if (mb.scrollTop > SCROLL_T) {
-        hero.style.setProperty('height',   HERO_MIN + 'px', 'important');
-        hero.style.setProperty('overflow', 'hidden',        'important');
-        hero.style.setProperty('min-height', '0',           'important');
-        hero.style.setProperty('max-height', HERO_MIN + 'px', 'important');
-        if (img) {
-          img.style.setProperty('height',     HERO_MIN + 'px', 'important');
-          img.style.setProperty('max-height', HERO_MIN + 'px', 'important');
-          img.style.setProperty('min-height', '0',             'important');
-        }
+        hero.style.height = HERO_MIN + 'px';
         if (content) { content.style.opacity = '0'; content.style.transform = 'translateY(-8px)'; content.style.pointerEvents = 'none'; }
       } else {
-        hero.style.setProperty('height',   HERO_FULL + 'px', 'important');
-        hero.style.removeProperty('max-height');
-        hero.style.removeProperty('min-height');
-        if (img) {
-          img.style.setProperty('height', '100%', 'important');
-          img.style.removeProperty('max-height');
-          img.style.removeProperty('min-height');
-        }
+        hero.style.height = HERO_FULL + 'px';
         if (content) { content.style.opacity = '1'; content.style.transform = ''; content.style.pointerEvents = ''; }
       }
     }, { passive: true });
@@ -107,7 +91,7 @@
         // Reset hero
         var hero = document.querySelector('#seriesModal .modal-hero');
         var mb   = document.getElementById('modalBody');
-        if (hero) hero.style.setProperty('height', HERO_FULL + 'px', 'important');
+        if (hero) hero.style.height = HERO_FULL + 'px';
         if (mb)   mb._mfPatch = false;
       }
     }).observe(modal, { attributes: true, attributeFilter: ['class'] });
