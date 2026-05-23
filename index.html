@@ -77,6 +77,159 @@
     <!-- ⚡ HIDE KEY HINTS — klávesové zkratky skryty -->
     <style>
       .key-hint, #mf-disco-kb-hint { display: none !important; }
+
+      /* ══ SYNC MODAL REDESIGN ══ */
+      #syncModal {
+        background: rgba(0,0,0,0.75) !important;
+        backdrop-filter: blur(32px) saturate(1.6) !important;
+        -webkit-backdrop-filter: blur(32px) saturate(1.6) !important;
+      }
+      #syncModal .sync-box {
+        background: rgba(10,10,16,0.98) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-top-color: rgba(255,255,255,0.13) !important;
+        border-radius: 22px !important;
+        padding: 24px 24px 20px !important;
+        width: min(440px, 93vw) !important;
+        box-shadow:
+          0 0 0 1px rgba(0,0,0,0.5),
+          0 40px 100px rgba(0,0,0,0.9),
+          inset 0 1px 0 rgba(255,255,255,0.07) !important;
+      }
+      /* Status row */
+      #syncModal .sync-status-row {
+        background: rgba(255,255,255,0.03) !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        border-radius: 14px !important;
+        padding: 13px 15px !important;
+        margin-bottom: 20px !important;
+        gap: 10px !important;
+      }
+      #syncModal .sync-status-dot {
+        width: 9px !important; height: 9px !important;
+      }
+      #syncModal .sync-status-dot.online {
+        background: #30d158 !important;
+        box-shadow: 0 0 8px rgba(48,209,88,0.5) !important;
+      }
+      #syncModal .sync-status-text {
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+        color: rgba(255,255,255,0.65) !important;
+      }
+      #syncModal .sync-now-btn {
+        font-size: 0.62rem !important;
+        font-weight: 700 !important;
+        color: #007aff !important;
+        background: rgba(0,122,255,0.1) !important;
+        border: 1px solid rgba(0,122,255,0.22) !important;
+        border-radius: 9px !important;
+        padding: 6px 11px !important;
+        transition: all 0.18s !important;
+        display: flex !important; align-items: center !important;
+      }
+      #syncModal .sync-now-btn:hover {
+        background: rgba(0,122,255,0.18) !important;
+      }
+      /* Code row */
+      #syncModal .sync-code-row {
+        gap: 7px !important;
+        margin-bottom: 16px !important;
+      }
+      #syncModal .sync-code-input {
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.09) !important;
+        border-radius: 12px !important;
+        padding: 11px 14px !important;
+        font-size: 0.9rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 1px !important;
+        color: #fff !important;
+        transition: border-color 0.18s, box-shadow 0.18s !important;
+      }
+      #syncModal .sync-code-input:focus {
+        border-color: rgba(0,122,255,0.4) !important;
+        box-shadow: 0 0 0 3px rgba(0,122,255,0.08) !important;
+      }
+      #syncModal .sync-gen-btn {
+        background: rgba(255,255,255,0.05) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 12px !important;
+        padding: 11px 14px !important;
+        font-size: 0.7rem !important;
+        font-weight: 700 !important;
+        color: rgba(255,255,255,0.55) !important;
+        transition: all 0.18s !important;
+        display: flex !important; align-items: center !important;
+      }
+      #syncModal .sync-gen-btn:hover {
+        background: rgba(255,255,255,0.1) !important;
+        color: #fff !important;
+      }
+      #syncModal .sync-btn {
+        background: #007aff !important;
+        border-radius: 12px !important;
+        padding: 11px 18px !important;
+        font-size: 0.8rem !important;
+        font-weight: 800 !important;
+        color: #fff !important;
+        box-shadow: 0 2px 12px rgba(0,122,255,0.35) !important;
+        transition: all 0.18s !important;
+      }
+      #syncModal .sync-btn:hover {
+        opacity: 1 !important;
+        transform: scale(1.03) !important;
+        box-shadow: 0 4px 18px rgba(0,122,255,0.5) !important;
+      }
+      /* Info box */
+      #syncModal .sync-info-box {
+        background: rgba(255,255,255,0.025) !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        border-radius: 13px !important;
+        padding: 13px 15px !important;
+        font-size: 0.67rem !important;
+        color: rgba(255,255,255,0.38) !important;
+        line-height: 1.65 !important;
+        margin-bottom: 18px !important;
+      }
+      #syncModal .sync-info-box strong {
+        color: rgba(255,255,255,0.65) !important;
+        font-weight: 700 !important;
+      }
+      /* Footer */
+      #syncModal .sync-footer-row {
+        gap: 8px !important;
+        justify-content: flex-end !important;
+      }
+      #syncModal .sync-disconnect-btn {
+        background: transparent !important;
+        border: 1px solid rgba(255,80,80,0.2) !important;
+        border-radius: 11px !important;
+        padding: 9px 15px !important;
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        color: rgba(255,100,100,0.55) !important;
+        transition: all 0.18s !important;
+      }
+      #syncModal .sync-disconnect-btn:hover {
+        background: rgba(255,80,80,0.1) !important;
+        color: #ff6060 !important;
+        border-color: rgba(255,80,80,0.35) !important;
+      }
+      #syncModal .sync-btn-sec {
+        background: rgba(255,255,255,0.05) !important;
+        border: 1px solid rgba(255,255,255,0.09) !important;
+        border-radius: 11px !important;
+        padding: 9px 18px !important;
+        font-size: 0.72rem !important;
+        font-weight: 600 !important;
+        color: rgba(255,255,255,0.45) !important;
+        transition: all 0.18s !important;
+      }
+      #syncModal .sync-btn-sec:hover {
+        background: rgba(255,255,255,0.1) !important;
+        color: rgba(255,255,255,0.8) !important;
+      }
     </style>
 
     <!-- ⚡ PERFORMANCE PATCH -->
@@ -3059,81 +3212,75 @@
     <!-- ☁️ SYNC SETTINGS MODAL -->
     <div id="syncModal">
       <div class="sync-box">
-        <div class="sync-title">☁️ Cross-Device Sync</div>
-        <div
-          id="syncFirebaseWarn"
-          class="sync-firebase-warn"
-          style="display: none"
-        >
-          ⚠️ <strong>Firebase není nastaven.</strong> Nastav ho přes tlačítko
-          níže — bez editace kódu.
-        </div>
-        <button
-          id="syncFbSetupBtn"
-          onclick="openFirebaseCfgModal()"
-          style="
-            display: none;
-            width: 100%;
-            padding: 12px 16px;
-            margin-bottom: 12px;
-            border-radius: 13px;
-            background: rgba(0, 122, 255, 0.1);
-            border: 1px solid rgba(0, 122, 255, 0.28);
-            color: var(--accent);
-            font-family: -apple-system, sans-serif;
-            font-size: 0.82rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-align: left;
-          "
-        >
-          🔥 Nastavit Firebase config (sync mezi zařízeními) →
-        </button>
 
-        <div class="sync-section-label">Stav připojení</div>
+        <!-- Header -->
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+          <div style="
+            width:44px;height:44px;border-radius:14px;flex-shrink:0;
+            background:linear-gradient(145deg,rgba(0,122,255,0.18),rgba(90,200,250,0.1));
+            border:1px solid rgba(0,122,255,0.2);
+            display:flex;align-items:center;justify-content:center;
+          ">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="rgba(0,150,255,0.9)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+            </svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:1.05rem;font-weight:800;letter-spacing:-0.3px;line-height:1.2;">Cross-Device Sync</div>
+            <div style="font-size:0.62rem;color:rgba(255,255,255,0.3);margin-top:2px;">Synchronizace přes Firebase</div>
+          </div>
+          <button onclick="closeSyncModal()" style="
+            width:30px;height:30px;border-radius:50%;flex-shrink:0;
+            background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);
+            color:rgba(255,255,255,0.35);font-size:0.8rem;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;
+            transition:all 0.18s;
+          " onmouseover="this.style.background='rgba(255,255,255,0.12)';this.style.color='#fff'"
+             onmouseout="this.style.background='rgba(255,255,255,0.06)';this.style.color='rgba(255,255,255,0.35)'">✕</button>
+        </div>
+
+        <!-- Firebase warn -->
+        <div id="syncFirebaseWarn" class="sync-firebase-warn" style="display:none;">
+          ⚠️ <strong>Firebase není nastaven.</strong> Nastav ho přes tlačítko níže — bez editace kódu.
+        </div>
+        <button id="syncFbSetupBtn" onclick="openFirebaseCfgModal()" style="
+          display:none;width:100%;padding:12px 16px;margin-bottom:12px;
+          border-radius:13px;background:rgba(0,122,255,0.1);border:1px solid rgba(0,122,255,0.28);
+          color:var(--accent);font-family:-apple-system,sans-serif;font-size:0.82rem;
+          font-weight:700;cursor:pointer;text-align:left;
+        ">🔥 Nastavit Firebase config →</button>
+
+        <!-- Status -->
+        <div style="font-size:0.55rem;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:8px;">Stav připojení</div>
         <div class="sync-status-row">
           <div class="sync-status-dot" id="syncModalDot"></div>
           <div class="sync-status-text" id="syncModalText">Inicializace…</div>
           <button class="sync-now-btn" onclick="MFSync.pushData()">
-            ⬆ Nahrát teď
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;vertical-align:-1px;"><path d="M12 2v13M7 9l5-5 5 5"/><path d="M3 19h18"/></svg>Nahrát teď
           </button>
         </div>
 
-        <div class="sync-section-label">
-          Kód skupiny (sdílej mezi zařízeními)
-        </div>
+        <!-- Kód skupiny -->
+        <div style="font-size:0.55rem;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:8px;">Kód skupiny</div>
         <div class="sync-code-row">
-          <input
-            class="sync-code-input"
-            id="syncGroupInput"
-            placeholder="Zadej nebo vygeneruj kód skupiny…"
-            spellcheck="false"
-          />
+          <input class="sync-code-input" id="syncGroupInput" placeholder="Zadej nebo vygeneruj kód…" spellcheck="false"/>
           <button class="sync-gen-btn" onclick="syncGenerateCode()">
-            🎲 Generovat
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:4px;vertical-align:-1px;"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>Generovat
           </button>
           <button class="sync-btn" onclick="syncConnect()">Připojit</button>
         </div>
 
+        <!-- Info -->
         <div class="sync-info-box">
-          <strong>Jak to funguje:</strong> Zadej stejný kód skupiny na všech
-          svých zařízeních. Všechny změny (sledované epizody, watchlist,
-          profily) se automaticky synchronizují přes Firebase. Kód je tajný —
-          sdílej ho jen se sebou samým.
+          <strong>Jak to funguje:</strong> Zadej stejný kód skupiny na všech svých zařízeních. Všechny změny (sledované epizody, watchlist, profily) se automaticky synchronizují přes Firebase. Kód je tajný — sdílej ho jen se sebou samým.
         </div>
 
+        <!-- Footer -->
         <div class="sync-footer-row">
-          <button
-            class="sync-disconnect-btn"
-            id="syncDisconnectBtn"
-            onclick="syncDisconnect()"
-          >
-            Odpojit
-          </button>
-          <button class="sync-btn-sec" onclick="closeSyncModal()">
-            Zavřít
-          </button>
+          <button class="sync-disconnect-btn" id="syncDisconnectBtn" onclick="syncDisconnect()">Odpojit</button>
+          <button class="sync-btn-sec" onclick="closeSyncModal()">Zavřít</button>
         </div>
+
       </div>
     </div>
 
