@@ -74,6 +74,11 @@
 
     <!-- ⚡ PROFILE GATE GUARD — gate je vždy první, obsah se odemkne až po výběru profilu -->
 
+    <!-- ⚡ HIDE KEY HINTS — klávesové zkratky skryty -->
+    <style>
+      .key-hint, #mf-disco-kb-hint { display: none !important; }
+    </style>
+
     <!-- ⚡ PERFORMANCE PATCH -->
     <style>
       .dock-inner,
@@ -2315,19 +2320,20 @@
       </button>
 
 
-      <!-- Více / Menu -->
+      <!-- Hlas / Voice Cmd -->
       <button
         class="dock-btn"
-        id="dockMore"
-        onclick="openDockMore()"
-        title="Více"
+        id="dockVoice"
+        onclick="openVoiceCmd()"
+        title="Hlasové ovládání (V)"
       >
-        <svg viewBox="0 0 24 24">
-          <circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none" />
-          <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
-          <circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none" />
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <rect x="9" y="2" width="6" height="12" rx="3" />
+          <path d="M5 10a7 7 0 0 0 14 0" />
+          <line x1="12" y1="20" x2="12" y2="23" />
+          <line x1="8" y1="23" x2="16" y2="23" />
         </svg>
-        <span class="dock-label">Více</span>
+        <span class="dock-label">Hlas</span>
       </button>
     </nav>
 
@@ -2377,204 +2383,8 @@
       >
         Více
       </div>
-      <div
-        style="
-          font-size: 0.6rem;
-          font-weight: 700;
-          letter-spacing: 1.5px;
-          text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.3);
-          margin-bottom: 14px;
-        "
-      >
-        Nástroje
-      </div>
-      <div
-        style="
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 10px;
-          padding: 0 16px 4px;
-        "
-      >
-        <!-- Premiéry -->
-        <button
-          onclick="
-            openPremiereCalendar();
-            closeDockMore();
-          "
-          style="
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            background: rgba(44, 44, 46, 0.9);
-            border: 0.5px solid rgba(84, 84, 88, 0.4);
-            border-radius: 14px;
-            padding: 14px 8px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-          "
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#ff9f0a"
-            stroke-width="1.8"
-            stroke-linecap="round"
-          >
-            <rect x="3" y="4" width="18" height="17" rx="3" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-            <line x1="8" y1="2" x2="8" y2="6" />
-            <line x1="16" y1="2" x2="16" y2="6" />
-            <circle cx="16" cy="16" r="2" fill="#ff9f0a" stroke="none" />
-          </svg>
-          <span
-            style="
-              font-size: 0.6rem;
-              font-weight: 600;
-              color: rgba(255, 159, 10, 0.85);
-            "
-            >Premiéry</span
-          >
-          <span
-            id="sheetPremiereBadge"
-            style="
-              font-size: 0.52rem;
-              background: rgba(255, 159, 10, 0.2);
-              color: #ff9f0a;
-              border-radius: 6px;
-              padding: 1px 6px;
-              display: none;
-            "
-          ></span>
-        </button>
-        <!-- Kolekce -->
-        <button
-          onclick="
-            openCollections();
-            closeDockMore();
-          "
-          style="
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            background: rgba(44, 44, 46, 0.9);
-            border: 0.5px solid rgba(84, 84, 88, 0.4);
-            border-radius: 14px;
-            padding: 14px 8px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-          "
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#5ac8fa"
-            stroke-width="1.8"
-            stroke-linecap="round"
-          >
-            <rect x="2" y="2" width="9" height="9" rx="2" />
-            <rect x="13" y="2" width="9" height="9" rx="2" />
-            <rect x="2" y="13" width="9" height="9" rx="2" />
-            <rect x="13" y="13" width="9" height="9" rx="2" />
-          </svg>
-          <span
-            style="
-              font-size: 0.6rem;
-              font-weight: 600;
-              color: rgba(90, 200, 250, 0.85);
-            "
-            >Kolekce</span
-          >
-        </button>
-        <!-- Wrapped/Stats -->
-        <button
-          onclick="
-            openWrapped();
-            closeDockMore();
-          "
-          style="
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            background: rgba(44, 44, 46, 0.9);
-            border: 0.5px solid rgba(84, 84, 88, 0.4);
-            border-radius: 14px;
-            padding: 14px 8px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-          "
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#a064ff"
-            stroke-width="1.8"
-            stroke-linecap="round"
-          >
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-          </svg>
-          <span
-            style="
-              font-size: 0.6rem;
-              font-weight: 600;
-              color: rgba(160, 100, 255, 0.85);
-            "
-            >Wrapped</span
-          >
-        </button>
-        <!-- Nálada -->
-        <button
-          onclick="
-            openMoodPicker();
-            closeDockMore();
-          "
-          style="
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            background: rgba(44, 44, 46, 0.9);
-            border: 0.5px solid rgba(84, 84, 88, 0.4);
-            border-radius: 14px;
-            padding: 14px 8px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-          "
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#ff375f"
-            stroke-width="1.8"
-            stroke-linecap="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-            <line x1="9" y1="9" x2="9.01" y2="9" />
-            <line x1="15" y1="9" x2="15.01" y2="9" />
-          </svg>
-          <span
-            style="
-              font-size: 0.6rem;
-              font-weight: 600;
-              color: rgba(255, 55, 95, 0.85);
-            "
-            >Nálada</span
-          >
-        </button>
-      </div>
+
+
       <div
         style="
           font-size: 0.6rem;
@@ -7131,21 +6941,7 @@
                   <div class="cust-toggle-slider"></div
                 ></label>
               </div>
-              <div class="customize-row">
-                <div class="customize-row-left">
-                  <div class="customize-row-label">Skrýt klávesové zkratky</div>
-                  <div class="customize-row-desc">
-                    Schová lištu s nápovědou kláves dole
-                  </div>
-                </div>
-                <label class="cust-toggle"
-                  ><input
-                    type="checkbox"
-                    id="custHideKeys"
-                    onchange="custApply()" />
-                  <div class="cust-toggle-slider"></div
-                ></label>
-              </div>
+
               <div class="customize-row">
                 <div class="customize-row-left">
                   <div class="customize-row-label">Výška dlaždic</div>
