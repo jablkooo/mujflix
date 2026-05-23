@@ -131,6 +131,276 @@
     .disco-nav-item.active { color: #fff !important; background: rgba(255,255,255,0.12) !important; border-color: rgba(255,255,255,0.22) !important; box-shadow: none !important; }
     .disco-nav-item:hover { background: rgba(255,255,255,0.05) !important; color: rgba(255,255,255,0.85) !important; }
   </style>
+  <!-- ══ AI PANEL REDESIGN ══ -->
+  <style id="mf-ai-redesign">
+    /* ── Celý panel ── */
+    .ai-fullscreen {
+      background: #08080d !important;
+      flex-direction: column !important;
+    }
+
+    /* ── Sidebar: skrytý vždy (chat-only layout) ── */
+    .ai-sidebar {
+      display: none !important;
+    }
+
+    /* ── ai-main: celá šířka ── */
+    .ai-main {
+      width: 100% !important;
+      max-width: 100% !important;
+      background: transparent !important;
+    }
+
+    /* ── Topbar ── */
+    .ai-topbar {
+      background: rgba(10,10,18,0.92) !important;
+      backdrop-filter: blur(28px) saturate(1.8) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
+      border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+      padding: 12px 20px !important;
+      gap: 10px !important;
+    }
+    .ai-topbar-title {
+      font-size: 0.95rem !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.2px !important;
+    }
+    .ai-topbar-title > span:first-child { color: #fff !important; }
+    .ai-topbar-sub {
+      font-size: 0.56rem !important;
+      color: rgba(255,255,255,0.28) !important;
+      letter-spacing: 0.3px !important;
+    }
+    .ai-topbar-btn {
+      width: 34px !important;
+      height: 34px !important;
+      border-radius: 10px !important;
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: rgba(255,255,255,0.4) !important;
+      transition: all 0.18s !important;
+    }
+    .ai-topbar-btn:hover {
+      background: rgba(255,255,255,0.09) !important;
+      color: rgba(255,255,255,0.85) !important;
+      border-color: rgba(255,255,255,0.14) !important;
+    }
+
+    /* ── Quick chips row ── */
+    .ai-quick-row {
+      padding: 10px 20px !important;
+      gap: 6px !important;
+      border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+      background: rgba(8,8,16,0.6) !important;
+    }
+    .ai-quick-btn {
+      padding: 5px 13px !important;
+      border-radius: 20px !important;
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: rgba(255,255,255,0.45) !important;
+      font-size: 0.66rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.1px !important;
+      transition: all 0.18s !important;
+    }
+    .ai-quick-btn:hover {
+      background: rgba(0,122,255,0.1) !important;
+      border-color: rgba(0,122,255,0.28) !important;
+      color: #007aff !important;
+      transform: translateY(-1px) !important;
+    }
+
+    /* ── Zprávy ── */
+    .ai-messages {
+      padding: 24px 0 !important;
+      gap: 20px !important;
+      background: transparent !important;
+    }
+    .ai-msg-wrap {
+      max-width: min(680px, 92%) !important;
+      margin: 0 auto !important;
+      width: 100% !important;
+    }
+    .ai-msg-wrap.user {
+      align-self: unset !important;
+      flex-direction: row-reverse !important;
+    }
+    .ai-msg-wrap.ai {
+      align-self: unset !important;
+    }
+
+    /* AI avatar — pulsující kruh */
+    .ai-msg-wrap.ai .ai-msg-avatar {
+      width: 30px !important;
+      height: 30px !important;
+      border-radius: 50% !important;
+      background: radial-gradient(circle at 35% 35%, rgba(0,150,255,0.35), rgba(0,80,200,0.15)) !important;
+      border: 1px solid rgba(0,122,255,0.3) !important;
+      color: #4da6ff !important;
+      font-size: 12px !important;
+      box-shadow: 0 0 12px rgba(0,100,255,0.15) !important;
+    }
+    .ai-msg-wrap.user .ai-msg-avatar {
+      width: 30px !important;
+      height: 30px !important;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.07) !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.5) !important;
+    }
+
+    /* AI bubble */
+    .ai-msg-wrap.ai .ai-msg-bubble {
+      background: rgba(255,255,255,0.03) !important;
+      border: 1px solid rgba(255,255,255,0.07) !important;
+      border-radius: 4px 18px 18px 18px !important;
+      font-size: 0.85rem !important;
+      line-height: 1.7 !important;
+      color: rgba(255,255,255,0.88) !important;
+      padding: 14px 17px !important;
+    }
+    /* User bubble */
+    .ai-msg-wrap.user .ai-msg-bubble {
+      background: linear-gradient(145deg, rgba(0,122,255,0.16), rgba(0,90,200,0.1)) !important;
+      border: 1px solid rgba(0,122,255,0.22) !important;
+      border-radius: 18px 4px 18px 18px !important;
+      font-size: 0.85rem !important;
+      line-height: 1.65 !important;
+      color: rgba(255,255,255,0.92) !important;
+      padding: 12px 16px !important;
+    }
+    .ai-msg-label {
+      font-size: 0.5rem !important;
+      font-weight: 800 !important;
+      letter-spacing: 1.5px !important;
+      color: rgba(0,150,255,0.6) !important;
+      margin-bottom: 6px !important;
+    }
+
+    /* Thinking dots — větší, výraznější */
+    .ai-thinking-bubble {
+      background: rgba(255,255,255,0.02) !important;
+      border: 1px solid rgba(255,255,255,0.06) !important;
+      border-radius: 4px 18px 18px 18px !important;
+      padding: 16px 20px !important;
+    }
+    .ai-thinking-bubble span {
+      width: 7px !important;
+      height: 7px !important;
+      background: rgba(0,150,255,0.55) !important;
+    }
+
+    /* Feedback buttons */
+    .ai-fb-btn {
+      font-size: 0.65rem !important;
+      padding: 3px 8px !important;
+      border-radius: 6px !important;
+      background: rgba(255,255,255,0.03) !important;
+      border: 1px solid rgba(255,255,255,0.07) !important;
+      color: rgba(255,255,255,0.28) !important;
+    }
+    .ai-fb-btn:hover {
+      background: rgba(255,255,255,0.07) !important;
+      color: rgba(255,255,255,0.7) !important;
+    }
+
+    /* ── Input area ── */
+    .ai-input-area {
+      padding: 12px 20px max(20px, env(safe-area-inset-bottom, 20px)) !important;
+      background: rgba(8,8,16,0.85) !important;
+      backdrop-filter: blur(28px) !important;
+      -webkit-backdrop-filter: blur(28px) !important;
+      border-top: 1px solid rgba(255,255,255,0.06) !important;
+    }
+    .ai-input-row {
+      background: rgba(255,255,255,0.05) !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      border-radius: 18px !important;
+      padding: 10px 10px 10px 18px !important;
+      gap: 10px !important;
+      transition: border-color 0.2s, box-shadow 0.2s !important;
+    }
+    .ai-input-row:focus-within {
+      border-color: rgba(0,122,255,0.38) !important;
+      box-shadow: 0 0 0 3px rgba(0,122,255,0.08) !important;
+    }
+    .ai-input {
+      font-size: 0.88rem !important;
+      line-height: 1.55 !important;
+      color: rgba(255,255,255,0.92) !important;
+    }
+    .ai-input::placeholder {
+      color: rgba(255,255,255,0.22) !important;
+    }
+    .ai-voice-fab-btn {
+      width: 38px !important;
+      height: 38px !important;
+      border-radius: 12px !important;
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid rgba(255,255,255,0.09) !important;
+      font-size: 1.05rem !important;
+      color: rgba(255,255,255,0.45) !important;
+      transition: all 0.18s !important;
+    }
+    .ai-voice-fab-btn:hover {
+      background: rgba(0,122,255,0.12) !important;
+      border-color: rgba(0,122,255,0.3) !important;
+      color: #007aff !important;
+    }
+    .ai-voice-fab-btn.listening {
+      background: rgba(255,45,85,0.15) !important;
+      border-color: rgba(255,45,85,0.4) !important;
+      color: #ff2d55 !important;
+      animation: mf-pulse-red 1.2s ease infinite !important;
+    }
+    .ai-send-btn {
+      width: 38px !important;
+      height: 38px !important;
+      border-radius: 12px !important;
+      background: #007aff !important;
+      box-shadow: 0 2px 12px rgba(0,122,255,0.35) !important;
+      transition: all 0.18s !important;
+    }
+    .ai-send-btn:hover {
+      transform: scale(1.07) !important;
+      box-shadow: 0 4px 20px rgba(0,122,255,0.5) !important;
+    }
+    .ai-send-btn:disabled {
+      background: rgba(255,255,255,0.08) !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+    }
+
+    /* ── Bold text v bubblách ── */
+    .ai-msg-bubble strong, .ai-msg-bubble b {
+      color: #fff !important;
+      font-weight: 700 !important;
+    }
+    .ai-msg-bubble em { color: rgba(255,255,255,0.65) !important; font-style: italic !important; }
+
+    /* ── Animace pro mic ── */
+    @keyframes mf-pulse-red {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,45,85,0.4); }
+      50% { box-shadow: 0 0 0 6px rgba(255,45,85,0); }
+    }
+
+    /* ── Ambient pozadí při přemýšlení ── */
+    .ai-fullscreen.ai-thinking-state::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #007aff, #5ac8fa, transparent);
+      background-size: 200% 100%;
+      animation: mf-shimmer 1.4s linear infinite;
+      z-index: 9999;
+    }
+    @keyframes mf-shimmer {
+      0% { background-position: -100% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
   </head>
 
   <body>
@@ -4876,288 +5146,66 @@
       <div class="ai-main">
         <div class="ai-topbar">
           <div class="ai-topbar-title">
-            Muj<span>Flix</span> AI<span class="ai-topbar-sub" id="aiTopbarSub"
-              >Tvuj osobni filmovy pruvodce</span
-            >
+            ✦ AI<span class="ai-topbar-sub" id="aiTopbarSub">Filmový průvodce</span>
           </div>
           <div
             id="aiMsgCounter"
-            style="
-              display: flex;
-              flex-direction: column;
-              align-items: flex-end;
-              flex-shrink: 0;
-              margin-right: 2px;
-              cursor: pointer;
-              gap: 1px;
-            "
+            style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;margin-right:2px;cursor:pointer;gap:1px;"
             onclick="openApikeyOverlay()"
             title="Denní limit zpráv"
           >
-            <div
-              style="
-                font-size: 0.5rem;
-                font-weight: 700;
-                letter-spacing: 0.5px;
-                color: var(--muted);
-                text-transform: uppercase;
-                line-height: 1.2;
-              "
-            >
-              Zbývá
-            </div>
-            <div
-              id="aiMsgCountNum"
-              style="
-                font-family:
-                  -apple-system, &quot;SF Pro Display&quot;,
-                  &quot;Helvetica Neue&quot;, sans-serif;
-                font-size: 1.05rem;
-                font-weight: 900;
-                color: var(--accent);
-                line-height: 1.1;
-              "
-            >
-              —
-            </div>
-            <div
-              id="aiMsgCountMax"
-              style="font-size: 0.5rem; color: var(--muted); line-height: 1.2"
-            >
-              zpráv dnes
-            </div>
-            <div
-              style="
-                width: 48px;
-                height: 3px;
-                background: rgba(255, 255, 255, 0.08);
-                border-radius: 2px;
-                overflow: hidden;
-                margin-top: 2px;
-              "
-            >
-              <div
-                id="aiLimitBar"
-                style="
-                  height: 100%;
-                  width: 0%;
-                  background: rgba(0, 122, 255, 0.5);
-                  border-radius: 2px;
-                  transition:
-                    width 0.5s ease,
-                    background 0.3s;
-                "
-              ></div>
+            <div style="font-size:0.5rem;font-weight:700;letter-spacing:0.5px;color:var(--muted);text-transform:uppercase;line-height:1.2;">Zbývá</div>
+            <div id="aiMsgCountNum" style="font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;font-size:1.05rem;font-weight:900;color:var(--accent);line-height:1.1;">—</div>
+            <div id="aiMsgCountMax" style="font-size:0.5rem;color:var(--muted);line-height:1.2;">zpráv dnes</div>
+            <div style="width:48px;height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;margin-top:2px;">
+              <div id="aiLimitBar" style="height:100%;width:0%;background:rgba(0,122,255,0.5);border-radius:2px;transition:width 0.5s ease,background 0.3s;"></div>
             </div>
           </div>
-          <button
-            class="ai-topbar-btn"
-            onclick="showAddSeriesForm()"
-            title="Pridat serial"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-            >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
+          <button class="ai-topbar-btn" id="aiTtsToggle" title="Hlas AI" onclick="toggleTts()">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
             </svg>
           </button>
-          <button
-            class="ai-topbar-btn"
-            id="aiTtsToggle"
-            title="Hlas AI"
-            onclick="toggleTts()"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="15"
-              height="15"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+          <button class="ai-topbar-btn" id="aiVoiceBtn" onclick="startVoice('chat')" title="Diktování">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
             </svg>
           </button>
-          <button
-            class="ai-topbar-btn"
-            id="aiVoiceBtn"
-            onclick="startVoice('chat')"
-            title="Diktovani"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            >
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-              <line x1="12" y1="19" x2="12" y2="23" />
-              <line x1="8" y1="23" x2="16" y2="23" />
+          <button class="ai-topbar-btn" onclick="clearAiHistory()" title="Smazat historii">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
             </svg>
           </button>
-          <button
-            class="ai-send-btn"
-            style="
-              background: rgba(0, 122, 255, 0.08);
-              border: 1px solid rgba(0, 122, 255, 0.25);
-              min-width: 38px;
-            "
-            onclick="startVoice('dictate')"
-            title="Diktovat (kontinuální)"
-          >
-            ✍️
-          </button>
-          <button
-            class="ai-topbar-btn"
-            onclick="clearAiHistory()"
-            title="Smazat historii"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="15"
-              height="15"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            >
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-            </svg>
-          </button>
-          <button class="ai-topbar-btn" onclick="closeAiPanel()" title="Zavrit">
-            <svg
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+          <button class="ai-topbar-btn" onclick="closeAiPanel()" title="Zavřít">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
         </div>
         <div class="ai-quick-row">
-          <button
-            class="ai-quick-btn"
-            onclick="aiQuick('co mam dal sledovat ze sveho seznamu?')"
-          >
-            ▶ Co dal?
-          </button>
-          <button
-            class="ai-quick-btn"
-            onclick="aiQuick('doporuc mi nejlepsi serial co ted leti')"
-          >
-            📺 Top serial
-          </button>
-          <button
-            class="ai-quick-btn"
-            onclick="aiQuick('doporuc mi skvely film na dnesni vecer')"
-          >
-            🎬 Film večer
-          </button>
-          <button
-            class="ai-quick-btn"
-            onclick="
-              aiQuick('doporuc mi neco napinavého – thriller nebo krimi')
-            "
-          >
-            🔪 Thriller
-          </button>
-          <button
-            class="ai-quick-btn"
-            onclick="aiQuick('doporuc mi odlehcenou komedii na relax')"
-          >
-            😂 Komedie
-          </button>
-          <button
-            class="ai-quick-btn"
-            onclick="aiQuick('doporuc mi neco podobneho tomu co sleduji')"
-          >
-            ✨ Podobné
-          </button>
-          <button
-            class="ai-quick-btn"
-            onclick="
-              aiQuick(
-                'jake jsou nejlepsi sci-fi nebo fantasy serialy poslednich let?',
-              )
-            "
-          >
-            🚀 Sci-fi
-          </button>
-          <button
-            class="ai-quick-btn"
-            onclick="aiQuick('doporuc mi nejlepsi hororovy film nebo serial')"
-          >
-            👻 Horor
-          </button>
-          <button
-            class="ai-quick-btn"
-            onclick="
-              aiQuick('doporuc mi kratky serial do 20 epizod ktery stoji za to')
-            "
-          >
-            ⚡ Kratký serial
-          </button>
-          <button
-            class="ai-quick-btn"
-            onclick="
-              aiQuick(
-                'co sledovat kdyz chci neco jako Breaking Bad nebo Peaky Blinders?',
-              )
-            "
-          >
-            🏆 Jako BB
-          </button>
-          <button
-            class="ai-quick-btn"
-            onclick="
-              aiQuick(
-                'prekvap me necim absolutne unikatnim co jsem urcite nevidel',
-              )
-            "
-          >
-            🎲 Překvap mě
-          </button>
-          <button
-            class="ai-quick-btn"
-            onclick="
-              aiQuick(
-                'ohodnoť muj vkus a rekni mi co ti to rika o me osobnosti',
-              )
-            "
-          >
-            🧠 Můj profil
-          </button>
-          <button class="ai-quick-btn" onclick="startVoice()">🎤 Hlas</button>
+          <button class="ai-quick-btn" onclick="aiQuick('co mam dal sledovat ze sveho seznamu?')">▶ Co dál?</button>
+          <button class="ai-quick-btn" onclick="aiQuick('doporuc mi nejlepsi serial co ted leti')">📺 Top seriál</button>
+          <button class="ai-quick-btn" onclick="aiQuick('doporuc mi skvely film na dnesni vecer')">🎬 Film večer</button>
+          <button class="ai-quick-btn" onclick="aiQuick('doporuc mi neco napinavého – thriller nebo krimi')">🔪 Thriller</button>
+          <button class="ai-quick-btn" onclick="aiQuick('doporuc mi odlehcenou komedii na relax')">😂 Komedie</button>
+          <button class="ai-quick-btn" onclick="aiQuick('doporuc mi neco podobneho tomu co sleduji')">✨ Podobné</button>
+          <button class="ai-quick-btn" onclick="aiQuick('jake jsou nejlepsi sci-fi nebo fantasy serialy poslednich let?')">🚀 Sci-fi</button>
+          <button class="ai-quick-btn" onclick="aiQuick('doporuc mi nejlepsi hororovy film nebo serial')">👻 Horor</button>
+          <button class="ai-quick-btn" onclick="aiQuick('doporuc mi kratky serial do 20 epizod ktery stoji za to')">⚡ Krátký</button>
+          <button class="ai-quick-btn" onclick="aiQuick('prekvap me necim absolutne unikatnim co jsem urcite nevidel')">🎲 Překvap mě</button>
+          <button class="ai-quick-btn" onclick="aiQuick('ohodnoť muj vkus a rekni mi co ti to rika o me osobnosti')">🧠 Můj profil</button>
         </div>
         <div class="ai-messages" id="aiMessages">
           <div class="ai-msg-wrap ai">
-            <div class="ai-msg-avatar">&#x2726;</div>
+            <div class="ai-msg-avatar">✦</div>
             <div class="ai-msg-bubble">
-              <span class="ai-msg-label">MujFlix AI</span>Cau! &#x1F3AC; Jsem
-              tvuj osobni filmovy guru. Rekni mi naladu nebo zanr a dostanes
-              konkretni doporuceni s hodnocenim a kde to streamovat. Nebo se
-              zeptej na cokoliv – herce, rezisery, skryte skvosty... &#x1F37F;
+              <span class="ai-msg-label">MůjFlix AI</span>Čau! 🎬 Jsem tvůj osobní filmový guru. Řekni mi náladu nebo žánr a dostaneš konkrétní doporučení s hodnocením a kde to streamovat. Nebo se zeptej na cokoliv — herce, režiséry, skryté skvosty... 🍿
             </div>
           </div>
         </div>
@@ -5185,7 +5233,7 @@
               class="ai-input"
               id="aiInput"
               rows="1"
-              placeholder="Napis nebo rekni co chces..."
+              placeholder="Napiš nebo řekni co chceš sledovat…"
               oninput="autoResizeInput(this)"
               onkeydown="handleAiInputKey(event)"
             ></textarea>
@@ -5194,23 +5242,12 @@
                 class="ai-voice-fab-btn"
                 id="aiVoiceFab"
                 onclick="startVoice()"
-                title="Diktovani"
-              >
-                &#x1F3A4;
-              </button>
+                title="Diktování hlasem"
+              >🎤</button>
               <button class="ai-send-btn" id="aiSendBtn" onclick="aiSend()">
-                <svg
-                  viewBox="0 0 24 24"
-                  width="16"
-                  height="16"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                 </svg>
               </button>
             </div>
