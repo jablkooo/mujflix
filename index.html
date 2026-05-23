@@ -9487,117 +9487,75 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <script>
     /* ══════════════════════════════════════════════════════
-       MůjFlix Patch — Skrýt dock+profil při detailu seriálu
-       + Scroll-to-minimize hero fotka
+       MůjFlix Patch — Skrýt dock+profil + scroll hero
     ══════════════════════════════════════════════════════ */
-    (function() {
+    document.addEventListener('DOMContentLoaded', function() {
 
-      // ── 1) HIDE/SHOW dock & profil ──
+      const HERO_FULL = 180;
+      const HERO_MIN  = 56;
+      const SCROLL_T  = 50;
+
+      // ── HIDE / SHOW ──
       function hideChrome() {
-        const dock = document.getElementById('mfDock');
-        const badge = document.getElementById('mfProfileBadge');
-        if (dock) {
-          dock.style.cssText += ';opacity:0!important;pointer-events:none!important;transform:translateY(120%)!important;transition:opacity 0.25s ease,transform 0.25s ease!important;';
-        }
-        if (badge) {
-          badge.style.cssText += ';opacity:0!important;pointer-events:none!important;transform:translateY(-10px)!important;transition:opacity 0.2s ease,transform 0.2s ease!important;';
-        }
+        var dock  = document.getElementById('mfDock');
+        var badge = document.getElementById('mfProfileBadge');
+        if (dock)  { dock.style.setProperty('opacity','0','important');  dock.style.setProperty('transform','translateY(120%)','important');  dock.style.setProperty('pointer-events','none','important');  dock.style.setProperty('transition','opacity 0.25s ease, transform 0.25s ease','important'); }
+        if (badge) { badge.style.setProperty('opacity','0','important'); badge.style.setProperty('transform','translateY(-10px)','important'); badge.style.setProperty('pointer-events','none','important'); badge.style.setProperty('transition','opacity 0.2s ease, transform 0.2s ease','important'); }
       }
 
       function showChrome() {
-        const dock = document.getElementById('mfDock');
-        const badge = document.getElementById('mfProfileBadge');
-        if (dock) {
-          dock.style.opacity = '';
-          dock.style.pointerEvents = '';
-          dock.style.transform = '';
-        }
-        if (badge) {
-          badge.style.opacity = '';
-          badge.style.pointerEvents = '';
-          badge.style.transform = '';
-        }
+        var dock  = document.getElementById('mfDock');
+        var badge = document.getElementById('mfProfileBadge');
+        if (dock)  { dock.style.removeProperty('opacity');  dock.style.removeProperty('transform');  dock.style.removeProperty('pointer-events'); }
+        if (badge) { badge.style.removeProperty('opacity'); badge.style.removeProperty('transform'); badge.style.removeProperty('pointer-events'); }
       }
 
-      // Přepsat openSeries a closeModal
-      const _openSeries = window.openSeries;
-      window.openSeries = function() {
-        if (_openSeries) _openSeries.apply(this, arguments);
-        setTimeout(hideChrome, 50);
-        setupHeroScroll();
-      };
-
-      const _closeModal = window.closeModal;
-      window.closeModal = function() {
-        if (_closeModal) _closeModal.apply(this, arguments);
-        showChrome();
-        restoreHero();
-      };
-
-      // ── 2) SCROLL → minimize/restore hero ──
-      const SCROLL_THRESHOLD = 60; // px scrollu kdy se minimalizuje
-      const HERO_FULL_H = 180;     // px — naše zmenšená výška
-      const HERO_MIN_H = 60;       // px — minimalizovaná výška
-
+      // ── HERO SCROLL ──
       function setupHeroScroll() {
-        const body = document.getElementById('modalBody');
-        if (!body || body._mfScrollBound) return;
-        body._mfScrollBound = true;
+        var mb = document.getElementById('modalBody');
+        if (!mb || mb._mfPatch) return;
+        mb._mfPatch = true;
 
-        body.addEventListener('scroll', function() {
-          const hero = document.querySelector('#seriesModal .modal-hero');
+        mb.addEventListener('scroll', function() {
+          var hero    = document.querySelector('#seriesModal .modal-hero');
+          var content = hero && hero.querySelector('.modal-hero-content');
           if (!hero) return;
-          const scrolled = body.scrollTop;
 
-          if (scrolled > SCROLL_THRESHOLD) {
-            // Minimalizovat
-            hero.style.height = HERO_MIN_H + 'px';
-            hero.style.transition = 'height 0.3s cubic-bezier(0.4,0,0.2,1)';
-            // Schovej obsah hrdiny (popisek, buttony)
-            const content = hero.querySelector('.modal-hero-content');
-            if (content) {
-              content.style.opacity = '0';
-              content.style.transform = 'translateY(-8px)';
-              content.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-              content.style.pointerEvents = 'none';
-            }
+          if (mb.scrollTop > SCROLL_T) {
+            hero.style.height = HERO_MIN + 'px';
+            if (content) { content.style.opacity = '0'; content.style.pointerEvents = 'none'; content.style.transform = 'translateY(-6px)'; }
           } else {
-            // Restore
-            hero.style.height = HERO_FULL_H + 'px';
-            const content = hero.querySelector('.modal-hero-content');
-            if (content) {
-              content.style.opacity = '1';
-              content.style.transform = 'translateY(0)';
-              content.style.pointerEvents = '';
-            }
+            hero.style.height = HERO_FULL + 'px';
+            if (content) { content.style.opacity = '1'; content.style.pointerEvents = ''; content.style.transform = ''; }
           }
         }, { passive: true });
       }
 
-      function restoreHero() {
-        const hero = document.querySelector('#seriesModal .modal-hero');
-        if (hero) hero.style.height = HERO_FULL_H + 'px';
-        const content = hero && hero.querySelector('.modal-hero-content');
-        if (content) {
-          content.style.opacity = '1';
-          content.style.transform = '';
-          content.style.pointerEvents = '';
-        }
-        // Reset scroll
-        const body = document.getElementById('modalBody');
-        if (body) body._mfScrollBound = false;
+      function teardownHero() {
+        var hero    = document.querySelector('#seriesModal .modal-hero');
+        var content = hero && hero.querySelector('.modal-hero-content');
+        var mb      = document.getElementById('modalBody');
+        if (hero)    { hero.style.height = HERO_FULL + 'px'; }
+        if (content) { content.style.opacity = '1'; content.style.pointerEvents = ''; content.style.transform = ''; }
+        if (mb)      { mb._mfPatch = false; }
       }
 
-      // Fallback — pokud modal již je otevřen při načtení (edge case)
-      document.addEventListener('DOMContentLoaded', function() {
-        const modal = document.getElementById('seriesModal');
-        if (modal && modal.classList.contains('open')) {
+      // ── WATCH body.modal-open via MutationObserver ──
+      var wasOpen = false;
+      new MutationObserver(function() {
+        var isOpen = document.body.classList.contains('modal-open');
+        if (isOpen && !wasOpen) {
+          wasOpen = true;
           hideChrome();
-          setupHeroScroll();
+          setTimeout(setupHeroScroll, 200);
+        } else if (!isOpen && wasOpen) {
+          wasOpen = false;
+          showChrome();
+          teardownHero();
         }
-      });
+      }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
-    })();
+    });
     </script>
   </body>
 </html>
