@@ -10,7 +10,7 @@
 
   var HERO_CSS_H = 260;
   var SCROLL_END = 320;
-  var LERP_SPEED = 0.12;  // 0.0–1.0: nižší = plynulejší/pomalejší dotah
+  var LERP_SPEED = 0.18;  // 0.0–1.0: nižší = plynulejší/pomalejší dotah
 
   var _current   = 0;     // aktuálně vykreslená hodnota (0–1)
   var _target    = 0;     // cílová hodnota ze scrollTop
