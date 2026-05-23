@@ -20051,3 +20051,23 @@ body.modal-open .mf-profile-badge {
 .modal-hero {
   height: 180px !important;
 }
+
+/* ══ SKRÝT DOCK A PROFIL PŘI OTEVŘENÉM DETAILU ══ */
+body.modal-open #mfDock,
+body.modal-open .mf-dock,
+body.modal-open nav.mf-dock {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(120%) !important;
+  visibility: hidden !important;
+  transition: opacity 0.2s ease, transform 0.25s ease !important;
+}
+
+body.modal-open #mfProfileBadge {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(-10px) !important;
+  visibility: hidden !important;
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+  z-index: 0 !important;
+}
