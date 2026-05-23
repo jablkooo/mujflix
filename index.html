@@ -7464,15 +7464,23 @@
         position: fixed;
         inset: 0;
         z-index: 500;
-        background: var(--bg, #07070a);
+        background: #07070b;
         overflow-y: auto;
-        padding-top: max(64px, calc(env(safe-area-inset-top, 0px) + 64px));
-        padding-bottom: max(
-          110px,
-          calc(env(safe-area-inset-bottom, 0px) + 110px)
-        );
+        padding-top: max(72px, calc(env(safe-area-inset-top, 0px) + 72px));
+        padding-bottom: max(120px, calc(env(safe-area-inset-bottom, 0px) + 120px));
       "
     >
+      <!-- Ambient glow background -->
+      <div style="
+        pointer-events: none;
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background:
+          radial-gradient(ellipse 60% 38% at 18% 12%, rgba(0,122,255,0.09) 0%, transparent 70%),
+          radial-gradient(ellipse 50% 32% at 85% 80%, rgba(160,100,255,0.07) 0%, transparent 70%);
+      "></div>
+
       <!-- Close button -->
       <button
         onclick="mfShowSection('serialy')"
@@ -7481,509 +7489,133 @@
           top: max(18px, env(safe-area-inset-top, 18px));
           right: 18px;
           z-index: 510;
-          width: 34px;
-          height: 34px;
+          width: 32px;
+          height: 32px;
           border-radius: 50%;
-          background: rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(20px) saturate(1.8);
-          -webkit-backdrop-filter: blur(20px) saturate(1.8);
-          border: 1px solid rgba(255, 255, 255, 0.16);
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.2),
-            0 4px 16px rgba(0, 0, 0, 0.4);
-          color: rgba(255, 255, 255, 0.75);
-          font-size: 1rem;
-          line-height: 1;
+          background: rgba(255,255,255,0.07);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: rgba(255,255,255,0.5);
+          font-size: 0.85rem;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.28s cubic-bezier(0.34, 1.28, 0.64, 1);
+          transition: all 0.2s;
         "
-        onmouseover="
-          this.style.background = 'rgba(255,255,255,0.18)';
-          this.style.color = '#fff';
-        "
-        onmouseout="
-          this.style.background = 'rgba(255,255,255,0.1)';
-          this.style.color = 'rgba(255,255,255,0.75)';
-        "
+        onmouseover="this.style.background='rgba(255,255,255,0.14)';this.style.color='#fff'"
+        onmouseout="this.style.background='rgba(255,255,255,0.07)';this.style.color='rgba(255,255,255,0.5)'"
         title="Zavřít"
-      >
-        ✕
-      </button>
+      >✕</button>
 
-      <div style="padding: 0 18px">
+      <div style="position: relative; z-index: 1; padding: 0 20px; max-width: 480px; margin: 0 auto;">
+
         <!-- HEADER -->
-        <div style="margin-bottom: 20px">
-          <div
-            style="
-              font-size: 1.5rem;
-              font-weight: 900;
-              letter-spacing: -0.5px;
-              margin-bottom: 2px;
-            "
-          >
-            ⭐ Pro tebe
-          </div>
-          <div style="font-size: 0.72rem; color: rgba(255, 255, 255, 0.32)">
-            Hledej zdroje, watchlist a doporučení
-          </div>
-        </div>
-
-        <!-- ══ FINDER SEARCH BAR ══ -->
-        <div style="margin-bottom: 28px">
-          <div
-            style="
-              font-size: 0.55rem;
-              font-weight: 700;
-              letter-spacing: 1.3px;
-              text-transform: uppercase;
-              color: rgba(255, 255, 255, 0.28);
-              margin-bottom: 10px;
-            "
-          >
-            🔍 Najít kde sledovat
-          </div>
-
-          <!-- Search input row -->
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              gap: 10px;
-              background: rgba(255, 255, 255, 0.06);
-              border: 1px solid rgba(255, 255, 255, 0.12);
-              border-radius: 18px;
-              padding: 4px 4px 4px 16px;
-              box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
-              transition:
-                border-color 0.2s,
-                box-shadow 0.2s;
-            "
-            id="ptFinderRow"
-            onfocusin="this.style.borderColor='rgba(0,122,255,0.5)';this.style.boxShadow='0 0 0 3px rgba(0,122,255,0.12),inset 0 1px 3px rgba(0,0,0,0.3)'"
-            onfocusout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.boxShadow='inset 0 1px 3px rgba(0,0,0,0.3)'"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="none"
-              stroke="rgba(255,255,255,0.35)"
-              stroke-width="2"
-            >
-              <circle cx="11" cy="11" r="7" />
-              <line x1="16.5" y1="16.5" x2="22" y2="22" />
-            </svg>
-            <input
-              id="ptFinderInput"
-              type="text"
-              placeholder="Název filmu nebo seriálu…"
-              style="
-                flex: 1;
-                background: transparent;
-                border: none;
-                outline: none;
-                color: #fff;
-                font-size: 0.88rem;
-                font-family: -apple-system, sans-serif;
-                padding: 10px 0;
-              "
-              onkeydown="if (event.key === 'Enter') ptFinderSearch();"
-            />
-            <!-- Type toggle -->
-            <div style="display: flex; gap: 4px; flex-shrink: 0">
-              <button
-                id="ptTypeMovie"
-                onclick="ptSetType('movie')"
-                style="
-                  padding: 7px 12px;
-                  border-radius: 13px;
-                  border: none;
-                  cursor: pointer;
-                  font-size: 0.65rem;
-                  font-weight: 700;
-                  transition: all 0.2s;
-                  background: rgba(0, 122, 255, 0.18);
-                  color: #007aff;
-                "
-              >
-                🎬 Film
-              </button>
-              <button
-                id="ptTypeSerial"
-                onclick="ptSetType('serial')"
-                style="
-                  padding: 7px 12px;
-                  border-radius: 13px;
-                  border: none;
-                  cursor: pointer;
-                  font-size: 0.65rem;
-                  font-weight: 700;
-                  transition: all 0.2s;
-                  background: transparent;
-                  color: rgba(255, 255, 255, 0.35);
-                "
-              >
-                📺 Seriál
-              </button>
-            </div>
-            <!-- Search button -->
-            <button
-              onclick="ptFinderSearch()"
-              style="
-                width: 40px;
-                height: 40px;
-                border-radius: 14px;
-                background: linear-gradient(145deg, #0a84ff, #007aff);
-                border: none;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow:
-                  0 4px 14px rgba(0, 122, 255, 0.45),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.25);
-                transition: all 0.2s;
-                flex-shrink: 0;
-              "
-              onmouseover="this.style.transform = 'scale(1.08)'"
-              onmouseout="this.style.transform = 'scale(1)'"
-            >
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="white">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Quick chips — populární hledané -->
-          <div
-            style="display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px"
-            id="ptFinderChips"
-          >
-            <span
-              style="
-                font-size: 0.55rem;
-                color: rgba(255, 255, 255, 0.25);
-                align-self: center;
-              "
-              >Rychlé:</span
-            >
-          </div>
-        </div>
-
-        <!-- Watchlist shortcut -->
-        <div
-          style="
-            font-size: 0.55rem;
+        <div style="margin-bottom: 32px;">
+          <div style="
+            font-size: 0.6rem;
             font-weight: 700;
-            letter-spacing: 1.3px;
+            letter-spacing: 2.5px;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.28);
-            margin-bottom: 10px;
-          "
-        >
-          🔖 Chci koukat
+            color: rgba(255,255,255,0.22);
+            margin-bottom: 6px;
+          ">MůjFlix</div>
+          <div style="
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,0.45));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+          ">Pro tebe</div>
         </div>
+
+        <!-- ══ WATCHLIST — velká karta ══ -->
         <button
           onclick="openWatchlist()"
           style="
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 16px;
             width: 100%;
-            padding: 15px 16px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            border-radius: 16px;
+            padding: 18px 20px;
+            background: rgba(255,200,0,0.06);
+            border: 1px solid rgba(255,200,0,0.14);
+            border-radius: 20px;
             color: #fff;
             cursor: pointer;
-            margin-bottom: 22px;
+            margin-bottom: 12px;
             text-align: left;
-            transition: background 0.2s;
+            transition: all 0.22s ease;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.25);
           "
-          onmouseover="this.style.background = 'rgba(255,255,255,0.08)'"
-          onmouseout="this.style.background = 'rgba(255,255,255,0.04)'"
+          onmouseover="this.style.background='rgba(255,200,0,0.11)';this.style.borderColor='rgba(255,200,0,0.25)';this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.background='rgba(255,200,0,0.06)';this.style.borderColor='rgba(255,200,0,0.14)';this.style.transform='translateY(0)'"
         >
-          <div
-            style="
-              width: 42px;
-              height: 42px;
-              border-radius: 12px;
-              background: rgba(255, 200, 0, 0.1);
-              border: 1px solid rgba(255, 200, 0, 0.2);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 1.3rem;
-              flex-shrink: 0;
-            "
-          >
-            🔖
+          <div style="
+            width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+            background: rgba(255,200,0,0.12);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+          ">🔖</div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 0.95rem; font-weight: 700; margin-bottom: 2px;">Watchlist</div>
+            <div style="font-size: 0.65rem; color: rgba(255,255,255,0.38);">Vše co chceš sledovat</div>
           </div>
-          <div>
-            <div style="font-size: 0.88rem; font-weight: 700">Watchlist</div>
-            <div
-              style="
-                font-size: 0.62rem;
-                color: rgba(255, 255, 255, 0.35);
-                margin-top: 2px;
-              "
-            >
-              Vše co chceš sledovat
-            </div>
-          </div>
-          <svg
-            style="margin-left: auto; opacity: 0.25"
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            stroke="currentColor"
-            stroke-width="2"
-            fill="none"
-          >
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
+          <svg viewBox="0 0 24 24" width="15" height="15" stroke="rgba(255,255,255,0.2)" stroke-width="2.5" fill="none" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
 
-        <!-- Ruleta + Premiéry -->
-        <div
-          style="
-            font-size: 0.55rem;
-            font-weight: 700;
-            letter-spacing: 1.3px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.28);
-            margin-bottom: 10px;
-          "
-        >
-          🎲 Nevím co koukat
-        </div>
-        <div
-          style="
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 22px;
-          "
-        >
+        <!-- ══ 2-slot grid: Ruleta + AI ══ -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+
+          <!-- Ruleta -->
           <button
             onclick="openRuleta()"
             style="
-              padding: 18px 14px;
-              background: rgba(255, 107, 53, 0.08);
-              border: 1px solid rgba(255, 107, 53, 0.18);
-              border-radius: 16px;
+              padding: 22px 14px 18px;
+              background: rgba(255,107,53,0.07);
+              border: 1px solid rgba(255,107,53,0.15);
+              border-radius: 20px;
               color: #fff;
               cursor: pointer;
               text-align: center;
-              transition: background 0.2s;
+              transition: all 0.22s ease;
+              box-shadow: 0 2px 20px rgba(0,0,0,0.2);
             "
-            onmouseover="this.style.background = 'rgba(255,107,53,0.15)'"
-            onmouseout="this.style.background = 'rgba(255,107,53,0.08)'"
+            onmouseover="this.style.background='rgba(255,107,53,0.14)';this.style.borderColor='rgba(255,107,53,0.28)';this.style.transform='translateY(-2px)'"
+            onmouseout="this.style.background='rgba(255,107,53,0.07)';this.style.borderColor='rgba(255,107,53,0.15)';this.style.transform='translateY(0)'"
           >
-            <div style="font-size: 1.7rem; margin-bottom: 6px">🎲</div>
-            <div style="font-size: 0.82rem; font-weight: 700">Ruleta</div>
-            <div
-              style="
-                font-size: 0.58rem;
-                color: rgba(255, 255, 255, 0.35);
-                margin-top: 2px;
-              "
-            >
-              Náhodný výběr
-            </div>
+            <div style="font-size: 2rem; margin-bottom: 10px; line-height: 1;">🎲</div>
+            <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 3px;">Ruleta</div>
+            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.32);">Náhodný výběr</div>
           </button>
+
+          <!-- AI doporučení -->
           <button
-            onclick="
-              if (typeof openPremiere === 'function') openPremiere();
-              else openRuleta();
-            "
+            onclick="openAi(); setTimeout(() => { const i = document.getElementById('aiInput'); if (i) { i.value = 'Doporuč mi co koukat dnes večer'; if (typeof aiSend === 'function') aiSend(); } }, 400);"
             style="
-              padding: 18px 14px;
-              background: rgba(0, 122, 255, 0.08);
-              border: 1px solid rgba(0, 122, 255, 0.18);
-              border-radius: 16px;
+              padding: 22px 14px 18px;
+              background: rgba(0,122,255,0.07);
+              border: 1px solid rgba(0,122,255,0.15);
+              border-radius: 20px;
               color: #fff;
               cursor: pointer;
               text-align: center;
-              transition: background 0.2s;
+              transition: all 0.22s ease;
+              box-shadow: 0 2px 20px rgba(0,0,0,0.2);
             "
-            onmouseover="this.style.background = 'rgba(0,122,255,0.15)'"
-            onmouseout="this.style.background = 'rgba(0,122,255,0.08)'"
+            onmouseover="this.style.background='rgba(0,122,255,0.14)';this.style.borderColor='rgba(0,122,255,0.28)';this.style.transform='translateY(-2px)'"
+            onmouseout="this.style.background='rgba(0,122,255,0.07)';this.style.borderColor='rgba(0,122,255,0.15)';this.style.transform='translateY(0)'"
           >
-            <div style="font-size: 1.7rem; margin-bottom: 6px">🎬</div>
-            <div style="font-size: 0.82rem; font-weight: 700">Premiéry</div>
-            <div
-              style="
-                font-size: 0.58rem;
-                color: rgba(255, 255, 255, 0.35);
-                margin-top: 2px;
-              "
-            >
-              Co jde nově
-            </div>
+            <div style="font-size: 2rem; margin-bottom: 10px; line-height: 1;">✦</div>
+            <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 3px;">AI tip</div>
+            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.32);">Co dnes koukat?</div>
           </button>
         </div>
 
-        <!-- AI doporučení -->
-        <div
-          style="
-            font-size: 0.55rem;
-            font-weight: 700;
-            letter-spacing: 1.3px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.28);
-            margin-bottom: 10px;
-          "
-        >
-          🤖 AI doporučení
-        </div>
-        <button
-          onclick="
-            openAi();
-            setTimeout(() => {
-              const i = document.getElementById('aiInput');
-              if (i) {
-                i.value = 'Doporuč mi co koukat dnes večer';
-                if (typeof aiSend === 'function') aiSend();
-              }
-            }, 400);
-          "
-          style="
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            width: 100%;
-            padding: 15px 16px;
-            background: rgba(0, 122, 255, 0.06);
-            border: 1px solid rgba(0, 122, 255, 0.15);
-            border-radius: 16px;
-            color: #fff;
-            cursor: pointer;
-            margin-bottom: 22px;
-            text-align: left;
-            transition: background 0.2s;
-          "
-          onmouseover="this.style.background = 'rgba(0,122,255,0.12)'"
-          onmouseout="this.style.background = 'rgba(0,122,255,0.06)'"
-        >
-          <div
-            style="
-              width: 42px;
-              height: 42px;
-              border-radius: 12px;
-              background: rgba(0, 122, 255, 0.1);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 1.3rem;
-              flex-shrink: 0;
-            "
-          >
-            💡
-          </div>
-          <div>
-            <div style="font-size: 0.88rem; font-weight: 700">
-              Co dnes koukat?
-            </div>
-            <div
-              style="
-                font-size: 0.62rem;
-                color: rgba(255, 255, 255, 0.35);
-                margin-top: 2px;
-              "
-            >
-              AI vybere podle tvých preferencí
-            </div>
-          </div>
-          <svg
-            style="margin-left: auto; opacity: 0.25"
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            stroke="currentColor"
-            stroke-width="2"
-            fill="none"
-          >
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
-
-        <!-- Kolekce -->
-        <div
-          style="
-            font-size: 0.55rem;
-            font-weight: 700;
-            letter-spacing: 1.3px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.28);
-            margin-bottom: 10px;
-          "
-        >
-          📦 Kolekce
-        </div>
-        <button
-          onclick="
-            if (typeof openCollections === 'function') openCollections();
-          "
-          style="
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            width: 100%;
-            padding: 15px 16px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            border-radius: 16px;
-            color: #fff;
-            cursor: pointer;
-            text-align: left;
-            transition: background 0.2s;
-          "
-          onmouseover="this.style.background = 'rgba(255,255,255,0.08)'"
-          onmouseout="this.style.background = 'rgba(255,255,255,0.04)'"
-        >
-          <div
-            style="
-              width: 42px;
-              height: 42px;
-              border-radius: 12px;
-              background: rgba(100, 210, 255, 0.08);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 1.3rem;
-              flex-shrink: 0;
-            "
-          >
-            📦
-          </div>
-          <div>
-            <div style="font-size: 0.88rem; font-weight: 700">Moje kolekce</div>
-            <div
-              style="
-                font-size: 0.62rem;
-                color: rgba(255, 255, 255, 0.35);
-                margin-top: 2px;
-              "
-            >
-              Vlastní seznamy
-            </div>
-          </div>
-          <svg
-            style="margin-left: auto; opacity: 0.25"
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            stroke="currentColor"
-            stroke-width="2"
-            fill="none"
-          >
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
       </div>
       <!-- /padding -->
     </div>
