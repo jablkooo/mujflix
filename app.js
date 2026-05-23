@@ -11651,6 +11651,14 @@ console.log('[MůjFlix Changelog] ✓ Changelog systém načten');
       transition: all 0.25s ease !important;
     }
 
+    /* Skrýt profil při otevřeném modalu */
+    body.modal-open #mfProfileBadge,
+    body.modal-open .mf-profile-badge {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transition: opacity 0.2s ease !important;
+    }
+
     /* Profile badge — čtvereček */
     #mfProfileBadge { border-radius: 14px !important; }
     .mpb-avatar {
