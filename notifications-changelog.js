@@ -216,12 +216,32 @@
     const panel = document.getElementById('notifPanel');
     if (!panel) return;
 
+    // Pozicování — uprostřed jako sync badge, ne vlevo
+    panel.style.left = '50%';
+    panel.style.transform = 'translateX(-50%) translateY(-6px) scale(0.97)';
+    panel.style.right = 'auto';
+    panel.style.top = 'max(62px, env(safe-area-inset-top, 62px))';
+    // Přebij transition aby animace fungovala správně
+    panel.style.transition = 'opacity 0.22s, transform 0.22s cubic-bezier(0.34, 1.3, 0.64, 1)';
+
     // Rozšíř panel
     panel.style.width = '340px';
     panel.style.borderRadius = '20px';
     panel.style.boxShadow = '0 32px 80px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07) inset';
 
-    if (panel.dataset.mfV3) return;
+    // Oprav visible stav — musí zahrnout nový transform
+    if (panel.classList.contains('visible')) {
+      panel.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+    }
+    const origAdd = panel.classList.add.bind(panel.classList);
+    panel.classList.add = function(...args) {
+      origAdd(...args);
+      if (args.includes('visible')) {
+        panel.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+      }
+    };
+
+    // Vždy znovu vyrenderuj — odstraňujeme starý guard který způsoboval "Načítám..."
     panel.dataset.mfV3 = '1';
 
     // Header
