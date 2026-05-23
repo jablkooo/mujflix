@@ -20071,3 +20071,11 @@ body.modal-open #mfProfileBadge {
   transition: opacity 0.2s ease, transform 0.2s ease !important;
   z-index: 0 !important;
 }
+
+/* ══ Hero scroll transition ══ */
+.modal-hero {
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.modal-hero-content {
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+}
