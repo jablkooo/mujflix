@@ -9,45 +9,73 @@
   var HERO_FULL = 180;
   var HERO_MIN  = 56;
   var SCROLL_T  = 50;
+  var _enforceInterval = null;
 
-  // ── Čekej dokud jsou elementy k dispozici ──
-  function ready(fn) {
-    if (document.readyState !== 'loading') fn();
-    else document.addEventListener('DOMContentLoaded', fn);
-  }
+  // ── CSS injekce ──
+  var style = document.createElement('style');
+  style.id = 'mf-patch-styles';
+  style.textContent = [
+    '.modal-hero { transition: height 0.3s cubic-bezier(0.4,0,0.2,1) !important; overflow: hidden !important; }',
+    '.modal-hero-img { height: 100% !important; width: 100% !important; object-fit: cover !important; }',
+    '.modal-hero-content { transition: opacity 0.22s ease, transform 0.22s ease !important; }'
+  ].join('\n');
+  (document.head || document.documentElement).appendChild(style);
 
   function getEl(id) { return document.getElementById(id); }
 
-  // ── Force-hide přes setProperty (přebije vše) ──
-  function hide(el, props) {
-    if (!el) return;
-    Object.keys(props).forEach(function(k) {
-      el.style.setProperty(k, props[k], 'important');
-    });
-  }
-  function unhide(el, keys) {
-    if (!el) return;
-    keys.forEach(function(k) { el.style.removeProperty(k); });
+  // ── Silné skrytí přes setAttribute style ──
+  function forceHide() {
+    var dock  = getEl('mfDock');
+    var badge = getEl('mfProfileBadge');
+
+    if (dock && dock.style.opacity !== '0') {
+      dock.style.setProperty('opacity',        '0',              'important');
+      dock.style.setProperty('transform',      'translateY(120%)','important');
+      dock.style.setProperty('pointer-events', 'none',           'important');
+      dock.style.setProperty('transition',     'opacity 0.25s ease, transform 0.25s ease', 'important');
+    }
+    if (badge && badge.style.opacity !== '0') {
+      badge.style.setProperty('opacity',        '0',              'important');
+      badge.style.setProperty('transform',      'translateY(-10px)','important');
+      badge.style.setProperty('pointer-events', 'none',           'important');
+      badge.style.setProperty('transition',     'opacity 0.2s ease, transform 0.2s ease', 'important');
+    }
   }
 
-  function hideChrome() {
-    hide(getEl('mfDock'), {
-      'opacity': '0',
-      'transform': 'translateY(120%)',
-      'pointer-events': 'none',
-      'transition': 'opacity 0.25s ease, transform 0.25s ease'
+  function startEnforce() {
+    stopEnforce();
+    forceHide();
+    // Každých 200ms zkontroluj a znovu skryj — přebije i app.js patche
+    _enforceInterval = setInterval(forceHide, 200);
+
+    // Taky sleduj přímé změny stylu na elementech
+    ['mfDock', 'mfProfileBadge'].forEach(function(id) {
+      var el = getEl(id);
+      if (!el || el._mfObserver) return;
+      var obs = new MutationObserver(function() {
+        if (document.body.classList.contains('modal-open')) forceHide();
+      });
+      obs.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
+      el._mfObserver = obs;
     });
-    hide(getEl('mfProfileBadge'), {
-      'opacity': '0',
-      'transform': 'translateY(-10px)',
-      'pointer-events': 'none',
-      'transition': 'opacity 0.2s ease, transform 0.2s ease'
-    });
+  }
+
+  function stopEnforce() {
+    if (_enforceInterval) { clearInterval(_enforceInterval); _enforceInterval = null; }
   }
 
   function showChrome() {
-    unhide(getEl('mfDock'),         ['opacity','transform','pointer-events','transition']);
-    unhide(getEl('mfProfileBadge'), ['opacity','transform','pointer-events','transition']);
+    stopEnforce();
+    ['mfDock', 'mfProfileBadge'].forEach(function(id) {
+      var el = getEl(id);
+      if (!el) return;
+      el.style.removeProperty('opacity');
+      el.style.removeProperty('transform');
+      el.style.removeProperty('pointer-events');
+      el.style.removeProperty('transition');
+      // Odpoj observer
+      if (el._mfObserver) { el._mfObserver.disconnect(); el._mfObserver = null; }
+    });
   }
 
   // ── Hero scroll ──
@@ -85,36 +113,36 @@
     var mb      = getEl('modalBody');
     if (hero)    hero.style.setProperty('height', HERO_FULL + 'px', 'important');
     if (content) { content.style.opacity = '1'; content.style.transform = ''; content.style.pointerEvents = ''; }
-    if (mb)      mb._mfPatch = false;
+    if (mb)      { mb._mfPatch = false; }
   }
 
-  // ── MutationObserver na body.modal-open ──
-  ready(function() {
+  // ── Sleduj body.modal-open ──
+  function init() {
     var wasOpen = document.body.classList.contains('modal-open');
-    if (wasOpen) { hideChrome(); setTimeout(setupHeroScroll, 300); }
+    if (wasOpen) { startEnforce(); setTimeout(setupHeroScroll, 400); }
 
     new MutationObserver(function() {
       var isOpen = document.body.classList.contains('modal-open');
       if (isOpen === wasOpen) return;
       wasOpen = isOpen;
       if (isOpen) {
-        hideChrome();
-        setTimeout(setupHeroScroll, 300);
+        startEnforce();
+        setTimeout(setupHeroScroll, 400);
       } else {
         showChrome();
         resetHero();
       }
     }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-  });
+  }
 
-  // ── CSS pro hero transition (injektovat do <head>) ──
-  var style = document.createElement('style');
-  style.textContent = [
-    '.modal-hero { transition: height 0.3s cubic-bezier(0.4,0,0.2,1) !important; overflow: hidden !important; }',
-    '.modal-hero-img { height: 100% !important; object-fit: cover !important; }',
-    '.modal-hero-content { transition: opacity 0.22s ease, transform 0.22s ease !important; }'
-  ].join('\n');
-  (document.head || document.documentElement).appendChild(style);
+  if (document.readyState !== 'loading') {
+    // Počkej až app.js dokončí své patche
+    setTimeout(init, 100);
+  } else {
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(init, 100);
+    });
+  }
 
   console.log('[MFPatch] dock/profil hide + hero scroll ✓');
 })();
