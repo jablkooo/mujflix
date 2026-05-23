@@ -1,29 +1,21 @@
 /**
  * MůjFlix — UI Patch
- * Hero scroll: plynulé mizení přes margin-top + opacity
+ * Hero scroll: 1:1 synchronizace se scrollem, úplné zmizení
  */
 (function() {
   'use strict';
 
-  var HERO_FULL  = 180;
-  var SCROLL_END = 280;
+  var SCROLL_END = 280;  // px scrollu = hero úplně pryč
   var _interval  = null;
   var _ticking   = false;
 
-  function easeOut(t) {
-    return 1 - Math.pow(1 - t, 2.2);
-  }
-
-  // ── CSS ──
-  // Musí přebít styles.css řádek 20051 kde je transition + overflow:hidden na .modal-hero
+  // ── CSS — přebití styles.css řádek 20051 ──
   var style = document.createElement('style');
   style.textContent = [
-    // Přebití globálního .modal-hero z styles.css (specificita: #seriesModal > .modal-body > ...)
     '#seriesModal .modal-hero,',
-    '#seriesModal > * .modal-hero,',
     '.modal-hero {',
-    '  transition: none !important;',   /* <-- toto přebíjí "transition: height 0.3s" z styles.css */
-    '  overflow: visible !important;',  /* <-- overflow:hidden blokoval sub-pixel vykreslení */
+    '  transition: none !important;',
+    '  overflow: visible !important;',
     '  will-change: margin-top !important;',
     '}',
     '#seriesModal .modal-hero-img {',
@@ -33,11 +25,10 @@
     '}',
     '#seriesModal .modal-hero-content,',
     '.modal-hero-content {',
-    '  transition: none !important;',   /* stejně přebít — rAF animuje přímo */
+    '  transition: none !important;',
     '  will-change: opacity, transform !important;',
     '}'
   ].join('\n');
-  // Inject jako poslední styl → nejvyšší priorita
   document.head
     ? document.head.appendChild(style)
     : document.documentElement.appendChild(style);
@@ -74,20 +65,22 @@
     var content = hero && hero.querySelector('.modal-hero-content');
     if (!hero) { _ticking = false; return; }
 
-    var raw      = Math.min(1, Math.max(0, mb.scrollTop / SCROLL_END));
-    var progress = easeOut(raw);
+    // Skutečná výška hero — ne hardcoded konstanta
+    var heroH = hero.offsetHeight || 180;
 
-    // Záporný margin-top — hero se "zasune" nahoru
-    // Bez Math.round → sub-pixel přesnost = žádné trhání
-    var offset = HERO_FULL * progress;
-    hero.style.setProperty('margin-top', '-' + offset + 'px', 'important');
-    hero.style.setProperty('height', HERO_FULL + 'px', 'important');
+    // raw: 0 (nahoře) → 1 (scrollEnd)
+    // Lineární — přesně sleduje prst/scroll bez žádné křivky
+    var raw = Math.min(1, Math.max(0, mb.scrollTop / SCROLL_END));
 
-    // Content: fade out v první třetině scrollu
+    // margin-top záporný = hero mizí nahoru, přesně o svou výšku
+    hero.style.setProperty('margin-top', '-' + (heroH * raw) + 'px', 'important');
+    hero.style.setProperty('height', heroH + 'px', 'important');
+
+    // Content fade — zmizí v první třetině scrollu
     if (content) {
-      var op = Math.max(0, 1 - raw / 0.38);
+      var op = Math.max(0, 1 - raw / 0.4);
       content.style.opacity       = op;
-      content.style.transform     = 'translateY(' + (-14 * progress) + 'px)';
+      content.style.transform     = 'translateY(' + (-12 * raw) + 'px)';
       content.style.pointerEvents = op < 0.05 ? 'none' : '';
     }
 
@@ -137,5 +130,5 @@
   if (document.readyState !== 'loading') setTimeout(init, 50);
   else document.addEventListener('DOMContentLoaded', function() { setTimeout(init, 50); });
 
-  console.log('[MFPatch] smooth hero scroll ✓');
+  console.log('[MFPatch] sync hero scroll ✓');
 })();
