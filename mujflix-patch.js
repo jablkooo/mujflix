@@ -6,8 +6,9 @@
   'use strict';
 
   var HERO_FULL = 180;
-  var HERO_MIN  = 56;
-  var SCROLL_T  = 50;
+  var HERO_MIN  = 52;
+  var SCROLL_START = 0;   // scroll od kdy začíná zmenšovat
+  var SCROLL_END   = 120; // scroll kdy je plně minimalizováno
   var _interval = null;
 
   // ── CSS ──
@@ -15,9 +16,9 @@
   style.textContent =
     '#seriesModal.open ~ * #mfDock,' +
     '#seriesModal.open ~ * #mfProfileBadge { opacity: 0 !important; }' +
-    '.modal-hero { transition: height 0.3s cubic-bezier(0.4,0,0.2,1) !important; overflow: hidden !important; }' +
+    '.modal-hero { overflow: hidden !important; }' +
     '.modal-hero-img { height: 100% !important; width: 100% !important; object-fit: cover !important; }' +
-    '.modal-hero-content { transition: opacity 0.22s ease, transform 0.22s ease !important; }';
+    '.modal-hero-content { transition: none !important; }';
   (document.head || document.documentElement).appendChild(style);
 
   function isModalOpen() {
@@ -60,12 +61,21 @@
       var hero    = document.querySelector('#seriesModal .modal-hero');
       var content = hero && hero.querySelector('.modal-hero-content');
       if (!hero) return;
-      if (mb.scrollTop > SCROLL_T) {
-        hero.style.height = HERO_MIN + 'px';
-        if (content) { content.style.opacity = '0'; content.style.transform = 'translateY(-8px)'; content.style.pointerEvents = 'none'; }
-      } else {
-        hero.style.height = HERO_FULL + 'px';
-        if (content) { content.style.opacity = '1'; content.style.transform = ''; content.style.pointerEvents = ''; }
+
+      var scrolled = mb.scrollTop;
+      // Clamp progress 0→1
+      var progress = Math.min(1, Math.max(0, (scrolled - SCROLL_START) / (SCROLL_END - SCROLL_START)));
+
+      // Plynulá výška
+      var newH = Math.round(HERO_FULL - (HERO_FULL - HERO_MIN) * progress);
+      hero.style.height = newH + 'px';
+
+      // Content fade — začne mizet od progress 0.2, zmizí při 0.7
+      if (content) {
+        var contentOpacity = Math.max(0, 1 - (progress - 0.2) / 0.5);
+        content.style.opacity      = contentOpacity;
+        content.style.transform    = 'translateY(' + (-8 * progress) + 'px)';
+        content.style.pointerEvents = progress > 0.8 ? 'none' : '';
       }
     }, { passive: true });
   }
