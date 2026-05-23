@@ -284,276 +284,6 @@
     .disco-nav-item.active { color: #fff !important; background: rgba(255,255,255,0.12) !important; border-color: rgba(255,255,255,0.22) !important; box-shadow: none !important; }
     .disco-nav-item:hover { background: rgba(255,255,255,0.05) !important; color: rgba(255,255,255,0.85) !important; }
   </style>
-  <!-- ══ AI PANEL REDESIGN ══ -->
-  <style id="mf-ai-redesign">
-    /* ── Celý panel ── */
-    .ai-fullscreen {
-      background: #08080d !important;
-      flex-direction: column !important;
-    }
-
-    /* ── Sidebar: skrytý vždy (chat-only layout) ── */
-    .ai-sidebar {
-      display: none !important;
-    }
-
-    /* ── ai-main: celá šířka ── */
-    .ai-main {
-      width: 100% !important;
-      max-width: 100% !important;
-      background: transparent !important;
-    }
-
-    /* ── Topbar ── */
-    .ai-topbar {
-      background: rgba(10,10,18,0.92) !important;
-      backdrop-filter: blur(28px) saturate(1.8) !important;
-      -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
-      border-bottom: 1px solid rgba(255,255,255,0.06) !important;
-      padding: 12px 20px !important;
-      gap: 10px !important;
-    }
-    .ai-topbar-title {
-      font-size: 0.95rem !important;
-      font-weight: 700 !important;
-      letter-spacing: -0.2px !important;
-    }
-    .ai-topbar-title > span:first-child { color: #fff !important; }
-    .ai-topbar-sub {
-      font-size: 0.56rem !important;
-      color: rgba(255,255,255,0.28) !important;
-      letter-spacing: 0.3px !important;
-    }
-    .ai-topbar-btn {
-      width: 34px !important;
-      height: 34px !important;
-      border-radius: 10px !important;
-      background: rgba(255,255,255,0.04) !important;
-      border: 1px solid rgba(255,255,255,0.08) !important;
-      color: rgba(255,255,255,0.4) !important;
-      transition: all 0.18s !important;
-    }
-    .ai-topbar-btn:hover {
-      background: rgba(255,255,255,0.09) !important;
-      color: rgba(255,255,255,0.85) !important;
-      border-color: rgba(255,255,255,0.14) !important;
-    }
-
-    /* ── Quick chips row ── */
-    .ai-quick-row {
-      padding: 10px 20px !important;
-      gap: 6px !important;
-      border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-      background: rgba(8,8,16,0.6) !important;
-    }
-    .ai-quick-btn {
-      padding: 5px 13px !important;
-      border-radius: 20px !important;
-      background: rgba(255,255,255,0.04) !important;
-      border: 1px solid rgba(255,255,255,0.08) !important;
-      color: rgba(255,255,255,0.45) !important;
-      font-size: 0.66rem !important;
-      font-weight: 600 !important;
-      letter-spacing: 0.1px !important;
-      transition: all 0.18s !important;
-    }
-    .ai-quick-btn:hover {
-      background: rgba(0,122,255,0.1) !important;
-      border-color: rgba(0,122,255,0.28) !important;
-      color: #007aff !important;
-      transform: translateY(-1px) !important;
-    }
-
-    /* ── Zprávy ── */
-    .ai-messages {
-      padding: 24px 0 !important;
-      gap: 20px !important;
-      background: transparent !important;
-    }
-    .ai-msg-wrap {
-      max-width: min(680px, 92%) !important;
-      margin: 0 auto !important;
-      width: 100% !important;
-    }
-    .ai-msg-wrap.user {
-      align-self: unset !important;
-      flex-direction: row-reverse !important;
-    }
-    .ai-msg-wrap.ai {
-      align-self: unset !important;
-    }
-
-    /* AI avatar — pulsující kruh */
-    .ai-msg-wrap.ai .ai-msg-avatar {
-      width: 30px !important;
-      height: 30px !important;
-      border-radius: 50% !important;
-      background: radial-gradient(circle at 35% 35%, rgba(0,150,255,0.35), rgba(0,80,200,0.15)) !important;
-      border: 1px solid rgba(0,122,255,0.3) !important;
-      color: #4da6ff !important;
-      font-size: 12px !important;
-      box-shadow: 0 0 12px rgba(0,100,255,0.15) !important;
-    }
-    .ai-msg-wrap.user .ai-msg-avatar {
-      width: 30px !important;
-      height: 30px !important;
-      border-radius: 50% !important;
-      background: rgba(255,255,255,0.07) !important;
-      border: 1px solid rgba(255,255,255,0.1) !important;
-      color: rgba(255,255,255,0.5) !important;
-    }
-
-    /* AI bubble */
-    .ai-msg-wrap.ai .ai-msg-bubble {
-      background: rgba(255,255,255,0.03) !important;
-      border: 1px solid rgba(255,255,255,0.07) !important;
-      border-radius: 4px 18px 18px 18px !important;
-      font-size: 0.85rem !important;
-      line-height: 1.7 !important;
-      color: rgba(255,255,255,0.88) !important;
-      padding: 14px 17px !important;
-    }
-    /* User bubble */
-    .ai-msg-wrap.user .ai-msg-bubble {
-      background: linear-gradient(145deg, rgba(0,122,255,0.16), rgba(0,90,200,0.1)) !important;
-      border: 1px solid rgba(0,122,255,0.22) !important;
-      border-radius: 18px 4px 18px 18px !important;
-      font-size: 0.85rem !important;
-      line-height: 1.65 !important;
-      color: rgba(255,255,255,0.92) !important;
-      padding: 12px 16px !important;
-    }
-    .ai-msg-label {
-      font-size: 0.5rem !important;
-      font-weight: 800 !important;
-      letter-spacing: 1.5px !important;
-      color: rgba(0,150,255,0.6) !important;
-      margin-bottom: 6px !important;
-    }
-
-    /* Thinking dots — větší, výraznější */
-    .ai-thinking-bubble {
-      background: rgba(255,255,255,0.02) !important;
-      border: 1px solid rgba(255,255,255,0.06) !important;
-      border-radius: 4px 18px 18px 18px !important;
-      padding: 16px 20px !important;
-    }
-    .ai-thinking-bubble span {
-      width: 7px !important;
-      height: 7px !important;
-      background: rgba(0,150,255,0.55) !important;
-    }
-
-    /* Feedback buttons */
-    .ai-fb-btn {
-      font-size: 0.65rem !important;
-      padding: 3px 8px !important;
-      border-radius: 6px !important;
-      background: rgba(255,255,255,0.03) !important;
-      border: 1px solid rgba(255,255,255,0.07) !important;
-      color: rgba(255,255,255,0.28) !important;
-    }
-    .ai-fb-btn:hover {
-      background: rgba(255,255,255,0.07) !important;
-      color: rgba(255,255,255,0.7) !important;
-    }
-
-    /* ── Input area ── */
-    .ai-input-area {
-      padding: 12px 20px max(20px, env(safe-area-inset-bottom, 20px)) !important;
-      background: rgba(8,8,16,0.85) !important;
-      backdrop-filter: blur(28px) !important;
-      -webkit-backdrop-filter: blur(28px) !important;
-      border-top: 1px solid rgba(255,255,255,0.06) !important;
-    }
-    .ai-input-row {
-      background: rgba(255,255,255,0.05) !important;
-      border: 1px solid rgba(255,255,255,0.1) !important;
-      border-radius: 18px !important;
-      padding: 10px 10px 10px 18px !important;
-      gap: 10px !important;
-      transition: border-color 0.2s, box-shadow 0.2s !important;
-    }
-    .ai-input-row:focus-within {
-      border-color: rgba(0,122,255,0.38) !important;
-      box-shadow: 0 0 0 3px rgba(0,122,255,0.08) !important;
-    }
-    .ai-input {
-      font-size: 0.88rem !important;
-      line-height: 1.55 !important;
-      color: rgba(255,255,255,0.92) !important;
-    }
-    .ai-input::placeholder {
-      color: rgba(255,255,255,0.22) !important;
-    }
-    .ai-voice-fab-btn {
-      width: 38px !important;
-      height: 38px !important;
-      border-radius: 12px !important;
-      background: rgba(255,255,255,0.04) !important;
-      border: 1px solid rgba(255,255,255,0.09) !important;
-      font-size: 1.05rem !important;
-      color: rgba(255,255,255,0.45) !important;
-      transition: all 0.18s !important;
-    }
-    .ai-voice-fab-btn:hover {
-      background: rgba(0,122,255,0.12) !important;
-      border-color: rgba(0,122,255,0.3) !important;
-      color: #007aff !important;
-    }
-    .ai-voice-fab-btn.listening {
-      background: rgba(255,45,85,0.15) !important;
-      border-color: rgba(255,45,85,0.4) !important;
-      color: #ff2d55 !important;
-      animation: mf-pulse-red 1.2s ease infinite !important;
-    }
-    .ai-send-btn {
-      width: 38px !important;
-      height: 38px !important;
-      border-radius: 12px !important;
-      background: #007aff !important;
-      box-shadow: 0 2px 12px rgba(0,122,255,0.35) !important;
-      transition: all 0.18s !important;
-    }
-    .ai-send-btn:hover {
-      transform: scale(1.07) !important;
-      box-shadow: 0 4px 20px rgba(0,122,255,0.5) !important;
-    }
-    .ai-send-btn:disabled {
-      background: rgba(255,255,255,0.08) !important;
-      box-shadow: none !important;
-      opacity: 1 !important;
-    }
-
-    /* ── Bold text v bubblách ── */
-    .ai-msg-bubble strong, .ai-msg-bubble b {
-      color: #fff !important;
-      font-weight: 700 !important;
-    }
-    .ai-msg-bubble em { color: rgba(255,255,255,0.65) !important; font-style: italic !important; }
-
-    /* ── Animace pro mic ── */
-    @keyframes mf-pulse-red {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255,45,85,0.4); }
-      50% { box-shadow: 0 0 0 6px rgba(255,45,85,0); }
-    }
-
-    /* ── Ambient pozadí při přemýšlení ── */
-    .ai-fullscreen.ai-thinking-state::after {
-      content: '';
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #007aff, #5ac8fa, transparent);
-      background-size: 200% 100%;
-      animation: mf-shimmer 1.4s linear infinite;
-      z-index: 9999;
-    }
-    @keyframes mf-shimmer {
-      0% { background-position: -100% 0; }
-      100% { background-position: 200% 0; }
-    }
-  </style>
   </head>
 
   <body>
@@ -9098,5 +8828,276 @@ document.addEventListener('DOMContentLoaded', () => {
     <script src="notifications-changelog.js"></script>
     <script src="mujflix-patch.js"></script>
 
-  </body>
+  
+  <!-- ══ AI PANEL REDESIGN ══ -->
+  <style id="mf-ai-redesign">
+    /* ── Celý panel ── */
+    .ai-fullscreen {
+      background: #08080d !important;
+      flex-direction: column !important;
+    }
+
+    /* ── Sidebar: skrytý vždy (chat-only layout) ── */
+    .ai-sidebar {
+      display: none !important;
+    }
+
+    /* ── ai-main: celá šířka ── */
+    .ai-main {
+      width: 100% !important;
+      max-width: 100% !important;
+      background: transparent !important;
+    }
+
+    /* ── Topbar ── */
+    .ai-topbar {
+      background: rgba(10,10,18,0.92) !important;
+      backdrop-filter: blur(28px) saturate(1.8) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(1.8) !important;
+      border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+      padding: 12px 20px !important;
+      gap: 10px !important;
+    }
+    .ai-topbar-title {
+      font-size: 0.95rem !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.2px !important;
+    }
+    .ai-topbar-title > span:first-child { color: #fff !important; }
+    .ai-topbar-sub {
+      font-size: 0.56rem !important;
+      color: rgba(255,255,255,0.28) !important;
+      letter-spacing: 0.3px !important;
+    }
+    .ai-topbar-btn {
+      width: 34px !important;
+      height: 34px !important;
+      border-radius: 10px !important;
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: rgba(255,255,255,0.4) !important;
+      transition: all 0.18s !important;
+    }
+    .ai-topbar-btn:hover {
+      background: rgba(255,255,255,0.09) !important;
+      color: rgba(255,255,255,0.85) !important;
+      border-color: rgba(255,255,255,0.14) !important;
+    }
+
+    /* ── Quick chips row ── */
+    .ai-quick-row {
+      padding: 10px 20px !important;
+      gap: 6px !important;
+      border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+      background: rgba(8,8,16,0.6) !important;
+    }
+    .ai-quick-btn {
+      padding: 5px 13px !important;
+      border-radius: 20px !important;
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: rgba(255,255,255,0.45) !important;
+      font-size: 0.66rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.1px !important;
+      transition: all 0.18s !important;
+    }
+    .ai-quick-btn:hover {
+      background: rgba(0,122,255,0.1) !important;
+      border-color: rgba(0,122,255,0.28) !important;
+      color: #007aff !important;
+      transform: translateY(-1px) !important;
+    }
+
+    /* ── Zprávy ── */
+    .ai-messages {
+      padding: 24px 0 !important;
+      gap: 20px !important;
+      background: transparent !important;
+    }
+    .ai-msg-wrap {
+      max-width: min(680px, 92%) !important;
+      margin: 0 auto !important;
+      width: 100% !important;
+    }
+    .ai-msg-wrap.user {
+      align-self: unset !important;
+      flex-direction: row-reverse !important;
+    }
+    .ai-msg-wrap.ai {
+      align-self: unset !important;
+    }
+
+    /* AI avatar — pulsující kruh */
+    .ai-msg-wrap.ai .ai-msg-avatar {
+      width: 30px !important;
+      height: 30px !important;
+      border-radius: 50% !important;
+      background: radial-gradient(circle at 35% 35%, rgba(0,150,255,0.35), rgba(0,80,200,0.15)) !important;
+      border: 1px solid rgba(0,122,255,0.3) !important;
+      color: #4da6ff !important;
+      font-size: 12px !important;
+      box-shadow: 0 0 12px rgba(0,100,255,0.15) !important;
+    }
+    .ai-msg-wrap.user .ai-msg-avatar {
+      width: 30px !important;
+      height: 30px !important;
+      border-radius: 50% !important;
+      background: rgba(255,255,255,0.07) !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.5) !important;
+    }
+
+    /* AI bubble */
+    .ai-msg-wrap.ai .ai-msg-bubble {
+      background: rgba(255,255,255,0.03) !important;
+      border: 1px solid rgba(255,255,255,0.07) !important;
+      border-radius: 4px 18px 18px 18px !important;
+      font-size: 0.85rem !important;
+      line-height: 1.7 !important;
+      color: rgba(255,255,255,0.88) !important;
+      padding: 14px 17px !important;
+    }
+    /* User bubble */
+    .ai-msg-wrap.user .ai-msg-bubble {
+      background: linear-gradient(145deg, rgba(0,122,255,0.16), rgba(0,90,200,0.1)) !important;
+      border: 1px solid rgba(0,122,255,0.22) !important;
+      border-radius: 18px 4px 18px 18px !important;
+      font-size: 0.85rem !important;
+      line-height: 1.65 !important;
+      color: rgba(255,255,255,0.92) !important;
+      padding: 12px 16px !important;
+    }
+    .ai-msg-label {
+      font-size: 0.5rem !important;
+      font-weight: 800 !important;
+      letter-spacing: 1.5px !important;
+      color: rgba(0,150,255,0.6) !important;
+      margin-bottom: 6px !important;
+    }
+
+    /* Thinking dots — větší, výraznější */
+    .ai-thinking-bubble {
+      background: rgba(255,255,255,0.02) !important;
+      border: 1px solid rgba(255,255,255,0.06) !important;
+      border-radius: 4px 18px 18px 18px !important;
+      padding: 16px 20px !important;
+    }
+    .ai-thinking-bubble span {
+      width: 7px !important;
+      height: 7px !important;
+      background: rgba(0,150,255,0.55) !important;
+    }
+
+    /* Feedback buttons */
+    .ai-fb-btn {
+      font-size: 0.65rem !important;
+      padding: 3px 8px !important;
+      border-radius: 6px !important;
+      background: rgba(255,255,255,0.03) !important;
+      border: 1px solid rgba(255,255,255,0.07) !important;
+      color: rgba(255,255,255,0.28) !important;
+    }
+    .ai-fb-btn:hover {
+      background: rgba(255,255,255,0.07) !important;
+      color: rgba(255,255,255,0.7) !important;
+    }
+
+    /* ── Input area ── */
+    .ai-input-area {
+      padding: 12px 20px max(20px, env(safe-area-inset-bottom, 20px)) !important;
+      background: rgba(8,8,16,0.85) !important;
+      backdrop-filter: blur(28px) !important;
+      -webkit-backdrop-filter: blur(28px) !important;
+      border-top: 1px solid rgba(255,255,255,0.06) !important;
+    }
+    .ai-input-row {
+      background: rgba(255,255,255,0.05) !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      border-radius: 18px !important;
+      padding: 10px 10px 10px 18px !important;
+      gap: 10px !important;
+      transition: border-color 0.2s, box-shadow 0.2s !important;
+    }
+    .ai-input-row:focus-within {
+      border-color: rgba(0,122,255,0.38) !important;
+      box-shadow: 0 0 0 3px rgba(0,122,255,0.08) !important;
+    }
+    .ai-input {
+      font-size: 0.88rem !important;
+      line-height: 1.55 !important;
+      color: rgba(255,255,255,0.92) !important;
+    }
+    .ai-input::placeholder {
+      color: rgba(255,255,255,0.22) !important;
+    }
+    .ai-voice-fab-btn {
+      width: 38px !important;
+      height: 38px !important;
+      border-radius: 12px !important;
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid rgba(255,255,255,0.09) !important;
+      font-size: 1.05rem !important;
+      color: rgba(255,255,255,0.45) !important;
+      transition: all 0.18s !important;
+    }
+    .ai-voice-fab-btn:hover {
+      background: rgba(0,122,255,0.12) !important;
+      border-color: rgba(0,122,255,0.3) !important;
+      color: #007aff !important;
+    }
+    .ai-voice-fab-btn.listening {
+      background: rgba(255,45,85,0.15) !important;
+      border-color: rgba(255,45,85,0.4) !important;
+      color: #ff2d55 !important;
+      animation: mf-pulse-red 1.2s ease infinite !important;
+    }
+    .ai-send-btn {
+      width: 38px !important;
+      height: 38px !important;
+      border-radius: 12px !important;
+      background: #007aff !important;
+      box-shadow: 0 2px 12px rgba(0,122,255,0.35) !important;
+      transition: all 0.18s !important;
+    }
+    .ai-send-btn:hover {
+      transform: scale(1.07) !important;
+      box-shadow: 0 4px 20px rgba(0,122,255,0.5) !important;
+    }
+    .ai-send-btn:disabled {
+      background: rgba(255,255,255,0.08) !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+    }
+
+    /* ── Bold text v bubblách ── */
+    .ai-msg-bubble strong, .ai-msg-bubble b {
+      color: #fff !important;
+      font-weight: 700 !important;
+    }
+    .ai-msg-bubble em { color: rgba(255,255,255,0.65) !important; font-style: italic !important; }
+
+    /* ── Animace pro mic ── */
+    @keyframes mf-pulse-red {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,45,85,0.4); }
+      50% { box-shadow: 0 0 0 6px rgba(255,45,85,0); }
+    }
+
+    /* ── Ambient pozadí při přemýšlení ── */
+    .ai-fullscreen.ai-thinking-state::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #007aff, #5ac8fa, transparent);
+      background-size: 200% 100%;
+      animation: mf-shimmer 1.4s linear infinite;
+      z-index: 9999;
+    }
+    @keyframes mf-shimmer {
+      0% { background-position: -100% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
+</body>
 </html>
