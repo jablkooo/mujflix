@@ -1,32 +1,40 @@
 /**
  * MůjFlix — UI Patch
- * Hero scroll: 1:1 synchronizace se scrollem, úplné zmizení
+ * Hero scroll: height + overflow:hidden = úplné zmizení synchronizované se scrollem
  */
 (function() {
   'use strict';
 
-  var SCROLL_END = 280;  // px scrollu = hero úplně pryč
+  var SCROLL_END = 260;
+  var _heroH     = 0;
   var _interval  = null;
   var _ticking   = false;
 
-  // ── CSS — přebití styles.css řádek 20051 ──
+  // ── CSS ──
   var style = document.createElement('style');
   style.textContent = [
     '#seriesModal .modal-hero,',
     '.modal-hero {',
     '  transition: none !important;',
-    '  overflow: visible !important;',
-    '  will-change: margin-top !important;',
+    '  overflow: hidden !important;',   /* clip obsahu při zmenšování výšky */
+    '  will-change: height !important;',
+    '  min-height: 0 !important;',      /* důležité — bez toho height nejde pod min-height */
+    '  flex-shrink: 0 !important;',
     '}',
     '#seriesModal .modal-hero-img {',
-    '  height: 100% !important;',
+    '  position: absolute !important;', /* img zůstane na místě, height ho ořízne */
+    '  top: 0 !important;',
+    '  left: 0 !important;',
     '  width: 100% !important;',
+    '  height: 100% !important;',
     '  object-fit: cover !important;',
     '}',
     '#seriesModal .modal-hero-content,',
     '.modal-hero-content {',
     '  transition: none !important;',
     '  will-change: opacity, transform !important;',
+    '  position: relative !important;',
+    '  z-index: 2 !important;',
     '}'
   ].join('\n');
   document.head
@@ -65,22 +73,22 @@
     var content = hero && hero.querySelector('.modal-hero-content');
     if (!hero) { _ticking = false; return; }
 
-    // Skutečná výška hero — ne hardcoded konstanta
-    var heroH = hero.offsetHeight || 180;
+    // Změř hero výšku jen jednou (první call, nebo po reset)
+    if (!_heroH) _heroH = hero.offsetHeight || 180;
 
-    // raw: 0 (nahoře) → 1 (scrollEnd)
-    // Lineární — přesně sleduje prst/scroll bez žádné křivky
+    // 0 → 1 lineárně se scrollem
     var raw = Math.min(1, Math.max(0, mb.scrollTop / SCROLL_END));
 
-    // margin-top záporný = hero mizí nahoru, přesně o svou výšku
-    hero.style.setProperty('margin-top', '-' + (heroH * raw) + 'px', 'important');
-    hero.style.setProperty('height', heroH + 'px', 'important');
+    // Zmenšujeme height od plné výšky → 0
+    // overflow:hidden to ořízne → úplně zmizí
+    var newH = _heroH * (1 - raw);
+    hero.style.setProperty('height', newH + 'px', 'important');
 
-    // Content fade — zmizí v první třetině scrollu
+    // Content fade v první třetině
     if (content) {
-      var op = Math.max(0, 1 - raw / 0.4);
+      var op = Math.max(0, 1 - raw / 0.38);
       content.style.opacity       = op;
-      content.style.transform     = 'translateY(' + (-12 * raw) + 'px)';
+      content.style.transform     = 'translateY(' + (-10 * raw) + 'px)';
       content.style.pointerEvents = op < 0.05 ? 'none' : '';
     }
 
@@ -91,6 +99,7 @@
     var mb = document.getElementById('modalBody');
     if (!mb || mb._mfPatch) return;
     mb._mfPatch = true;
+    _heroH = 0; // reset aby se přeměřila výška
     mb.addEventListener('scroll', function() {
       if (!_ticking) {
         _ticking = true;
@@ -120,9 +129,10 @@
         var hero    = document.querySelector('#seriesModal .modal-hero');
         var content = hero && hero.querySelector('.modal-hero-content');
         var mb      = document.getElementById('modalBody');
-        if (hero)    { hero.style.removeProperty('margin-top'); hero.style.removeProperty('height'); }
+        if (hero)    { hero.style.removeProperty('height'); hero.style.removeProperty('margin-top'); }
         if (content) { content.style.opacity = '1'; content.style.transform = ''; content.style.pointerEvents = ''; }
         if (mb)      mb._mfPatch = false;
+        _heroH = 0;
       }
     }).observe(modal, { attributes: true, attributeFilter: ['class'] });
   }
@@ -130,5 +140,5 @@
   if (document.readyState !== 'loading') setTimeout(init, 50);
   else document.addEventListener('DOMContentLoaded', function() { setTimeout(init, 50); });
 
-  console.log('[MFPatch] sync hero scroll ✓');
+  console.log('[MFPatch] height-collapse hero scroll ✓');
 })();
