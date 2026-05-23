@@ -1,26 +1,29 @@
 /**
  * MůjFlix — UI Patch
- * Hero scroll: clip+translateY místo height (obchází flex/min-height omezení)
+ * Hero scroll: plynulé mizení přes margin-top + opacity
+ * Opravy: žádný Math.round (sub-pixel), delší SCROLL_END, CSS transition vypnut během scrollu
  */
 (function() {
   'use strict';
 
-  var HERO_FULL  = 180;
-  var SCROLL_END = 160;
+  var HERO_FULL  = 180;   // px — výška hero obrázku
+  var SCROLL_END = 260;   // px — za kolik px scrollu hero úplně zmizí (bylo 160 → trhat)
   var _interval  = null;
   var _ticking   = false;
 
-  function easeInOut(t) {
-    return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+  function easeOut(t) {
+    // Plynulejší než easeInOut pro scroll — začne rychle, zpomalí ke konci
+    return 1 - Math.pow(1 - t, 2.5);
   }
 
   // ── CSS ──
   var style = document.createElement('style');
   style.textContent = [
-    // Hero: clip-path animace — ořízne shora dolů
     '#seriesModal .modal-hero {',
     '  overflow: visible !important;',
-    '  will-change: clip-path, margin-top;',
+    '  will-change: margin-top;',
+    '  /* Žádný CSS transition — animaci řídí rAF, transition by způsobovala lag */',
+    '  transition: none !important;',
     '}',
     '#seriesModal .modal-hero-img {',
     '  height: 100% !important;',
@@ -29,6 +32,7 @@
     '}',
     '#seriesModal .modal-hero-content {',
     '  will-change: opacity, transform;',
+    '  transition: none !important;',
     '}'
   ].join('\n');
   (document.head || document.documentElement).appendChild(style);
@@ -59,25 +63,28 @@
     }, 150);
   }
 
-  // ── Hero scroll: marginTop záporný + clip ──
+  // ── Hero scroll ──
   function updateHero(mb) {
     var hero    = document.querySelector('#seriesModal .modal-hero');
     var content = hero && hero.querySelector('.modal-hero-content');
     if (!hero) { _ticking = false; return; }
 
+    // raw 0→1 podle scrollTop
     var raw      = Math.min(1, Math.max(0, mb.scrollTop / SCROLL_END));
-    var progress = easeInOut(raw);
+    var progress = easeOut(raw);
 
-    // Posuneme hero nahoru záporným marginem — úplně zmizí
-    var offset = Math.round(HERO_FULL * progress);
+    // Záporný margin-top — hero se "zasune" nahoru a zmizí
+    // Bez Math.round → sub-pixel přesnost = žádné trhání
+    var offset = HERO_FULL * progress;
     hero.style.setProperty('margin-top', '-' + offset + 'px', 'important');
     hero.style.setProperty('height', HERO_FULL + 'px', 'important');
 
-    // Content fade
+    // Content: fade out v první třetině scrollu, lehký posun nahoru
     if (content) {
-      var op = Math.max(0, 1 - raw / 0.5);
-      content.style.opacity      = op;
-      content.style.transform    = 'translateY(' + (-10 * progress) + 'px)';
+      var fadeEnd = 0.35; // opacity = 0 při 35 % scrollu
+      var op      = Math.max(0, 1 - raw / fadeEnd);
+      content.style.opacity       = op;
+      content.style.transform     = 'translateY(' + (-14 * progress) + 'px)';
       content.style.pointerEvents = op < 0.05 ? 'none' : '';
     }
 
@@ -127,5 +134,5 @@
   if (document.readyState !== 'loading') setTimeout(init, 50);
   else document.addEventListener('DOMContentLoaded', function() { setTimeout(init, 50); });
 
-  console.log('[MFPatch] margin-top scroll ✓');
+  console.log('[MFPatch] smooth hero scroll ✓');
 })();
