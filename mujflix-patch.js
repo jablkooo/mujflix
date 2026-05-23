@@ -1,9 +1,16 @@
 /**
  * MůjFlix — UI Patch
- * Hero scroll: height 260→0 synchronizovaně se scrollem
+ * Hero scroll: height + overlay fade synchronizovaně se scrollem
  */
 (function() {
   'use strict';
+
+  // Guard — spusť jen jednou
+  if (window._mfPatchLoaded) {
+    console.warn('[MFPatch] already loaded, skipping');
+    return;
+  }
+  window._mfPatchLoaded = true;
 
   var HERO_CSS_H = 260;
   var SCROLL_END = 300;
@@ -12,29 +19,35 @@
 
   // ── CSS ──
   var style = document.createElement('style');
+  style.id  = 'mf-patch-style';
+  // Odstraň předchozí instanci pokud existuje
+  var old = document.getElementById('mf-patch-style');
+  if (old) old.remove();
+
   style.textContent = [
     '#seriesModal .modal-hero {',
     '  transition: none !important;',
-    '  overflow: hidden !important;',  /* ořízne img při zmenšení */
+    '  overflow: hidden !important;',
     '  will-change: height !important;',
     '  min-height: 0 !important;',
     '  flex-shrink: 1 !important;',
     '  position: relative !important;',
     '}',
-    /* img v normálním flow, height:100% = kopíruje výšku hero */
     '#seriesModal .modal-hero-img {',
-    '  position: relative !important;', /* NE absolute — musí jít s height hero */
+    '  position: relative !important;',
     '  width: 100% !important;',
-    '  height: 100% !important;',
-    '  min-height: ' + HERO_CSS_H + 'px !important;', /* zachová aspect při zmenšení */
+    '  height: ' + HERO_CSS_H + 'px !important;',
     '  object-fit: cover !important;',
     '  object-position: center 22% !important;',
     '  display: block !important;',
-    '  transform: none !important;',
+    '  transform: scale(1) !important;',  /* zruš scale(1.06) z CSS */
+    '  filter: brightness(0.5) !important;',
     '}',
     '#seriesModal .modal-hero-overlay {',
     '  position: absolute !important;',
     '  inset: 0 !important;',
+    '  will-change: opacity !important;',
+    '  transition: none !important;',
     '}',
     '#seriesModal .modal-hero-content {',
     '  transition: none !important;',
@@ -78,14 +91,21 @@
   // ── Hero scroll ──
   function updateHero(mb) {
     var hero    = document.querySelector('#seriesModal .modal-hero');
+    var overlay = hero && hero.querySelector('.modal-hero-overlay');
     var content = hero && hero.querySelector('.modal-hero-content');
     if (!hero) { _ticking = false; return; }
 
     var raw = Math.min(1, Math.max(0, mb.scrollTop / SCROLL_END));
 
-    // Zmenšujeme hero výšku — overflow:hidden ořízne img shora
+    // Zmenšujeme hero výšku — img má fixní height, overflow:hidden ho ořízne
     hero.style.setProperty('height', (HERO_CSS_H * (1 - raw)) + 'px', 'important');
 
+    // Overlay taky fade out aby nezůstal proužek gradientu
+    if (overlay) {
+      overlay.style.opacity = (1 - raw);
+    }
+
+    // Content fade
     if (content) {
       var op = Math.max(0, 1 - raw / 0.4);
       content.style.opacity       = op;
@@ -100,6 +120,7 @@
     var mb = document.getElementById('modalBody');
     if (!mb || mb._mfPatch) return;
     mb._mfPatch = true;
+    // Reset výšky
     var hero = document.querySelector('#seriesModal .modal-hero');
     if (hero) hero.style.setProperty('height', HERO_CSS_H + 'px', 'important');
     mb.addEventListener('scroll', function() {
@@ -129,9 +150,11 @@
         forceShow();
         if (_interval) { clearInterval(_interval); _interval = null; }
         var hero    = document.querySelector('#seriesModal .modal-hero');
+        var overlay = hero && hero.querySelector('.modal-hero-overlay');
         var content = hero && hero.querySelector('.modal-hero-content');
         var mb      = document.getElementById('modalBody');
         if (hero)    hero.style.setProperty('height', HERO_CSS_H + 'px', 'important');
+        if (overlay) overlay.style.removeProperty('opacity');
         if (content) { content.style.opacity = '1'; content.style.transform = ''; content.style.pointerEvents = ''; }
         if (mb)      mb._mfPatch = false;
       }
@@ -141,5 +164,5 @@
   if (document.readyState !== 'loading') setTimeout(init, 50);
   else document.addEventListener('DOMContentLoaded', function() { setTimeout(init, 50); });
 
-  console.log('[MFPatch] hero 260→0 v2 ✓');
+  console.log('[MFPatch] v3 loaded ✓');
 })();
