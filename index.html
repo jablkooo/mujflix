@@ -9164,7 +9164,92 @@ document.addEventListener('DOMContentLoaded', () => {
     <script src="legal-streaming-providers.js"></script>
     <script src="notifications-changelog.js"></script>
     <script src="mujflix-patch.js"></script>
-    <script src="mujflix-discover-tv-modal.js"></script>
+    <script>
+    /* MůjFlix — Discover TV → Series Modal Patch v3 */
+    (function () {
+      'use strict';
+      var IMG_P = 'https://image.tmdb.org/t/p/w342';
+      var IMG_B = 'https://image.tmdb.org/t/p/w780';
+
+      function install(tries) {
+        tries = tries || 0;
+        if (
+          typeof window.openMovieInCinema === 'function' &&
+          typeof window.openSeries === 'function' &&
+          typeof window.db !== 'undefined' &&
+          typeof window.tmdbGet === 'function'
+        ) {
+          var _orig = window.openMovieInCinema;
+          window.openMovieInCinema = function (tmdbId, title, type) {
+            var t = type || 'movie';
+            if (t === 'tv' && !String(tmdbId).includes('/')) {
+              _openDiscover(tmdbId, title);
+              return;
+            }
+            _orig.apply(this, arguments);
+          };
+          console.log('[MFDiscoverTV] v3 aktivní');
+        } else if (tries < 100) {
+          setTimeout(function () { install(tries + 1); }, 100);
+        }
+      }
+
+      async function _openDiscover(tmdbId, title) {
+        var slug = '__dtv_' + tmdbId;
+        if (!window.db[slug]) {
+          if (typeof showToast === 'function') showToast('📺 Načítám…', 1800);
+          try {
+            var d = await window.tmdbGet('/tv/' + tmdbId + '?language=cs');
+            if (!d || d.success === false) throw new Error('no data');
+            var rec = {
+              name:        d.name || title,
+              tmdbId:      tmdbId,
+              totalEps:    d.number_of_episodes || 0,
+              poster:      d.poster_path   ? IMG_P + d.poster_path   : '',
+              _poster:     d.poster_path   ? IMG_P + d.poster_path   : '',
+              _backdrop:   d.backdrop_path ? IMG_B + d.backdrop_path : '',
+              _genres:     (d.genres || []).map(function (g) { return g.name; }),
+              _isDiscover: true,
+            };
+            var seasons = d.seasons || [];
+            var ns = d.number_of_seasons || 1;
+            for (var s = 1; s <= ns; s++) {
+              var sd = seasons.find(function (x) { return x.season_number === s; });
+              var ec = sd && sd.episode_count ? sd.episode_count : 1;
+              for (var e = 1; e <= ec; e++) {
+                rec[slug + '-S' + s + '-E' + e] = { se: s, ep: e };
+              }
+            }
+            window.db[slug] = rec;
+          } catch (err) {
+            console.error('[MFDiscoverTV]', err);
+            if (typeof showToast === 'function') showToast('⚠ Nepodařilo se načíst', 3000);
+            return;
+          }
+        }
+        if (typeof closeUniverse === 'function') closeUniverse();
+        setTimeout(function () {
+          if (typeof openSeries === 'function') openSeries(slug);
+        }, 150);
+        var modal = document.getElementById('seriesModal');
+        if (modal) {
+          var obs = new MutationObserver(function () {
+            if (!modal.classList.contains('open') && window.db[slug] && window.db[slug]._isDiscover) {
+              delete window.db[slug];
+              obs.disconnect();
+            }
+          });
+          obs.observe(modal, { attributes: true, attributeFilter: ['class'] });
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { install(); });
+      } else {
+        install();
+      }
+    })();
+    </script>
 
   </body>
 </html>
