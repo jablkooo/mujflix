@@ -9527,9 +9527,9 @@ function _bombujMovieUrlVariants(e, t) {
   const n = _czSlug(e);
   const q = `https://www.bombuj.si/?s=${encodeURIComponent(e||"")}`;
   if (!n) return [q];
+  if (!t) return [q];
   const o = parseInt(t) || null;
-  // Bez roku: zkus URL bez roku jako první volbu (místo search stránky)
-  if (!o) return [`https://www.bombuj.si/online-film-${n}`, q];
+  if (!o) return [q];
   return [`https://www.bombuj.si/online-film-${n}-${o}`, `https://www.bombuj.si/online-film-${n}-${o-1}`, `https://www.bombuj.si/online-film-${n}`, q]
 }
 window.adminRenderPerProfileKeys=function(){const e=document.getElementById("adminTab_apikeys");if(!e)return;let t=document.getElementById("mfPerProfileSection");t||(t=document.createElement("div"),t.id="mfPerProfileSection",e.querySelector(":scope > div")?.appendChild(t),t.parentNode||e.appendChild(t));let n=[];try{n=safeLS("mf_profiles_v2","[]")}catch(e){}n.length?t.innerHTML=`\n    <div class="mfPPS-title">👤 API klíče pro konkrétní profil</div>\n    <div class="mfPPS-sub">Každý profil může mít vlastní klíč — použije ho místo globálního.</div>\n    ${n.map(e=>{const t=e.id,n=e.avatarUrl?`<img src="${e.avatarUrl}" alt="">`:e.avatar||"🎬",o=_PP_KEYS.map(e=>{const n=e.key+"_"+t,o=localStorage.getItem(n)||"",i=o?o.slice(0,5)+"•••"+o.slice(-3):"";return`<div class="mfPPS-row">\n          <span class="mfPPS-lbl" style="color:${e.color}">${e.label}</span>\n          <input class="mfPPS-inp" id="ppk_${t}_${e.key}"\n            type="password" placeholder="${i||e.ph}"\n            ${o?`value="${o}"`:""}>\n          <button class="mfPPS-save"\n            onclick="adminSavePerKey('${t}','${e.key}')">Uložit</button>\n          ${o?`<button class="mfPPS-del"\n            onclick="adminDelPerKey('${t}','${e.key}')">✕</button>`:""}\n        </div>`}).join("");return`<div class="mfPPS-card">\n        <div class="mfPPS-head">\n          <div class="mfPPS-av" style="background:${e.color||"rgba(255,255,255,0.08)"}33;\n            border:1px solid ${e.color||"rgba(255,255,255,0.1)"}44">${n}</div>\n          <div>\n            <div class="mfPPS-name">${e.name||"Profil"}</div>\n            <div class="mfPPS-id">${t}</div>\n          </div>\n        </div>\n        ${o}\n      </div>`}).join("")}\n  `:t.innerHTML='<div class="mfPPS-title">👤 Per-profil API klíče</div><div class="mfPPS-sub" style="color:rgba(255,255,255,0.25)">Žádné profily.</div>'},
@@ -10456,7 +10456,6 @@ const CINEMA_SOURCES = [{
 }, {
   id: "bombuj",
   label: "Bombuj",
-  popupOnly: !0,
   movie: (e, t, n) => _bombujMovieUrlVariants(t, n)[0],
   movieVariants: (e, t, n) => _bombujMovieUrlVariants(t, n),
   tv: (e, t, n, o) => {
@@ -10588,7 +10587,7 @@ function _cinShowPlayButton(e, t) {
       f = "tv" === o.type ? `https://api.themoviedb.org/3/tv/${o.tmdbId}?api_key=${g}&language=cs` : `https://api.themoviedb.org/3/movie/${o.tmdbId}?api_key=${g}&language=cs`,
       y = i => {
         const c = i ? `background:url('${i}') center/cover no-repeat;` : "background:linear-gradient(135deg,#0a0a14 0%,#111122 100%);";
-        n.innerHTML = `\n        <div style="position:absolute;inset:0;${c}">\n          \x3c!-- Tmavý overlay přes backdrop --\x3e\n          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.55) 50%,rgba(0,0,0,0.4) 100%);"></div>\n          \x3c!-- Blur vrstva pro glass efekt --\x3e\n          <div style="position:absolute;inset:0;backdrop-filter:blur(2px);"></div>\n\n          \x3c!-- Obsah uprostřed — tmavý glass panel garantuje čitelnost vždy --\x3e\n          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:-apple-system,'SF Pro Display',Inter,sans-serif;">\n\n            \x3c!-- Glass panel — izoluje texty od pozadí --\x3e\n            <div style="background:rgba(0,0,0,0.62);backdrop-filter:blur(28px) saturate(1.3);border:1px solid rgba(255,255,255,0.1);border-radius:28px;padding:40px 52px;display:flex;flex-direction:column;align-items:center;gap:20px;box-shadow:0 32px 96px rgba(0,0,0,0.8),inset 0 1px 0 rgba(255,255,255,0.06);min-width:300px;max-width:460px;">\n\n              \x3c!-- Název + epizoda --\x3e\n              <div style="text-align:center;">\n                <div style="font-size:1.65rem;font-weight:800;color:#fff;letter-spacing:-0.5px;line-height:1.2;">${o.title||""}</div>\n                ${"tv"===o.type?`<div style="font-size:0.82rem;color:rgba(255,255,255,0.6);margin-top:8px;letter-spacing:2px;font-weight:600;">S${String(o.season).padStart(2,"0")} · E${String(o.ep).padStart(2,"0")}</div>`:""}\n              </div>\n\n              \x3c!-- Hlavní play tlačítko --\x3e\n              <button onclick="window.open('${e.replace(/'/g,"\\'")}','_blank','noopener')"\n                style="padding:18px 52px;border-radius:60px;background:linear-gradient(135deg,rgba(48,209,88,0.97),rgba(37,162,68,1));border:none;color:#fff;font-size:1.1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 10px 40px rgba(48,209,88,0.45),inset 0 1px 0 rgba(255,255,255,0.25);transition:all 0.2s;letter-spacing:-0.2px;"\n                onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 16px 52px rgba(48,209,88,0.6),inset 0 1px 0 rgba(255,255,255,0.25)'"\n                onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 10px 40px rgba(48,209,88,0.45),inset 0 1px 0 rgba(255,255,255,0.25)'">\n                <svg viewBox="0 0 24 24" width="22" height="22" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>\n                Přehrát\n              </button>\n\n              \x3c!-- Zdroj label — vždy čitelný na tmavém panelu --\x3e\n              <div style="font-size:0.68rem;color:rgba(255,255,255,0.55);letter-spacing:2px;text-transform:uppercase;font-weight:600;">${t}</div>\n\n              ${a&&l?`\n              \x3c!-- Další epizoda --\x3e\n              <button onclick="(function(){_cinState.season=${s};_cinState.ep=${r};document.getElementById('cinemaSubtitle').textContent='S${String(s).padStart(2,"0")}E${String(r).padStart(2,"0")}';const e=document.getElementById('cinemaEpSel');if(e)e.value='${r}';const se=document.getElementById('cinemaSeasonSel');if(se)se.value='${s}';_cinLoad();})()"\n                style="display:flex;align-items:center;gap:9px;padding:11px 26px;border-radius:40px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);color:rgba(255,255,255,0.8);font-size:0.82rem;font-weight:600;cursor:pointer;font-family:-apple-system,Inter,sans-serif;transition:all 0.18s;letter-spacing:-0.1px;"\n                onmouseover="this.style.background='rgba(255,255,255,0.16)';this.style.color='#fff'"\n                onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='rgba(255,255,255,0.8)'">\n                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">\n                  <polygon points="5 3 15 12 5 21 5 3" fill="currentColor" stroke="none"/>\n                  <line x1="19" y1="3" x2="19" y2="21"/>\n                </svg>\n                Další epizoda · S${String(s).padStart(2,"0")}E${String(r).padStart(2,"0")}\n              </button>`:""}\n\n              \x3c!-- Hledat na webu — vždy viditelné na glass panelu --\x3e\n              <a href="${d}" target="_blank" rel="noopener"\n                style="font-size:0.68rem;color:rgba(255,255,255,0.4);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color 0.15s;font-weight:500;"\n                onmouseover="this.style.color='rgba(255,255,255,0.8)'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">\n                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>\n                Nenašlo se? Hledat na webu\n              </a>\n\n            </div>\x3c!-- /glass panel --\x3e\n          </div>\n        </div>\n      `
+        n.innerHTML = `\n        <div style="position:absolute;inset:0;${c}">\n          \x3c!-- Tmavý overlay přes backdrop --\x3e\n          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.55) 50%,rgba(0,0,0,0.4) 100%);"></div>\n          \x3c!-- Blur vrstva pro glass efekt --\x3e\n          <div style="position:absolute;inset:0;backdrop-filter:blur(2px);"></div>\n\n          \x3c!-- Obsah uprostřed — tmavý glass panel garantuje čitelnost vždy --\x3e\n          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:-apple-system,'SF Pro Display',Inter,sans-serif;">\n\n            \x3c!-- Glass panel — izoluje texty od pozadí --\x3e\n            <div style="background:rgba(0,0,0,0.62);backdrop-filter:blur(28px) saturate(1.3);border:1px solid rgba(255,255,255,0.1);border-radius:28px;padding:40px 52px;display:flex;flex-direction:column;align-items:center;gap:20px;box-shadow:0 32px 96px rgba(0,0,0,0.8),inset 0 1px 0 rgba(255,255,255,0.06);min-width:300px;max-width:460px;">\n\n              \x3c!-- Název + epizoda --\x3e\n              <div style="text-align:center;">\n                <div style="font-size:1.65rem;font-weight:800;color:#fff;letter-spacing:-0.5px;line-height:1.2;">${o.title||""}</div>\n                ${"tv"===o.type?`<div style="font-size:0.82rem;color:rgba(255,255,255,0.6);margin-top:8px;letter-spacing:2px;font-weight:600;">S${String(o.season).padStart(2,"0")} · E${String(o.ep).padStart(2,"0")}</div>`:""}\n              </div>\n\n              \x3c!-- Hlavní play tlačítko --\x3e\n              <button onclick="(function(){const pw=screen.width,ph=screen.height,pop=window.open('${e.replace(/'/g,"\\'")}','MujFlixCinema','width='+pw+',height='+ph+',left=0,top=0,menubar=no,toolbar=no,location=no,scrollbars=yes');if(!pop||pop.closed)window.open('${e.replace(/'/g,"\\'")}','_blank','noopener');})()"\n                style="padding:18px 52px;border-radius:60px;background:linear-gradient(135deg,rgba(48,209,88,0.97),rgba(37,162,68,1));border:none;color:#fff;font-size:1.1rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 10px 40px rgba(48,209,88,0.45),inset 0 1px 0 rgba(255,255,255,0.25);transition:all 0.2s;letter-spacing:-0.2px;"\n                onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 16px 52px rgba(48,209,88,0.6),inset 0 1px 0 rgba(255,255,255,0.25)'"\n                onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 10px 40px rgba(48,209,88,0.45),inset 0 1px 0 rgba(255,255,255,0.25)'">\n                <svg viewBox="0 0 24 24" width="22" height="22" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>\n                Přehrát\n              </button>\n\n              \x3c!-- Zdroj label — vždy čitelný na tmavém panelu --\x3e\n              <div style="font-size:0.68rem;color:rgba(255,255,255,0.55);letter-spacing:2px;text-transform:uppercase;font-weight:600;">${t}</div>\n\n              ${a&&l?`\n              \x3c!-- Další epizoda --\x3e\n              <button onclick="(function(){_cinState.season=${s};_cinState.ep=${r};document.getElementById('cinemaSubtitle').textContent='S${String(s).padStart(2,"0")}E${String(r).padStart(2,"0")}';const e=document.getElementById('cinemaEpSel');if(e)e.value='${r}';const se=document.getElementById('cinemaSeasonSel');if(se)se.value='${s}';_cinLoad();})()"\n                style="display:flex;align-items:center;gap:9px;padding:11px 26px;border-radius:40px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);color:rgba(255,255,255,0.8);font-size:0.82rem;font-weight:600;cursor:pointer;font-family:-apple-system,Inter,sans-serif;transition:all 0.18s;letter-spacing:-0.1px;"\n                onmouseover="this.style.background='rgba(255,255,255,0.16)';this.style.color='#fff'"\n                onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.color='rgba(255,255,255,0.8)'">\n                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">\n                  <polygon points="5 3 15 12 5 21 5 3" fill="currentColor" stroke="none"/>\n                  <line x1="19" y1="3" x2="19" y2="21"/>\n                </svg>\n                Další epizoda · S${String(s).padStart(2,"0")}E${String(r).padStart(2,"0")}\n              </button>`:""}\n\n              \x3c!-- Hledat na webu — vždy viditelné na glass panelu --\x3e\n              <a href="${d}" target="_blank" rel="noopener"\n                style="font-size:0.68rem;color:rgba(255,255,255,0.4);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color 0.15s;font-weight:500;"\n                onmouseover="this.style.color='rgba(255,255,255,0.8)'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">\n                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>\n                Nenašlo se? Hledat na webu\n              </a>\n\n            </div>\x3c!-- /glass panel --\x3e\n          </div>\n        </div>\n      `
       };
     y(null), o.tmdbId && g && fetch(f).then(e => e.ok ? e.json() : null).then(e => {
       if (!e) return;
@@ -10616,34 +10615,65 @@ function _cinShowEmbedPlayer(e) {
   const s = document.createElement("div");
   s.style.cssText = "flex:1;position:relative;background:#000;";
   const r = document.createElement("iframe");
-  r.src = e, r.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:none;", r.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture; fullscreen"), r.setAttribute("referrerpolicy", "no-referrer"), r.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation");
+  r.src = e, r.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:none;", r.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture; fullscreen"), r.setAttribute("referrerpolicy", "no-referrer"), r.setAttribute("allowfullscreen", "");
+  // Bez sandbox — Bombuj a SvetSerialu potřebují volný přístup
   const l = document.createElement("div");
-  l.style.cssText = "position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(0,0,0,0.9);pointer-events:none;z-index:2;transition:opacity 0.5s;", l.innerHTML = '\n      <div style="font-size:2.2rem;">🎬</div>\n      <div style="color:rgba(255,255,255,0.6);font-size:0.8rem;font-family:Inter,sans-serif;text-align:center;padding:0 24px;line-height:1.7;max-width:340px;">\n        Načítám přehrávač…\n        <br><span style="color:rgba(255,255,255,0.3);font-size:0.65rem;">Pokud zůstane prázdné, zkus jiný zdroj níže nebo otevři v nové kartě</span>\n      </div>';
+  l.style.cssText = "position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(0,0,0,0.92);pointer-events:none;z-index:2;transition:opacity 0.5s;";
+  l.innerHTML = `
+    <div style="font-size:2.5rem;">🎬</div>
+    <div style="color:rgba(255,255,255,0.65);font-size:0.82rem;font-family:-apple-system,Inter,sans-serif;text-align:center;padding:0 24px;line-height:1.7;max-width:360px;">
+      Načítám přehrávač…
+      <br><span style="color:rgba(255,255,255,0.3);font-size:0.65rem;">Pokud zůstane prázdné, klikni na tlačítko níže</span>
+    </div>
+    <button id="_cinFallbackBtn" style="pointer-events:auto;padding:12px 28px;border-radius:50px;background:linear-gradient(135deg,#30d158,#25a244);border:none;color:#fff;font-size:0.82rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 8px 28px rgba(48,209,88,0.4);" onclick="window.open('${e.replace(/'/g,"\\'")}','_blank','noopener')">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Otevřít v nové kartě
+    </button>`;
   let c = setTimeout(() => {
-    "none" !== l.style.display && (l.innerHTML = `\n          <div style="font-size:2rem;">⚠️</div>\n          <div style="color:rgba(255,255,255,0.65);font-size:0.8rem;font-family:Inter,sans-serif;text-align:center;padding:0 24px;line-height:1.7;max-width:360px;">\n            Zdroj <strong>${o}</strong> nereaguje nebo blokuje přehrávání.\n            <br><span style="color:rgba(255,255,255,0.35);font-size:0.65rem;">Zkus přepnout zdroj v liště nahoře, nebo použij tlačítka níže.</span>\n          </div>`, l.style.pointerEvents = "none")
+    if ("none" === l.style.display) return;
+    l.innerHTML = `
+      <div style="font-size:2rem;">⚠️</div>
+      <div style="color:rgba(255,255,255,0.65);font-size:0.8rem;font-family:-apple-system,Inter,sans-serif;text-align:center;padding:0 24px;line-height:1.7;max-width:360px;">
+        Zdroj <strong>${o}</strong> blokuje přehrávání v okně.<br>
+        <span style="color:rgba(255,255,255,0.35);font-size:0.65rem;">Otevři přímo nebo zkus jiný zdroj.</span>
+      </div>
+      <button style="pointer-events:auto;padding:12px 28px;border-radius:50px;background:linear-gradient(135deg,#30d158,#25a244);border:none;color:#fff;font-size:0.82rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 8px 28px rgba(48,209,88,0.4);" onclick="window.open('${e.replace(/'/g,"\\'")}','_blank','noopener')">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Otevřít v nové kartě
+      </button>`;
+    l.style.pointerEvents = "auto";
   }, 8e3);
-  if (r.onload = () => {
-      clearTimeout(c), l.style.opacity = "0", setTimeout(() => {
-        l.style.display = "none"
-      }, 500)
-    }, window.CinAI) {
-    const e = CINEMA_SOURCES[_cinState.sourceIdx].id;
-    CinAI.monitorIframe(r, e)
+  r.onload = () => {
+    clearTimeout(c);
+    // Zkontroluj po 1s jestli iframe má skutečný obsah (ne prázdná stránka)
+    setTimeout(() => {
+      try {
+        const doc = r.contentDocument || r.contentWindow?.document;
+        if (doc && (doc.title === "" || doc.body?.innerHTML === "")) {
+          // Prázdný iframe — zobraz fallback
+          l.style.pointerEvents = "auto";
+          return;
+        }
+      } catch (ex) {
+        // Cross-origin — to je OK, znamená že stránka se načetla
+      }
+      l.style.opacity = "0";
+      setTimeout(() => { l.style.display = "none"; }, 500);
+    }, 1000);
+  };
+  if (window.CinAI) {
+    const srcId = CINEMA_SOURCES[_cinState.sourceIdx].id;
+    CinAI.monitorIframe(r, srcId);
   }
   s.appendChild(r), s.appendChild(l);
   const d = document.createElement("div");
-  d.style.cssText = "flex-shrink:0;background:rgba(10,10,16,0.97);border-top:1px solid rgba(255,255,255,0.07);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;";
+  d.style.cssText = "flex-shrink:0;background:rgba(10,10,16,0.97);border-top:1px solid rgba(255,255,255,0.07);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;";
   const m = document.createElement("div");
-  m.style.cssText = "flex:1;min-width:0;", m.innerHTML = `<div style="color:#fff;font-family:Inter,sans-serif;font-size:0.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.title||""}</div>\n      <div style="color:rgba(255,255,255,0.35);font-family:Inter,sans-serif;font-size:0.62rem;">${i} · Pokud neběží, otevři v záložce</div>`;
+  m.style.cssText = "flex:1;min-width:0;", m.innerHTML = `<div style="color:#fff;font-family:-apple-system,Inter,sans-serif;font-size:0.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${n.title||""}</div>
+    <div style="color:rgba(255,255,255,0.35);font-family:Inter,sans-serif;font-size:0.6rem;">${i}</div>`;
   const u = document.createElement("button");
-  u.innerHTML = "🔗 Nová karta", u.style.cssText = "padding:9px 16px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;flex-shrink:0;", u.onclick = () => window.open(e, "_blank", "noopener");
-  const p = document.createElement("button");
-  p.innerHTML = "▶ Popup okno", p.style.cssText = "padding:9px 16px;border-radius:10px;background:linear-gradient(135deg,#007AFF,#5ac8fa);border:none;color:#fff;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap;flex-shrink:0;", p.onclick = () => {
-    const t = window.screen.width,
-      n = window.screen.height,
-      o = window.open(e, "_blank", "noopener");
-    o && !o.closed || window.open(e, "_blank", "noopener")
-  }, d.appendChild(m), d.appendChild(u), d.appendChild(p), a.appendChild(s), a.appendChild(d), t.appendChild(a)
+  u.innerHTML = "🔗 Nová karta", u.style.cssText = "padding:8px 14px;border-radius:20px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);font-size:0.72rem;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;", u.onclick = () => window.open(e, "_blank", "noopener");
+  d.appendChild(m), d.appendChild(u), a.appendChild(s), a.appendChild(d), t.appendChild(a)
 }
 
 function _cinShowLauncher(e) {
@@ -10667,7 +10697,7 @@ function _cinShowLauncher(e) {
   d.style.cssText = "padding:16px 24px;border-radius:16px;background:linear-gradient(135deg,#007AFF,#5ac8fa);border:none;color:#fff;font-size:0.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 24px rgba(0,122,255,0.35);", d.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg> Spustit kino', d.addEventListener("click", function() {
     const t = window.screen.width,
       n = window.screen.height,
-      o = window.open(e, "_blank", "noopener");
+      o = window.open(e, "MujFlixCinema", "width=" + t + ",height=" + n + ",left=0,top=0,menubar=no,toolbar=no,location=no,status=no,scrollbars=no");
     o && !o.closed || window.open(e, "_blank", "noopener")
   });
   const m = document.createElement("div");
