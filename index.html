@@ -9164,165 +9164,138 @@ document.addEventListener('DOMContentLoaded', () => {
     <script src="legal-streaming-providers.js"></script>
     <script src="notifications-changelog.js"></script>
     <script src="mujflix-patch.js"></script>
+
+
     <script>
-    /* MůjFlix — Discover TV → Series Modal Patch v4
-     * - TV seriály z Objevování → series modal
-     * - URL slug generace: latin original → original_name, non-latin → EN fetch
-     * - _cinSiteSlug opraveno pro epizody
-     * - _buildEpCardBase URL opraveno
+    /* MůjFlix — Emergency Discover TV Patch
+     * Přepisuje onclick na disco kartách po jejich vykreslení.
+     * Funguje nezávisle na app.js verzi.
      */
-    (function () {
-      'use strict';
-      var IMG_P = 'https://image.tmdb.org/t/p/w342';
-      var IMG_B = 'https://image.tmdb.org/t/p/w780';
+    (function() {
+      const IMG_P = 'https://image.tmdb.org/t/p/w342';
+      const IMG_B = 'https://image.tmdb.org/t/p/w780';
 
-      function isNonLatin(s) {
-        return /[\u3000-\u9fff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u4e00-\u9fff]/.test(s || '');
-      }
+      async function openDiscoverTvInline(tmdbId, title) {
+        const slug = '__dtv_' + tmdbId;
+        console.log('[MFPatch] openDiscoverTv', tmdbId, title);
 
-      function install(tries) {
-        tries = tries || 0;
-        if (
-          typeof window.openMovieInCinema === 'function' &&
-          typeof window.openSeries === 'function' &&
-          typeof window.db !== 'undefined' &&
-          typeof window.tmdbGet === 'function' &&
-          typeof window._czSlug === 'function'
-        ) {
-          // 1. Zachyť TV seriály z Discover → modal
-          var _orig = window.openMovieInCinema;
-          window.openMovieInCinema = function (tmdbId, title, type) {
-            var t = type || 'movie';
-
-            // Oprav _cinSiteSlug pro epizody discover seriálů
-            if ((t === 'tv_ep' || String(tmdbId).includes('/')) && window._cinSiteSlug) {
-              var slug = window._cinSiteSlug;
-              if (slug.startsWith('__dtv_') && window.db[slug] && window.db[slug]._svetSlug) {
-                window._cinSiteSlug = window.db[slug]._svetSlug;
-              }
-            }
-
-            // Redirect čistých TV seriálů do modal
-            if (t === 'tv' && !String(tmdbId).includes('/')) {
-              _openDiscover(tmdbId, title);
-              return;
-            }
-
-            _orig.apply(this, arguments);
-          };
-
-          // 2. Oprav URL v _buildEpCardBase pro __dtv_ seriály
-          var _origBuild = window._buildEpCardBase;
-          if (typeof _origBuild === 'function') {
-            window._buildEpCardBase = function () {
-              if (typeof window.activeSeries === 'string' && window.activeSeries.startsWith('__dtv_')) {
-                var rec = window.db[window.activeSeries];
-                if (rec && rec._svetSlug) {
-                  var saved = window.activeSeries;
-                  window.activeSeries = rec._svetSlug;
-                  var card = _origBuild.apply(this, arguments);
-                  window.activeSeries = saved;
-                  return card;
-                }
-              }
-              return _origBuild.apply(this, arguments);
-            };
-          }
-
-          console.log('[MFDiscoverTV] v4 aktivní');
-        } else if (tries < 120) {
-          setTimeout(function () { install(tries + 1); }, 100);
-        } else {
-          console.warn('[MFDiscoverTV] Timeout');
-        }
-      }
-
-      async function _getSvetSlug(tmdbId, csData) {
-        var origName = csData.original_name || '';
-        // Latin original name → použij přímo (Chainsaw Man, Breaking Bad, Half Man...)
-        if (origName && !isNonLatin(origName)) {
-          return window._czSlug(origName);
-        }
-        // Non-latin (japonština, korejština...) → fetch EN název
-        try {
-          var en = await window.tmdbGet('/tv/' + tmdbId + '?language=en-US');
-          var enName = (en && (en.name || en.original_name)) || '';
-          if (enName && !isNonLatin(enName)) {
-            return window._czSlug(enName);
-          }
-        } catch (e) {}
-        // Fallback: CZ název
-        return window._czSlug(csData.name || '');
-      }
-
-      async function _openDiscover(tmdbId, title) {
-        var slug = '__dtv_' + tmdbId;
+        if (!window.db) { console.warn('[MFPatch] db not ready'); return; }
 
         if (!window.db[slug]) {
           if (typeof showToast === 'function') showToast('📺 Načítám…', 1800);
           try {
-            var d = await window.tmdbGet('/tv/' + tmdbId + '?language=cs');
+            const d = await window.tmdbGet('/tv/' + tmdbId + '?language=cs');
             if (!d || d.success === false) throw new Error('no data');
 
-            var svetSlug = await _getSvetSlug(tmdbId, d);
+            let svetSlug;
+            const orig = d.original_name || '';
+            if (orig && !/[　-鿿가-힯؀-ۿЀ-ӿ一-鿿]/.test(orig)) {
+              svetSlug = window._czSlug(orig);
+            } else {
+              try {
+                const en = await window.tmdbGet('/tv/' + tmdbId + '?language=en-US');
+                svetSlug = window._czSlug((en && (en.name || en.original_name)) || d.name || title || '');
+              } catch(e2) { svetSlug = window._czSlug(d.name || title || ''); }
+            }
 
-            var rec = {
-              name:        d.name || title,
-              tmdbId:      tmdbId,
-              totalEps:    d.number_of_episodes || 0,
-              poster:      d.poster_path   ? IMG_P + d.poster_path   : '',
-              _poster:     d.poster_path   ? IMG_P + d.poster_path   : '',
-              _backdrop:   d.backdrop_path ? IMG_B + d.backdrop_path : '',
-              _genres:     (d.genres || []).map(function (g) { return g.name; }),
-              _genreIds:   (d.genres || []).map(function (g) { return g.id; }),
-              _rating:     d.vote_average || 0,
-              _svetSlug:   svetSlug,
-              _isDiscover: true,
+            const rec = {
+              name: d.name || title, tmdbId,
+              totalEps: d.number_of_episodes || 0,
+              poster: d.poster_path ? IMG_P + d.poster_path : '',
+              _poster: d.poster_path ? IMG_P + d.poster_path : '',
+              _backdrop: d.backdrop_path ? IMG_B + d.backdrop_path : '',
+              _genres: (d.genres || []).map(g => g.name),
+              _genreIds: (d.genres || []).map(g => g.id),
+              _rating: d.vote_average || 0,
+              _svetSlug: svetSlug, _isDiscover: true,
             };
-
-            // Sloty epizod pro každou sezónu
-            var seasons = d.seasons || [];
-            var ns = d.number_of_seasons || 1;
-            for (var s = 1; s <= ns; s++) {
-              var sd = seasons.find(function (x) { return x.season_number === s; });
-              var ec = (sd && sd.episode_count) ? sd.episode_count : 1;
-              for (var e = 1; e <= ec; e++) {
-                rec[slug + '-S' + s + '-E' + e] = { se: s, ep: e };
-              }
+            const seasons = d.seasons || [], ns = d.number_of_seasons || 1;
+            for (let s = 1; s <= ns; s++) {
+              const sd = seasons.find(x => x.season_number === s);
+              const ec = sd && sd.episode_count ? sd.episode_count : 1;
+              for (let e = 1; e <= ec; e++) rec[slug+'-S'+s+'-E'+e] = { se: s, ep: e };
             }
             window.db[slug] = rec;
-          } catch (err) {
-            console.error('[MFDiscoverTV]', err);
+            console.log('[MFPatch] db slot vytvořen, _svetSlug:', svetSlug);
+          } catch(err) {
+            console.error('[MFPatch]', err);
             if (typeof showToast === 'function') showToast('⚠ Nepodařilo se načíst', 3000);
             return;
           }
         }
 
         if (typeof closeUniverse === 'function') closeUniverse();
-        setTimeout(function () {
-          if (typeof openSeries === 'function') openSeries(slug);
-        }, 150);
+        setTimeout(() => { if (typeof openSeries === 'function') openSeries(slug); }, 150);
 
-        // Úklid po zavření modalu
-        var modal = document.getElementById('seriesModal');
+        const modal = document.getElementById('seriesModal');
         if (modal) {
-          var obs = new MutationObserver(function () {
-            if (!modal.classList.contains('open') && window.db[slug] && window.db[slug]._isDiscover) {
-              delete window.db[slug];
-              obs.disconnect();
+          const obs = new MutationObserver(() => {
+            if (!modal.classList.contains('open') && window.db[slug]?._isDiscover) {
+              delete window.db[slug]; obs.disconnect();
             }
           });
           obs.observe(modal, { attributes: true, attributeFilter: ['class'] });
         }
       }
 
+      // Přepiš onclick na každé nově přidané disco kartě
+      function patchCards(root) {
+        root.querySelectorAll('.disco-card').forEach(card => {
+          if (card._mfTvPatched) return;
+          // Zjisti typ z badge textu
+          const typeBadge = card.querySelector('.disco-card-type');
+          if (!typeBadge || !typeBadge.textContent.includes('Seriál')) return;
+          card._mfTvPatched = true;
+
+          // Nahraď onclick — zavolá openDiscoverTvInline
+          const oldOnclick = card.onclick;
+          card.onclick = function(ev) {
+            // Získej tmdbId a title z existujícího onclick closure přes dataset nebo data atributy
+            // Nejjednodušší: zavolej původní onclick ale zachyť volání přes override
+            if (!window._mfDiscoverTvOverrideActive) {
+              window._mfDiscoverTvOverrideActive = true;
+              const origChoice = window._showCinemaOrFinderChoice;
+              const origCinema = window.openMovieInCinema;
+              // Zachyť volání
+              let captured = null;
+              window._showCinemaOrFinderChoice = function(id, title, type, fallback) {
+                if (type === 'tv') { captured = { id, title }; return; }
+                origChoice && origChoice.apply(this, arguments);
+              };
+              window.openMovieInCinema = function(id, title, type) {
+                if (type === 'tv' && !String(id).includes('/')) { captured = { id, title }; return; }
+                origCinema && origCinema.apply(this, arguments);
+              };
+              try { oldOnclick && oldOnclick.call(this, ev); } catch(e) {}
+              window._showCinemaOrFinderChoice = origChoice;
+              window.openMovieInCinema = origCinema;
+              window._mfDiscoverTvOverrideActive = false;
+              if (captured) {
+                openDiscoverTvInline(captured.id, captured.title);
+                return;
+              }
+            }
+            oldOnclick && oldOnclick.call(this, ev);
+          };
+        });
+      }
+
+      // Sleduj přidání disco karet do DOM
+      function startObserver() {
+        const body = document.getElementById('discoBody');
+        if (!body) { setTimeout(startObserver, 300); return; }
+        patchCards(body);
+        new MutationObserver(() => patchCards(body))
+          .observe(body, { childList: true, subtree: true });
+        console.log('[MFPatch] Disco TV observer aktivní');
+      }
+
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () { install(); });
+        document.addEventListener('DOMContentLoaded', startObserver);
       } else {
-        install();
+        startObserver();
       }
     })();
     </script>
-
   </body>
 </html>
