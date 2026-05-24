@@ -194,11 +194,13 @@ body::after {
   background: #007aff !important;
   font-family: var(--font-ui) !important;
   font-weight: 800 !important;
-  border-radius: 14px !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  flex-shrink: 0 !important;
   letter-spacing: 0.2px !important;
   display: flex !important;
   align-items: center !important;
-  gap: 7px !important;
+  gap: 6px !important;
   box-shadow: 0 4px 18px rgba(0,122,255,0.45), inset 0 1px 0 rgba(255,255,255,0.15) !important;
   transition: all 0.2s ease !important;
 }
@@ -213,7 +215,9 @@ body::after {
   background: transparent !important;
   border-color: rgba(255,255,255,0.1) !important;
   color: rgba(255,255,255,0.4) !important;
-  border-radius: 14px !important;
+  border-radius: 12px !important;
+  padding: 12px 13px !important;
+  flex-shrink: 0 !important;
   transition: all 0.2s ease !important;
 }
 .sync-now-btn {
@@ -1353,11 +1357,13 @@ body::after {
 }
 .sync-code-row {
   display: flex;
-  gap: 8px;
+  gap: 7px;
   margin-bottom: 20px;
+  align-items: stretch;
 }
 .sync-code-input {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -1379,16 +1385,18 @@ body::after {
   background: var(--accent);
   border: none;
   border-radius: 12px;
-  padding: 12px 18px;
+  padding: 12px 16px;
   font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  font-size: 0.78rem;
-  font-weight: 900;
-  color: #000;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #fff;
   cursor: pointer;
-  transition:
-    opacity 0.18s,
-    transform 0.18s;
+  flex-shrink: 0;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.18s, transform 0.18s;
 }
 .sync-btn:hover {
   background: #0a84ff !important;
@@ -1420,13 +1428,14 @@ body::after {
   transform: scale(0.97);
 }
 .sync-gen-btn {
-  background: rgba(162, 155, 254, 0.12);
-  border: 1px solid rgba(162, 155, 254, 0.25);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 0.72rem;
+  padding: 12px 13px;
+  font-size: 0.68rem;
   font-weight: 700;
-  color: #a29bfe;
+  flex-shrink: 0;
+  color: rgba(255,255,255,0.45);
   cursor: pointer;
   transition: all 0.18s;
   white-space: nowrap;
