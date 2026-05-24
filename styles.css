@@ -13022,9 +13022,10 @@ body.grain-off::after {
   flex-direction: column;
   align-items: center;
   gap: 0;
-  width: min(400px, 92vw);
+  width: min(440px, 92vw);
   padding: 0;
   background: transparent;
+  perspective: 800px;
 }
 
 /* ── Close ── */
@@ -13048,185 +13049,125 @@ body.grain-off::after {
   color: #fff;
 }
 
-/* ══ 3D ORB ══ */
+/* ══ JARVIS ORB ══ */
 .vc-orb-wrap {
   position: relative;
-  width: 180px; height: 180px;
-  margin-bottom: 32px;
+  width: 240px; height: 240px;
+  margin-bottom: 28px;
   flex-shrink: 0;
 }
 
-/* Outer glow halo */
-.vc-orb-outer {
-  position: absolute;
-  inset: -24px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,120,255,0.12) 0%, transparent 70%);
-  animation: orbHalo 3s ease-in-out infinite;
-}
-@keyframes orbHalo {
-  0%,100% { transform: scale(1); opacity: 0.6; }
-  50%      { transform: scale(1.15); opacity: 1; }
-}
-
-/* Mid blur ring */
-.vc-orb-mid {
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  border: 1px solid rgba(0,140,255,0.15);
-  animation: orbMid 4s ease-in-out infinite;
-  filter: blur(1px);
-}
-@keyframes orbMid {
-  0%,100% { transform: scale(1) rotate(0deg); opacity: 0.5; }
-  50%      { transform: scale(1.05) rotate(180deg); opacity: 0.9; }
-}
-
-/* Main 3D sphere */
-.vc-orb-inner {
+/* SVG vrstva — prstence + sphere */
+.vc-svg-rings {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 32% 28%,
-      rgba(80,170,255,0.55) 0%,
-      rgba(0,100,255,0.35) 25%,
-      rgba(0,50,180,0.55) 55%,
-      rgba(0,10,80,0.9) 100%
-    );
-  box-shadow:
-    0 0 0 1px rgba(0,120,255,0.2),
-    0 0 40px rgba(0,100,255,0.35),
-    0 0 80px rgba(0,80,200,0.2),
-    inset 0 -20px 40px rgba(0,20,100,0.6),
-    inset 0 20px 30px rgba(100,180,255,0.15);
-  animation: orbBreath 2.8s ease-in-out infinite;
-  transition: box-shadow 0.4s;
+  width: 100%; height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 18px rgba(0,140,255,0.5));
+  animation: svgBreathe 3s ease-in-out infinite;
 }
-.voice-cmd-overlay.listening .vc-orb-inner {
-  animation: orbPulseActive 0.55s ease-in-out infinite alternate;
+@keyframes svgBreathe {
+  0%,100% { filter: drop-shadow(0 0 14px rgba(0,130,255,0.45)); }
+  50%      { filter: drop-shadow(0 0 32px rgba(0,180,255,0.75)); }
 }
-@keyframes orbBreath {
-  0%,100% {
-    box-shadow:
-      0 0 0 1px rgba(0,120,255,0.2),
-      0 0 40px rgba(0,100,255,0.3),
-      0 0 80px rgba(0,80,200,0.15),
-      inset 0 -20px 40px rgba(0,20,100,0.6),
-      inset 0 20px 30px rgba(100,180,255,0.12);
-    transform: scale(1);
-  }
-  50% {
-    box-shadow:
-      0 0 0 1px rgba(0,140,255,0.35),
-      0 0 60px rgba(0,120,255,0.55),
-      0 0 120px rgba(0,100,220,0.3),
-      inset 0 -20px 40px rgba(0,20,100,0.6),
-      inset 0 20px 30px rgba(120,200,255,0.2);
-    transform: scale(1.025);
-  }
+.voice-cmd-overlay.listening .vc-svg-rings {
+  animation: svgListening 0.5s ease-in-out infinite alternate;
 }
-@keyframes orbPulseActive {
-  from {
-    box-shadow:
-      0 0 0 1px rgba(0,160,255,0.4),
-      0 0 50px rgba(0,140,255,0.5),
-      0 0 100px rgba(0,120,220,0.3),
-      inset 0 -20px 40px rgba(0,20,100,0.5),
-      inset 0 20px 30px rgba(120,200,255,0.2);
-    transform: scale(1.02);
-  }
-  to {
-    box-shadow:
-      0 0 0 2px rgba(0,180,255,0.6),
-      0 0 80px rgba(0,160,255,0.75),
-      0 0 160px rgba(0,140,255,0.45),
-      inset 0 -20px 40px rgba(0,20,100,0.4),
-      inset 0 20px 30px rgba(140,220,255,0.3);
-    transform: scale(1.05);
-  }
+@keyframes svgListening {
+  from { filter: drop-shadow(0 0 20px rgba(0,160,255,0.6)); }
+  to   { filter: drop-shadow(0 0 50px rgba(0,220,255,1)); }
 }
 
-/* Glare – lesklý odlesk nahoře vlevo */
-.vc-orb-glare {
+/* Sphere pulsace */
+.vc-sphere {
+  animation: spherePulse 2.8s ease-in-out infinite;
+}
+@keyframes spherePulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.88; }
+}
+.voice-cmd-overlay.listening .vc-sphere {
+  animation: sphereActive 0.6s ease-in-out infinite alternate;
+}
+@keyframes sphereActive {
+  from { opacity: 0.9; }
+  to   { opacity: 1; }
+}
+
+/* Core dot pulsace */
+.vc-core-pulse {
+  transform-origin: center;
+  animation: corePulse 1.6s ease-in-out infinite;
+}
+@keyframes corePulse {
+  0%,100% { transform: scale(1); opacity: 0.8; }
+  50%      { transform: scale(1.5); opacity: 0.3; }
+}
+
+/* Orbitální skupiny */
+.vc-ring-g1 { animation: ringOrbit1 7s linear infinite; transform-origin: center; }
+.vc-ring-g2 { animation: ringOrbit2 11s linear infinite; transform-origin: center; }
+.vc-ring-g3 { animation: ringOrbit3 9s linear infinite; transform-origin: center; }
+.vc-ring-g4 { animation: ringOrbit1 18s linear infinite reverse; transform-origin: center; }
+
+@keyframes ringOrbit1 { to { transform: rotateY(360deg); } }
+@keyframes ringOrbit2 { to { transform: rotateX(360deg); } }
+@keyframes ringOrbit3 {
+  0%   { transform: rotate3d(1,1,0, 0deg); }
+  100% { transform: rotate3d(1,1,0, 360deg); }
+}
+
+/* Orbitální tečky */
+.vc-dot-orbit {
+  animation: dotGlow 1.4s ease-in-out infinite alternate;
+}
+@keyframes dotGlow {
+  from { opacity: 0.6; r: 2; }
+  to   { opacity: 1;   r: 3.5; filter: blur(0.5px); }
+}
+
+/* Halo kroužky za SVG */
+.vc-orb-halo {
   position: absolute;
-  top: 14%;
-  left: 18%;
-  width: 38%;
-  height: 28%;
   border-radius: 50%;
-  background: radial-gradient(ellipse at 40% 40%,
-    rgba(255,255,255,0.55) 0%,
-    rgba(255,255,255,0.08) 60%,
-    transparent 100%
-  );
-  transform: rotate(-30deg);
+  border: 1px solid rgba(0,160,255,0.12);
   pointer-events: none;
 }
-
-/* Core — vnitřní světlo */
-.vc-orb-core {
-  position: absolute;
-  inset: 30%;
-  border-radius: 50%;
-  background: radial-gradient(circle,
-    rgba(180,220,255,0.3) 0%,
-    transparent 100%
-  );
-  animation: coreFlicker 1.8s ease-in-out infinite;
+.vc-h1 {
+  inset: -22px;
+  animation: haloBreath 4s ease-in-out infinite;
 }
-@keyframes coreFlicker {
-  0%,100% { opacity: 0.5; transform: scale(1); }
-  50%      { opacity: 1;   transform: scale(1.2); }
+.vc-h2 {
+  inset: -42px;
+  border-color: rgba(0,120,255,0.06);
+  animation: haloBreath 4s ease-in-out infinite 1s;
 }
-
-/* Orbitální prstence */
-.vc-orb-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid transparent;
-  pointer-events: none;
+@keyframes haloBreath {
+  0%,100% { transform: scale(1); opacity: 0.6; }
+  50%      { transform: scale(1.06); opacity: 1; }
 }
-.vc-ring-1 {
-  inset: -18px;
-  border-color: rgba(0,140,255,0.18);
-  animation: ring1 6s linear infinite;
-}
-.vc-ring-2 {
-  inset: -32px;
-  border-color: rgba(0,100,255,0.1);
-  border-style: dashed;
-  animation: ring2 9s linear infinite reverse;
-}
-.vc-ring-3 {
-  inset: -48px;
-  border-color: rgba(0,80,200,0.06);
-  animation: ring1 14s linear infinite;
-}
-@keyframes ring1 { to { transform: rotate(360deg); } }
-@keyframes ring2 { to { transform: rotate(360deg) scaleX(0.7); } }
 
 /* Partikly */
 .vc-particle {
   position: absolute;
   border-radius: 50%;
-  background: rgba(100,180,255,0.8);
+  background: rgba(100,200,255,0.85);
   pointer-events: none;
+  box-shadow: 0 0 4px rgba(0,180,255,0.8);
 }
-.vc-p1 { width:3px; height:3px; top:10%; left:55%; animation: pFloat1 4s ease-in-out infinite; }
-.vc-p2 { width:2px; height:2px; top:75%; left:20%; animation: pFloat2 5s ease-in-out infinite 0.5s; }
-.vc-p3 { width:4px; height:4px; top:20%; left:80%; animation: pFloat1 3.5s ease-in-out infinite 1s; }
-.vc-p4 { width:2px; height:2px; top:65%; left:75%; animation: pFloat2 6s ease-in-out infinite 0.2s; }
-.vc-p5 { width:3px; height:3px; top:85%; left:45%; animation: pFloat1 4.5s ease-in-out infinite 1.5s; }
-.vc-p6 { width:2px; height:2px; top:40%; left:5%;  animation: pFloat2 5.5s ease-in-out infinite 0.8s; }
+.vc-p1 { width:3px; height:3px; top:8%;  left:58%; animation: pFloat1 3.8s ease-in-out infinite; }
+.vc-p2 { width:2px; height:2px; top:78%; left:18%; animation: pFloat2 5.2s ease-in-out infinite 0.4s; }
+.vc-p3 { width:4px; height:4px; top:18%; left:82%; animation: pFloat1 3.3s ease-in-out infinite 0.9s; }
+.vc-p4 { width:2px; height:2px; top:68%; left:78%; animation: pFloat2 6.1s ease-in-out infinite 0.2s; }
+.vc-p5 { width:3px; height:3px; top:88%; left:42%; animation: pFloat1 4.3s ease-in-out infinite 1.4s; }
+.vc-p6 { width:2px; height:2px; top:38%; left:4%;  animation: pFloat2 5.8s ease-in-out infinite 0.7s; }
 @keyframes pFloat1 {
-  0%,100% { transform: translateY(0) scale(1); opacity: 0.7; }
-  50%      { transform: translateY(-12px) scale(1.4); opacity: 1; }
+  0%,100% { transform: translateY(0) scale(1); opacity: 0.6; }
+  50%      { transform: translateY(-14px) scale(1.6); opacity: 1; }
 }
 @keyframes pFloat2 {
-  0%,100% { transform: translateY(0) translateX(0); opacity: 0.5; }
-  50%      { transform: translateY(10px) translateX(-6px); opacity: 0.9; }
+  0%,100% { transform: translateY(0) translateX(0); opacity: 0.4; }
+  50%      { transform: translateY(12px) translateX(-8px); opacity: 0.95; }
 }
 
 /* ══ WAVEFORM ══ */
