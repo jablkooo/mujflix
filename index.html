@@ -3256,7 +3256,8 @@
           <div class="sync-status-dot" id="syncModalDot"></div>
           <div class="sync-status-text" id="syncModalText">Inicializace…</div>
           <button class="sync-now-btn" onclick="MFSync.pushData()">
-            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:4px;vertical-align:-1px;"><path d="M12 2v13M7 9l5-5 5 5"/><path d="M3 19h18"/></svg>Nahrát teď
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2v13M7 9l5-5 5 5"/><path d="M3 19h18"/></svg>
+            Nahrát teď
           </button>
         </div>
 
@@ -3265,9 +3266,13 @@
         <div class="sync-code-row">
           <input class="sync-code-input" id="syncGroupInput" placeholder="Zadej nebo vygeneruj kód…" spellcheck="false"/>
           <button class="sync-gen-btn" onclick="syncGenerateCode()">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:4px;vertical-align:-1px;"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>Generovat
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+            Generovat
           </button>
-          <button class="sync-btn" onclick="syncConnect()">Připojit</button>
+          <button class="sync-btn" onclick="syncConnect()">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Připojit
+          </button>
         </div>
 
         <!-- Info -->
@@ -3277,7 +3282,10 @@
 
         <!-- Footer -->
         <div class="sync-footer-row">
-          <button class="sync-disconnect-btn" id="syncDisconnectBtn" onclick="syncDisconnect()">Odpojit</button>
+          <button class="sync-disconnect-btn" id="syncDisconnectBtn" onclick="syncDisconnect()">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18.36 6.64A9 9 0 1 1 5.63 5.63"/><path d="M12 2v10"/></svg>
+            Odpojit
+          </button>
           <button class="sync-btn-sec" onclick="closeSyncModal()">Zavřít</button>
         </div>
 
