@@ -1,15 +1,15 @@
 /**
- * MůjFlix — URL Fix Patch v3
+ * MůjFlix — URL Fix Patch v4
  * ════════════════════════════
  * Vzory dle skutečných URL:
  *  bombuj:      https://www.bombuj.si/online-film-SLUG-YYYY
  *  svetserialu: https://svetserialu.to/serial/SLUG/s01e01
  *
  * Opravuje:
- *  1. Bombuj filmy — /online-film-SLUG-YYYY (s rokem vždy na konci)
- *  2. SvetSerialu filmy — /film/SLUG místo search
- *  3. SvetSerialu seriály — /serial/SLUG/sSSeEE správný formát
- *  4. TV seriály vždy přes SvetSerialu — CinAI probe zakázán pro TV
+ *  1. Bombuj filmy — /online-film-SLUG-YYYY
+ *  2. SvetSerialu filmy — /film/SLUG
+ *  3. SvetSerialu seriály — /serial/SLUG/sSSeEE
+ *  4. TV seriály vždy přes SvetSerialu — override po plném načtení app.js
  */
 
 (function () {
@@ -43,12 +43,10 @@
 
     const svet = CINEMA_SOURCES.find(s => s.id === 'svetserialu');
     if (svet) {
-      // Filmy
       svet.movie = function (_id, title) {
         const slug = czSlug(title || '');
         return slug ? `https://svetserialu.to/film/${slug}` : `https://svetserialu.to/?s=${encodeURIComponent(title || '')}`;
       };
-      // Seriály — SLUG/sSSeEE
       svet.tv = function (_id, season, ep, title, siteSlug) {
         const epStr = `s${String(season).padStart(2,'0')}e${String(ep).padStart(2,'0')}`;
         const slug  = siteSlug || czSlug(title || '');
@@ -79,36 +77,36 @@
   }
   patchSources();
 
-  // ── FIX 4: TV vždy SvetSerialu — přepíšeme openMovieInCinema ─
-  // Přístup: zachytíme volání CinAI.findBestSource které app.js
-  // zavolá uvnitř closure `c()`. Protože nemůžeme přímo do `c()`
-  // vstoupit, přepíšeme CinAI objekt jakmile existuje A zároveň
-  // přepíšeme openMovieInCinema aby před voláním originálu
-  // dočasně nahradil CinAI za mock který pro TV vrátí 0.
-  function patchForTV() {
-    const _origOpen = window.openMovieInCinema;
-    if (typeof _origOpen !== 'function') { setTimeout(patchForTV, 200); return; }
+  // ── FIX 4: TV vždy SvetSerialu ──────────────────────────────
+  // app.js dokončí inicializaci až po DOMContentLoaded + vlastní
+  // patche uvnitř app.js přepíší openMovieInCinema nakonec.
+  // Proto čekáme až je DOM hotový + 500ms navíc.
+  function applyTVOverride() {
+    const _orig = window.openMovieInCinema;
+    if (typeof _orig !== 'function') {
+      setTimeout(applyTVOverride, 200);
+      return;
+    }
 
     window.openMovieInCinema = function(tmdbId, title, type) {
-      const resolvedType = (!type || type === 'movie') ? 'movie' : 'tv';
-
-      // Pro TV: dočasně vyměníme CinAI.findBestSource za verzi která vždy vrátí 0
-      let _savedFind = null;
-      if (resolvedType === 'tv' && window.CinAI) {
-        _savedFind = window.CinAI.findBestSource;
+      const isTV = type === 'tv' || type === 'tv_ep';
+      if (isTV && window.CinAI) {
+        const _saved = window.CinAI.findBestSource;
         window.CinAI.findBestSource = async function() { return 0; };
-        // Obnov po 3s (víc než dost pro probe)
-        setTimeout(() => {
-          if (_savedFind && window.CinAI) window.CinAI.findBestSource = _savedFind;
-        }, 3000);
+        setTimeout(() => { window.CinAI.findBestSource = _saved; }, 3000);
       }
-
-      return _origOpen.apply(this, arguments);
+      return _orig.apply(this, arguments);
     };
 
-    console.log('[MFUrlFix] v3 — TV→SvetSerialu override aktivní');
+    console.log('[MFUrlFix] v4 — TV→SvetSerialu override aktivní');
   }
-  patchForTV();
 
-  console.log('[MFUrlFix] v3 načten');
+  // Počkej na DOMContentLoaded + 500ms aby app.js dokončil všechny své patche
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(applyTVOverride, 500));
+  } else {
+    setTimeout(applyTVOverride, 500);
+  }
+
+  console.log('[MFUrlFix] v4 načten');
 })();
