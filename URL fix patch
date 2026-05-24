@@ -204,5 +204,24 @@
 
   patchCinLoad();
 
-  console.log('[MFUrlFix] v2 — bombuj /online-film-SLUG-YYYY + svetserialu /serial/SLUG/sSSeEE');
+  // ══════════════════════════════════════════════════════════════
+  // FIX 4 — CinAI override: TV seriály vždy přes SvetSerialu
+  //
+  // CinAI.findBestSource() vybírá source podle HEAD probe +
+  // historických statistik. Pro seriály ale vždy chceme index 0
+  // (svetserialu) — bombuj seriály jsou záloha, ne primár.
+  // ══════════════════════════════════════════════════════════════
+  function patchCinAI() {
+    if (!window.CinAI) { setTimeout(patchCinAI, 300); return; }
+
+    const _origFind = window.CinAI.findBestSource;
+    window.CinAI.findBestSource = async function(sources, tmdbId, type, season, ep) {
+      if (type === 'tv') return 0; // vždy svetserialu, žádný probe
+      return _origFind.apply(this, arguments); // filmy → původní logika
+    };
+  }
+
+  patchCinAI();
+
+  console.log('[MFUrlFix] v2 — bombuj /online-film-SLUG-YYYY + svetserialu /serial/SLUG/sSSeEE + CinAI TV fix');
 })();
