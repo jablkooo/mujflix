@@ -1,11 +1,12 @@
 /**
- * MůjFlix — URL Fix Patch v5
+ * MůjFlix — URL Fix Patch v7
  * ════════════════════════════
- * Vzory dle skutečných URL:
- *  bombuj filmy:      https://www.bombuj.si/online-film-SLUG-YYYY
- *  svetserialu seriály: https://svetserialu.to/serial/SLUG/s01e01
- *
- * Svetserialu NEMÁ filmy → filmy vždy přes bombuj.
+ * Opravuje:
+ *  1. Bombuj filmy — popupOnly (iframe blokován), rok jen pro 2020+
+ *  2. SvetSerialu seriály — /serial/SLUG/sSSeEE
+ *  3. TV vždy SvetSerialu, filmy vždy Bombuj
+ *  4. "Zkusit bez roku" tlačítko — zobrazí se jen když URL má rok,
+ *     zmizí po kliknutí nebo po 30s
  */
 
 (function () {
@@ -22,15 +23,16 @@
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
 
-  // ── FIX 1: Bombuj filmy — vždy přímý URL, i bez roku ────────
+  // ── FIX 1: Bombuj filmy — rok jen pro 2020+ ─────────────────
   window._bombujMovieUrlVariants = function (title, year) {
     const slug   = czSlug(title);
     const search = `https://www.bombuj.si/?s=${encodeURIComponent(title || '')}`;
     if (!slug) return [search];
     const base = `https://www.bombuj.si/online-film-${slug}`;
     const yr   = parseInt(year) || null;
-    if (yr) return [`${base}-${yr}`, `${base}-${yr - 1}`, base, search];
-    // Bez roku — zkus bez roku (funguje pro starší filmy) a search jako záloha
+    if (yr && yr >= 2020) {
+      return [`${base}-${yr}`, `${base}-${yr - 1}`, base, search];
+    }
     return [base, search];
   };
 
@@ -38,7 +40,18 @@
   function patchSources() {
     if (typeof CINEMA_SOURCES === 'undefined') { setTimeout(patchSources, 200); return; }
 
-    // Svetserialu: seriály opravit, movie NECHAT (svetserialu filmy nemá)
+    const bombuj = CINEMA_SOURCES.find(s => s.id === 'bombuj');
+    if (bombuj) {
+      bombuj.popupOnly = true;
+      bombuj.tv = function (_id, season, ep, title, siteSlug) {
+        const epStr = `${season}x${String(ep).padStart(2,'0')}`;
+        const slug  = siteSlug || czSlug(title || '');
+        return slug
+          ? `https://serialy.bombuj.si/serial/${slug}-${epStr}`
+          : `https://serialy.bombuj.si/?s=${encodeURIComponent(title || '')}`;
+      };
+    }
+
     const svet = CINEMA_SOURCES.find(s => s.id === 'svetserialu');
     if (svet) {
       svet.tv = function (_id, season, ep, title, siteSlug) {
@@ -61,46 +74,103 @@
         return [...new Set(v)];
       };
     }
-
-    // Bombuj: TV seriály
-    const bombuj = CINEMA_SOURCES.find(s => s.id === 'bombuj');
-    if (bombuj) {
-      bombuj.tv = function (_id, season, ep, title, siteSlug) {
-        const epStr = `${season}x${String(ep).padStart(2,'0')}`;
-        const slug  = siteSlug || czSlug(title || '');
-        return slug
-          ? `https://serialy.bombuj.si/serial/${slug}-${epStr}`
-          : `https://serialy.bombuj.si/?s=${encodeURIComponent(title || '')}`;
-      };
-    }
   }
   patchSources();
 
-  // ── FIX 3: Filmy vždy přes Bombuj (sourceIdx=1), seriály přes SvetSerialu (0) ──
-  function applyTVOverride() {
+  // ── FIX 3: TV→SvetSerialu, filmy→Bombuj ─────────────────────
+  function applyOverride() {
     const _orig = window.openMovieInCinema;
-    if (typeof _orig !== 'function') { setTimeout(applyTVOverride, 200); return; }
+    if (typeof _orig !== 'function') { setTimeout(applyOverride, 200); return; }
 
     window.openMovieInCinema = function(tmdbId, title, type) {
       const isTV = type === 'tv' || type === 'tv_ep';
       if (window.CinAI) {
         const _saved = window.CinAI.findBestSource;
-        window.CinAI.findBestSource = async function() {
-          return isTV ? 0 : 1; // TV→svetserialu, filmy→bombuj
-        };
+        window.CinAI.findBestSource = async function() { return isTV ? 0 : 1; };
         setTimeout(() => { window.CinAI.findBestSource = _saved; }, 3000);
       }
       return _orig.apply(this, arguments);
     };
 
-    console.log('[MFUrlFix] v5 — filmy→Bombuj, seriály→SvetSerialu');
+    console.log('[MFUrlFix] v7 aktivní');
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => setTimeout(applyTVOverride, 500));
+    document.addEventListener('DOMContentLoaded', () => setTimeout(applyOverride, 500));
   } else {
-    setTimeout(applyTVOverride, 500);
+    setTimeout(applyOverride, 500);
   }
 
-  console.log('[MFUrlFix] v5 načten');
+  // ── FIX 4: "Zkusit bez roku" tlačítko ───────────────────────
+  function injectFallbackButton(popupUrl) {
+    const hasYear = /online-film-.+-\d{4}$/.test(popupUrl);
+    if (!hasYear) return;
+
+    const urlWithoutYear = popupUrl.replace(/-\d{4}$/, '');
+
+    const existing = document.getElementById('_mfFallbackBtn');
+    if (existing) existing.remove();
+
+    const btn = document.createElement('button');
+    btn.id = '_mfFallbackBtn';
+    btn.textContent = '🔄 Nenašlo se? Zkusit bez roku';
+    btn.style.cssText = `
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99999;
+      padding: 10px 22px;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: -apple-system, Inter, sans-serif;
+      backdrop-filter: blur(20px);
+      transition: all 0.2s;
+      white-space: nowrap;
+    `;
+
+    btn.onclick = () => {
+      window.open(urlWithoutYear, '_blank', 'noopener');
+      btn.remove();
+    };
+    btn.onmouseenter = () => {
+      btn.style.background = 'rgba(255,255,255,0.18)';
+      btn.style.color = '#fff';
+    };
+    btn.onmouseleave = () => {
+      btn.style.background = 'rgba(255,255,255,0.1)';
+      btn.style.color = 'rgba(255,255,255,0.7)';
+    };
+
+    document.body.appendChild(btn);
+    setTimeout(() => btn.remove(), 30000);
+
+    const cinemaModal = document.getElementById('cinemaModal');
+    if (cinemaModal) {
+      const observer = new MutationObserver(() => {
+        if (cinemaModal.style.display === 'none' || !cinemaModal.style.display) {
+          btn.remove();
+          observer.disconnect();
+        }
+      });
+      observer.observe(cinemaModal, { attributes: true, attributeFilter: ['style'] });
+    }
+  }
+
+  // Hook window.open pro zachycení bombuj popup URL
+  const _origOpen = window.open.bind(window);
+  window.open = function(url, target, features) {
+    const result = _origOpen(url, target, features);
+    if (url && url.includes('bombuj.si/online-film-')) {
+      setTimeout(() => injectFallbackButton(url), 800);
+    }
+    return result;
+  };
+
+  console.log('[MFUrlFix] v7 načten');
 })();
