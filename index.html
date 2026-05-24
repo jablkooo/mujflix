@@ -4949,17 +4949,59 @@
         <!-- Close -->
         <button class="voice-cmd-close-btn" onclick="closeVoiceCmd()">✕</button>
 
-        <!-- 3D Bublina -->
+        <!-- 3D Jarvis Orb -->
         <div class="vc-orb-wrap" id="voiceCmdOrb">
-          <div class="vc-orb-outer"></div>
-          <div class="vc-orb-mid"></div>
-          <div class="vc-orb-inner" id="voiceCmdOrbCenter">
-            <div class="vc-orb-core"></div>
-            <div class="vc-orb-glare"></div>
-          </div>
-          <div class="vc-orb-ring vc-ring-1"></div>
-          <div class="vc-orb-ring vc-ring-2"></div>
-          <div class="vc-orb-ring vc-ring-3"></div>
+          <!-- SVG prstence -->
+          <svg class="vc-svg-rings" viewBox="-120 -120 240 240" xmlns="http://www.w3.org/2000/svg">
+            <!-- Vnější orbitální prstenec 1 -->
+            <g class="vc-ring-g1">
+              <ellipse cx="0" cy="0" rx="108" ry="32" fill="none" stroke="rgba(0,160,255,0.55)" stroke-width="0.8"/>
+              <ellipse cx="0" cy="0" rx="108" ry="32" fill="none" stroke="rgba(100,220,255,0.3)" stroke-width="0.4" stroke-dasharray="6 14"/>
+              <circle cx="108" cy="0" r="2.5" fill="rgba(0,200,255,0.9)" class="vc-dot-orbit"/>
+            </g>
+            <!-- Prstenec 2 — nakloněný -->
+            <g class="vc-ring-g2">
+              <ellipse cx="0" cy="0" rx="95" ry="28" fill="none" stroke="rgba(0,120,255,0.45)" stroke-width="0.7" stroke-dasharray="20 8"/>
+              <circle cx="-95" cy="0" r="2" fill="rgba(80,180,255,0.9)" class="vc-dot-orbit"/>
+            </g>
+            <!-- Prstenec 3 — vertikální -->
+            <g class="vc-ring-g3">
+              <ellipse cx="0" cy="0" rx="22" ry="100" fill="none" stroke="rgba(0,180,255,0.4)" stroke-width="0.6"/>
+              <ellipse cx="0" cy="0" rx="22" ry="100" fill="none" stroke="rgba(150,230,255,0.2)" stroke-width="0.3" stroke-dasharray="4 10"/>
+              <circle cx="0" cy="-100" r="2" fill="rgba(0,220,255,0.95)" class="vc-dot-orbit"/>
+            </g>
+            <!-- Prstenec 4 — diagonal -->
+            <g class="vc-ring-g4">
+              <ellipse cx="0" cy="0" rx="115" ry="18" fill="none" stroke="rgba(0,80,200,0.35)" stroke-width="0.5" stroke-dasharray="3 8"/>
+            </g>
+            <!-- Středový glow -->
+            <radialGradient id="coreGrad" cx="40%" cy="35%" r="60%">
+              <stop offset="0%"   stop-color="rgba(140,210,255,0.9)"/>
+              <stop offset="35%"  stop-color="rgba(0,130,255,0.7)"/>
+              <stop offset="70%"  stop-color="rgba(0,50,180,0.85)"/>
+              <stop offset="100%" stop-color="rgba(0,10,60,0.95)"/>
+            </radialGradient>
+            <radialGradient id="glareGrad" cx="35%" cy="30%" r="50%">
+              <stop offset="0%"   stop-color="rgba(255,255,255,0.6)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+            </radialGradient>
+            <!-- Sphere -->
+            <circle cx="0" cy="0" r="62" fill="url(#coreGrad)" class="vc-sphere"/>
+            <!-- Glare -->
+            <ellipse cx="-14" cy="-18" rx="22" ry="16" fill="url(#glareGrad)" transform="rotate(-30,-14,-18)"/>
+            <!-- Inner detail lines (Jarvis wireframe) -->
+            <circle cx="0" cy="0" r="62" fill="none" stroke="rgba(100,200,255,0.08)" stroke-width="0.5"/>
+            <ellipse cx="0" cy="0" rx="62" ry="18" fill="none" stroke="rgba(0,180,255,0.12)" stroke-width="0.5"/>
+            <ellipse cx="0" cy="0" rx="62" ry="36" fill="none" stroke="rgba(0,160,255,0.09)" stroke-width="0.5"/>
+            <ellipse cx="0" cy="0" rx="18" ry="62" fill="none" stroke="rgba(0,180,255,0.1)" stroke-width="0.5"/>
+            <!-- Core glow dot -->
+            <circle cx="0" cy="0" r="10" fill="rgba(150,220,255,0.35)" class="vc-core-pulse"/>
+            <circle cx="0" cy="0" r="4"  fill="rgba(200,240,255,0.8)" class="vc-core-pulse"/>
+          </svg>
+
+          <!-- Outer ambient rings -->
+          <div class="vc-orb-halo vc-h1"></div>
+          <div class="vc-orb-halo vc-h2"></div>
           <div class="vc-particle vc-p1"></div>
           <div class="vc-particle vc-p2"></div>
           <div class="vc-particle vc-p3"></div>
