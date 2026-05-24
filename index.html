@@ -135,8 +135,11 @@
       #syncModal .sync-code-row {
         gap: 7px !important;
         margin-bottom: 16px !important;
+        align-items: stretch !important;
       }
       #syncModal .sync-code-input {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
         background: rgba(255,255,255,0.04) !important;
         border: 1px solid rgba(255,255,255,0.09) !important;
         border-radius: 12px !important;
@@ -152,34 +155,42 @@
         box-shadow: 0 0 0 3px rgba(0,122,255,0.08) !important;
       }
       #syncModal .sync-gen-btn {
-        background: rgba(255,255,255,0.05) !important;
+        background: transparent !important;
         border: 1px solid rgba(255,255,255,0.1) !important;
         border-radius: 12px !important;
-        padding: 11px 14px !important;
-        font-size: 0.7rem !important;
+        padding: 11px 13px !important;
+        font-size: 0.68rem !important;
         font-weight: 700 !important;
-        color: rgba(255,255,255,0.55) !important;
-        transition: all 0.18s !important;
-        display: flex !important; align-items: center !important;
+        color: rgba(255,255,255,0.45) !important;
+        flex-shrink: 0 !important;
+        transition: all 0.2s ease !important;
+        display: flex !important; align-items: center !important; gap: 5px !important;
+        white-space: nowrap !important;
       }
       #syncModal .sync-gen-btn:hover {
-        background: rgba(255,255,255,0.1) !important;
-        color: #fff !important;
+        background: rgba(255,255,255,0.06) !important;
+        color: rgba(255,255,255,0.8) !important;
+        border-color: rgba(255,255,255,0.18) !important;
       }
       #syncModal .sync-btn {
         background: #007aff !important;
         border-radius: 12px !important;
-        padding: 11px 18px !important;
-        font-size: 0.8rem !important;
+        padding: 11px 16px !important;
+        font-size: 0.76rem !important;
         font-weight: 800 !important;
         color: #fff !important;
+        flex-shrink: 0 !important;
+        display: flex !important; align-items: center !important; gap: 6px !important;
+        white-space: nowrap !important;
         box-shadow: 0 2px 12px rgba(0,122,255,0.35) !important;
-        transition: all 0.18s !important;
+        transition: all 0.2s ease !important;
       }
       #syncModal .sync-btn:hover {
-        opacity: 1 !important;
-        transform: scale(1.03) !important;
-        box-shadow: 0 4px 18px rgba(0,122,255,0.5) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 20px rgba(0,122,255,0.5) !important;
+      }
+      #syncModal .sync-btn:active {
+        transform: scale(0.97) !important;
       }
       /* Info box */
       #syncModal .sync-info-box {
