@@ -1,0 +1,208 @@
+/**
+ * MůjFlix — URL Fix Patch v2
+ * ════════════════════════════
+ * Vzory dle skutečných URL:
+ *  bombuj:      https://www.bombuj.si/online-film-SLUG-YYYY
+ *  svetserialu: https://svetserialu.to/serial/SLUG/sSSeEE
+ *
+ * Opravuje:
+ *  1. Bombuj filmy — rok je povinný suffix; bez roku počká na TMDB fetch
+ *  2. SvetSerialu — movie source vracel search místo /film/SLUG
+ *  3. Race condition — _cinLoad se volal dřív než TMDB vrátil rok
+ */
+
+(function () {
+  'use strict';
+
+  if (window._mfUrlFixLoaded) return;
+  window._mfUrlFixLoaded = true;
+
+  // ── Pomocná: čistý slug (stejná logika jako _czSlug v app.js) ──
+  function czSlug(s) {
+    if (!s) return '';
+    return s.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/&/g, 'and')
+      .replace(/'/g, '')
+      .replace(/:/g, '')
+      .replace(/\./g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // FIX 1 — _bombujMovieUrlVariants
+  //
+  // Vzor:  /online-film-punisher-posledni-zuctovani-2026
+  //         slug = czSlug(title), pak -YYYY na konec
+  //
+  // Původní chyba: bez roku → okamžitě [search URL].
+  // Oprava: bez roku vrátíme /online-film-SLUG (záloha) a čekáme
+  //         na rok přes FIX 3 níže.
+  // ══════════════════════════════════════════════════════════════
+  window._bombujMovieUrlVariants = function (title, year) {
+    const slug   = czSlug(title);
+    const search = `https://www.bombuj.si/?s=${encodeURIComponent(title || '')}`;
+
+    if (!slug) return [search];
+
+    const base = `https://www.bombuj.si/online-film-${slug}`;
+    const yr   = parseInt(year) || null;
+
+    if (yr) {
+      return [
+        `${base}-${yr}`,       // přesný rok — nejpravděpodobnější
+        `${base}-${yr - 1}`,   // o rok míň (pro filmy v CZ uvedené o rok dříve)
+        base,                  // bez roku (starší tituly)
+        search,
+      ];
+    }
+
+    // Rok ještě neznáme (TMDB fetch běží) — vrátíme bez roku jako fallback.
+    // FIX 3 zajistí opakování po přijetí roku.
+    return [base, search];
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  // FIX 2 — CINEMA_SOURCES patchování
+  // ══════════════════════════════════════════════════════════════
+  function patchSources() {
+    if (typeof CINEMA_SOURCES === 'undefined') {
+      setTimeout(patchSources, 200);
+      return;
+    }
+
+    // ── SvetSerialu: movie → /film/SLUG ──────────────────────
+    const svet = CINEMA_SOURCES.find(s => s.id === 'svetserialu');
+    if (svet) {
+      svet.movie = function (_tmdbId, title) {
+        const slug = czSlug(title || '');
+        if (!slug) return `https://svetserialu.to/?s=${encodeURIComponent(title || '')}`;
+        return `https://svetserialu.to/film/${slug}`;
+      };
+      svet.movieVariants = function (_tmdbId, title) {
+        const slug   = czSlug(title || '');
+        const search = `https://svetserialu.to/?s=${encodeURIComponent(title || '')}`;
+        if (!slug) return [search];
+        const variants = [`https://svetserialu.to/film/${slug}`];
+        // varianta bez "The" na začátku
+        if (slug.startsWith('the-')) variants.push(`https://svetserialu.to/film/${slug.slice(4)}`);
+        variants.push(search);
+        return variants;
+      };
+
+      // ── SvetSerialu: tv → /serial/SLUG/sSSeEE ──────────────
+      // Vzor: https://svetserialu.to/serial/the-boys/s01e01
+      // siteSlug přichází z db záznamu (activeSeries key nebo _svetSlug)
+      svet.tv = function (_tmdbId, season, ep, title, siteSlug) {
+        const s  = String(season).padStart(2, '0');
+        const e  = String(ep).padStart(2, '0');
+        const ep_str = `s${s}e${e}`;
+        const slug = siteSlug || czSlug(title || '');
+        if (!slug) return `https://svetserialu.to/?s=${encodeURIComponent(title || '')}`;
+        return `https://svetserialu.to/serial/${slug}/${ep_str}`;
+      };
+      svet.tvVariants = function (_tmdbId, season, ep, title, siteSlug) {
+        const s      = String(season).padStart(2, '0');
+        const e      = String(ep).padStart(2, '0');
+        const ep_str = `s${s}e${e}`;
+        const slug   = czSlug(title || '');
+        const search = `https://svetserialu.to/?s=${encodeURIComponent(title || '')}`;
+        const base   = siteSlug || slug;
+        if (!base) return [search];
+
+        const variants = [`https://svetserialu.to/serial/${base}/${ep_str}`];
+        if (siteSlug && siteSlug !== slug && slug) {
+          variants.push(`https://svetserialu.to/serial/${slug}/${ep_str}`);
+        }
+        // bez "the-"
+        if (base.startsWith('the-')) {
+          variants.push(`https://svetserialu.to/serial/${base.slice(4)}/${ep_str}`);
+        }
+        variants.push(search);
+        return [...new Set(variants)];
+      };
+    }
+
+    // ── Bombuj: tv → serialy.bombuj.si/serial/SLUG-SxEE ─────
+    const bombuj = CINEMA_SOURCES.find(s => s.id === 'bombuj');
+    if (bombuj) {
+      bombuj.tv = function (_tmdbId, season, ep, title, siteSlug) {
+        const epStr = `${season}x${String(ep).padStart(2, '0')}`;
+        const slug  = siteSlug || czSlug(title || '');
+        if (!slug) return `https://serialy.bombuj.si/?s=${encodeURIComponent(title || '')}`;
+        return `https://serialy.bombuj.si/serial/${slug}-${epStr}`;
+      };
+      bombuj.tvVariants = function (_tmdbId, season, ep, title, siteSlug) {
+        const epStr  = `${season}x${String(ep).padStart(2, '0')}`;
+        const slug   = czSlug(title || '');
+        const search = `https://serialy.bombuj.si/?s=${encodeURIComponent(title || '')}`;
+        const variants = [];
+
+        if (siteSlug) variants.push(`https://serialy.bombuj.si/serial/${siteSlug}-${epStr}`);
+        if (slug)     variants.push(`https://serialy.bombuj.si/serial/${slug}-${epStr}`);
+        if (slug && slug.startsWith('the-')) {
+          variants.push(`https://serialy.bombuj.si/serial/${slug.slice(4)}-${epStr}`);
+        }
+        // záložní www.bombuj.si (starší formát)
+        if (slug) {
+          variants.push(`https://www.bombuj.si/serial/${slug}/s${String(season).padStart(2,'0')}e${String(ep).padStart(2,'0')}`);
+        }
+        variants.push(search);
+        return [...new Set(variants)];
+      };
+    }
+  }
+
+  patchSources();
+
+  // ══════════════════════════════════════════════════════════════
+  // FIX 3 — Race condition: _cinLoad volaný dřív než přišel rok
+  //
+  // Problém: openMovieInCinema spouští TMDB fetch ASYNCHRONNĚ,
+  // ale _cinLoad() se může zavolat PŘED jeho dokončením
+  // (přes CinAI timeout nebo else větev). Bombuj pak dostane
+  // year=null → vrátí /online-film-SLUG bez roku (špatné pro nové filmy).
+  //
+  // Řešení: pokud je film + tmdbId + nemáme rok → počkej max 1.5s.
+  // Rok přijde přes TMDB finally→c()→_cinLoad znovu se správným rokem.
+  // ══════════════════════════════════════════════════════════════
+  function patchCinLoad() {
+    const _orig = window._cinLoad;
+    if (typeof _orig !== 'function') { setTimeout(patchCinLoad, 200); return; }
+
+    window._cinLoad = function () {
+      const st = window._cinState;
+
+      if (
+        st &&
+        st.type === 'movie' &&
+        st.tmdbId &&
+        !st.year &&
+        typeof TMDB_KEY !== 'undefined' && TMDB_KEY
+      ) {
+        // TMDB fetch ještě běží — počkej, zavolá _cinLoad sám přes finally
+        const watchId = st.tmdbId;
+        const deadline = setTimeout(() => {
+          // Pokud rok STÁLE nepřišel po 1.5s, zavolej s tím co máme
+          if (window._cinState && window._cinState.tmdbId === watchId && !window._cinState.year) {
+            _orig.call(window);
+          }
+        }, 1500);
+
+        // Pokud rok dorazí dřív → finally→c()→_cinLoad to zavolá
+        // a tento deadline clearujeme (hacky, ale funkční)
+        const origC = window.__mfCinC;
+        if (typeof origC === 'function') clearTimeout(deadline);
+
+        return;
+      }
+
+      _orig.apply(this, arguments);
+    };
+  }
+
+  patchCinLoad();
+
+  console.log('[MFUrlFix] v2 — bombuj /online-film-SLUG-YYYY + svetserialu /serial/SLUG/sSSeEE');
+})();
