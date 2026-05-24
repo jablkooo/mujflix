@@ -12990,9 +12990,9 @@ body.grain-off::after {
 .collections-fab:active .mf-fab-icon {
   transform: scale(0.94);
 }
-/* ══════════════════════════════════════════
-   VOICE CMD OVERLAY — MůjFlix Design
-   ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   VOICE — 3D ORB AI ASSISTANT
+══════════════════════════════════════════════════════ */
 .voice-cmd-overlay {
   position: fixed;
   inset: 0;
@@ -13001,240 +13001,366 @@ body.grain-off::after {
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.28s ease;
+  transition: opacity 0.32s ease;
 }
-.voice-cmd-overlay.open {
-  display: flex;
-}
-.voice-cmd-overlay.visible {
-  opacity: 1;
-}
+.voice-cmd-overlay.open  { display: flex; }
+.voice-cmd-overlay.visible { opacity: 1; }
+
 .voice-cmd-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(40px) saturate(1.8);
-  -webkit-backdrop-filter: blur(40px) saturate(1.8);
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(50px) saturate(1.6);
+  -webkit-backdrop-filter: blur(50px) saturate(1.6);
 }
+
+/* ── Box ── */
 .voice-cmd-box {
   position: relative;
   z-index: 1;
-  background: rgba(10,10,18,0.97);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-top-color: rgba(255,255,255,0.12);
-  border-radius: 30px;
-  padding: 44px 36px 36px;
-  width: min(440px, 92vw);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 22px;
-  box-shadow:
-    0 0 0 1px rgba(0,0,0,0.5),
-    0 60px 140px rgba(0,0,0,0.95),
-    0 0 100px rgba(0,80,255,0.06),
-    inset 0 1px 0 rgba(255,255,255,0.07);
-  transform: scale(0.92) translateY(24px);
-  transition: transform 0.38s cubic-bezier(0.34,1.3,0.64,1);
-}
-.voice-cmd-overlay.visible .voice-cmd-box {
-  transform: scale(1) translateY(0);
+  gap: 0;
+  width: min(400px, 92vw);
+  padding: 0;
+  background: transparent;
 }
 
-/* ── Orb ── */
-.voice-cmd-orb {
+/* ── Close ── */
+.voice-cmd-close-btn {
+  position: absolute;
+  top: -8px;
+  right: 0;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.35);
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s;
+  z-index: 10;
+}
+.voice-cmd-close-btn:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+
+/* ══ 3D ORB ══ */
+.vc-orb-wrap {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 180px; height: 180px;
+  margin-bottom: 32px;
   flex-shrink: 0;
 }
-.voice-cmd-orb-ring {
+
+/* Outer glow halo */
+.vc-orb-outer {
+  position: absolute;
+  inset: -24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,120,255,0.12) 0%, transparent 70%);
+  animation: orbHalo 3s ease-in-out infinite;
+}
+@keyframes orbHalo {
+  0%,100% { transform: scale(1); opacity: 0.6; }
+  50%      { transform: scale(1.15); opacity: 1; }
+}
+
+/* Mid blur ring */
+.vc-orb-mid {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,140,255,0.15);
+  animation: orbMid 4s ease-in-out infinite;
+  filter: blur(1px);
+}
+@keyframes orbMid {
+  0%,100% { transform: scale(1) rotate(0deg); opacity: 0.5; }
+  50%      { transform: scale(1.05) rotate(180deg); opacity: 0.9; }
+}
+
+/* Main 3D sphere */
+.vc-orb-inner {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 1.5px solid rgba(0,122,255,0.2);
-  animation: voiceOrbRing 2.4s ease-in-out infinite;
-}
-.voice-cmd-orb-ring:nth-child(2) {
-  animation-delay: 0.5s;
-  inset: -10px;
-  opacity: 0.45;
-  border-color: rgba(0,122,255,0.14);
-}
-.voice-cmd-orb-ring:nth-child(3) {
-  animation-delay: 1s;
-  inset: -20px;
-  opacity: 0.2;
-  border-color: rgba(0,122,255,0.08);
-}
-@keyframes voiceOrbRing {
-  0%, 100% { transform: scale(1); opacity: 0.7; }
-  50% { transform: scale(1.08); opacity: 0.1; }
-}
-.voice-cmd-orb-center {
-  position: absolute;
-  inset: 8px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 32% 32%,
-    rgba(0,130,255,0.35) 0%,
-    rgba(0,80,200,0.15) 50%,
-    rgba(0,40,120,0.08) 100%
-  );
-  border: 1px solid rgba(0,122,255,0.28);
+  background:
+    radial-gradient(circle at 32% 28%,
+      rgba(80,170,255,0.55) 0%,
+      rgba(0,100,255,0.35) 25%,
+      rgba(0,50,180,0.55) 55%,
+      rgba(0,10,80,0.9) 100%
+    );
   box-shadow:
-    0 0 30px rgba(0,100,255,0.15),
-    inset 0 1px 0 rgba(255,255,255,0.08);
+    0 0 0 1px rgba(0,120,255,0.2),
+    0 0 40px rgba(0,100,255,0.35),
+    0 0 80px rgba(0,80,200,0.2),
+    inset 0 -20px 40px rgba(0,20,100,0.6),
+    inset 0 20px 30px rgba(100,180,255,0.15);
+  animation: orbBreath 2.8s ease-in-out infinite;
+  transition: box-shadow 0.4s;
+}
+.voice-cmd-overlay.listening .vc-orb-inner {
+  animation: orbPulseActive 0.55s ease-in-out infinite alternate;
+}
+@keyframes orbBreath {
+  0%,100% {
+    box-shadow:
+      0 0 0 1px rgba(0,120,255,0.2),
+      0 0 40px rgba(0,100,255,0.3),
+      0 0 80px rgba(0,80,200,0.15),
+      inset 0 -20px 40px rgba(0,20,100,0.6),
+      inset 0 20px 30px rgba(100,180,255,0.12);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(0,140,255,0.35),
+      0 0 60px rgba(0,120,255,0.55),
+      0 0 120px rgba(0,100,220,0.3),
+      inset 0 -20px 40px rgba(0,20,100,0.6),
+      inset 0 20px 30px rgba(120,200,255,0.2);
+    transform: scale(1.025);
+  }
+}
+@keyframes orbPulseActive {
+  from {
+    box-shadow:
+      0 0 0 1px rgba(0,160,255,0.4),
+      0 0 50px rgba(0,140,255,0.5),
+      0 0 100px rgba(0,120,220,0.3),
+      inset 0 -20px 40px rgba(0,20,100,0.5),
+      inset 0 20px 30px rgba(120,200,255,0.2);
+    transform: scale(1.02);
+  }
+  to {
+    box-shadow:
+      0 0 0 2px rgba(0,180,255,0.6),
+      0 0 80px rgba(0,160,255,0.75),
+      0 0 160px rgba(0,140,255,0.45),
+      inset 0 -20px 40px rgba(0,20,100,0.4),
+      inset 0 20px 30px rgba(140,220,255,0.3);
+    transform: scale(1.05);
+  }
+}
+
+/* Glare – lesklý odlesk nahoře vlevo */
+.vc-orb-glare {
+  position: absolute;
+  top: 14%;
+  left: 18%;
+  width: 38%;
+  height: 28%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 40% 40%,
+    rgba(255,255,255,0.55) 0%,
+    rgba(255,255,255,0.08) 60%,
+    transparent 100%
+  );
+  transform: rotate(-30deg);
+  pointer-events: none;
+}
+
+/* Core — vnitřní světlo */
+.vc-orb-core {
+  position: absolute;
+  inset: 30%;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(180,220,255,0.3) 0%,
+    transparent 100%
+  );
+  animation: coreFlicker 1.8s ease-in-out infinite;
+}
+@keyframes coreFlicker {
+  0%,100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.2); }
+}
+
+/* Orbitální prstence */
+.vc-orb-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  pointer-events: none;
+}
+.vc-ring-1 {
+  inset: -18px;
+  border-color: rgba(0,140,255,0.18);
+  animation: ring1 6s linear infinite;
+}
+.vc-ring-2 {
+  inset: -32px;
+  border-color: rgba(0,100,255,0.1);
+  border-style: dashed;
+  animation: ring2 9s linear infinite reverse;
+}
+.vc-ring-3 {
+  inset: -48px;
+  border-color: rgba(0,80,200,0.06);
+  animation: ring1 14s linear infinite;
+}
+@keyframes ring1 { to { transform: rotate(360deg); } }
+@keyframes ring2 { to { transform: rotate(360deg) scaleX(0.7); } }
+
+/* Partikly */
+.vc-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(100,180,255,0.8);
+  pointer-events: none;
+}
+.vc-p1 { width:3px; height:3px; top:10%; left:55%; animation: pFloat1 4s ease-in-out infinite; }
+.vc-p2 { width:2px; height:2px; top:75%; left:20%; animation: pFloat2 5s ease-in-out infinite 0.5s; }
+.vc-p3 { width:4px; height:4px; top:20%; left:80%; animation: pFloat1 3.5s ease-in-out infinite 1s; }
+.vc-p4 { width:2px; height:2px; top:65%; left:75%; animation: pFloat2 6s ease-in-out infinite 0.2s; }
+.vc-p5 { width:3px; height:3px; top:85%; left:45%; animation: pFloat1 4.5s ease-in-out infinite 1.5s; }
+.vc-p6 { width:2px; height:2px; top:40%; left:5%;  animation: pFloat2 5.5s ease-in-out infinite 0.8s; }
+@keyframes pFloat1 {
+  0%,100% { transform: translateY(0) scale(1); opacity: 0.7; }
+  50%      { transform: translateY(-12px) scale(1.4); opacity: 1; }
+}
+@keyframes pFloat2 {
+  0%,100% { transform: translateY(0) translateX(0); opacity: 0.5; }
+  50%      { transform: translateY(10px) translateX(-6px); opacity: 0.9; }
+}
+
+/* ══ WAVEFORM ══ */
+.vc-wave {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.4rem;
+  gap: 4px;
+  height: 40px;
+  margin-bottom: 24px;
+  width: 100%;
 }
-.voice-cmd-orb-center.listening {
-  animation: voiceOrbPulse 0.7s ease-in-out infinite alternate;
-}
-@keyframes voiceOrbPulse {
-  from {
-    box-shadow: 0 0 20px rgba(0,122,255,0.25), inset 0 0 16px rgba(0,122,255,0.08);
-    border-color: rgba(0,122,255,0.3);
-  }
-  to {
-    box-shadow: 0 0 70px rgba(0,122,255,0.65), inset 0 0 40px rgba(0,122,255,0.2);
-    border-color: rgba(0,160,255,0.7);
-  }
-}
-
-/* ── Waveform ── */
-.voice-cmd-waveform {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  height: 36px;
-}
-.voice-cmd-bar {
+.vc-wave span {
+  display: block;
   width: 3px;
   border-radius: 3px;
-  background: linear-gradient(to top, rgba(0,100,255,0.35), #007aff);
-  height: 5px;
-  transition: height 0.1s ease;
-  animation: voiceBar 0.9s ease-in-out infinite;
+  background: linear-gradient(to top, rgba(0,100,255,0.3), rgba(0,160,255,0.9));
+  height: 4px;
+  animation: vcWaveBar 1s ease-in-out infinite;
+  transform-origin: bottom;
 }
-.voice-cmd-bar:first-child  { animation-delay: 0s; }
-.voice-cmd-bar:nth-child(2) { animation-delay: 0.12s; }
-.voice-cmd-bar:nth-child(3) { animation-delay: 0.22s; }
-.voice-cmd-bar:nth-child(4) { animation-delay: 0.16s; }
-.voice-cmd-bar:nth-child(5) { animation-delay: 0.06s; }
-.voice-cmd-bar:nth-child(6) { animation-delay: 0.28s; }
-.voice-cmd-bar:nth-child(7) { animation-delay: 0.1s; }
-@keyframes voiceBar {
-  0%, 100% { height: 4px; opacity: 0.3; }
-  50%       { height: 26px; opacity: 1; }
+.vc-wave span:nth-child(1)  { animation-delay: 0s; }
+.vc-wave span:nth-child(2)  { animation-delay: 0.07s; }
+.vc-wave span:nth-child(3)  { animation-delay: 0.14s; }
+.vc-wave span:nth-child(4)  { animation-delay: 0.21s; }
+.vc-wave span:nth-child(5)  { animation-delay: 0.28s; }
+.vc-wave span:nth-child(6)  { animation-delay: 0.21s; }
+.vc-wave span:nth-child(7)  { animation-delay: 0.14s; }
+.vc-wave span:nth-child(8)  { animation-delay: 0.07s; }
+.vc-wave span:nth-child(9)  { animation-delay: 0s; }
+.vc-wave span:nth-child(10) { animation-delay: 0.1s; }
+.vc-wave span:nth-child(11) { animation-delay: 0.2s; }
+.vc-wave span:nth-child(12) { animation-delay: 0.3s; }
+.vc-wave span:nth-child(13) { animation-delay: 0.2s; }
+.vc-wave span:nth-child(14) { animation-delay: 0.1s; }
+.vc-wave span:nth-child(15) { animation-delay: 0s; }
+@keyframes vcWaveBar {
+  0%,100% { height: 4px; opacity: 0.3; }
+  50%      { height: 30px; opacity: 1; }
 }
-.voice-cmd-overlay:not(.listening) .voice-cmd-bar {
+.voice-cmd-overlay:not(.listening) .vc-wave span {
   animation: none;
   height: 4px;
-  opacity: 0.18;
+  opacity: 0.15;
 }
 
-/* ── Status & transcript ── */
-.voice-cmd-status {
-  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #007aff;
-  text-align: center;
-  letter-spacing: -0.3px;
-}
-.voice-cmd-transcript {
-  font-size: 0.8rem;
-  color: rgba(255,255,255,0.5);
-  text-align: center;
-  min-height: 22px;
-  line-height: 1.55;
-  max-width: 320px;
-  font-style: italic;
-}
-
-/* ── Příklady ── */
-.voice-cmd-examples {
+/* ══ TRANSCRIPT ══ */
+.vc-transcript-wrap {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 6px;
+  margin-bottom: 28px;
+  min-height: 64px;
   width: 100%;
 }
-.voice-cmd-example {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255,255,255,0.025);
-  border: 1px solid rgba(255,255,255,0.055);
-  border-radius: 12px;
-  padding: 9px 13px;
-  font-size: 0.68rem;
-  color: rgba(255,255,255,0.38);
-  transition: background 0.18s, border-color 0.18s;
+.vc-transcript {
+  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  letter-spacing: -0.3px;
+  line-height: 1.35;
+  min-height: 1.6em;
+  transition: opacity 0.2s;
+  text-shadow: 0 0 30px rgba(0,140,255,0.4);
 }
-.voice-cmd-example:hover {
-  background: rgba(0,122,255,0.05);
-  border-color: rgba(0,122,255,0.15);
+.vc-transcript:empty::before {
+  content: "Poslouchám…";
+  color: rgba(255,255,255,0.3);
+  font-weight: 400;
+  font-style: italic;
 }
-.voice-cmd-example-icon {
-  font-size: 0.85rem;
-  flex-shrink: 0;
-  opacity: 0.7;
-}
-.voice-cmd-example em {
-  color: rgba(0,150,255,0.75);
-  font-style: normal;
-  font-weight: 600;
-}
-
-/* ── Cancel btn ── */
-.voice-cmd-cancel {
-  padding: 10px 32px;
-  border-radius: 50px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.04);
-  color: rgba(255,255,255,0.35);
-  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.18s;
-  letter-spacing: 0.2px;
-}
-.voice-cmd-cancel:hover {
-  background: rgba(255,255,255,0.09);
-  color: rgba(255,255,255,0.75);
-  border-color: rgba(255,255,255,0.18);
+.vc-status {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(0,160,255,0.6);
 }
 
-/* ── Result box ── */
+/* ══ RESULT ══ */
 .voice-cmd-result {
   width: 100%;
-  background: rgba(0,122,255,0.06);
-  border: 1px solid rgba(0,122,255,0.18);
-  border-radius: 14px;
-  padding: 13px 15px;
+  background: rgba(0,122,255,0.07);
+  border: 1px solid rgba(0,122,255,0.2);
+  border-radius: 16px;
+  padding: 14px 16px;
   display: none;
+  margin-bottom: 20px;
 }
-.voice-cmd-result.visible {
-  display: block;
-}
+.voice-cmd-result.visible { display: block; }
 .voice-cmd-result-label {
   font-size: 0.5rem;
   font-weight: 900;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: rgba(0,150,255,0.7);
+  color: rgba(0,160,255,0.7);
   margin-bottom: 5px;
 }
 .voice-cmd-result-text {
   font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: #fff;
 }
+
+/* ══ HINTS ══ */
+.vc-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: center;
+  width: 100%;
+}
+.vc-hints span {
+  padding: 6px 13px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 50px;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.3);
+  font-family: -apple-system, sans-serif;
+  cursor: default;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.vc-hints span:hover {
+  background: rgba(0,122,255,0.08);
+  border-color: rgba(0,122,255,0.2);
+  color: rgba(255,255,255,0.6);
+}
+
 .ruleta-wheel-canvas-wrap {
   position: relative;
   width: 380px;
@@ -14412,46 +14538,7 @@ textarea:focus {
 .tt-rating-num {
   color: rgba(0, 122, 255, 0.85) !important;
 }
-/* voice-cmd overrides — sjednoceno s MůjFlix stylem výše */
-.voice-cmd-box {
-  background: rgba(10,10,18,0.97) !important;
-  border: 1px solid rgba(255,255,255,0.07) !important;
-  border-top-color: rgba(255,255,255,0.12) !important;
-  border-radius: 30px !important;
-}
-.voice-cmd-orb-ring {
-  border-color: rgba(0,122,255,0.2) !important;
-}
-.voice-cmd-orb-center {
-  background: radial-gradient(
-    circle at 32% 32%,
-    rgba(0,130,255,0.35) 0%,
-    rgba(0,80,200,0.15) 50%,
-    rgba(0,40,120,0.08) 100%
-  ) !important;
-  border-color: rgba(0,122,255,0.28) !important;
-}
-.voice-cmd-status {
-  color: #007aff !important;
-  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif !important;
-  font-weight: 800 !important;
-}
-.voice-cmd-result {
-  background: rgba(0,122,255,0.06) !important;
-  border-color: rgba(0,122,255,0.18) !important;
-  border-radius: 12px !important;
-}
-.voice-cmd-result-label {
-  color: #007aff !important;
-  font-weight: 600 !important;
-}
-.voice-cmd-bar {
-  background: linear-gradient(
-    to top,
-    rgba(0, 122, 255, 0.35),
-    #007aff
-  ) !important;
-}
+/* voice-cmd starý override — odstraněn */
 .cw-inner {
   background: var(--mat-chrome) !important;
   backdrop-filter: var(--mat-blur) !important;
