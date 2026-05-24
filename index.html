@@ -4945,50 +4945,56 @@
     <div class="voice-cmd-overlay" id="voiceCmdOverlay">
       <div class="voice-cmd-backdrop" onclick="closeVoiceCmd()"></div>
       <div class="voice-cmd-box">
-        <div class="voice-cmd-orb" id="voiceCmdOrb">
-          <div class="voice-cmd-orb-ring"></div>
-          <div class="voice-cmd-orb-ring"></div>
-          <div class="voice-cmd-orb-ring"></div>
-          <div class="voice-cmd-orb-center" id="voiceCmdOrbCenter">🎤</div>
+
+        <!-- Close -->
+        <button class="voice-cmd-close-btn" onclick="closeVoiceCmd()">✕</button>
+
+        <!-- 3D Bublina -->
+        <div class="vc-orb-wrap" id="voiceCmdOrb">
+          <div class="vc-orb-outer"></div>
+          <div class="vc-orb-mid"></div>
+          <div class="vc-orb-inner" id="voiceCmdOrbCenter">
+            <div class="vc-orb-core"></div>
+            <div class="vc-orb-glare"></div>
+          </div>
+          <div class="vc-orb-ring vc-ring-1"></div>
+          <div class="vc-orb-ring vc-ring-2"></div>
+          <div class="vc-orb-ring vc-ring-3"></div>
+          <div class="vc-particle vc-p1"></div>
+          <div class="vc-particle vc-p2"></div>
+          <div class="vc-particle vc-p3"></div>
+          <div class="vc-particle vc-p4"></div>
+          <div class="vc-particle vc-p5"></div>
+          <div class="vc-particle vc-p6"></div>
         </div>
-        <div class="voice-cmd-waveform">
-          <div class="voice-cmd-bar"></div>
-          <div class="voice-cmd-bar"></div>
-          <div class="voice-cmd-bar"></div>
-          <div class="voice-cmd-bar"></div>
-          <div class="voice-cmd-bar"></div>
-          <div class="voice-cmd-bar"></div>
-          <div class="voice-cmd-bar"></div>
+
+        <!-- Live waveform -->
+        <div class="vc-wave" id="vcWave">
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
         </div>
-        <div class="voice-cmd-status" id="voiceCmdStatus">Řekněte příkaz…</div>
-        <div class="voice-cmd-transcript" id="voiceCmdTranscript">
-          Poslouchám…
+
+        <!-- Co říkáš -->
+        <div class="vc-transcript-wrap">
+          <div class="vc-transcript" id="voiceCmdTranscript">Poslouchám…</div>
+          <div class="vc-status" id="voiceCmdStatus"></div>
         </div>
+
+        <!-- Result -->
         <div class="voice-cmd-result" id="voiceCmdResult">
           <div class="voice-cmd-result-label">Příkaz rozpoznán</div>
           <div class="voice-cmd-result-text" id="voiceCmdResultText">—</div>
         </div>
-        <div class="voice-cmd-examples">
-          <div class="voice-cmd-example">
-            <span class="voice-cmd-example-icon">🔍</span
-            ><span><em>"Najdi mi horor"</em></span>
-          </div>
-          <div class="voice-cmd-example">
-            <span class="voice-cmd-example-icon">▶</span
-            ><span><em>"Pusť další díl Futuramy"</em></span>
-          </div>
-          <div class="voice-cmd-example">
-            <span class="voice-cmd-example-icon">🎲</span
-            ><span><em>"Náhodný film"</em></span>
-          </div>
-          <div class="voice-cmd-example">
-            <span class="voice-cmd-example-icon">📅</span
-            ><span><em>"Premiéry tento týden"</em></span>
-          </div>
+
+        <!-- Hints -->
+        <div class="vc-hints">
+          <span>"Najdi horor"</span>
+          <span>"Pusť Futuramu"</span>
+          <span>"Náhodný film"</span>
+          <span>"Premiéry"</span>
         </div>
-        <button class="voice-cmd-cancel" onclick="closeVoiceCmd()">
-          Zrušit ✕
-        </button>
+
       </div>
     </div>
     <!-- WRAPPED OVERLAY -->
@@ -9094,7 +9100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       })();
     </script>
-    <script src="legal-streaming-providers.js" defer></script>
+    <script src="legal-streaming-providers.js"></script>
     <script src="notifications-changelog.js"></script>
     <script src="mujflix-patch.js"></script>
 
