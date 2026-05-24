@@ -1,13 +1,28 @@
-/**
- * MůjFlix — URL Fix Patch v8
- * ════════════════════════════
- * Opravuje:
- *  1. Bombuj filmy — popupOnly (iframe blokován), rok jen pro 2020+
- *  2. SvetSerialu seriály — /serial/SLUG/sSSeEE
- *  3. TV vždy SvetSerialu, filmy vždy Bombuj
- *  4. "Zkusit bez roku" tlačítko — zobrazí se v cinemaBottomBar,
- *     zmizí po kliknutí nebo po 30s nebo při zavření modalu
- */
+// ==UserScript==
+// @name         MůjFlix — URL Fix
+// @namespace    mujflix
+// @version      9
+// @description  Opravuje bombuj URL, iframe embedding, rok v URL
+// @match        *://mujflix.*/*
+// @match        *://*.mujflix.*/*
+// @grant        GM_webRequest
+// @run-at       document-start
+// ==/UserScript==
+
+// ── Odstranění X-Frame-Options pro bombuj ───────────────────
+GM_webRequest([
+  {
+    selector: { include: ['*://www.bombuj.si/*', '*://bombuj.si/*', '*://serialy.bombuj.si/*'] },
+    action: {
+      cancel: false,
+      redirect: false,
+      setHeaders: [],
+      removeHeaders: ['x-frame-options', 'content-security-policy', 'content-security-policy-report-only']
+    }
+  }
+], (info, message, details) => {
+  // callback prázdný — pravidlo stačí
+});
 
 (function () {
   'use strict';
@@ -42,7 +57,8 @@
 
     const bombuj = CINEMA_SOURCES.find(s => s.id === 'bombuj');
     if (bombuj) {
-      bombuj.popupOnly = true;
+      // Odstranit popupOnly — teď se načte do iframe
+      bombuj.popupOnly = false;
       bombuj.tv = function (_id, season, ep, title, siteSlug) {
         const epStr = `${season}x${String(ep).padStart(2,'0')}`;
         const slug  = siteSlug || czSlug(title || '');
@@ -92,7 +108,7 @@
       return _orig.apply(this, arguments);
     };
 
-    console.log('[MFUrlFix] v8 aktivní');
+    console.log('[MFUrlFix] v9 aktivní — bombuj v iframe');
   }
 
   if (document.readyState === 'loading') {
@@ -101,81 +117,5 @@
     setTimeout(applyOverride, 500);
   }
 
-  // ── FIX 4: "Zkusit bez roku" tlačítko v cinemaBottomBar ─────
-  function injectFallbackButton(popupUrl) {
-    const hasYear = /online-film-.+-\d{4}$/.test(popupUrl);
-    if (!hasYear) return;
-
-    const urlWithoutYear = popupUrl.replace(/-\d{4}$/, '');
-
-    const existing = document.getElementById('_mfFallbackBtn');
-    if (existing) existing.remove();
-
-    const bottomBar = document.getElementById('cinemaBottomBar');
-    if (!bottomBar) {
-      console.warn('[MFUrlFix] cinemaBottomBar nenalezen');
-      return;
-    }
-
-    const btn = document.createElement('button');
-    btn.id = '_mfFallbackBtn';
-    btn.textContent = '🔄 Zkusit bez roku';
-    btn.style.cssText = `
-      padding: 6px 16px;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.75);
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s;
-      white-space: nowrap;
-      margin-left: 8px;
-    `;
-
-    btn.onmouseenter = () => {
-      btn.style.background = 'rgba(255,255,255,0.2)';
-      btn.style.color = '#fff';
-    };
-    btn.onmouseleave = () => {
-      btn.style.background = 'rgba(255,255,255,0.1)';
-      btn.style.color = 'rgba(255,255,255,0.75)';
-    };
-    btn.onclick = () => {
-      window.open(urlWithoutYear, '_blank', 'noopener');
-      btn.remove();
-    };
-
-    bottomBar.appendChild(btn);
-
-    // Zmizí po 30s
-    const timer = setTimeout(() => btn.remove(), 30000);
-
-    // Zmizí při zavření cinema modalu
-    const cinemaModal = document.getElementById('cinemaModal');
-    if (cinemaModal) {
-      const observer = new MutationObserver(() => {
-        if (cinemaModal.style.display === 'none' || cinemaModal.style.visibility === 'hidden') {
-          clearTimeout(timer);
-          btn.remove();
-          observer.disconnect();
-        }
-      });
-      observer.observe(cinemaModal, { attributes: true, attributeFilter: ['style', 'class'] });
-    }
-  }
-
-  // Hook window.open
-  const _origOpen = window.open.bind(window);
-  window.open = function(url, target, features) {
-    const result = _origOpen(url, target, features);
-    if (url && url.includes('bombuj.si/online-film-')) {
-      setTimeout(() => injectFallbackButton(url), 800);
-    }
-    return result;
-  };
-
-  console.log('[MFUrlFix] v8 načten');
+  console.log('[MFUrlFix] v9 načten');
 })();
