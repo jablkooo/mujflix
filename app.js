@@ -1053,6 +1053,64 @@ function _isNonLatin(e) {
   return /[\u3000-\u9fff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u4e00-\u9fff]/.test(e)
 }
 
+// MůjFlix — Discover TV → Series Modal
+async function openDiscoverTv(tmdbId, title) {
+  const slug = '__dtv_' + tmdbId;
+  const IMG_P = 'https://image.tmdb.org/t/p/w342';
+  const IMG_B = 'https://image.tmdb.org/t/p/w780';
+  if (!db[slug]) {
+    if (typeof showToast === 'function') showToast('📺 Načítám…', 1800);
+    try {
+      const d = await tmdbGet('/tv/' + tmdbId + '?language=cs');
+      if (!d || d.success === false) throw new Error('no data');
+      let svetSlug;
+      const orig = d.original_name || '';
+      if (orig && !/[\u3000-\u9fff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u4e00-\u9fff]/.test(orig)) {
+        svetSlug = _czSlug(orig);
+      } else {
+        try {
+          const en = await tmdbGet('/tv/' + tmdbId + '?language=en-US');
+          svetSlug = _czSlug((en && (en.name || en.original_name)) || d.name || title || '');
+        } catch(e2) { svetSlug = _czSlug(d.name || title || ''); }
+      }
+      const rec = {
+        name: d.name || title, tmdbId,
+        totalEps: d.number_of_episodes || 0,
+        poster: d.poster_path ? IMG_P + d.poster_path : '',
+        _poster: d.poster_path ? IMG_P + d.poster_path : '',
+        _backdrop: d.backdrop_path ? IMG_B + d.backdrop_path : '',
+        _genres: (d.genres || []).map(g => g.name),
+        _genreIds: (d.genres || []).map(g => g.id),
+        _rating: d.vote_average || 0,
+        _svetSlug: svetSlug,
+        _isDiscover: true,
+      };
+      const seasons = d.seasons || [], ns = d.number_of_seasons || 1;
+      for (let s = 1; s <= ns; s++) {
+        const sd = seasons.find(x => x.season_number === s);
+        const ec = (sd && sd.episode_count) ? sd.episode_count : 1;
+        for (let e = 1; e <= ec; e++) rec[slug + '-S' + s + '-E' + e] = { se: s, ep: e };
+      }
+      db[slug] = rec;
+    } catch(err) {
+      console.error('[openDiscoverTv]', err);
+      if (typeof showToast === 'function') showToast('⚠ Nepodařilo se načíst', 3000);
+      return;
+    }
+  }
+  if (typeof closeUniverse === 'function') closeUniverse();
+  setTimeout(() => { if (typeof openSeries === 'function') openSeries(slug); }, 150);
+  const modal = document.getElementById('seriesModal');
+  if (modal) {
+    const obs = new MutationObserver(() => {
+      if (!modal.classList.contains('open') && db[slug]?._isDiscover) {
+        delete db[slug]; obs.disconnect();
+      }
+    });
+    obs.observe(modal, { attributes: true, attributeFilter: ['class'] });
+  }
+}
+
 function renderDiscoRow(e, t, n, o) {
   if (!n || !n.length) return;
   const i = document.createElement("div");
@@ -1072,7 +1130,7 @@ function renderDiscoRow(e, t, n, o) {
       c = e._rowType || o,
       d = document.createElement("div");
     if (d.className = "disco-card", d.innerHTML = `<img class="disco-card-img" src="${l}" alt="" loading="lazy">\n          <div class="disco-card-overlay"></div>\n          <div class="disco-play-btn"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></div>\n          <div class="disco-card-finder-btn" title="Najít kde sledovat" onclick="event.stopPropagation();verifyAndOpen('${a.replace(/'/g,"\\'")}','${c}','${(e.release_date||e.first_air_date||"").slice(0,4)}')">\n            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>\n          </div>\n          <div class="disco-card-glow"></div>\n          <div class="disco-card-info">\n            <div class="disco-card-name">${i}</div>\n            <div class="disco-card-meta">\n              <span class="disco-card-type">${"movie"===c?"🎬 Film":"📺 Seriál"}</span>\n              ${s?`<span class="disco-card-rating">★ ${s}</span>`:""}\n            </div>\n          </div>`, d.onclick = () => {
-        e.id ? (window._mfFinderTmdbId = e.id, window._cinYear = (e.release_date || e.first_air_date || "").slice(0, 4) || null, _showCinemaOrFinderChoice(e.id, i, c, a)) : (closeUniverse(), window._mfFinderTmdbId = null, openWithCopy(a, c, (e.release_date || e.first_air_date || "").slice(0, 4) || null))
+        e.id ? (window._mfFinderTmdbId = e.id, window._cinYear = (e.release_date || e.first_air_date || "").slice(0, 4) || null, "tv" === c ? openDiscoverTv(e.id, i) : _showCinemaOrFinderChoice(e.id, i, c, null)) : (closeUniverse(), window._mfFinderTmdbId = null, openWithCopy(a, c, (e.release_date || e.first_air_date || "").slice(0, 4) || null))
       }, TMDB_KEY && e.id) {
       const t = document.createElement("div");
       t.style.cssText = "position:absolute;inset:0;z-index:8;pointer-events:none;border-radius:20px;overflow:hidden;opacity:0;background:#000;transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1);", d.style.position = "relative", d.appendChild(t), d.addEventListener("mouseenter", () => {
@@ -1648,7 +1706,8 @@ async function renderEpisodes() {
 function _buildEpCardBase(e, t, n, o, i, a, s) {
   const r = activeSeries || "",
     l = db[activeSeries],
-    c = r ? `https://svetserialu.to/serial/${r}/s${String(t).padStart(2,"0")}e${String(n).padStart(2,"0")}` : `https://svetserialu.to/?s=${encodeURIComponent(l&&l.name||"")}`,
+    _r = (r.startsWith('__dtv_') && l?._svetSlug) ? l._svetSlug : r,
+    c = _r ? `https://svetserialu.to/serial/${_r}/s${String(t).padStart(2,"0")}e${String(n).padStart(2,"0")}` : `https://svetserialu.to/?s=${encodeURIComponent(l&&l.name||"")}`,
     d = o ? o.name : `Epizoda ${n}`,
     m = o && o.overview ? o.overview : "",
     u = o && o.runtime ? `${o.runtime} min` : "",
@@ -1669,7 +1728,8 @@ function playWithConfirm(e, t, n, o) {
   const i = db[activeSeries]?.name || activeSeries,
     a = db[activeSeries]?.tmdbId,
     s = `${i} — S${String(t).padStart(2,"0")}E${String(n).padStart(2,"0")}`;
-  a ? (window._cinSiteSlug = activeSeries, _showCinemaOrFinderChoice(a + "/" + t + "/" + n, s, "tv_ep", o), markWatched(e)) : showConfirm("▶", "Pustit epizodu?", s, "▶ Pustit", () => {
+  const _ps = (activeSeries.startsWith('__dtv_') && db[activeSeries]?._svetSlug) ? db[activeSeries]._svetSlug : activeSeries;
+  a ? (window._cinSiteSlug = _ps, _showCinemaOrFinderChoice(a + "/" + t + "/" + n, s, "tv_ep", o), markWatched(e)) : showConfirm("▶", "Pustit epizodu?", s, "▶ Pustit", () => {
     markWatched(e), window.open(o, "_blank", "noopener,noreferrer")
   })
 }
@@ -1698,7 +1758,8 @@ async function showNextEpPrompt(e) {
   const t = findNextEp(activeSeries);
   if (!t) return;
   const n = db[activeSeries],
-    o = `https://svetserialu.to/serial/${activeSeries}/s${String(t.se).padStart(2,"0")}e${String(t.ep).padStart(2,"0")}`;
+    _nSlug = (activeSeries.startsWith('__dtv_') && db[activeSeries]?._svetSlug) ? db[activeSeries]._svetSlug : activeSeries,
+    o = `https://svetserialu.to/serial/${_nSlug}/s${String(t.se).padStart(2,"0")}e${String(t.ep).padStart(2,"0")}`;
   _nextEpTarget = {
     uid: t.uid,
     se: t.se,
@@ -1725,7 +1786,7 @@ function nextEpPlay() {
   const t = db[activeSeries]?.tmdbId;
   if (t) {
     const n = `${db[activeSeries]?.name||activeSeries} — S${String(e.se).padStart(2,"0")}E${String(e.ep||e.epNum||"?").padStart(2,"0")}`;
-    window._cinSiteSlug = activeSeries, _showCinemaOrFinderChoice(t + "/" + e.se + "/" + (e.ep || e.epNum), n, "tv_ep", e.url)
+    window._cinSiteSlug = (activeSeries.startsWith('__dtv_') && db[activeSeries]?._svetSlug) ? db[activeSeries]._svetSlug : activeSeries, _showCinemaOrFinderChoice(t + "/" + e.se + "/" + (e.ep || e.epNum), n, "tv_ep", e.url)
   } else window.open(e.url, "_blank", "noopener,noreferrer");
   activeSeason = e.se, showAllSeasons = !1, renderSeasons(), renderEpisodes(), setTimeout(() => {
     const t = document.getElementById(`card-${e.uid}`);
@@ -1767,10 +1828,11 @@ function shuffleEpisode() {
       behavior: "smooth",
       block: "center"
     }), setTimeout(() => n.classList.remove("shuffle-highlight"), 2200));
-    const i = `https://svetserialu.to/serial/${activeSeries}/s${String(t).padStart(2,"0")}e${String(o).padStart(2,"0")}`,
+    const _ss = (activeSeries.startsWith('__dtv_') && db[activeSeries]?._svetSlug) ? db[activeSeries]._svetSlug : activeSeries;
+    const i = `https://svetserialu.to/serial/${_ss}/s${String(t).padStart(2,"0")}e${String(o).padStart(2,"0")}`,
       a = db[activeSeries]?.tmdbId,
       s = `${db[activeSeries].name} — S${String(t).padStart(2,"0")}E${String(o).padStart(2,"0")}`;
-    a ? (markWatched(e), window._cinSiteSlug = activeSeries, _showCinemaOrFinderChoice(a + "/" + t + "/" + o, s, "tv_ep", i)) : showConfirm("🎲", "Náhodná epizoda", s, "▶ Pustit", () => {
+    a ? (markWatched(e), window._cinSiteSlug = _ss, _showCinemaOrFinderChoice(a + "/" + t + "/" + o, s, "tv_ep", i)) : showConfirm("🎲", "Náhodná epizoda", s, "▶ Pustit", () => {
       markWatched(e), window.open(i, "_blank", "noopener,noreferrer")
     })
   }, 90)
