@@ -1,12 +1,12 @@
 /**
- * MůjFlix — URL Fix Patch v7
+ * MůjFlix — URL Fix Patch v8
  * ════════════════════════════
  * Opravuje:
  *  1. Bombuj filmy — popupOnly (iframe blokován), rok jen pro 2020+
  *  2. SvetSerialu seriály — /serial/SLUG/sSSeEE
  *  3. TV vždy SvetSerialu, filmy vždy Bombuj
- *  4. "Zkusit bez roku" tlačítko — zobrazí se jen když URL má rok,
- *     zmizí po kliknutí nebo po 30s
+ *  4. "Zkusit bez roku" tlačítko — zobrazí se v cinemaBottomBar,
+ *     zmizí po kliknutí nebo po 30s nebo při zavření modalu
  */
 
 (function () {
@@ -92,7 +92,7 @@
       return _orig.apply(this, arguments);
     };
 
-    console.log('[MFUrlFix] v7 aktivní');
+    console.log('[MFUrlFix] v8 aktivní');
   }
 
   if (document.readyState === 'loading') {
@@ -101,7 +101,7 @@
     setTimeout(applyOverride, 500);
   }
 
-  // ── FIX 4: "Zkusit bez roku" tlačítko ───────────────────────
+  // ── FIX 4: "Zkusit bez roku" tlačítko v cinemaBottomBar ─────
   function injectFallbackButton(popupUrl) {
     const hasYear = /online-film-.+-\d{4}$/.test(popupUrl);
     if (!hasYear) return;
@@ -111,58 +111,63 @@
     const existing = document.getElementById('_mfFallbackBtn');
     if (existing) existing.remove();
 
+    const bottomBar = document.getElementById('cinemaBottomBar');
+    if (!bottomBar) {
+      console.warn('[MFUrlFix] cinemaBottomBar nenalezen');
+      return;
+    }
+
     const btn = document.createElement('button');
     btn.id = '_mfFallbackBtn';
-    btn.textContent = '🔄 Nenašlo se? Zkusit bez roku';
+    btn.textContent = '🔄 Zkusit bez roku';
     btn.style.cssText = `
-      position: fixed;
-      bottom: 90px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 99999;
-      padding: 10px 22px;
-      border-radius: 50px;
+      padding: 6px 16px;
+      border-radius: 20px;
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.7);
-      font-size: 0.78rem;
+      color: rgba(255,255,255,0.75);
+      font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
-      font-family: -apple-system, Inter, sans-serif;
-      backdrop-filter: blur(20px);
+      font-family: inherit;
       transition: all 0.2s;
       white-space: nowrap;
+      margin-left: 8px;
     `;
 
-    btn.onclick = () => {
-      window.open(urlWithoutYear, '_blank', 'noopener');
-      btn.remove();
-    };
     btn.onmouseenter = () => {
-      btn.style.background = 'rgba(255,255,255,0.18)';
+      btn.style.background = 'rgba(255,255,255,0.2)';
       btn.style.color = '#fff';
     };
     btn.onmouseleave = () => {
       btn.style.background = 'rgba(255,255,255,0.1)';
-      btn.style.color = 'rgba(255,255,255,0.7)';
+      btn.style.color = 'rgba(255,255,255,0.75)';
+    };
+    btn.onclick = () => {
+      window.open(urlWithoutYear, '_blank', 'noopener');
+      btn.remove();
     };
 
-    document.body.appendChild(btn);
-    setTimeout(() => btn.remove(), 30000);
+    bottomBar.appendChild(btn);
 
+    // Zmizí po 30s
+    const timer = setTimeout(() => btn.remove(), 30000);
+
+    // Zmizí při zavření cinema modalu
     const cinemaModal = document.getElementById('cinemaModal');
     if (cinemaModal) {
       const observer = new MutationObserver(() => {
-        if (cinemaModal.style.display === 'none' || !cinemaModal.style.display) {
+        if (cinemaModal.style.display === 'none' || cinemaModal.style.visibility === 'hidden') {
+          clearTimeout(timer);
           btn.remove();
           observer.disconnect();
         }
       });
-      observer.observe(cinemaModal, { attributes: true, attributeFilter: ['style'] });
+      observer.observe(cinemaModal, { attributes: true, attributeFilter: ['style', 'class'] });
     }
   }
 
-  // Hook window.open pro zachycení bombuj popup URL
+  // Hook window.open
   const _origOpen = window.open.bind(window);
   window.open = function(url, target, features) {
     const result = _origOpen(url, target, features);
@@ -172,5 +177,5 @@
     return result;
   };
 
-  console.log('[MFUrlFix] v7 načten');
+  console.log('[MFUrlFix] v8 načten');
 })();
