@@ -1020,7 +1020,7 @@ function renderPersonalisedRow(e, t, n) {
     g.className = "disco-card ai-match-card", g.style.position = "relative";
     const f = p ? `\n          <div class="ai-match-badge" style="\n            position:absolute;top:8px;left:8px;z-index:15;\n            background:linear-gradient(135deg,rgba(10,132,255,0.92),rgba(0,90,200,0.88));\n            color:#fff;font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;font-size:0.48rem;font-weight:900;\n            letter-spacing:0.5px;padding:3px 7px;border-radius:6px;\n            box-shadow:0 0 0 1px rgba(10,132,255,0.35),0 2px 8px rgba(0,0,0,0.45);\n            animation:none;\n            pointer-events:none;\n          ">${t}% Shoda</div>` : "";
     if (g.innerHTML = `\n          ${f}\n          <img class="disco-card-img" src="${m}" alt="" loading="lazy">\n          <div class="disco-card-overlay"></div>\n          <div class="disco-play-btn"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></div>\n          <div class="disco-card-finder-btn" title="Najít kde sledovat" onclick="event.stopPropagation();verifyAndOpen('${l.replace(/'/g,"'")}','${u}','${(e.release_date||e.first_air_date||"").slice(0,4)}')">\n            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>\n          </div>\n          <div class="disco-card-glow"></div>\n          <div class="disco-card-info">\n            <div class="disco-card-name">${r}</div>\n            ${o?`<div style="font-size:0.42rem;color:${a}cc;margin-bottom:4px;font-weight:700;letter-spacing:0.3px;line-height:1.3;">💡 ${o}</div>`:""}\n            <div class="disco-card-meta">\n              <span class="disco-card-type">${"movie"===u?"🎬 Film":"📺 Seriál"}</span>\n              ${d?`<span class="disco-card-rating">★ ${d}</span>`:""}\n            </div>\n          </div>`, g.onclick = () => {
-        e.id && (aiBrain.boostGenreIds(e.genre_ids || [], .05), aiBrain.recordTmdbSeen(e.id)), e.id ? (window._mfFinderTmdbId = e.id, window._cinYear = (e.release_date || e.first_air_date || "").slice(0, 4) || null, _showCinemaOrFinderChoice(e.id, r, u, l)) : (closeUniverse(), window._mfFinderTmdbId = null, openWithCopy(l, u, (e.release_date || e.first_air_date || "").slice(0, 4) || null))
+        e.id && (aiBrain.boostGenreIds(e.genre_ids || [], .05), aiBrain.recordTmdbSeen(e.id)), e.id ? (window._mfFinderTmdbId = e.id, window._cinYear = (e.release_date || e.first_air_date || "").slice(0, 4) || null, "tv" === u ? openDiscoverTv(e.id, r) : _showCinemaOrFinderChoice(e.id, r, u, null)) : (closeUniverse(), window._mfFinderTmdbId = null, openWithCopy(l, u, (e.release_date || e.first_air_date || "").slice(0, 4) || null))
       }, TMDB_KEY && e.id) {
       const t = document.createElement("div");
       t.style.cssText = "position:absolute;inset:0;z-index:8;pointer-events:none;border-radius:20px;overflow:hidden;opacity:0;background:#000;transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1);", g.appendChild(t), g.addEventListener("mouseenter", () => {
@@ -1065,7 +1065,7 @@ async function openDiscoverTv(tmdbId, title) {
       if (!d || d.success === false) throw new Error('no data');
       let svetSlug;
       const orig = d.original_name || '';
-      if (orig && !/[\u3000-\u9fff\uac00-\ud7af\u0600-\u06ff\u0400-\u04ff\u4e00-\u9fff]/.test(orig)) {
+      if (orig && !/[　-鿿가-힯؀-ۿЀ-ӿ一-鿿]/.test(orig)) {
         svetSlug = _czSlug(orig);
       } else {
         try {
@@ -1082,14 +1082,13 @@ async function openDiscoverTv(tmdbId, title) {
         _genres: (d.genres || []).map(g => g.name),
         _genreIds: (d.genres || []).map(g => g.id),
         _rating: d.vote_average || 0,
-        _svetSlug: svetSlug,
-        _isDiscover: true,
+        _svetSlug: svetSlug, _isDiscover: true,
       };
       const seasons = d.seasons || [], ns = d.number_of_seasons || 1;
       for (let s = 1; s <= ns; s++) {
         const sd = seasons.find(x => x.season_number === s);
-        const ec = (sd && sd.episode_count) ? sd.episode_count : 1;
-        for (let e = 1; e <= ec; e++) rec[slug + '-S' + s + '-E' + e] = { se: s, ep: e };
+        const ec = sd && sd.episode_count ? sd.episode_count : 1;
+        for (let e = 1; e <= ec; e++) rec[slug+'-S'+s+'-E'+e] = { se: s, ep: e };
       }
       db[slug] = rec;
     } catch(err) {
@@ -1286,7 +1285,7 @@ async function loadDiscoContent(e, t) {
     const c = t.replace(/'/g, "\\'"),
       d = r.vote_average ? r.vote_average.toFixed(1) : "",
       m = (r.release_date || r.first_air_date || "").slice(0, 4);
-    l.innerHTML = `\n          <div class="disco-hero-badge">\n            <span class="disco-hero-badge-type">${"movie"===e?"🎬 Film":"📺 Seriál"}</span>\n            ${d?`<span class="disco-hero-badge-rating">★ ${d}</span>`:""}\n            ${m?`<span class="disco-hero-badge-year">${m}</span>`:""}\n          </div>\n          <div class="disco-hero-title">${t}</div>\n          <div class="disco-hero-desc">${(r.overview||"Žádný popis není k dispozici.").substring(0,160)}${(r.overview||"").length>160?"…":""}</div>\n          <div class="disco-hero-btns">\n            <button class="disco-hero-btn primary" onclick="event.stopPropagation();if(heroItem.id){window._mfFinderTmdbId=heroItem.id;window._cinYear='${m}';_showCinemaOrFinderChoice(heroItem.id,'${c}','${e}','${c}');}else{openWithCopy('${c}','${e}','${m}');closeUniverse();}">▶ Přehrát</button>\n            <button class="disco-hero-btn secondary" onclick="event.stopPropagation();shAddToWatchlistByItem({name:'${c}',media_type:'${e}'});showToast('Přidáno do watchlistu 🔖')">＋ Watchlist</button>\n          </div>`, o.append(i, a, s, l), o.onclick = () => {
+    l.innerHTML = `\n          <div class="disco-hero-badge">\n            <span class="disco-hero-badge-type">${"movie"===e?"🎬 Film":"📺 Seriál"}</span>\n            ${d?`<span class="disco-hero-badge-rating">★ ${d}</span>`:""}\n            ${m?`<span class="disco-hero-badge-year">${m}</span>`:""}\n          </div>\n          <div class="disco-hero-title">${t}</div>\n          <div class="disco-hero-desc">${(r.overview||"Žádný popis není k dispozici.").substring(0,160)}${(r.overview||"").length>160?"…":""}</div>\n          <div class="disco-hero-btns">\n            <button class="disco-hero-btn primary" onclick="event.stopPropagation();if(heroItem.id){window._mfFinderTmdbId=heroItem.id;window._cinYear='${m}';'tv'==='${e}'?openDiscoverTv(heroItem.id,'${c}'):_showCinemaOrFinderChoice(heroItem.id,'${c}','${e}',null);}else{openWithCopy('${c}','${e}','${m}');closeUniverse();}">▶ Přehrát</button>\n            <button class="disco-hero-btn secondary" onclick="event.stopPropagation();shAddToWatchlistByItem({name:'${c}',media_type:'${e}'});showToast('Přidáno do watchlistu 🔖')">＋ Watchlist</button>\n          </div>`, o.append(i, a, s, l), o.onclick = () => {
       r.id ? (window._mfFinderTmdbId = r.id, window._cinYear = (r.release_date || r.first_air_date || "").slice(0, 4) || null, _showCinemaOrFinderChoice(r.id, t, e, t)) : (openWithCopy(t, e, (r.release_date || r.first_air_date || "").slice(0, 4) || null), closeUniverse())
     }, TMDB_KEY && r.id && (o.addEventListener("mouseenter", () => {
       o._t = setTimeout(async () => {
