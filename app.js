@@ -130,53 +130,7 @@ const TMDB_KEY = "36a429855b5872e5db851b6e04db81f0",
     futurama: [13, 19, 22, 18, 16, 26, 26, 10, 10, 10],
     "breaking-bad": [7, 13, 13, 13, 16]
   },
-  db = {
-    "the-simpsons": {
-      name: "The Simpsons",
-      tmdbId: 456,
-      poster: "https://image.tmdb.org/t/p/w400/b0WmHGc8LHTdGCVzxRb3IBMur57.jpg",
-      totalEps: 805,
-      runtime: 22,
-      type: "tv",
-      trailerKey: "oMXk1wi-9Zs"
-    },
-    "family-guy": {
-      name: "Family Guy",
-      tmdbId: 1434,
-      poster: "https://image.tmdb.org/t/p/w400/q0S0K5XJHA6DDYP4CmHoJbxBhMd.jpg",
-      totalEps: 432,
-      runtime: 22,
-      type: "tv",
-      trailerKey: "J32iwo65RMc"
-    },
-    "south-park": {
-      name: "South Park",
-      tmdbId: 2190,
-      poster: "https://image.tmdb.org/t/p/w400/lMZv8bGHDWQFbUMAfBOsyHAR3dX.jpg",
-      totalEps: 327,
-      runtime: 22,
-      type: "tv",
-      trailerKey: "FMKcPao7A6Y"
-    },
-    futurama: {
-      name: "Futurama",
-      tmdbId: 615,
-      poster: "https://image.tmdb.org/t/p/w400/7LEI8ulZzO5gy9Ww2NVCrKmHeDZ.jpg",
-      totalEps: 140,
-      runtime: 22,
-      type: "tv",
-      trailerKey: "GxEY6KNsz44"
-    },
-    "breaking-bad": {
-      name: "Breaking Bad",
-      tmdbId: 1396,
-      poster: "https://image.tmdb.org/t/p/w400/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
-      totalEps: 62,
-      runtime: 47,
-      type: "tv",
-      trailerKey: "HhesaQXLuRY"
-    }
-  },
+  db = {},
   TMDB_GENRE_MAP = {
     komedie: 35,
     akcni: 28,
