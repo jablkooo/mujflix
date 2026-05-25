@@ -1,26 +1,13 @@
-// ==UserScript==
-// @name         MůjFlix — URL Fix
-// @namespace    mujflix
-// @version      11
-// @description  Opravuje bombuj URL, iframe embedding, rok v URL, fallback tlačítko
-// @match        *://mujflix.*/*
-// @match        *://*.mujflix.*/*
-// @grant        GM_webRequest
-// @run-at       document-start
-// ==/UserScript==
-
-// ── Odstranění X-Frame-Options pro bombuj ───────────────────
-GM_webRequest([
-  {
-    selector: { include: ['*://www.bombuj.si/*', '*://bombuj.si/*', '*://serialy.bombuj.si/*'] },
-    action: {
-      cancel: false,
-      redirect: false,
-      setHeaders: [],
-      removeHeaders: ['x-frame-options', 'content-security-policy', 'content-security-policy-report-only']
-    }
-  }
-], () => {});
+/**
+ * MůjFlix — URL Fix Patch v12
+ * ════════════════════════════
+ * Opravuje:
+ *  1. Bombuj filmy — popupOnly=true (iframe blokován), rok jen pro 2020+
+ *  2. SvetSerialu seriály — /serial/SLUG/sSSeEE
+ *  3. TV→SvetSerialu popup, filmy→Bombuj popup (bez CinAI probe)
+ *  4. "Zkusit bez roku" tlačítko v glass panelu — jen když URL má rok,
+ *     zmizí po kliknutí
+ */
 
 (function () {
   'use strict';
@@ -36,7 +23,8 @@ GM_webRequest([
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
 
-  // ── FIX 1: Bombuj filmy — rok jen pro 2020+ ─────────────────
+  // ── FIX 1: Bombuj filmy ──────────────────────────────────────
+  // Rok jen pro filmy z 2020+ (starší mají URL bez roku)
   window._bombujMovieUrlVariants = function (title, year) {
     const slug   = czSlug(title);
     const search = `https://www.bombuj.si/?s=${encodeURIComponent(title || '')}`;
@@ -55,7 +43,7 @@ GM_webRequest([
 
     const bombuj = CINEMA_SOURCES.find(s => s.id === 'bombuj');
     if (bombuj) {
-      bombuj.popupOnly = false;
+      bombuj.popupOnly = true; // bombuj blokuje iframe → vždy popup
       bombuj.tv = function (_id, season, ep, title, siteSlug) {
         const epStr = `${season}x${String(ep).padStart(2,'0')}`;
         const slug  = siteSlug || czSlug(title || '');
@@ -90,7 +78,7 @@ GM_webRequest([
   }
   patchSources();
 
-  // ── FIX 3: TV→SvetSerialu, filmy→Bombuj ─────────────────────
+  // ── FIX 3: TV→SvetSerialu, filmy→Bombuj, bez CinAI probe ────
   function patchCinemaOpen() {
     const _orig = window.openMovieInCinema;
     if (typeof _orig !== 'function') { setTimeout(patchCinemaOpen, 200); return; }
@@ -104,52 +92,38 @@ GM_webRequest([
       }
       return _orig.apply(this, arguments);
     };
+
+    console.log('[MFUrlFix] v12 — cinema override aktivní');
   }
 
-  // ── FIX 4: Patch _cinShowPlayButton — přidej "Zkusit bez roku" ──
-  // _cinShowPlayButton je v closure, ale volá se přes requestAnimationFrame.
-  // Patchujeme requestAnimationFrame aby zachytil callback a po vykreslení
-  // přidal tlačítko do glass panelu.
+  // ── FIX 4: "Zkusit bez roku" tlačítko v glass panelu ────────
+  // MutationObserver sleduje cinemaFrameWrap — když se vykreslí
+  // glass panel s bombuj URL s rokem → přidá fallback tlačítko.
   function patchShowPlayButton() {
-    // Počkej až bude _cinLoad definovaný (signál že app.js je načtený)
-    if (typeof _cinLoad === 'undefined') {
-      // _cinLoad je v closure — nemůžeme zkontrolovat přímo
-      // Místo toho sledujeme DOM
-    }
-
-    // Sleduj cinemaFrameWrap přes MutationObserver na document.body
-    // Když se objeví glass panel s bombuj URL s rokem → přidej tlačítko
     const obs = new MutationObserver(() => {
       const wrap = document.getElementById('cinemaFrameWrap');
       if (!wrap) return;
 
-      // Najdi glass panel (div s border-radius:28px)
+      // Glass panel má border-radius:28px
       const glassPanel = wrap.querySelector('div[style*="border-radius:28px"]');
       if (!glassPanel) return;
-
-      // Už tam tlačítko je?
       if (glassPanel.querySelector('#_mfFallbackBtn')) return;
 
       // Najdi URL v onclick play tlačítka
       const playBtn = glassPanel.querySelector('button');
       if (!playBtn) return;
-
       const onclickStr = playBtn.getAttribute('onclick') || '';
       const urlMatch = onclickStr.match(/window\.open\('(https?:\/\/[^']+)'/);
       if (!urlMatch) return;
 
       const url = urlMatch[1];
-
-      // Jen pro bombuj s rokem na konci
       if (!url.includes('bombuj.si/online-film-')) return;
+
+      // Jen pokud URL má rok na konci
       const hasYear = /online-film-.+-\d{4}$/.test(url);
       if (!hasYear) return;
 
       const urlWithoutYear = url.replace(/-\d{4}$/, '');
-
-      // Najdi místo — za "Hledat na webu" odkazem, před koncem glass panelu
-      const searchLink = glassPanel.querySelector('a[href*="bombuj"]') ||
-                         glassPanel.querySelector('a[href*="?s="]');
 
       const btn = document.createElement('button');
       btn.id = '_mfFallbackBtn';
@@ -160,31 +134,18 @@ GM_webRequest([
         Zkusit bez roku
       `;
       btn.style.cssText = `
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        padding: 10px 24px;
-        border-radius: 40px;
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(255,255,255,0.14);
-        color: rgba(255,255,255,0.65);
-        font-size: 0.8rem;
-        font-weight: 600;
-        cursor: pointer;
-        font-family: -apple-system,'SF Pro Display',Inter,sans-serif;
-        transition: all 0.18s;
-        letter-spacing: -0.1px;
+        display:flex;align-items:center;gap:7px;
+        padding:10px 24px;border-radius:40px;
+        background:rgba(255,255,255,0.07);
+        border:1px solid rgba(255,255,255,0.14);
+        color:rgba(255,255,255,0.65);
+        font-size:0.8rem;font-weight:600;cursor:pointer;
+        font-family:-apple-system,'SF Pro Display',Inter,sans-serif;
+        transition:all 0.18s;letter-spacing:-0.1px;
       `;
-      btn.onmouseenter = () => {
-        btn.style.background = 'rgba(255,255,255,0.14)';
-        btn.style.color = '#fff';
-      };
-      btn.onmouseleave = () => {
-        btn.style.background = 'rgba(255,255,255,0.07)';
-        btn.style.color = 'rgba(255,255,255,0.65)';
-      };
+      btn.onmouseenter = () => { btn.style.background='rgba(255,255,255,0.14)'; btn.style.color='#fff'; };
+      btn.onmouseleave = () => { btn.style.background='rgba(255,255,255,0.07)'; btn.style.color='rgba(255,255,255,0.65)'; };
       btn.onclick = () => {
-        // Otevři URL bez roku jako popup (stejně jako hlavní Přehrát tlačítko)
         const pw = screen.width, ph = screen.height;
         const pop = window.open(urlWithoutYear, 'MujFlixCinema',
           `width=${pw},height=${ph},left=0,top=0,menubar=no,toolbar=no,location=no,scrollbars=yes`);
@@ -192,21 +153,18 @@ GM_webRequest([
         btn.remove();
       };
 
-      // Vlož před "Hledat na webu" nebo na konec glass panelu
-      if (searchLink) {
-        glassPanel.insertBefore(btn, searchLink);
-      } else {
-        glassPanel.appendChild(btn);
-      }
+      // Vlož před "Hledat na webu" nebo na konec
+      const searchLink = glassPanel.querySelector('a[href*="?s="]');
+      if (searchLink) glassPanel.insertBefore(btn, searchLink);
+      else glassPanel.appendChild(btn);
 
-      console.log('[MFUrlFix] Fallback tlačítko přidáno pro:', url);
+      console.log('[MFUrlFix] Fallback tlačítko přidáno:', url, '→', urlWithoutYear);
     });
 
     obs.observe(document.body, { childList: true, subtree: true });
-    console.log('[MFUrlFix] FallbackObserver aktivní');
   }
 
-  // Spustit vše
+  // Spustit — po DOMContentLoaded + 500ms aby app.js dokončil patche
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(patchCinemaOpen, 500);
@@ -217,5 +175,5 @@ GM_webRequest([
     patchShowPlayButton();
   }
 
-  console.log('[MFUrlFix] v11 načten');
+  console.log('[MFUrlFix] v12 načten');
 })();
