@@ -1,5 +1,5 @@
 /**
- * MůjFlix — URL Fix Patch v14
+ * MůjFlix — URL Fix Patch v15
  * ════════════════════════════
  * Opravuje:
  *  1. Bombuj filmy — popupOnly=true (iframe blokován), rok jen pro 2020+
@@ -101,18 +101,17 @@
   // funguje i po druhém volání y(backdrop) které přepíše innerHTML.
   function patchShowPlayButton() {
     function tryPatch() {
-      if (typeof window._cinShowPlayButton !== 'function') {
+      if (typeof window._cinShowEmbedPlayer !== 'function') {
         setTimeout(tryPatch, 200);
         return;
       }
 
-      const _origCinShowPlayButton = window._cinShowPlayButton;
+      const _origCinShowEmbedPlayer = window._cinShowEmbedPlayer;
 
-      window._cinShowPlayButton = function(url, label) {
-        // Zavolej originál
-        _origCinShowPlayButton.apply(this, arguments);
+      window._cinShowEmbedPlayer = function(url) {
+        _origCinShowEmbedPlayer.apply(this, arguments);
 
-        // Odstraň staré tlačítko při každém novém URL
+        // Odstraň staré tlačítko
         const old = document.getElementById('_mfFallbackBtn');
         if (old) old.remove();
 
@@ -148,16 +147,8 @@
           btn.onmouseenter = () => { btn.style.background='rgba(255,255,255,0.16)'; btn.style.color='#fff'; };
           btn.onmouseleave = () => { btn.style.background='rgba(255,255,255,0.08)'; btn.style.color='rgba(255,255,255,0.7)'; };
           btn.onclick = () => {
-            // Přenačti iframe s URL bez roku
             const iframe = document.querySelector('#cinemaFrameWrap iframe');
-            if (iframe) {
-              iframe.src = urlWithoutYear;
-            } else {
-              const pw = screen.width, ph = screen.height;
-              const pop = window.open(urlWithoutYear, 'MujFlixCinema',
-                `width=${pw},height=${ph},left=0,top=0,menubar=no,toolbar=no,location=no,scrollbars=yes`);
-              if (!pop || pop.closed) window.open(urlWithoutYear, '_blank', 'noopener');
-            }
+            if (iframe) iframe.src = urlWithoutYear;
             btn.remove();
           };
 
@@ -170,7 +161,7 @@
         }));
       };
 
-      console.log('[MFUrlFix] _cinShowPlayButton override aktivní');
+      console.log('[MFUrlFix] _cinShowEmbedPlayer override aktivní');
     }
 
     tryPatch();
@@ -187,5 +178,5 @@
     patchShowPlayButton();
   }
 
-  console.log('[MFUrlFix] v14 načten');
+  console.log('[MFUrlFix] v15 načten');
 })();
