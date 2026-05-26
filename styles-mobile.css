@@ -2203,3 +2203,702 @@
     }
   }
 }
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 65 · CONTINUE WIDGET — upřesnění pozice (fixní top místo bottom)
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /*
+   * Continue widget je fixní v TOP-RIGHT (top: 14px, right: 20px).
+   * Na mobilu tam je profile badge a notif bell — přesuneme ho
+   * dolů pod header nebo úplně přemístíme nad dock.
+   */
+  .continue-widget {
+    /* Ze top-right přesunout nad dock */
+    top: auto !important;
+    bottom: max(82px, calc(env(safe-area-inset-bottom, 0px) + 82px)) !important;
+    right: 10px !important;
+    left: 10px !important;
+    max-width: none !important;
+  }
+
+  /* Inner — plná šířka */
+  .cw-inner {
+    padding: 8px 12px 8px 8px !important;
+    border-radius: 16px !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  /* Thumb — menší */
+  .cw-thumb {
+    width: 52px !important;
+    height: 34px !important;
+    border-radius: 8px !important;
+  }
+
+  /* Hover efekty pryč na touch */
+  .continue-widget:hover .cw-inner {
+    transform: none !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+  .continue-widget:hover .cw-thumb img {
+    transform: none !important;
+  }
+  .continue-widget:hover .cw-chevron {
+    color: rgba(255, 255, 255, 0.18) !important;
+    transform: none !important;
+  }
+
+  /* Tap feedback */
+  .continue-widget:active .cw-inner {
+    transform: scale(0.98) !important;
+    transition-duration: 80ms !important;
+  }
+
+  /* Title */
+  .cw-title {
+    font-size: 0.78rem !important;
+    letter-spacing: -0.2px !important;
+  }
+  .cw-ep {
+    font-size: 0.52rem !important;
+  }
+  .cw-label {
+    font-size: 0.4rem !important;
+    letter-spacing: 2px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 66 · TRAKT MODAL — mobilní upřesnění
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Overlay — flex-end (sheet ze spodu) */
+  .trakt-overlay {
+    align-items: flex-end !important;
+  }
+
+  /* Box — plná šířka, sheet styl */
+  .trakt-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 28px 28px 0 0 !important;
+    max-height: 88dvh !important;
+    transform: translateY(100%) !important;
+    transition: transform 0.38s cubic-bezier(0.34, 1.12, 0.64, 1) !important;
+  }
+  .trakt-overlay.visible .trakt-box {
+    transform: translateY(0) !important;
+  }
+
+  /* Trakt header */
+  .trakt-header {
+    padding: 20px 16px 0 !important;
+    gap: 12px !important;
+  }
+  .trakt-logo-wrap {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+  }
+  .trakt-header-text h2 {
+    font-size: 1rem !important;
+  }
+
+  /* Close — větší tap area */
+  .trakt-close {
+    top: 14px !important;
+    right: 14px !important;
+    padding: 6px 10px !important;
+    font-size: 0.6rem !important;
+    min-height: 36px !important;
+  }
+
+  /* Body */
+  .trakt-body {
+    padding: 16px 16px max(24px, env(safe-area-inset-bottom, 24px)) !important;
+  }
+
+  /* Status row */
+  .trakt-status {
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+  }
+
+  /* FAB — hover pryč, tap scale */
+  .trakt-fab:hover {
+    transform: none !important;
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.6),
+      0 0 16px rgba(237, 95, 52, 0.15) !important;
+  }
+  .trakt-fab:active {
+    transform: scale(0.9) !important;
+    transition-duration: 80ms !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 67 · SPEECH MIC BTN — přesunout pod notif/header ikony
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /*
+   * Speech mic je fixed top: 22px, right: 32px — překrývá se
+   * s header tlačítky. Schovej ho (je přístupný přes dock AI).
+   */
+  .speech-mic-btn {
+    display: none !important;
+  }
+
+  /* AI voice bubble overlay — fullscreen, zachovat */
+  #ai-voice-bubble-overlay {
+    z-index: 9999 !important;
+  }
+
+  /* AI bubble close tlačítko — větší tap target */
+  #ai-bubble-close {
+    top: max(24px, env(safe-area-inset-top, 24px)) !important;
+    right: max(16px, env(safe-area-inset-right, 16px)) !important;
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  /* Bubble label — menší font */
+  #ai-bubble-label {
+    font-size: 0.7rem !important;
+    letter-spacing: 2px !important;
+    bottom: calc(50% - 140px) !important;
+  }
+
+  /* AI bubble canvas — menší na telefonu */
+  #ai-bubble-canvas {
+    width: min(280px, 80vw) !important;
+    height: min(280px, 80vw) !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 68 · POPULAR SECTION (v search) — mobilní
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  .popular-section {
+    padding: 0 12px !important;
+  }
+
+  .popular-header {
+    margin-bottom: 8px !important;
+    gap: 6px !important;
+  }
+
+  .popular-label {
+    font-size: 0.46rem !important;
+    letter-spacing: 1.5px !important;
+  }
+
+  /* Tabs */
+  .popular-tabs {
+    gap: 4px !important;
+  }
+  .pop-tab {
+    padding: 4px 10px !important;
+    font-size: 0.5rem !important;
+    border-radius: 16px !important;
+  }
+
+  /* Popular list */
+  .popular-list {
+    gap: 4px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 69 · SEARCH INPUT OVERLAY — mobilní
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Search overlay fullscreen */
+  #searchOverlay,
+  .search-overlay {
+    padding: max(8px, env(safe-area-inset-top, 8px)) 0 0 !important;
+  }
+
+  /* Search input */
+  #searchInput,
+  .mf-search-input,
+  .search-input {
+    font-size: 1rem !important;
+    padding: 14px 16px !important;
+    border-radius: 16px !important;
+    margin: 0 12px !important;
+    width: calc(100% - 24px) !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Focus ring větší */
+  #searchInput:focus,
+  .search-input:focus {
+    box-shadow:
+      0 0 0 4px rgba(10, 132, 255, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 70 · DOCK MORE SHEET — upřesnění tlačítek
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Sheet — animace ze spodu */
+  #dockMoreSheet {
+    padding-bottom: max(28px, env(safe-area-inset-bottom, 28px)) !important;
+    border-radius: 28px 28px 0 0 !important;
+  }
+
+  /* Grid tlačítka — 44px min touch target */
+  #dockMoreSheet [style*="grid"] button {
+    min-height: 64px !important;
+    border-radius: 14px !important;
+    font-size: 0.6rem !important;
+    gap: 5px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Ikony v grid tlačítkách */
+  #dockMoreSheet [style*="grid"] button svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  /* Tap scale */
+  #dockMoreSheet [style*="grid"] button:active {
+    transform: scale(0.91) !important;
+    transition-duration: 70ms !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 71 · DISCO ROW SCROLL — maskovací gradient na mobilu
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /*
+   * Na desktopu je mask-image gradient (průhledné okraje) pro
+   * naznačení dalšího obsahu. Na mobilu chceme jen levý okraj
+   * (pravý není potřeba — vidíme konec řady).
+   */
+  .disco-row-scroll {
+    mask-image: linear-gradient(
+      to right,
+      transparent 0px,
+      #000 12px,
+      #000 100%
+    ) !important;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0px,
+      #000 12px,
+      #000 100%
+    ) !important;
+    /* Přidat padding pro snap scrollování */
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Snap alignment na každé kartě */
+  .disco-card {
+    scroll-snap-align: start !important;
+    scroll-margin-left: 12px !important;
+  }
+
+  /* Focus scale pryč (touch) */
+  .disco-card.sh-focused {
+    transform: scale(1) translateY(0) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7) !important;
+    border-color: rgba(0, 122, 255, 0.5) !important;
+  }
+
+  /* Row dimming při hover — pryč na touch */
+  .disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
+    filter: none !important;
+    transform: none !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 72 · DISCO NAV ITEM — hover pryč, tap scale
+───────────────────────────────────────────────────────────────── */
+@media (hover: none) and (pointer: coarse) {
+
+  .disco-nav-item:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .disco-nav-item:active {
+    transform: scale(0.92) !important;
+    transition-duration: 80ms !important;
+  }
+
+  /* Disco close */
+  .disco-close:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+  }
+
+  /* Genre pill */
+  .genre-pill:hover,
+  .disco-genre-pill:hover {
+    transform: none !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 73 · WATCHLIST OVERLAY — slide ze prava → ze spodu na mobilu
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /*
+   * Watchlist overlay původně sliduje zprava (iosSlideRight).
+   * Na mobilu lepší ze spodu — sheet pattern.
+   */
+  #watchlistOverlay {
+    align-items: flex-end !important;
+    justify-content: center !important;
+  }
+
+  .watchlist-inner {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 28px 28px 0 0 !important;
+    max-height: 88dvh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Přepsat animaci na slide-up */
+  #watchlistOverlay.open .watchlist-inner {
+    animation: iosSlideUp 0.38s cubic-bezier(0.34, 1.1, 0.64, 1) both !important;
+  }
+
+  /* Watchlist header */
+  [class*="watchlist-header"],
+  [class*="wl-header"] {
+    padding: 16px 16px 12px !important;
+    position: sticky !important;
+    top: 0 !important;
+    background: rgba(12, 12, 20, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    z-index: 2 !important;
+  }
+
+  /* Watchlist položky */
+  .watchlist-inner [class*="wl-item"],
+  .watchlist-inner [class*="watchlist-item"] {
+    padding: 10px 14px !important;
+    gap: 12px !important;
+    min-height: 60px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 74 · ADMIN OVERLAY — sidebar skrýt, fullwidth content
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Admin overlay fullscreen */
+  #adminOverlay {
+    flex-direction: column !important;
+  }
+
+  /* Sidebar — skrýt, nahradit tabs v headeru */
+  #adminOverlay .adm-sidebar {
+    display: none !important;
+  }
+
+  /* Admin content — plná šířka */
+  #adminOverlay .adm-content,
+  [class*="adm-content"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 12px !important;
+  }
+
+  /* Admin header */
+  [class*="adm-header"] {
+    padding: max(14px, env(safe-area-inset-top, 14px)) 14px 10px !important;
+    gap: 8px !important;
+  }
+
+  /* Admin nav tabs místo sidebaru */
+  [class*="adm-nav"],
+  [class*="admin-nav"] {
+    display: flex !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    padding: 0 12px 10px !important;
+    gap: 6px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  }
+  [class*="adm-nav"]::-webkit-scrollbar {
+    display: none !important;
+  }
+  [class*="adm-nav-item"],
+  [class*="admin-nav-item"] {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    padding: 7px 14px !important;
+    border-radius: 20px !important;
+    font-size: 0.68rem !important;
+    min-height: 36px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 75 · GENRE PILLS (v seriál modalu) — scroll na mobilu
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Wrapper genre pills */
+  [class*="genre-pills"],
+  [class*="genres-wrap"] {
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    flex-wrap: nowrap !important;
+    padding-bottom: 2px !important;
+  }
+  [class*="genre-pills"]::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Jednotlivé pills */
+  .genre-pill,
+  .disco-genre-pill,
+  [class*="genre-pill"] {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    padding: 5px 12px !important;
+    font-size: 0.62rem !important;
+    border-radius: 20px !important;
+    min-height: 30px !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 76 · IOS ANIMATIONS — zkrátit pro výkon na slabých telefonech
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* iosSlideUp — o 30% rychlejší na mobilu */
+  @keyframes iosSlideUp {
+    from {
+      transform: translateY(32px) scale(0.98);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Karta animace v disco — rychlejší */
+  @keyframes discoCardIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Tile animace — kratší */
+  .disco-card {
+    animation-duration: 0.3s !important;
+  }
+  .ps-tile-wrapper {
+    animation-duration: 0.25s !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 77 · AUTOSAVE INDICATOR — mobilní
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  .autosave-indicator {
+    /* Nesmí překrývat header na mobilu */
+    top: auto !important;
+    bottom: max(78px, calc(env(safe-area-inset-bottom, 0px) + 78px)) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
+    font-size: 0.6rem !important;
+    padding: 5px 12px !important;
+    border-radius: 20px !important;
+    white-space: nowrap !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 78 · STREAK DISPLAY (plovoucí widget) — plná verze
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* Streak widget plovoucí — menší aby nezabíral místo */
+  #streakWidget,
+  .streak-widget,
+  [id*="streakWidget"] {
+    transform: scale(0.82) !important;
+    transform-origin: top right !important;
+    top: max(56px, calc(env(safe-area-inset-top, 0px) + 56px)) !important;
+    right: 8px !important;
+  }
+
+  /* Streak fire */
+  .streak-fire {
+    font-size: 1.2rem !important;
+  }
+
+  /* Streak count */
+  .streak-count {
+    font-size: 1.1rem !important;
+    letter-spacing: -0.5px !important;
+  }
+
+  /* Streak label */
+  .streak-label {
+    font-size: 0.42rem !important;
+    letter-spacing: 1.5px !important;
+  }
+
+  /* Streak today section */
+  .streak-today {
+    padding: 6px 8px !important;
+    gap: 4px !important;
+  }
+  .streak-today-count {
+    font-size: 1rem !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 79 · MODAL OVERLAY ANIMACE — slide-up na mobilu
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /*
+   * Na desktopu modaly otevírají scale-up z středu.
+   * Na mobilu sheet pattern (ze spodu) je přirozenější.
+   * Přepíšeme animaci pro obecné modal-overlay.
+   */
+  .modal-overlay.open .modal-content {
+    animation: iosSlideUp 0.38s cubic-bezier(0.34, 1.12, 0.64, 1) both !important;
+  }
+
+  /* Výjimky — series a cinema jsou fullscreen, ne sheet */
+  #seriesModal.modal-overlay.open .modal-content,
+  #cinemaModal.modal-overlay.open .modal-content {
+    animation: mf-page-enter 0.22s cubic-bezier(0.34, 1.1, 0.64, 1) both !important;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 80 · FINÁLNÍ PŘEPISY — touch-action a user-select
+───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /*
+   * Zabrání zdvojitému tapnutí a nechtěnému zoomování
+   * na interaktivních prvcích.
+   */
+  button,
+  [role="button"],
+  .dock-btn,
+  .disco-card,
+  .ps-tile-wrapper,
+  .episode-card,
+  .sh-card,
+  .continue-widget,
+  .trakt-fab,
+  .timer-fab,
+  .ruleta-fab,
+  .notif-bell,
+  #mfProfileBadge,
+  .mf-header-btn {
+    touch-action: manipulation !important;
+  }
+
+  /*
+   * Zabránit označování textu při tapnutí na karty/tlačítka.
+   */
+  .disco-card,
+  .ps-tile-wrapper,
+  .episode-card,
+  .sh-card,
+  .dock-btn,
+  .mf-header-btn,
+  .continue-widget,
+  .timer-fab,
+  .trakt-fab,
+  .ruleta-fab {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+  }
+
+  /*
+   * Text v modalech a popisech musí jít označit (copy/paste).
+   */
+  .modal-overview,
+  .ep-desc,
+  .disco-hero-desc,
+  [class*="overview"],
+  [class*="description"],
+  [class*="ep-desc"] {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+  }
+
+  /*
+   * Overscroll behavior — zabrání "pull to refresh" při
+   * scrollování uvnitř modalů.
+   */
+  #modalBody,
+  .customize-body,
+  .trakt-box,
+  .watchlist-inner,
+  .notif-panel,
+  .trakt-body {
+    overscroll-behavior: contain !important;
+  }
+
+  /*
+   * Hlavní stránka — povolení pull-to-refresh jen pokud
+   * existuje (na iOS Safari nemá vliv, pouze Chrome Android).
+   */
+  body {
+    overscroll-behavior-y: auto !important;
+  }
+}
