@@ -3466,8 +3466,8 @@ body::after {
 }
 .disco-nav-item.active {
   color: #fff !important;
-  background: rgba(255, 255, 255, 0.12) !important;
-  border-color: rgba(255, 255, 255, 0.22) !important;
+  background: rgba(10, 132, 255, 0.15) !important;
+  border-color: rgba(10, 132, 255, 0.38) !important;
   font-weight: 800 !important;
   box-shadow: none !important;
 }
@@ -3530,12 +3530,10 @@ body::after {
   opacity: 1;
 }
 .disco-nav-item.active {
-  color: #000;
-  background: var(--accent);
-  border-color: var(--accent);
-  box-shadow:
-    0 4px 24px rgba(0, 122, 255, 0.3),
-    0 1px 0 rgba(255, 255, 255, 0.3) inset;
+  color: #fff;
+  background: rgba(10, 132, 255, 0.15);
+  border-color: rgba(10, 132, 255, 0.38);
+  box-shadow: 0 2px 14px rgba(10, 132, 255, 0.2);
   font-weight: 800;
 }
 .disco-nav-item.active::before {
@@ -3661,9 +3659,9 @@ body::after {
   letter-spacing: 0.2px;
 }
 .disco-hero-btn.primary {
-  background: #fff;
-  color: #000;
-  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+  background: var(--accent) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 18px rgba(10, 132, 255, 0.38) !important;
 }
 .disco-hero-btn.primary:hover {
   background: var(--accent);
