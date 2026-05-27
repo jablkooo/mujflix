@@ -1,64 +1,128 @@
 /**
- * MůjFlix — Design Patch v1
- * Přepíše #mf-disco-override style tag přímo v DOM.
- * Přidej jako POSLEDNÍ <script> před </body> v index.html:
- *   <script src="mujflix-design-patch.js"></script>
+ * MůjFlix — Design Patch v2
+ * Používá MutationObserver + přímé inline styly na DOM elementech.
+ * CSS třídy nestačí — app.js přidává inline styly a mf-chip-optimistic class.
  */
 (function () {
   'use strict';
 
-  const CSS = `
-    :root { --radius: 12px !important; --radius-lg: 18px !important; --radius-sm: 8px !important; }
+  // ── Barvy ────────────────────────────────────────────
+  const ACCENT_BG     = 'rgba(10,132,255,0.16)';
+  const ACCENT_BORDER = 'rgba(10,132,255,0.38)';
+  const INACTIVE_BG   = 'transparent';
+  const INACTIVE_BORDER = 'rgba(255,255,255,0.09)';
+  const INACTIVE_COLOR  = 'rgba(255,255,255,0.42)';
 
-    /* ── Karty ── */
-    .disco-card, .disco-card-inner { border-radius: 12px !important; }
-    .disco-card { background: rgba(255,255,255,0.025) !important; border: none !important; box-shadow: none !important; width: 154px !important; }
-    .disco-card:hover { transform: scale(1.07) translateY(-6px) !important; box-shadow: 0 22px 60px rgba(0,0,0,0.9), 0 0 0 0.5px rgba(255,255,255,0.15) !important; border-color: transparent !important; }
-    .disco-card-img { width: 154px !important; height: 231px !important; border-radius: 12px !important; }
-    .disco-card-inner { height: 231px !important; }
-    .disco-card-glow { display: none !important; }
-    .disco-card-rating { color: rgba(255,200,50,0.85) !important; }
-
-    /* ── Nav chipsy ── */
-    .disco-nav-item { background: transparent !important; border: 0.5px solid rgba(255,255,255,0.09) !important; color: rgba(255,255,255,0.42) !important; overflow: visible !important; }
-    .disco-nav-item::before { display: none !important; }
-    .disco-nav-item.active { color: #fff !important; background: rgba(10,132,255,0.16) !important; border-color: rgba(10,132,255,0.38) !important; box-shadow: 0 0 0 0.5px rgba(10,132,255,0.4) !important; }
-    .disco-nav-item:hover { background: rgba(255,255,255,0.05) !important; color: rgba(255,255,255,0.85) !important; }
-
-    /* ── Header ── */
-    .disco-header { background: rgba(6,6,9,0.92) !important; backdrop-filter: blur(44px) saturate(1.8) !important; -webkit-backdrop-filter: blur(44px) saturate(1.8) !important; border-bottom: 0.5px solid rgba(255,255,255,0.06) !important; position: sticky !important; top: 0 !important; z-index: 20 !important; box-shadow: 0 1px 0 rgba(0,0,0,0.5) !important; }
-
-    /* ── Hero tlačítka ── */
-    .disco-hero-btn.primary { background: var(--accent) !important; color: #fff !important; box-shadow: 0 4px 18px rgba(10,132,255,0.4) !important; }
-    .disco-hero-btn.primary:hover { background: #1a8fff !important; box-shadow: 0 8px 28px rgba(10,132,255,0.55) !important; }
-  `;
-
-  function applyPatch() {
-    // 1. Přepiš existující #mf-disco-override
-    const existing = document.getElementById('mf-disco-override');
-    if (existing) {
-      existing.textContent = CSS;
+  // ── Přepiš inline #mf-disco-override ────────────────
+  function patchStyleTag() {
+    const el = document.getElementById('mf-disco-override');
+    if (el) {
+      // Nahraď bílý active styl accentovým
+      el.textContent = el.textContent
+        .replace(/\.disco-nav-item\.active\s*\{[^}]*\}/g,
+          `.disco-nav-item.active { color: #fff !important; background: ${ACCENT_BG} !important; border-color: ${ACCENT_BORDER} !important; box-shadow: 0 0 0 0.5px ${ACCENT_BORDER} !important; }`)
+        .replace(/\.disco-header\s*\{[^}]*\}/g,
+          `.disco-header { background: rgba(6,6,9,0.92) !important; backdrop-filter: blur(44px) saturate(1.8) !important; -webkit-backdrop-filter: blur(44px) saturate(1.8) !important; border-bottom: 0.5px solid rgba(255,255,255,0.06) !important; position: sticky !important; top: 0 !important; z-index: 20 !important; }`);
     }
 
-    // 2. Přidej nový style tag jako pojistku (nejvyšší priorita)
-    const old = document.getElementById('mf-design-patch');
-    if (old) old.remove();
-    const s = document.createElement('style');
-    s.id = 'mf-design-patch';
-    s.textContent = CSS;
-    document.head.appendChild(s);
+    // Přepiš mf-disco-fx (app.js dynamický styl)
+    const fx = document.getElementById('mf-disco-fx');
+    if (fx) {
+      fx.textContent = fx.textContent
+        .replace(/\.disco-nav-item\.mf-chip-optimistic\s*\{[^}]*\}/g,
+          `.disco-nav-item.mf-chip-optimistic { background: ${ACCENT_BG} !important; border-color: ${ACCENT_BORDER} !important; color: #fff !important; }`);
+    }
   }
 
-  // Spusť ihned i po DOMContentLoaded
+  // ── Nastav inline styly přímo na elementech ──────────
+  function styleNavItems() {
+    document.querySelectorAll('.disco-nav-item').forEach(el => {
+      const isActive = el.classList.contains('active') || el.classList.contains('mf-chip-optimistic');
+      el.style.setProperty('background',    isActive ? ACCENT_BG     : INACTIVE_BG,     'important');
+      el.style.setProperty('border-color',  isActive ? ACCENT_BORDER : INACTIVE_BORDER, 'important');
+      el.style.setProperty('color',         isActive ? '#fff'        : INACTIVE_COLOR,  'important');
+      el.style.setProperty('border-width',  '0.5px', 'important');
+      el.style.setProperty('border-style',  'solid', 'important');
+    });
+  }
+
+  // ── Nastav sticky header ─────────────────────────────
+  function styleHeader() {
+    document.querySelectorAll('.disco-header').forEach(el => {
+      el.style.setProperty('background',          'rgba(6,6,9,0.92)',            'important');
+      el.style.setProperty('backdrop-filter',     'blur(44px) saturate(1.8)',    'important');
+      el.style.setProperty('-webkit-backdrop-filter', 'blur(44px) saturate(1.8)', 'important');
+      el.style.setProperty('border-bottom',       '0.5px solid rgba(255,255,255,0.06)', 'important');
+      el.style.setProperty('position',            'sticky',  'important');
+      el.style.setProperty('top',                 '0',       'important');
+      el.style.setProperty('z-index',             '20',      'important');
+    });
+  }
+
+  // ── Nastav primary tlačítka ──────────────────────────
+  function stylePrimaryBtns() {
+    document.querySelectorAll('.disco-hero-btn.primary').forEach(el => {
+      el.style.setProperty('background',   'var(--accent)',                    'important');
+      el.style.setProperty('color',        '#fff',                             'important');
+      el.style.setProperty('box-shadow',   '0 4px 18px rgba(10,132,255,0.4)', 'important');
+    });
+  }
+
+  // ── Spusť vše ────────────────────────────────────────
+  function applyAll() {
+    patchStyleTag();
+    styleNavItems();
+    styleHeader();
+    stylePrimaryBtns();
+  }
+
+  // ── MutationObserver — sleduje změny tříd na nav itemech ─
+  function startObserver() {
+    const nav = document.getElementById('discoNav');
+    if (!nav) return;
+
+    new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === 'attributes' && m.attributeName === 'class') {
+          // Reaguj ihned při změně třídy na nav itemu
+          styleNavItems();
+          return;
+        }
+      }
+    }).observe(nav, { subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+  }
+
+  // ── Sleduj přidání mf-disco-fx stylu do <head> ───────
+  function watchHead() {
+    new MutationObserver(() => {
+      const fx = document.getElementById('mf-disco-fx');
+      if (fx && !fx._patched) {
+        fx._patched = true;
+        // Přepiš mf-chip-optimistic hned jak se styl přidá
+        setTimeout(() => {
+          fx.textContent = fx.textContent.replace(
+            /\.disco-nav-item\.mf-chip-optimistic\s*\{[^}]*\}/g,
+            `.disco-nav-item.mf-chip-optimistic { background: ${ACCENT_BG} !important; border-color: ${ACCENT_BORDER} !important; color: #fff !important; }`
+          );
+        }, 0);
+      }
+    }).observe(document.head, { childList: true });
+  }
+
+  // ── Init ─────────────────────────────────────────────
+  function init() {
+    applyAll();
+    startObserver();
+    watchHead();
+    // Opakované jištění pro dynamicky přidávaný obsah
+    [100, 300, 600, 1000, 2000].forEach(ms => setTimeout(applyAll, ms));
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyPatch);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    applyPatch();
+    init();
   }
 
-  // Pojistka — znovu po 300ms (pro případ že app.js přepíše styl)
-  setTimeout(applyPatch, 300);
-  setTimeout(applyPatch, 800);
-
-  console.log('[MF Design Patch] ✓ aplikován');
+  console.log('[MF Design Patch v2] ✓');
 })();
