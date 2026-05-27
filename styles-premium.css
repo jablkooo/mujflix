@@ -366,7 +366,7 @@ body::after { display: none !important; }
    § 8 · DISCOVERY CARDS  (.disco-card)
 ──────────────────────────────────────────────────────────────── */
 .disco-card {
-  border-radius: var(--radius) !important;
+  border-radius: 12px !important;
   border: 1px solid rgba(255,255,255,0.048) !important;
   transition: transform 0.18s var(--ease-spring), box-shadow 0.18s var(--ease-soft), border-color 0.18s ease, opacity 0.18s ease !important;
   animation: mf-fade-up 0.4s var(--ease-out) both;
@@ -377,7 +377,7 @@ body::after { display: none !important; }
 .disco-card:nth-child(n+5) { animation-delay: 0.22s; }
 .disco-card:hover {
   transform: scale(1.07) translateY(-6px) translateZ(0) !important;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 6px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.12) !important;
+  box-shadow: 0 22px 60px rgba(0,0,0,0.9), 0 6px 20px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,255,255,0.15) !important;
   border-color: transparent !important;
 }
 .disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
@@ -466,10 +466,14 @@ body::after { display: none !important; }
   background: rgba(5,5,9,0.98) !important;
 }
 .disco-header {
-  background: linear-gradient(to bottom, rgba(5,5,9,0.99) 0%, rgba(5,5,9,0.65) 80%, transparent 100%) !important;
-  backdrop-filter: blur(26px) !important;
-  -webkit-backdrop-filter: blur(26px) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.038) !important;
+  background: rgba(6,6,9,0.92) !important;
+  backdrop-filter: blur(44px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(44px) saturate(1.8) !important;
+  border-bottom: 0.5px solid rgba(255,255,255,0.06) !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 20 !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.5) !important;
 }
 .disco-logo {
   font-family: var(--font-ui) !important;
