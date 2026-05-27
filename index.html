@@ -283,17 +283,21 @@
       }
     </style>
   <style id="mf-disco-override">
-    :root { --radius: 8px !important; --radius-lg: 16px !important; --radius-sm: 6px !important; }
-    .disco-card, .disco-card-inner { border-radius: 8px !important; }
-    .disco-card { background: #111 !important; border: none !important; box-shadow: none !important; width: 154px !important; }
-    .disco-card:hover { transform: scale(1.07) translateY(-6px) !important; box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.12) !important; border-color: transparent !important; }
-    .disco-card-img { width: 154px !important; height: 231px !important; }
+    :root { --radius: 12px !important; --radius-lg: 18px !important; --radius-sm: 8px !important; }
+    .disco-card, .disco-card-inner { border-radius: 12px !important; }
+    .disco-card { background: rgba(255,255,255,0.025) !important; border: none !important; box-shadow: none !important; width: 154px !important; }
+    .disco-card:hover { transform: scale(1.07) translateY(-6px) !important; box-shadow: 0 22px 60px rgba(0,0,0,0.9), 0 0 0 0.5px rgba(255,255,255,0.15) !important; border-color: transparent !important; }
+    .disco-card-img { width: 154px !important; height: 231px !important; border-radius: 12px !important; }
     .disco-card-inner { height: 231px !important; }
     .disco-card-glow { display: none !important; }
-    .disco-nav-item { background: transparent !important; border: 1px solid rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.42) !important; overflow: visible !important; }
+    .disco-card-rating { color: rgba(255,200,50,0.85) !important; }
+    .disco-nav-item { background: transparent !important; border: 0.5px solid rgba(255,255,255,0.09) !important; color: rgba(255,255,255,0.42) !important; overflow: visible !important; }
     .disco-nav-item::before { display: none !important; }
-    .disco-nav-item.active { color: #fff !important; background: rgba(255,255,255,0.12) !important; border-color: rgba(255,255,255,0.22) !important; box-shadow: none !important; }
+    .disco-nav-item.active { color: #fff !important; background: rgba(10,132,255,0.16) !important; border-color: rgba(10,132,255,0.38) !important; box-shadow: 0 0 0 0.5px rgba(10,132,255,0.4) !important; }
     .disco-nav-item:hover { background: rgba(255,255,255,0.05) !important; color: rgba(255,255,255,0.85) !important; }
+    .disco-header { background: rgba(6,6,9,0.92) !important; backdrop-filter: blur(44px) saturate(1.8) !important; -webkit-backdrop-filter: blur(44px) saturate(1.8) !important; border-bottom: 0.5px solid rgba(255,255,255,0.06) !important; position: sticky !important; top: 0 !important; z-index: 20 !important; }
+    .disco-hero-btn.primary { background: var(--accent) !important; color: #fff !important; box-shadow: 0 4px 18px rgba(10,132,255,0.4) !important; }
+    .disco-hero-btn.primary:hover { background: #1a8fff !important; box-shadow: 0 8px 28px rgba(10,132,255,0.55) !important; }
   </style>
   <!-- ══ AI PANEL REDESIGN ══ -->
   <style id="mf-ai-redesign">
