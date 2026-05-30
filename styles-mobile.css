@@ -2916,8 +2916,12 @@
     height: 100dvh !important;
     height: -webkit-fill-available !important;
     overflow: hidden !important;
-    display: flex !important;
     flex-direction: column !important;
+    /* display NEPŘEPISUJEME — řídí app.js třídou .open */
+  }
+
+  .universe-overlay.open {
+    display: flex !important;
   }
 
   /* Tělo overlaye scrolluje, ne celá stránka */
