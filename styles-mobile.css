@@ -2902,3 +2902,425 @@
     overscroll-behavior-y: auto !important;
   }
 }
+
+
+/* ─────────────────────────────────────────────────────────────────
+   § 81 · DISCOVER / UNIVERSE OVERLAY — mobilní redesign
+   Pracuje s styles-discover-redesign.css (musí být načten dříve).
+───────────────────────────────────────────────────────────────── */
+
+/* ── Základní overlay — flex sloupec přes celou obrazovku ── */
+@media (max-width: 600px) {
+
+  .universe-overlay {
+    height: 100dvh !important;
+    height: -webkit-fill-available !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Tělo overlaye scrolluje, ne celá stránka */
+  .disco-body {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    padding-bottom: max(90px, calc(env(safe-area-inset-bottom, 0px) + 90px)) !important;
+  }
+}
+
+
+/* ── HEADER — kompaktnější, search přes celou šířku ── */
+@media (max-width: 600px) {
+
+  .disco-header {
+    height: auto !important;
+    padding: max(14px, env(safe-area-inset-top, 14px)) 14px 12px !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+
+  /* Logo + titulek — první řada */
+  .disco-header-left {
+    flex: 0 0 auto !important;
+    order: 1 !important;
+  }
+
+  .disco-logo {
+    font-size: 0.75rem !important;
+  }
+
+  .disco-title {
+    font-size: 1.15rem !important;
+    letter-spacing: -0.5px !important;
+  }
+
+  /* Pravá část (AI btn + close) — první řada, zarovnáno doprava */
+  .disco-header > div:last-child {
+    order: 2 !important;
+    margin-left: auto !important;
+    gap: 8px !important;
+  }
+
+  /* AI Doporučení btn — skrýt text, jen ikona na velmi malých */
+  .disco-header > div:last-child > button:first-child {
+    padding: 9px 14px !important;
+    font-size: 0.72rem !important;
+    gap: 5px !important;
+  }
+
+  /* Close button */
+  .disco-close {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* Search wrap — druhá řada, plná šířka */
+  .uni-search-wrap {
+    order: 3 !important;
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .uni-input {
+    width: 100% !important;
+    font-size: 0.875rem !important;
+    padding: 11px 38px 11px 38px !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* Extra malé — skrýt text AI btn, nechat jen ikonu */
+@media (max-width: 390px) {
+
+  .disco-header > div:last-child > button:first-child > svg {
+    display: inline-block !important;
+  }
+
+  .disco-header > div:last-child > button:first-child {
+    padding: 9px 11px !important;
+    min-width: 36px !important;
+  }
+
+  /* Skryj text tlačítka, nech jen ikonu */
+  .disco-header > div:last-child > button:first-child::after {
+    display: none !important;
+  }
+}
+
+
+/* ── GENRE NAV — horizontální scroll, velký touch target ── */
+@media (max-width: 600px) {
+
+  .disco-nav {
+    padding: 10px 14px !important;
+    gap: 6px !important;
+    /* Nav se NEstickyuje na mobilu — šetří místo */
+    position: relative !important;
+    top: auto !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: 0.5px solid rgba(255,255,255,0.06) !important;
+    background: rgba(7,7,15,0.98) !important;
+  }
+
+  .disco-nav-item {
+    padding: 8px 14px !important;
+    font-size: 0.78rem !important;
+    min-height: 36px !important; /* iOS 44px dotek pokryje padding rodiče */
+    border-radius: 18px !important;
+    /* Zabrání dvojitému tapu */
+    touch-action: manipulation !important;
+  }
+}
+
+
+/* ── HERO SEKCE — nižší na telefonu, obsah čitelný ── */
+@media (max-width: 600px) {
+
+  .disco-hero {
+    height: 260px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .disco-hero-content {
+    padding: 20px 16px !important;
+  }
+
+  .disco-hero-title {
+    font-size: 1.5rem !important;
+    letter-spacing: -0.6px !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Popis — skrýt na telefonu, není místo */
+  .disco-hero-desc {
+    display: none !important;
+  }
+
+  .disco-hero-btns {
+    gap: 8px !important;
+  }
+
+  .disco-hero-btn {
+    padding: 10px 18px !important;
+    font-size: 0.82rem !important;
+    border-radius: 10px !important;
+    min-height: 42px !important;
+    touch-action: manipulation !important;
+  }
+
+  .disco-hero-badge-type {
+    font-size: 0.6rem !important;
+    padding: 3px 8px !important;
+  }
+}
+
+@media (max-width: 390px) {
+
+  .disco-hero {
+    height: 220px !important;
+  }
+
+  .disco-hero-title {
+    font-size: 1.25rem !important;
+  }
+
+  .disco-hero-btn {
+    padding: 9px 14px !important;
+    font-size: 0.78rem !important;
+  }
+}
+
+
+/* ── DISCO ROWS — menší padding, karty optimalizovány ── */
+@media (max-width: 600px) {
+
+  .disco-row-header {
+    padding: 18px 14px 10px !important;
+  }
+
+  .disco-row-title {
+    font-size: 0.95rem !important;
+    letter-spacing: -0.3px !important;
+  }
+
+  .disco-row-scroll {
+    padding: 4px 14px 18px !important;
+    gap: 8px !important;
+    /* iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-x: contain !important;
+    /* Bez mask-image na mobilu — výkonnostní důvody */
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+
+  /* Nav šipky — skrýt na telefonu (swipe gesta stačí) */
+  .disco-row-nav-btn {
+    display: none !important;
+  }
+
+  /* Tlačítko "Nová doporučení" — menší */
+  .disco-row-nav > button[onclick*="refreshPersonalisedRow"] {
+    font-size: 0.6rem !important;
+    padding: 5px 10px !important;
+  }
+}
+
+
+/* ── DISCO CARDS — menší na telefonu, 2.5 viditelné ── */
+@media (max-width: 600px) {
+
+  :root {
+    --dr-card-w: 130px !important;
+    --dr-card-h: 195px !important;
+    --dr-card-r: 10px !important;
+    --dr-px: 14px !important;
+  }
+
+  .disco-card {
+    width: 130px !important;
+    min-width: 130px !important;
+    border-radius: 10px !important;
+    /* Zrušit komplexní hover animace na dotykovém displeji */
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  }
+
+  /* Na dotykových zařízeních nemáme hover — zobraz info vždy */
+  @media (hover: none) {
+    .disco-card .disco-card-info {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+
+    .disco-card .disco-card-overlay {
+      opacity: 1 !important;
+    }
+
+    /* Play btn skrytý (tap = přehrát přímo) */
+    .disco-card .disco-play-btn {
+      display: none !important;
+    }
+
+    /* Finder btn — vždy viditelný na dotykových */
+    .disco-card .disco-card-finder-btn {
+      opacity: 1 !important;
+      transform: scale(1) !important;
+    }
+  }
+
+  .disco-card-inner {
+    width: 130px !important;
+    height: 195px !important;
+    border-radius: 10px !important;
+  }
+
+  .disco-card-img {
+    border-radius: 10px !important;
+  }
+
+  .disco-card-name {
+    font-size: 0.68rem !important;
+  }
+
+  .disco-card-type {
+    font-size: 0.55rem !important;
+    padding: 1px 5px !important;
+  }
+
+  .disco-card-info {
+    padding: 10px 9px !important;
+  }
+
+  .disco-card-finder-btn {
+    width: 24px !important;
+    height: 24px !important;
+    top: 7px !important;
+    right: 7px !important;
+  }
+
+  .ai-match-badge {
+    font-size: 0.5rem !important;
+    padding: 2px 6px !important;
+    top: 7px !important;
+    left: 7px !important;
+  }
+}
+
+@media (max-width: 390px) {
+
+  :root {
+    --dr-card-w: 112px !important;
+    --dr-card-h: 168px !important;
+  }
+
+  .disco-card {
+    width: 112px !important;
+    min-width: 112px !important;
+  }
+
+  .disco-card-inner {
+    width: 112px !important;
+    height: 168px !important;
+  }
+}
+
+
+/* ── STICKY CATEGORY INDICATOR — přesunout dolů ── */
+@media (max-width: 600px) {
+
+  #dr-sticky-cat {
+    top: auto !important;
+    bottom: max(88px, calc(env(safe-area-inset-bottom, 0px) + 88px)) !important;
+    right: 14px !important;
+    font-size: 0.65rem !important;
+  }
+
+  /* Back to top — nad dockem */
+  #dr-back-top {
+    bottom: max(88px, calc(env(safe-area-inset-bottom, 0px) + 88px)) !important;
+    right: 14px !important;
+    /* Vedle sticky cat — přesun doleva */
+    right: 60px !important;
+  }
+}
+
+
+/* ── LOADING STATE — plná šířka na mobilu ── */
+@media (max-width: 600px) {
+
+  .disco-loading {
+    padding: 60px 20px !important;
+  }
+
+  .dr-loading-card {
+    width: 130px !important;
+    min-width: 130px !important;
+    height: 195px !important;
+    border-radius: 10px !important;
+  }
+}
+
+
+/* ── SCROLL HINT — skrýt na mobilu (není potřeba) ── */
+@media (max-width: 600px) {
+
+  .disco-scroll-hint {
+    display: none !important;
+  }
+}
+
+
+/* ── TOUCH-ACTION — všechny interaktivní prvky ── */
+@media (max-width: 600px) {
+
+  .disco-card,
+  .disco-nav-item,
+  .disco-hero-btn,
+  .disco-row-nav-btn,
+  .disco-close,
+  .disco-card-finder-btn,
+  #dr-back-top {
+    touch-action: manipulation !important;
+  }
+
+  /* Karty nejdou označit tapem */
+  .disco-card,
+  .disco-nav-item,
+  .disco-hero {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+  }
+
+  /* Popis v hero jde označit (i když je skrytý) */
+  .disco-hero-desc {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+  }
+}
+
+
+/* ── PARALLAX VYPNUTÝ NA MOBILU — výkon ── */
+@media (max-width: 600px) {
+
+  .disco-hero-img {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Card count badge — menší */
+  .dr-card-count {
+    font-size: 0.55rem !important;
+    padding: 1px 5px !important;
+  }
+
+  /* Sekční oddělovač — tenčí */
+  .disco-row + .disco-row::before {
+    margin: 0 14px !important;
+  }
+}
