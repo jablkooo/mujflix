@@ -1,599 +1,371 @@
 /**
- * MůjFlix — Discover Redesign JS Patch v1
+ * MůjFlix — Discover Total Redesign JS v2
  * ════════════════════════════════════════
- * Přidat jako POSLEDNÍ <script> v index.html:
+ * Přidat jako POSLEDNÍ <script> před </body>:
  * <script src="mujflix-discover-redesign.js"></script>
- *
- * Co dělá:
- *  1. Injectuje "Pro tebe" sekcový separátor s počítadlem
- *  2. Přidá plynulé scroll-fade na hero obrázek
- *  3. Lazy-load hero backdrop (vysoké rozlišení)
- *  4. Přidá "sticky" indikátor aktuální kategorie při scrollu
- *  5. Vylepší skeleton loading states
- *  6. Přidá parallax efekt na hero section
- *  7. Přidá počet karet do row titulů
- *  8. Nastaví správné scroll-snapping na body
  */
-
 (function () {
   'use strict';
-
   if (window._mfDiscoverRedesignLoaded) return;
   window._mfDiscoverRedesignLoaded = true;
 
-  /* ── UTILS ─────────────────────────────────────────────── */
-  function qs(sel, root) { return (root || document).querySelector(sel); }
-  function qsa(sel, root) { return [...(root || document).querySelectorAll(sel)]; }
-  function wait(fn, tries) {
-    tries = tries || 0;
-    if (tries > 80) { console.warn('[DR] Timeout'); return; }
-    setTimeout(function () { fn() || wait(fn, tries + 1); }, 120);
-  }
-  function ready(fn) {
-    if (document.readyState !== 'loading') fn();
-    else document.addEventListener('DOMContentLoaded', fn);
-  }
+  /* ── SVG IKONY PRO NAV ────────────────────────────────────────────── */
+  var NAV_ICONS = {
+    'Trending':             '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M2 14l4-4 3 3 4-5 3 3"/><path d="M14 6h4v4" stroke-width="1.6"/></svg>',
+    'Filmy':                '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><rect x="2" y="4" width="16" height="13" rx="2"/><path d="M2 8h16M7 4v4M13 4v4"/></svg>',
+    'Seriály':              '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><rect x="1" y="3" width="18" height="13" rx="2"/><path d="M6 17l2-1h4l2 1"/></svg>',
+    'Komedie':              '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><circle cx="10" cy="9" r="7"/><path d="M7 11c.8 1.5 5.2 1.5 6 0"/><circle cx="8" cy="8" r="0.8" fill="currentColor"/><circle cx="12" cy="8" r="0.8" fill="currentColor"/></svg>',
+    'Drama':                '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><path d="M4 14c1-3 4-5 6-3s5 0 6-3"/><path d="M3 7c1 3 4 5 6 3s5 0 6 3"/></svg>',
+    'Sci-Fi':               '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><ellipse cx="10" cy="10" rx="4" ry="4"/><ellipse cx="10" cy="10" rx="9" ry="4"/><path d="M10 1v18M1 10h18" stroke-width="1.2" stroke-dasharray="1 3"/></svg>',
+    'Krimi':                '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5L18 18"/><circle cx="9" cy="9" r="2.5" stroke-dasharray="1.5 2"/></svg>',
+    'Horor':                '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><path d="M10 2L3 18h14L10 2z"/><path d="M10 8v5M10 15v.5" stroke-width="2"/></svg>',
+    'Animované':            '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><path d="M3 10c0-4 3-7 7-7s7 3 7 7"/><path d="M6 13c.5 2 1.8 3.5 4 4M10 17c2.2-.5 3.5-2 4-4"/><circle cx="7.5" cy="10" r="1.2" fill="currentColor"/><circle cx="12.5" cy="10" r="1.2" fill="currentColor"/></svg>',
+    'Mysteriózní':          '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><circle cx="10" cy="10" r="8"/><path d="M10 6c-1.6 0-3 1-3 2.5S8.5 11 10 11"/><circle cx="10" cy="14" r="0.9" fill="currentColor"/></svg>',
+    'Akce & Dobrodružství': '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><path d="M10 2l1.5 5h5.5l-4.5 3 1.5 5L10 12l-4 3 1.5-5L3 7h5.5z"/></svg>',
+    'Reality':              '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><circle cx="10" cy="10" r="3.5"/><circle cx="10" cy="10" r="7" stroke-dasharray="2 3"/></svg>',
+    'Dokumenty':            '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><rect x="4" y="2" width="12" height="16" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>',
+    'Romantika':            '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><path d="M10 17S3 12 3 7a4 4 0 017-2.6A4 4 0 0117 7c0 5-7 10-7 10z"/></svg>',
+    'Thriller':             '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><path d="M10 2v8"/><path d="M6 6l4-4 4 4"/><rect x="4" y="12" width="12" height="6" rx="1.5"/><path d="M10 15v1"/></svg>',
+    'Fantasy':              '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><path d="M10 2l2 6h6l-5 3.5 2 6L10 14l-5 3.5 2-6L2 8h6z"/></svg>',
+    'Sport':                '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><circle cx="10" cy="10" r="8"/><path d="M10 2c2 4 2 12 0 16M2 10c4-2 12-2 16 0" stroke-dasharray="2.5 2"/></svg>',
+    'Hudba':                '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><path d="M9 17V6l9-2v11"/><circle cx="6" cy="17" r="3"/><circle cx="15" cy="15" r="3"/></svg>',
+    'Válečné':              '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><path d="M3 15h14M6 12l-3 3M14 12l3 3M10 3v9M7 6l3-3 3 3"/></svg>',
+    'Historické':           '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><path d="M4 18V9l6-6 6 6v9"/><path d="M8 18v-5h4v5"/><path d="M2 9h16" stroke-width="1.4"/></svg>',
+    'Rodinné':              '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="14" height="14"><circle cx="7" cy="6" r="2.5"/><circle cx="13" cy="6" r="2.5"/><path d="M2 18c0-4 10-4 10 0"/><circle cx="14.5" cy="13" r="1.8"/><path d="M11 18c0-2.5 7-2.5 7 0"/></svg>',
+  };
 
-  /* ── INJECT CUSTOM FONTS if not already there ─────────── */
-  function injectFonts() {
-    if (document.getElementById('dr-fonts')) return;
-    var l = document.createElement('link');
-    l.id = 'dr-fonts';
-    l.rel = 'stylesheet';
-    l.href = 'https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap';
-    document.head.appendChild(l);
-  }
+  /* ── NAV ITEM IKONY — inject SVG před text ─────────────────────────── */
+  function upgradeNavIcons() {
+    var navEl = document.getElementById('discoNav');
+    if (!navEl) return;
+    var items = navEl.querySelectorAll('.disco-nav-item');
+    items.forEach(function (item) {
+      if (item._drIconDone) return;
+      item._drIconDone = true;
 
-  /* ── INJECT EXTRA INLINE STYLES ────────────────────────── */
-  function injectStyles() {
-    if (document.getElementById('dr-extra')) return;
-    var s = document.createElement('style');
-    s.id = 'dr-extra';
-    s.textContent = `
-      /* Sekcový label mezi řadami */
-      .dr-section-label {
-        padding: 6px 52px 0;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.6rem;
-        font-weight: 700;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        color: rgba(255,255,255,0.2);
-        user-select: none;
-      }
+      var label = item.textContent.trim();
 
-      /* Sticky kategorie indikátor při scrollu */
-      #dr-sticky-cat {
-        position: fixed;
-        top: calc(var(--dr-header-h, 72px) + 52px + 16px);
-        right: 24px;
-        z-index: 200;
-        background: rgba(7,7,15,0.88);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 0.5px solid rgba(255,255,255,0.1);
-        border-radius: 20px;
-        padding: 6px 14px;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.68rem;
-        font-weight: 600;
-        color: rgba(255,255,255,0.6);
-        opacity: 0;
-        transform: translateY(-6px);
-        transition: opacity 0.2s ease, transform 0.2s ease;
-        pointer-events: none;
-        white-space: nowrap;
+      // Najdi ikonu — přesná shoda nebo contains
+      var svg = NAV_ICONS[label];
+      if (!svg) {
+        for (var key in NAV_ICONS) {
+          if (label.includes(key) || key.includes(label.split(' ')[0])) {
+            svg = NAV_ICONS[key]; break;
+          }
+        }
       }
-      #dr-sticky-cat.visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      if (!svg) return;
 
-      /* Row hover — jemné zvýraznění titulku */
-      .disco-row:hover > .disco-row-header .disco-row-title {
-        color: rgba(255,255,255,1) !important;
-        transition: color 0.2s ease;
-      }
+      // Odstraň existující emoji (první znak pokud je emoji)
+      var text = item.textContent.trim();
+      // Odstraň emoji prefix (Unicode ranges)
+      text = text.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}\u{1F100}-\u{1F1FF}]\s*/u, '').trim();
 
-      /* Card count badge v titulku */
-      .dr-card-count {
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.6rem;
-        font-weight: 600;
-        color: rgba(255,255,255,0.22);
-        background: rgba(255,255,255,0.05);
-        border: 0.5px solid rgba(255,255,255,0.08);
-        padding: 2px 7px;
-        border-radius: 10px;
-        vertical-align: middle;
-        margin-left: 4px;
-      }
-
-      /* Hero parallax container */
-      .disco-hero-parallax {
-        position: absolute !important;
-        inset: -40px !important;
-        will-change: transform !important;
-      }
-      .disco-hero-parallax img {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
-        object-position: center 25% !important;
-        display: block !important;
-      }
-
-      /* Přidaný "Načíst více" row scroll fade-out efekt */
-      .disco-row-scroll {
-        -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20px, black calc(100% - 60px), transparent 100%) !important;
-        mask-image: linear-gradient(to right, transparent 0%, black 20px, black calc(100% - 60px), transparent 100%) !important;
-      }
-
-      /* Card shimmer při načítání */
-      @keyframes dr-card-shimmer {
-        0%   { background-position: -400px 0; }
-        100% { background-position:  400px 0; }
-      }
-      .dr-loading-card {
-        width: var(--dr-card-w, 160px);
-        height: var(--dr-card-h, 240px);
-        min-width: var(--dr-card-w, 160px);
-        border-radius: 14px;
-        flex-shrink: 0;
-        background:
-          linear-gradient(
-            105deg,
-            rgba(255,255,255,0.03) 20%,
-            rgba(255,255,255,0.065) 48%,
-            rgba(255,255,255,0.1) 50%,
-            rgba(255,255,255,0.065) 52%,
-            rgba(255,255,255,0.03) 80%
-          );
-        background-size: 400px 100%;
-        animation: dr-card-shimmer 1.5s ease-in-out infinite;
-      }
-
-      /* Jemná separace sekcí */
-      .disco-row + .disco-row::before {
-        content: '';
-        display: block;
-        height: 0.5px;
-        background: rgba(255,255,255,0.04);
-        margin: 0 52px 0;
-      }
-
-      /* "✦ Pro tebe" row — jemné zvýraznění pozadí */
-      .disco-row.dr-featured-row {
-        background: linear-gradient(
-          to bottom,
-          rgba(61,142,255,0.025) 0%,
-          transparent 100%
-        );
-        border-radius: 0;
-        padding-bottom: 4px;
-      }
-
-      /* Tooltip pro finder btn */
-      .disco-card-finder-btn::after {
-        content: 'Kde sledovat';
-        position: absolute;
-        top: 110%;
-        right: 0;
-        background: rgba(7,7,15,0.95);
-        border: 0.5px solid rgba(255,255,255,0.1);
-        border-radius: 8px;
-        padding: 4px 9px;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.6rem;
-        font-weight: 600;
-        color: rgba(255,255,255,0.7);
-        white-space: nowrap;
-        opacity: 0;
-        pointer-events: none;
-        transform: translateY(-4px);
-        transition: all 0.15s ease;
-        z-index: 10;
-      }
-      .disco-card-finder-btn:hover::after {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      /* Vylepšit transition na cards při filter změně */
-      .disco-body.dr-filtering .disco-row {
-        animation: dr-enter-fade 0.25s ease both !important;
-      }
-      @keyframes dr-enter-fade {
-        from { opacity: 0; }
-        to   { opacity: 1; }
-      }
-
-      /* Floating "Zpět nahoru" tlačítko */
-      #dr-back-top {
-        position: fixed;
-        bottom: 90px;
-        right: 24px;
-        z-index: 200;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: rgba(7,7,15,0.88);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 0.5px solid rgba(255,255,255,0.1);
-        color: rgba(255,255,255,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        opacity: 0;
-        transform: translateY(12px) scale(0.8);
-        transition: all 0.25s cubic-bezier(0.34,1.3,0.64,1);
-        pointer-events: none;
-      }
-      #dr-back-top.visible {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        pointer-events: auto;
-      }
-      #dr-back-top:hover {
-        background: rgba(61,142,255,0.15);
-        border-color: rgba(61,142,255,0.3);
-        color: #3d8eff;
-      }
-      #dr-back-top svg {
-        width: 14px;
-        height: 14px;
-      }
-
-      /* Discovery info — počet výsledků */
-      .dr-results-count {
-        padding: 8px 52px;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.7rem;
-        color: rgba(255,255,255,0.25);
-        font-weight: 500;
-      }
-    `;
-    document.head.appendChild(s);
+      item.innerHTML = svg + '<span>' + text + '</span>';
+      item.style.gap = '5px';
+      item.style.display = 'inline-flex';
+      item.style.alignItems = 'center';
+    });
   }
 
-  /* ── STICKY CATEGORY INDICATOR ────────────────────────── */
-  function setupStickyCategory() {
-    var overlay = qs('#universeOverlay');
-    if (!overlay) return;
+  /* ── HERO PŘEHRÁT + WATCHLIST IKONY ───────────────────────────────── */
+  function upgradeHeroBtns() {
+    var PLAY_SVG = '<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><polygon points="4,2 14,8 4,14"/></svg>';
+    var PLUS_SVG = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="14" height="14"><path d="M8 3v10M3 8h10"/></svg>';
 
-    var ind = document.getElementById('dr-sticky-cat');
-    if (!ind) {
-      ind = document.createElement('div');
-      ind.id = 'dr-sticky-cat';
-      overlay.appendChild(ind);
-    }
+    document.querySelectorAll('.disco-hero-btn').forEach(function (btn) {
+      if (btn._drBtnDone) return;
+      btn._drBtnDone = true;
+      var txt = btn.textContent.trim();
 
-    var body = qs('#discoBody');
-    if (!body) return;
+      // Odstraň emoji prefix
+      txt = txt.replace(/^[▶►▷▸＋+✚✙✓•·\s]+/, '').trim();
 
-    var hideTimer;
-    body.addEventListener('scroll', function () {
-      clearTimeout(hideTimer);
-
-      // Najdi aktivní nav item
-      var activeNav = qs('.disco-nav-item.active', overlay);
-      var label = activeNav ? activeNav.textContent.trim() : '';
-
-      if (label && body.scrollTop > 80) {
-        ind.textContent = label;
-        ind.classList.add('visible');
-      } else {
-        ind.classList.remove('visible');
+      if (txt.toLowerCase().includes('přehrat') || txt.toLowerCase().includes('přehr')) {
+        btn.innerHTML = PLAY_SVG + '<span>' + txt + '</span>';
+      } else if (txt.toLowerCase().includes('watchlist') || txt.toLowerCase().includes('přidat')) {
+        btn.innerHTML = PLUS_SVG + '<span>' + txt + '</span>';
       }
-
-      hideTimer = setTimeout(function () {
-        ind.classList.remove('visible');
-      }, 1200);
-    }, { passive: true });
+    });
   }
 
-  /* ── BACK TO TOP BUTTON ────────────────────────────────── */
-  function setupBackTop() {
-    var overlay = qs('#universeOverlay');
-    if (!overlay) return;
-
-    var btn = document.getElementById('dr-back-top');
-    if (!btn) {
-      btn = document.createElement('button');
-      btn.id = 'dr-back-top';
-      btn.title = 'Zpět nahoru';
-      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>';
-      btn.onclick = function () {
-        var body = qs('#discoBody');
-        if (body) body.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-      overlay.appendChild(btn);
-    }
-
-    var body = qs('#discoBody');
-    if (!body) return;
-
-    body.addEventListener('scroll', function () {
-      if (body.scrollTop > 300) btn.classList.add('visible');
-      else btn.classList.remove('visible');
-    }, { passive: true });
+  /* ── HERO BADGE IKONKY ─────────────────────────────────────────────── */
+  function upgradeHeroBadge() {
+    document.querySelectorAll('.disco-hero-badge-type').forEach(function (el) {
+      if (el._drDone) return;
+      el._drDone = true;
+      var txt = el.textContent.trim();
+      var FILM_SVG = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="11" height="11"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M1 6.5h14M5 3v3.5M11 3v3.5"/></svg>';
+      var TV_SVG   = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="11" height="11"><rect x="1" y="2" width="14" height="10" rx="1.5"/><path d="M5 14l2-2h2l2 2"/></svg>';
+      txt = txt.replace(/^[🎬📺\s]+/, '').trim();
+      if (txt === 'Film' || txt === 'FILM') el.innerHTML = FILM_SVG + '<span> ' + txt + '</span>';
+      else if (txt === 'Seriál' || txt === 'SERIÁL') el.innerHTML = TV_SVG + '<span> ' + txt + '</span>';
+    });
   }
 
-  /* ── ROW CARD COUNT BADGES ─────────────────────────────── */
+  /* ── CARD TYPE BADGES — SVG místo emoji ───────────────────────────── */
+  function upgradeCardTypes() {
+    var FILM_SVG = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" width="9" height="9"><rect x="0.5" y="2" width="11" height="8" rx="1.2"/><path d="M.5 5h11M4 2v3M8 2v3"/></svg>';
+    var TV_SVG   = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" width="9" height="9"><rect x=".5" y="1.5" width="11" height="8" rx="1.2"/><path d="M4 11l1.5-1.5h1L8 11"/></svg>';
+
+    document.querySelectorAll('.disco-card-type').forEach(function (el) {
+      if (el._drDone) return;
+      el._drDone = true;
+      var txt = el.textContent.trim();
+      txt = txt.replace(/^[🎬📺\s]+/, '').trim();
+      if (txt === 'Film') el.innerHTML = FILM_SVG + ' ' + txt;
+      else if (txt === 'Seriál') el.innerHTML = TV_SVG + ' ' + txt;
+      el.style.display = 'inline-flex';
+      el.style.alignItems = 'center';
+      el.style.gap = '4px';
+    });
+  }
+
+  /* ── CARD COUNT BADGE V TITULKU ────────────────────────────────────── */
   function addCardCounts() {
-    qsa('#discoBody .disco-row').forEach(function (row) {
-      if (row._drCountDone) return;
-      row._drCountDone = true;
-
+    document.querySelectorAll('#discoBody .disco-row').forEach(function (row) {
+      if (row._drCount) return;
+      row._drCount = true;
       var scroll = row.querySelector('.disco-row-scroll');
       var title  = row.querySelector('.disco-row-title');
       if (!scroll || !title) return;
-
       var count = scroll.querySelectorAll('.disco-card').length;
       if (count < 2) return;
-
-      // Odstraň starý badge pokud existuje
-      var old = title.querySelector('.dr-card-count');
+      var old = title.querySelector('.dr-count');
       if (old) old.remove();
-
       var badge = document.createElement('span');
-      badge.className = 'dr-card-count';
+      badge.className = 'dr-count';
+      badge.style.cssText = 'font-family:var(--dr-font-b,-apple-system,sans-serif);font-size:0.55rem;font-weight:600;color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.07);padding:2px 7px;border-radius:10px;margin-left:4px;vertical-align:middle;';
       badge.textContent = count;
       title.appendChild(badge);
     });
   }
 
-  /* ── FEATURED ROW HIGHLIGHT ─────────────────────────────── */
-  function markFeaturedRow() {
-    qsa('#discoBody .disco-row').forEach(function (row) {
-      var title = row.querySelector('.disco-row-title');
-      if (!title) return;
-      if (title.textContent.includes('Pro tebe') || title.textContent.includes('personalis')) {
-        row.classList.add('dr-featured-row');
-      }
-    });
-  }
-
-  /* ── HERO PARALLAX ─────────────────────────────────────── */
-  function setupHeroParallax() {
-    var body = qs('#discoBody');
+  /* ── PARALLAX NA HERO (desktop) ────────────────────────────────────── */
+  function setupParallax() {
+    var body = document.getElementById('discoBody');
     if (!body) return;
-
+    var ticking = false;
     body.addEventListener('scroll', function () {
-      var hero = qs('#discoBody .disco-hero');
-      if (!hero) return;
-
-      var scrolled = body.scrollTop;
-      var img = hero.querySelector('.disco-hero-img');
-      if (!img) return;
-
-      // Jemný parallax — posun obrázku při scrollu
-      var parallax = Math.min(scrolled * 0.3, 60);
-      img.style.transform = 'scale(1.06) translateY(' + parallax + 'px)';
-
-      // Fade out hero content při scrollu
-      var content = hero.querySelector('.disco-hero-content');
-      if (content) {
-        var fade = Math.max(0, 1 - scrolled / 220);
-        content.style.opacity = fade;
-        content.style.transform = 'translateY(' + (scrolled * 0.15) + 'px)';
-      }
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        ticking = false;
+        var hero = body.querySelector('.disco-hero');
+        if (!hero) return;
+        var s = body.scrollTop;
+        var img = hero.querySelector('.disco-hero-img');
+        if (img) img.style.transform = 'scale(1.06) translateY(' + Math.min(s * 0.28, 55) + 'px)';
+        var content = hero.querySelector('.disco-hero-content');
+        if (content) {
+          content.style.opacity = Math.max(0, 1 - s / 260);
+          content.style.transform = 'translateY(' + s * 0.14 + 'px)';
+        }
+      });
     }, { passive: true });
   }
 
-  /* ── FILTER TRANSITION ─────────────────────────────────── */
-  function patchDiscoFilter() {
-    var orig = window.discoFilter;
-    if (!orig || orig._drPatched) return;
-
-    window.discoFilter = function (el, genre, type) {
-      var body = qs('#discoBody');
-      if (body) {
-        body.classList.add('dr-filtering');
-        setTimeout(function () { body.classList.remove('dr-filtering'); }, 400);
-      }
-      orig.apply(this, arguments);
-    };
-    window.discoFilter._drPatched = true;
-  }
-
-  /* ── LOADING SKELETONS ─────────────────────────────────── */
-  function injectSkeletons() {
-    var body = qs('#discoBody');
-    if (!body) return;
-
-    // Pokud je prázdný nebo jen loading spinner, zobraz skeletony
-    var loading = body.querySelector('.disco-loading');
-    if (!loading) return;
-
-    // Vytvořit skeleton rows
-    var frag = document.createDocumentFragment();
-    var rowCount = 3;
-
-    for (var r = 0; r < rowCount; r++) {
-      var skelSection = document.createElement('div');
-      skelSection.className = 'dr-skel-section';
-      skelSection.style.cssText = 'padding: 22px 0 0;';
-
-      var skelHdr = document.createElement('div');
-      skelHdr.style.cssText = 'display:flex;align-items:center;gap:12px;padding:0 52px 12px;';
-      skelHdr.innerHTML = [
-        '<div style="height:18px;width:140px;border-radius:8px;background:rgba(255,255,255,0.06);animation:dr-card-shimmer 1.5s ease-in-out infinite;background-size:400px 100%;"></div>',
-        '<div style="height:14px;width:60px;border-radius:20px;background:rgba(61,142,255,0.08);animation:dr-card-shimmer 1.5s ease-in-out infinite 0.1s;background-size:400px 100%;"></div>'
-      ].join('');
-
-      var skelRow = document.createElement('div');
-      skelRow.style.cssText = 'display:flex;gap:10px;padding:0 52px 20px;overflow:hidden;';
-
-      var cardCount = 8;
-      for (var c = 0; c < cardCount; c++) {
-        var skelCard = document.createElement('div');
-        skelCard.className = 'dr-loading-card';
-        skelCard.style.animationDelay = (c * 0.07) + 's';
-        skelRow.appendChild(skelCard);
-      }
-
-      skelSection.appendChild(skelHdr);
-      skelSection.appendChild(skelRow);
-      frag.appendChild(skelSection);
-    }
-
-    loading.parentNode.insertBefore(frag, loading.nextSibling);
-  }
-
-  /* ── MUTATION OBSERVER — reaguje na změny discoBody ────── */
-  function setupBodyObserver() {
-    var body = qs('#discoBody');
-    if (!body) return;
-
-    var mo = new MutationObserver(function (muts) {
-      var changed = muts.some(function (m) { return m.addedNodes.length > 0; });
-      if (!changed) return;
-
-      // Odstraň skeletony pokud jsou real karty
-      if (body.querySelectorAll('.disco-card').length > 0) {
-        qsa('.dr-skel-section', body).forEach(function (el) { el.remove(); });
-      }
-
-      // Přidej card counts po krátké chvilce (aby se karty načetly)
-      clearTimeout(body._drCountTimer);
-      body._drCountTimer = setTimeout(function () {
-        addCardCounts();
-        markFeaturedRow();
-      }, 300);
-    });
-
-    mo.observe(body, { childList: true, subtree: true });
-  }
-
-  /* ── ENHANCE SEARCH RESULTS ─────────────────────────────── */
-  function setupSearchEnhancement() {
-    // Override onSearchInput pro přidání animace
-    var origSearch = window.onSearchInput;
-    if (origSearch && !origSearch._drPatched) {
-      window.onSearchInput = function (val) {
-        var body = qs('#discoBody');
-        if (body && val.length > 0) {
-          body.classList.add('dr-filtering');
-          setTimeout(function () { body.classList.remove('dr-filtering'); }, 300);
-        }
-        return origSearch.apply(this, arguments);
-      };
-      window.onSearchInput._drPatched = true;
-    }
-  }
-
-  /* ── HERO HIGH-RES BACKDROP UPGRADE ─────────────────────── */
+  /* ── HERO IMAGE UPGRADE NA HIGH-RES ───────────────────────────────── */
   function upgradeHeroImage() {
-    var body = qs('#discoBody');
-    if (!body) return;
-
-    body.addEventListener('DOMNodeInserted', function onInsert(e) {
-      if (!e.target || !e.target.classList) return;
-      if (!e.target.classList.contains('disco-hero')) return;
-
-      var img = e.target.querySelector('.disco-hero-img');
-      if (!img || !img.src) return;
-
-      // Pokud je src w780, upgradni na w1280
-      var upgraded = img.src.replace('/w780/', '/w1280/').replace('/w500/', '/w1280/');
-      if (upgraded !== img.src) {
-        var hires = new Image();
-        hires.onload = function () { img.src = upgraded; };
-        hires.src = upgraded;
+    document.querySelectorAll('.disco-hero-img').forEach(function (img) {
+      if (img._drHiRes || !img.src) return;
+      img._drHiRes = true;
+      var hi = img.src.replace('/w780/', '/w1280/').replace('/w500/', '/w1280/').replace('/w342/', '/w780/');
+      if (hi !== img.src) {
+        var tmp = new Image();
+        tmp.onload = function () { img.src = hi; };
+        tmp.src = hi;
       }
     });
   }
 
-  /* ── DISCO NAV SCROLL INTO VIEW ─────────────────────────── */
-  function setupNavAutoScroll() {
-    var nav = qs('#discoNav');
-    if (!nav) return;
+  /* ── SCROLL HINT ────────────────────────────────────────────────────── */
+  function addScrollHint() {
+    var hero = document.querySelector('#discoBody .disco-hero');
+    if (!hero || hero.querySelector('.disco-scroll-hint')) return;
+    var hint = document.createElement('div');
+    hint.className = 'disco-scroll-hint';
+    hint.style.cssText = 'position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:5px;color:rgba(255,255,255,0.3);font-family:var(--dr-font-b,-apple-system,sans-serif);font-size:0.52rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;pointer-events:auto;cursor:pointer;animation:dr-bounce 2.5s ease-in-out infinite;';
+    hint.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M4 6l4 4 4-4"/></svg><span>Scroll</span>';
+    hint.onclick = function () {
+      var body = document.getElementById('discoBody');
+      if (body) body.scrollBy({ top: 300, behavior: 'smooth' });
+    };
+    hero.appendChild(hint);
 
-    nav.addEventListener('click', function (e) {
-      var item = e.target.closest('.disco-nav-item');
-      if (!item) return;
-      setTimeout(function () {
-        item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      }, 50);
-    });
+    // Skryj po scrollu
+    var body = document.getElementById('discoBody');
+    if (body) {
+      body.addEventListener('scroll', function () {
+        hint.style.opacity = body.scrollTop > 30 ? '0' : '';
+      }, { passive: true, once: false });
+    }
   }
 
-  /* ── ROW SCROLL: PŘIDAT FADE MASKU DYNAMICKY ───────────── */
-  function updateRowScrollMasks() {
-    qsa('.disco-row-scroll').forEach(function (scroll) {
-      if (scroll._drMaskSet) return;
-      scroll._drMaskSet = true;
-
-      scroll.addEventListener('scroll', function () {
-        var atStart = scroll.scrollLeft < 16;
-        var atEnd   = scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 16;
-
-        var maskLeft   = atStart ? 'transparent 0%, black 0%'        : 'transparent 0%, black 20px';
-        var maskRight  = atEnd   ? 'black calc(100%)'                 : 'black calc(100% - 60px), transparent 100%';
-
-        scroll.style.webkitMaskImage = 'linear-gradient(to right, ' + maskLeft + ', ' + maskRight + ')';
-        scroll.style.maskImage       = 'linear-gradient(to right, ' + maskLeft + ', ' + maskRight + ')';
-      }, { passive: true });
-    });
+  /* ── BACK TO TOP ──────────────────────────────────────────────────── */
+  function setupBackTop() {
+    var overlay = document.getElementById('universeOverlay');
+    if (!overlay) return;
+    var btn = document.getElementById('dr-back-top');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = 'dr-back-top';
+      btn.title = 'Zpět nahoru';
+      btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="14" height="14"><path d="M4 10l4-4 4 4"/></svg>';
+      btn.style.cssText = 'position:fixed;bottom:88px;right:22px;z-index:300;width:38px;height:38px;border-radius:50%;background:rgba(8,8,15,0.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:0.5px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transform:translateY(12px) scale(0.8);transition:all 0.28s cubic-bezier(0.34,1.3,0.64,1);pointer-events:none;';
+      btn.onclick = function () {
+        var b = document.getElementById('discoBody');
+        if (b) b.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+      overlay.appendChild(btn);
+    }
+    var body = document.getElementById('discoBody');
+    if (!body) return;
+    body.addEventListener('scroll', function () {
+      var show = body.scrollTop > 320;
+      btn.style.opacity = show ? '1' : '0';
+      btn.style.transform = show ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.8)';
+      btn.style.pointerEvents = show ? 'auto' : 'none';
+    }, { passive: true });
   }
 
-  /* ── ATTACH ROW SCROLL MASK OBSERVER ───────────────────── */
-  function setupRowScrollObserver() {
-    var body = qs('#discoBody');
+  /* ── MUTATION OBSERVER — spustit upgrade při každé změně DOM ──────── */
+  function setupObserver() {
+    var body = document.getElementById('discoBody');
     if (!body) return;
 
+    var timer;
     var mo = new MutationObserver(function () {
-      updateRowScrollMasks();
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        upgradeNavIcons();
+        upgradeHeroBtns();
+        upgradeHeroBadge();
+        upgradeCardTypes();
+        addCardCounts();
+        upgradeHeroImage();
+        addScrollHint();
+      }, 80);
     });
     mo.observe(body, { childList: true, subtree: true });
-    updateRowScrollMasks();
+
+    // Observer na nav
+    var nav = document.getElementById('discoNav');
+    if (nav) {
+      var navMo = new MutationObserver(function () {
+        clearTimeout(timer);
+        timer = setTimeout(upgradeNavIcons, 60);
+      });
+      navMo.observe(nav, { childList: true, subtree: true, attributes: true });
+    }
   }
 
-  /* ── MAIN INIT ──────────────────────────────────────────── */
+  /* ── PŘEPSAT INLINE STYLY Z app.js (mf-disco-fx) ────────────────── */
+  function patchInlineStyles() {
+    // Smaž a znovu aplikuj po každém injektu mf-disco-fx
+    var mo = new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        m.addedNodes.forEach(function (n) {
+          if (n.id === 'mf-disco-fx' || n.id === 'mf-disco-fxv3' || n.id === 'mf-fx-engine') {
+            // Přidej override appended za jejich style tag
+            setTimeout(injectOverrideTag, 10);
+          }
+        });
+      });
+    });
+    mo.observe(document.head, { childList: true });
+    injectOverrideTag();
+  }
+
+  function injectOverrideTag() {
+    var old = document.getElementById('dr-override');
+    if (old) old.remove();
+    var s = document.createElement('style');
+    s.id = 'dr-override';
+    s.textContent = [
+      // Nav font override
+      '.disco-nav-item{font-family:"DM Sans",-apple-system,sans-serif!important;font-size:.8rem!important;font-weight:500!important;letter-spacing:0!important;}',
+      // Active nav
+      '.disco-nav-item.active,.disco-nav-item.mf-chip-optimistic{background:rgba(255,255,255,0.1)!important;border-color:rgba(255,255,255,0.18)!important;color:rgba(255,255,255,0.96)!important;font-weight:700!important;box-shadow:none!important;transform:none!important;}',
+      // Row title
+      '.disco-row-title{font-family:"Syne",-apple-system,sans-serif!important;font-size:1.15rem!important;font-weight:800!important;letter-spacing:-.5px!important;line-height:1.2!important;}',
+      // Card
+      '.disco-card{border-radius:16px!important;transition:transform .3s cubic-bezier(.34,1.44,.64,1),box-shadow .3s cubic-bezier(.25,1,.5,1)!important;}',
+      '.disco-card-inner{border-radius:16px!important;}',
+      '.disco-card-img{border-radius:16px!important;}',
+      // Row spacing override mf-disco-fx
+      '.disco-row-header{padding:30px 52px 14px!important;}',
+      '.disco-row-scroll{gap:12px!important;padding-left:52px!important;padding-right:52px!important;padding-bottom:28px!important;}',
+      // Skeleton tiles bigger
+      '.mf-skeleton-tile,.mf-disco-skel-card{width:172px!important;min-width:172px!important;height:258px!important;border-radius:16px!important;}',
+      // Hero btn
+      '.disco-hero-btn.primary{background:#3b8eff!important;color:#fff!important;box-shadow:0 6px 28px rgba(59,142,255,.4)!important;}',
+      '.disco-hero-btn.primary:hover{background:#5aaaff!important;transform:translateY(-2px)!important;box-shadow:0 10px 36px rgba(59,142,255,.55)!important;}',
+      // Card rating gold
+      '.disco-card-rating{color:#e8c050!important;}',
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  /* ── FONT INJECT ──────────────────────────────────────────────────── */
+  function injectFonts() {
+    if (document.getElementById('dr-fonts')) return;
+    var l = document.createElement('link');
+    l.id = 'dr-fonts';
+    l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap';
+    document.head.appendChild(l);
+  }
+
+  /* ── MAIN ─────────────────────────────────────────────────────────── */
   function init() {
     injectFonts();
-    injectStyles();
+    patchInlineStyles();
 
-    // Počkej na universe overlay
-    wait(function () {
-      var overlay = qs('#universeOverlay');
-      return !!overlay;
-    });
+    // Počkej na discoBody
+    var tries = 0;
+    var poll = setInterval(function () {
+      tries++;
+      if (tries > 100) { clearInterval(poll); return; }
+      var body = document.getElementById('discoBody');
+      if (!body) return;
+      clearInterval(poll);
 
-    // Počkej na disco body
-    wait(function () {
-      var body = qs('#discoBody');
-      if (!body) return false;
-
-      setupStickyCategory();
+      setupObserver();
+      setupParallax();
       setupBackTop();
-      setupHeroParallax();
-      setupBodyObserver();
-      setupRowScrollObserver();
-      setupNavAutoScroll();
-      upgradeHeroImage();
 
-      // Počkej až budou k dispozici funkce
+      // Initial run
       setTimeout(function () {
-        patchDiscoFilter();
-        setupSearchEnhancement();
+        upgradeNavIcons();
+        upgradeHeroBtns();
+        upgradeHeroBadge();
+        upgradeCardTypes();
         addCardCounts();
-        markFeaturedRow();
-      }, 800);
+        upgradeHeroImage();
+        addScrollHint();
+      }, 400);
 
-      // Injektuj skeletony ihned
-      injectSkeletons();
-
-      return true;
-    });
+      // Re-run several times to catch app.js renders
+      [800, 1500, 3000].forEach(function (t) {
+        setTimeout(function () {
+          upgradeNavIcons();
+          upgradeHeroBtns();
+          upgradeHeroBadge();
+          upgradeCardTypes();
+          addCardCounts();
+          upgradeHeroImage();
+          injectOverrideTag();
+        }, t);
+      });
+    }, 120);
   }
 
-  ready(function () {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(init, 100); });
+  } else {
     setTimeout(init, 100);
-  });
+  }
 
-  console.log('[MFDiscoverRedesign] v1 načten');
+  console.log('[MFDiscoverRedesign] v2 načten');
 })();
