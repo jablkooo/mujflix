@@ -1,0 +1,943 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   MůjFlix — DISCOVER REDESIGN v1
+   Kompletní přepis sekce Objevování.
+   ─────────────────────────────────────────────────────────────────────
+   Přidat jako POSLEDNÍ <link> v index.html (za styles-apple-tv.css):
+   <link rel="stylesheet" href="styles-discover-redesign.css" />
+   + přidat script: <script src="mujflix-discover-redesign.js"></script>
+═══════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap');
+
+/* ───────────────────────────────────────────────────────────────
+   DESIGN TOKENS
+─────────────────────────────────────────────────────────────── */
+:root {
+  --dr-bg:          #07070f;
+  --dr-surface:     rgba(255,255,255,0.032);
+  --dr-elevated:    rgba(255,255,255,0.058);
+  --dr-border:      rgba(255,255,255,0.065);
+  --dr-border-hi:   rgba(255,255,255,0.13);
+
+  --dr-blue:        #3d8eff;
+  --dr-blue-dim:    rgba(61,142,255,0.14);
+  --dr-blue-glow:   rgba(61,142,255,0.3);
+  --dr-gold:        #e8c46a;
+  --dr-gold-dim:    rgba(232,196,106,0.15);
+
+  --dr-text:        rgba(255,255,255,0.95);
+  --dr-text-sub:    rgba(255,255,255,0.55);
+  --dr-text-muted:  rgba(255,255,255,0.28);
+
+  --dr-font-display: 'Syne', -apple-system, sans-serif;
+  --dr-font-body:    'DM Sans', -apple-system, sans-serif;
+
+  --dr-ease:        cubic-bezier(0.25, 1, 0.5, 1);
+  --dr-spring:      cubic-bezier(0.34, 1.44, 0.64, 1);
+
+  --dr-card-w:      160px;
+  --dr-card-h:      240px;
+  --dr-card-r:      14px;
+  --dr-px:          52px;
+  --dr-header-h:    72px;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   UNIVERSE OVERLAY — celý kontejner
+─────────────────────────────────────────────────────────────── */
+.universe-overlay {
+  background: var(--dr-bg) !important;
+  font-family: var(--dr-font-body) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100dvh !important;
+  overflow: hidden !important;
+}
+
+/* Ambient background gradient */
+.universe-overlay::before {
+  content: '' !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background:
+    radial-gradient(ellipse 70% 55% at 15% -10%, rgba(61,142,255,0.055) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 88% 100%, rgba(120,61,255,0.04) 0%, transparent 60%) !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   HEADER
+─────────────────────────────────────────────────────────────── */
+.disco-header {
+  height: var(--dr-header-h) !important;
+  padding: 0 var(--dr-px) !important;
+  background: rgba(7,7,15,0.88) !important;
+  backdrop-filter: blur(40px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(1.8) !important;
+  border-bottom: 0.5px solid var(--dr-border) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 20px !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  flex-shrink: 0 !important;
+}
+
+.disco-header-left {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 10px !important;
+  flex-shrink: 0 !important;
+}
+
+.disco-logo {
+  font-family: var(--dr-font-display) !important;
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  color: var(--dr-text-muted) !important;
+  letter-spacing: -0.3px !important;
+}
+
+.disco-title {
+  font-family: var(--dr-font-display) !important;
+  font-size: 1.45rem !important;
+  font-weight: 800 !important;
+  color: var(--dr-text) !important;
+  letter-spacing: -0.8px !important;
+  line-height: 1 !important;
+}
+
+.disco-title span {
+  color: var(--dr-blue) !important;
+}
+
+/* Search */
+.uni-search-wrap {
+  flex: 1 !important;
+  max-width: 420px !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.uni-search-icon {
+  position: absolute !important;
+  left: 14px !important;
+  color: var(--dr-text-muted) !important;
+  width: 16px !important;
+  height: 16px !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+.uni-input {
+  width: 100% !important;
+  background: var(--dr-surface) !important;
+  border: 0.5px solid var(--dr-border) !important;
+  border-radius: 24px !important;
+  padding: 10px 40px 10px 40px !important;
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.875rem !important;
+  color: var(--dr-text) !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+  outline: none !important;
+}
+
+.uni-input::placeholder {
+  color: var(--dr-text-muted) !important;
+}
+
+.uni-input:focus {
+  border-color: rgba(61,142,255,0.35) !important;
+  box-shadow: 0 0 0 3px rgba(61,142,255,0.08) !important;
+  background: rgba(255,255,255,0.05) !important;
+}
+
+.uni-clear-btn {
+  position: absolute !important;
+  right: 12px !important;
+  background: none !important;
+  border: none !important;
+  color: var(--dr-text-muted) !important;
+  cursor: pointer !important;
+  font-size: 0.75rem !important;
+  padding: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* AI Recommendation button */
+.disco-header > div:last-child > button:first-child {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 9px 18px !important;
+  border-radius: 20px !important;
+  background: var(--dr-blue-dim) !important;
+  border: 0.5px solid rgba(61,142,255,0.3) !important;
+  color: var(--dr-blue) !important;
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.22s var(--dr-ease) !important;
+  letter-spacing: 0.1px !important;
+  box-shadow: none !important;
+  white-space: nowrap !important;
+}
+
+.disco-header > div:last-child > button:first-child:hover {
+  background: rgba(61,142,255,0.22) !important;
+  border-color: rgba(61,142,255,0.5) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Close button */
+.disco-close {
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: var(--dr-surface) !important;
+  border: 0.5px solid var(--dr-border) !important;
+  color: var(--dr-text-sub) !important;
+  font-size: 1rem !important;
+  cursor: pointer !important;
+  transition: all 0.18s !important;
+  flex-shrink: 0 !important;
+}
+
+.disco-close:hover {
+  background: var(--dr-elevated) !important;
+  color: var(--dr-text) !important;
+  border-color: var(--dr-border-hi) !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   GENRE NAV — horizontální, design z "pásky s kategorii"
+─────────────────────────────────────────────────────────────── */
+.disco-nav {
+  display: flex !important;
+  gap: 6px !important;
+  padding: 14px var(--dr-px) !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  flex-shrink: 0 !important;
+  background: rgba(7,7,15,0.6) !important;
+  border-bottom: 0.5px solid var(--dr-border) !important;
+  position: sticky !important;
+  top: var(--dr-header-h) !important;
+  z-index: 90 !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+}
+
+.disco-nav::-webkit-scrollbar { display: none !important; }
+
+.disco-nav-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 7px 15px !important;
+  border-radius: 20px !important;
+  border: 0.5px solid var(--dr-border) !important;
+  background: transparent !important;
+  color: var(--dr-text-sub) !important;
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  transition: all 0.18s var(--dr-ease) !important;
+  user-select: none !important;
+  overflow: visible !important;
+}
+
+.disco-nav-item::before { display: none !important; }
+
+.disco-nav-item:hover {
+  background: var(--dr-surface) !important;
+  color: var(--dr-text) !important;
+  border-color: var(--dr-border-hi) !important;
+}
+
+.disco-nav-item.active,
+.disco-nav-item.mf-chip-optimistic {
+  background: var(--dr-blue-dim) !important;
+  border-color: rgba(61,142,255,0.35) !important;
+  color: var(--dr-blue) !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   DISCO BODY — scrollovatelný obsah
+─────────────────────────────────────────────────────────────── */
+.disco-body {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 8px 0 100px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255,255,255,0.08) transparent !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.disco-body::-webkit-scrollbar {
+  width: 4px !important;
+}
+.disco-body::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.disco-body::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08) !important;
+  border-radius: 4px !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   HERO SECTION — velká featured karta
+─────────────────────────────────────────────────────────────── */
+.disco-hero {
+  position: relative !important;
+  height: 380px !important;
+  margin: 0 0 8px 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+}
+
+.disco-hero-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 25% !important;
+  display: block !important;
+  transform: scale(1.02) !important;
+  transition: transform 6s ease !important;
+}
+
+.disco-hero:hover .disco-hero-img {
+  transform: scale(1.06) !important;
+}
+
+.disco-hero-grad {
+  position: absolute !important;
+  inset: 0 !important;
+  background:
+    linear-gradient(to top, rgba(7,7,15,0.97) 0%, rgba(7,7,15,0.6) 40%, rgba(7,7,15,0.15) 70%, transparent 100%) !important;
+  z-index: 2 !important;
+}
+
+.disco-hero-content {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  padding: 32px var(--dr-px) !important;
+  z-index: 5 !important;
+}
+
+.disco-hero-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 12px !important;
+}
+
+.disco-hero-badge-type {
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase !important;
+  color: var(--dr-text-sub) !important;
+  background: var(--dr-surface) !important;
+  border: 0.5px solid var(--dr-border-hi) !important;
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.disco-hero-badge-rating {
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  color: var(--dr-gold) !important;
+}
+
+.disco-hero-badge-year {
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.72rem !important;
+  color: var(--dr-text-muted) !important;
+}
+
+.disco-hero-title {
+  font-family: var(--dr-font-display) !important;
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem) !important;
+  font-weight: 800 !important;
+  color: var(--dr-text) !important;
+  letter-spacing: -1px !important;
+  line-height: 1.1 !important;
+  margin-bottom: 10px !important;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.5) !important;
+}
+
+.disco-hero-desc {
+  font-size: 0.875rem !important;
+  color: var(--dr-text-sub) !important;
+  line-height: 1.6 !important;
+  max-width: 560px !important;
+  margin-bottom: 20px !important;
+}
+
+.disco-hero-btns {
+  display: flex !important;
+  gap: 10px !important;
+  align-items: center !important;
+}
+
+.disco-hero-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 11px 24px !important;
+  border-radius: 12px !important;
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  border: none !important;
+  transition: all 0.22s var(--dr-ease) !important;
+  white-space: nowrap !important;
+}
+
+.disco-hero-btn.primary {
+  background: var(--dr-blue) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 20px rgba(61,142,255,0.35) !important;
+}
+
+.disco-hero-btn.primary:hover {
+  background: #5aa3ff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 8px 28px rgba(61,142,255,0.5) !important;
+}
+
+.disco-hero-btn.secondary {
+  background: rgba(255,255,255,0.1) !important;
+  color: var(--dr-text) !important;
+  border: 0.5px solid var(--dr-border-hi) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.disco-hero-btn.secondary:hover {
+  background: rgba(255,255,255,0.16) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   ROW STRUCTURE
+─────────────────────────────────────────────────────────────── */
+.disco-row {
+  margin-bottom: 0 !important;
+}
+
+.disco-row-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 22px var(--dr-px) 12px !important;
+  gap: 16px !important;
+}
+
+.disco-row-title {
+  font-family: var(--dr-font-display) !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  color: var(--dr-text) !important;
+  letter-spacing: -0.4px !important;
+  line-height: 1.2 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.drt-tag {
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.55rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  color: var(--dr-blue) !important;
+  background: var(--dr-blue-dim) !important;
+  border: 0.5px solid rgba(61,142,255,0.25) !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  vertical-align: middle !important;
+}
+
+.disco-row-nav {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  flex-shrink: 0 !important;
+}
+
+.disco-row-nav-btn {
+  width: 30px !important;
+  height: 30px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: var(--dr-surface) !important;
+  border: 0.5px solid var(--dr-border) !important;
+  color: var(--dr-text-sub) !important;
+  cursor: pointer !important;
+  transition: all 0.18s !important;
+}
+
+.disco-row-nav-btn:hover {
+  background: var(--dr-elevated) !important;
+  color: var(--dr-text) !important;
+  border-color: var(--dr-border-hi) !important;
+}
+
+.disco-row-nav-btn svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.disco-row-scroll {
+  display: flex !important;
+  gap: 10px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  padding: 4px var(--dr-px) 20px !important;
+  scroll-behavior: smooth !important;
+}
+
+.disco-row-scroll::-webkit-scrollbar { display: none !important; }
+
+/* ───────────────────────────────────────────────────────────────
+   CARDS — poster karty
+─────────────────────────────────────────────────────────────── */
+.disco-card {
+  position: relative !important;
+  width: var(--dr-card-w) !important;
+  min-width: var(--dr-card-w) !important;
+  flex-shrink: 0 !important;
+  border-radius: var(--dr-card-r) !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+  background: var(--dr-surface) !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: transform 0.28s var(--dr-spring), box-shadow 0.28s var(--dr-ease) !important;
+  transform-origin: bottom center !important;
+}
+
+.disco-card:hover {
+  transform: translateY(-10px) scale(1.04) !important;
+  box-shadow:
+    0 28px 60px rgba(0,0,0,0.85),
+    0 0 0 0.5px rgba(255,255,255,0.12) !important;
+  z-index: 5 !important;
+}
+
+.disco-card-inner {
+  width: var(--dr-card-w) !important;
+  height: var(--dr-card-h) !important;
+  border-radius: var(--dr-card-r) !important;
+  overflow: hidden !important;
+}
+
+.disco-card-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: var(--dr-card-r) !important;
+  transition: filter 0.3s ease !important;
+}
+
+.disco-card:hover .disco-card-img {
+  filter: brightness(0.75) !important;
+}
+
+/* Gradient overlay na kartě */
+.disco-card-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(to top, rgba(7,7,15,0.96) 0%, rgba(7,7,15,0.3) 45%, transparent 70%) !important;
+  border-radius: var(--dr-card-r) !important;
+  opacity: 0.7 !important;
+  transition: opacity 0.28s ease !important;
+}
+
+.disco-card:hover .disco-card-overlay {
+  opacity: 1 !important;
+}
+
+.disco-card-glow { display: none !important; }
+
+/* Info dole na kartě */
+.disco-card-info {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  padding: 12px 11px !important;
+  z-index: 3 !important;
+  transform: translateY(4px) !important;
+  opacity: 0 !important;
+  transition: all 0.25s var(--dr-ease) !important;
+}
+
+.disco-card:hover .disco-card-info {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+}
+
+.disco-card-name {
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  color: var(--dr-text) !important;
+  letter-spacing: -0.15px !important;
+  line-height: 1.25 !important;
+  margin-bottom: 5px !important;
+  overflow: hidden !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.disco-card-meta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+}
+
+.disco-card-type {
+  font-size: 0.6rem !important;
+  font-weight: 600 !important;
+  color: var(--dr-text-muted) !important;
+  background: rgba(255,255,255,0.07) !important;
+  border: 0.5px solid rgba(255,255,255,0.1) !important;
+  padding: 2px 6px !important;
+  border-radius: 5px !important;
+}
+
+.disco-card-rating {
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  color: var(--dr-gold) !important;
+}
+
+/* Play button na kartě */
+.disco-play-btn {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) scale(0.7) !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,0.95) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0 !important;
+  transition: all 0.25s var(--dr-spring) !important;
+  z-index: 4 !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+}
+
+.disco-play-btn svg {
+  width: 14px !important;
+  height: 14px !important;
+  fill: #07070f !important;
+  margin-left: 2px !important;
+}
+
+.disco-card:hover .disco-play-btn {
+  opacity: 1 !important;
+  transform: translate(-50%, -50%) scale(1) !important;
+}
+
+/* Finder button (vpravo dole) */
+.disco-card-finder-btn {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  background: rgba(7,7,15,0.7) !important;
+  border: 0.5px solid rgba(255,255,255,0.15) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0 !important;
+  transform: scale(0.8) !important;
+  transition: all 0.2s var(--dr-spring) !important;
+  z-index: 5 !important;
+  backdrop-filter: blur(8px) !important;
+  color: rgba(255,255,255,0.7) !important;
+  cursor: pointer !important;
+}
+
+.disco-card:hover .disco-card-finder-btn {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
+.disco-card-finder-btn:hover {
+  background: rgba(61,142,255,0.3) !important;
+  border-color: rgba(61,142,255,0.5) !important;
+  color: #fff !important;
+}
+
+/* AI match badge */
+.ai-match-badge {
+  position: absolute !important;
+  top: 10px !important;
+  left: 10px !important;
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.55rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.3px !important;
+  color: var(--dr-blue) !important;
+  background: rgba(7,7,15,0.82) !important;
+  border: 0.5px solid rgba(61,142,255,0.3) !important;
+  padding: 3px 8px !important;
+  border-radius: 20px !important;
+  backdrop-filter: blur(8px) !important;
+  z-index: 5 !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   LOADING STATE
+─────────────────────────────────────────────────────────────── */
+.disco-loading {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 80px 20px !important;
+  gap: 16px !important;
+  color: var(--dr-text-muted) !important;
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.875rem !important;
+}
+
+.disco-spinner {
+  width: 28px !important;
+  height: 28px !important;
+  border: 2px solid rgba(255,255,255,0.06) !important;
+  border-top-color: var(--dr-blue) !important;
+  border-radius: 50% !important;
+  animation: dr-spin 0.75s linear infinite !important;
+}
+
+@keyframes dr-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   SCROLL HINT
+─────────────────────────────────────────────────────────────── */
+.disco-scroll-hint {
+  position: absolute !important;
+  bottom: 24px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  cursor: pointer !important;
+  opacity: 0.35 !important;
+  transition: opacity 0.2s !important;
+  z-index: 10 !important;
+}
+
+.disco-scroll-hint:hover { opacity: 0.7 !important; }
+
+.disco-scroll-hint-icon {
+  width: 30px !important;
+  height: 30px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  border: 0.5px solid var(--dr-border-hi) !important;
+  color: var(--dr-text-muted) !important;
+  animation: dr-bounce 2s ease-in-out infinite !important;
+}
+
+.disco-scroll-hint-icon svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.disco-scroll-hint-label {
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.58rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  color: var(--dr-text-muted) !important;
+}
+
+@keyframes dr-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   "PRO TEBE" AI ROW — zvláštní highlight
+─────────────────────────────────────────────────────────────── */
+.disco-row:has(.personalisedRowScroll) .disco-row-header,
+.disco-row:has(#personalisedRowScroll) .disco-row-header {
+  padding-top: 28px !important;
+}
+
+.disco-row:has(.personalisedRowScroll) .disco-row-title,
+.disco-row:has(#personalisedRowScroll) .disco-row-title {
+  font-size: 1.15rem !important;
+}
+
+/* "Nová doporučení" tlačítko */
+.disco-row-nav > button[onclick*="refreshPersonalisedRow"] {
+  font-family: var(--dr-font-body) !important;
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.3px !important;
+  color: var(--dr-blue) !important;
+  background: var(--dr-blue-dim) !important;
+  border: 0.5px solid rgba(61,142,255,0.25) !important;
+  border-radius: 20px !important;
+  padding: 6px 14px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  text-transform: none !important;
+}
+
+.disco-row-nav > button[onclick*="refreshPersonalisedRow"]:hover {
+  background: rgba(61,142,255,0.22) !important;
+  border-color: rgba(61,142,255,0.4) !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   AI MATCH CARDS — specialní styl pro personalizované výsledky
+─────────────────────────────────────────────────────────────── */
+.ai-match-card.disco-card:hover {
+  transform: translateY(-12px) scale(1.05) !important;
+  box-shadow:
+    0 30px 65px rgba(0,0,0,0.9),
+    0 0 0 0.5px rgba(61,142,255,0.2),
+    0 0 30px rgba(61,142,255,0.06) !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   SEARCH RESULTS — čistý grid
+─────────────────────────────────────────────────────────────── */
+#searchResults {
+  padding: 0 var(--dr-px) !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   RESPONSIVE
+─────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  :root {
+    --dr-px: 24px;
+    --dr-card-w: 140px;
+    --dr-card-h: 210px;
+    --dr-card-r: 12px;
+  }
+  .disco-hero { height: 300px !important; }
+  .disco-hero-title { font-size: 1.6rem !important; }
+  .disco-title { font-size: 1.2rem !important; }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --dr-px: 16px;
+    --dr-card-w: 120px;
+    --dr-card-h: 180px;
+    --dr-card-r: 10px;
+    --dr-header-h: 60px;
+  }
+  .disco-hero { height: 240px !important; }
+  .disco-hero-desc { display: none !important; }
+  .disco-title { display: none !important; }
+}
+
+/* ───────────────────────────────────────────────────────────────
+   ENTRANCE ANIMATIONS
+─────────────────────────────────────────────────────────────── */
+@keyframes dr-enter-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dr-enter-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.disco-row {
+  animation: dr-enter-up 0.3s var(--dr-ease) both !important;
+}
+
+.disco-card.mf-card-enter {
+  animation: dr-enter-up 0.22s var(--dr-ease) both !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   KEYBOARD FOCUS
+─────────────────────────────────────────────────────────────── */
+.mf-disco-kb-focus {
+  outline: none !important;
+  transform: translateY(-10px) scale(1.04) !important;
+  box-shadow:
+    0 28px 60px rgba(0,0,0,0.85),
+    0 0 0 2px rgba(255,255,255,0.8) !important;
+  z-index: 10 !important;
+}
+
+/* ───────────────────────────────────────────────────────────────
+   SKELETON SCREENS
+─────────────────────────────────────────────────────────────── */
+@keyframes dr-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.mf-disco-skel {
+  background:
+    linear-gradient(
+      105deg,
+      rgba(255,255,255,0.03) 20%,
+      rgba(255,255,255,0.07) 48%,
+      rgba(255,255,255,0.12) 50%,
+      rgba(255,255,255,0.07) 52%,
+      rgba(255,255,255,0.03) 80%
+    ) !important;
+  background-size: 600px 100% !important;
+  animation: dr-shimmer 1.6s ease-in-out infinite !important;
+  border-radius: var(--dr-card-r) !important;
+}
+
+.mf-disco-skel-card { width: var(--dr-card-w) !important; height: var(--dr-card-h) !important; }
