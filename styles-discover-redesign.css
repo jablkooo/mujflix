@@ -48,10 +48,14 @@
 .universe-overlay {
   background: var(--dr-bg) !important;
   font-family: var(--dr-font-body) !important;
-  display: flex !important;
   flex-direction: column !important;
   height: 100dvh !important;
   overflow: hidden !important;
+  /* display NEPŘEPISUJEME — řídí app.js třídou .open */
+}
+
+.universe-overlay.open {
+  display: flex !important;
 }
 
 /* Ambient background gradient */
