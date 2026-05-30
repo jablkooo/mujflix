@@ -1,120 +1,113 @@
-/* ═══════════════════════════════════════════════════════════════════════
-   MůjFlix — DISCOVER TOTAL REDESIGN v2
-   Kompletně přepisuje sekci Objevování.
-   Přidat JAKO POSLEDNÍ stylesheet v index.html.
-═══════════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   MujFlix — DISCOVER TOTAL REDESIGN v4
+   Uplne jiny vizualni jazyk nez originál.
+═══════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap');
 
-/* ── FONTY ── */
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
-
-/* ── DESIGN TOKENS ── */
 :root {
-  --dr-bg:           #08080f;
-  --dr-bg2:          rgba(255,255,255,0.028);
-  --dr-bg3:          rgba(255,255,255,0.052);
-  --dr-border:       rgba(255,255,255,0.062);
-  --dr-border-hi:    rgba(255,255,255,0.12);
-  --dr-blue:         #3b8eff;
-  --dr-blue-dim:     rgba(59,142,255,0.13);
-  --dr-gold:         #e8c050;
-  --dr-text:         rgba(255,255,255,0.96);
-  --dr-sub:          rgba(255,255,255,0.52);
-  --dr-muted:        rgba(255,255,255,0.26);
-  --dr-font-d:       'Syne', -apple-system, sans-serif;
-  --dr-font-b:       'DM Sans', -apple-system, sans-serif;
-  --dr-ease:         cubic-bezier(0.25,1,0.5,1);
-  --dr-spring:       cubic-bezier(0.34,1.44,0.64,1);
-  --dr-cw:           172px;   /* card width */
-  --dr-ch:           258px;   /* card height */
-  --dr-cr:           16px;    /* card radius */
-  --dr-px:           52px;    /* horizontal padding */
-  --dr-hh:           74px;    /* header height */
-  --dr-nh:           52px;    /* nav height */
+  --dr-bg:     #060610;
+  --dr-s1:     rgba(255,255,255,0.03);
+  --dr-s2:     rgba(255,255,255,0.055);
+  --dr-brd:    rgba(255,255,255,0.07);
+  --dr-brd2:   rgba(255,255,255,0.13);
+  --dr-blue:   #4a9eff;
+  --dr-bdim:   rgba(74,158,255,0.14);
+  --dr-gold:   #f0c94a;
+  --dr-txt:    rgba(255,255,255,0.97);
+  --dr-sub:    rgba(255,255,255,0.52);
+  --dr-muted:  rgba(255,255,255,0.25);
+  --dr-fd:     'Syne', -apple-system, sans-serif;
+  --dr-fb:     'DM Sans', -apple-system, sans-serif;
+  --dr-ease:   cubic-bezier(0.25,1,0.5,1);
+  --dr-spring: cubic-bezier(0.34,1.44,0.64,1);
+
+  /* Karta — landscape 16:10 format */
+  --cw: 220px;
+  --ch: 138px;
+  --cr: 12px;
+  --px: 52px;
+  --hh: 70px;
 }
 
-/* ═══════════════════════════════════════════════════════════════
+/* ═══════════════════════════════
    OVERLAY
-═══════════════════════════════════════════════════════════════ */
+═══════════════════════════════ */
 .universe-overlay {
   background: var(--dr-bg) !important;
-  font-family: var(--dr-font-b) !important;
+  font-family: var(--dr-fb) !important;
   flex-direction: column !important;
   height: 100dvh !important;
   overflow: hidden !important;
 }
-/* KRITICKÉ — display řídí app.js přes .open */
 .universe-overlay.open { display: flex !important; }
 
-/* Halo gradient */
-.universe-overlay.open::after {
+/* Noise texture + gradient bg */
+.universe-overlay.open::before {
   content: '' !important;
   position: fixed !important;
   inset: 0 !important;
   background:
-    radial-gradient(ellipse 60% 40% at 20% 0%,  rgba(59,142,255,0.055) 0%, transparent 55%),
-    radial-gradient(ellipse 45% 50% at 90% 100%, rgba(120,59,255,0.038) 0%, transparent 55%) !important;
+    radial-gradient(ellipse 70% 50% at 10% -5%,  rgba(74,158,255,0.065) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 92% 105%, rgba(160,74,255,0.045) 0%, transparent 55%) !important;
   pointer-events: none !important;
   z-index: 0 !important;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   HEADER
-═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════
+   HEADER — kompaktni, cistý
+═══════════════════════════════ */
 .universe-overlay .disco-header {
   position: sticky !important;
   top: 0 !important;
-  z-index: 100 !important;
-  height: var(--dr-hh) !important;
-  padding: 0 var(--dr-px) !important;
+  z-index: 200 !important;
+  height: var(--hh) !important;
+  padding: 0 var(--px) !important;
   display: flex !important;
   align-items: center !important;
-  gap: 18px !important;
-  background: rgba(8,8,15,0.9) !important;
-  backdrop-filter: blur(48px) saturate(1.9) !important;
-  -webkit-backdrop-filter: blur(48px) saturate(1.9) !important;
-  border-bottom: 0.5px solid var(--dr-border) !important;
+  gap: 20px !important;
+  background: rgba(6,6,16,0.92) !important;
+  backdrop-filter: blur(52px) saturate(2) !important;
+  -webkit-backdrop-filter: blur(52px) saturate(2) !important;
+  border-bottom: 0.5px solid var(--dr-brd) !important;
   flex-shrink: 0 !important;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.6) !important;
 }
 
-/* Logo + title wrap */
 .universe-overlay .disco-header-left {
   display: flex !important;
   align-items: baseline !important;
-  gap: 10px !important;
+  gap: 8px !important;
   flex-shrink: 0 !important;
 }
 
 .universe-overlay .disco-logo {
-  font-family: var(--dr-font-d) !important;
-  font-size: 0.78rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 3px !important;
+  font-family: var(--dr-fd) !important;
+  font-size: 0.65rem !important;
+  font-weight: 900 !important;
+  letter-spacing: 4px !important;
   text-transform: uppercase !important;
   color: var(--dr-muted) !important;
 }
 
 .universe-overlay .disco-title {
-  font-family: var(--dr-font-d) !important;
-  font-size: 1.55rem !important;
-  font-weight: 800 !important;
-  letter-spacing: -1px !important;
+  font-family: var(--dr-fd) !important;
+  font-size: 1.6rem !important;
+  font-weight: 900 !important;
+  letter-spacing: -1.2px !important;
+  color: var(--dr-txt) !important;
   line-height: 1 !important;
-  color: var(--dr-text) !important;
 }
 
-/* Search */
 .universe-overlay .uni-search-wrap {
   flex: 1 !important;
-  max-width: 440px !important;
+  max-width: 460px !important;
   position: relative !important;
-  display: flex !important;
-  align-items: center !important;
 }
 
 .universe-overlay .uni-search-icon {
   position: absolute !important;
   left: 15px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
   width: 15px !important;
   height: 15px !important;
   color: var(--dr-muted) !important;
@@ -123,26 +116,28 @@
 
 .universe-overlay .uni-input {
   width: 100% !important;
-  background: var(--dr-bg2) !important;
-  border: 0.5px solid var(--dr-border) !important;
-  border-radius: 26px !important;
-  padding: 11px 42px !important;
-  font-family: var(--dr-font-b) !important;
+  background: var(--dr-s1) !important;
+  border: 0.5px solid var(--dr-brd) !important;
+  border-radius: 28px !important;
+  padding: 11px 44px !important;
+  font-family: var(--dr-fb) !important;
   font-size: 0.875rem !important;
-  color: var(--dr-text) !important;
+  color: var(--dr-txt) !important;
   outline: none !important;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s !important;
+  transition: all 0.2s !important;
 }
 .universe-overlay .uni-input::placeholder { color: var(--dr-muted) !important; }
 .universe-overlay .uni-input:focus {
-  border-color: rgba(59,142,255,0.4) !important;
-  background: rgba(255,255,255,0.044) !important;
-  box-shadow: 0 0 0 3px rgba(59,142,255,0.07) !important;
+  border-color: rgba(74,158,255,0.42) !important;
+  background: var(--dr-s2) !important;
+  box-shadow: 0 0 0 3px rgba(74,158,255,0.08) !important;
 }
 
 .universe-overlay .uni-clear-btn {
   position: absolute !important;
   right: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
   background: none !important;
   border: none !important;
   color: var(--dr-muted) !important;
@@ -151,7 +146,6 @@
   display: flex !important;
 }
 
-/* Header right side */
 .universe-overlay .disco-header > div:last-child {
   display: flex !important;
   align-items: center !important;
@@ -166,25 +160,23 @@
   align-items: center !important;
   gap: 7px !important;
   padding: 9px 20px !important;
-  border-radius: 22px !important;
-  background: var(--dr-blue-dim) !important;
-  border: 0.5px solid rgba(59,142,255,0.28) !important;
+  border-radius: 24px !important;
+  background: var(--dr-bdim) !important;
+  border: 0.5px solid rgba(74,158,255,0.28) !important;
   color: var(--dr-blue) !important;
-  font-family: var(--dr-font-b) !important;
-  font-size: 0.8rem !important;
+  font-family: var(--dr-fb) !important;
+  font-size: 0.78rem !important;
   font-weight: 600 !important;
   cursor: pointer !important;
   transition: all 0.22s var(--dr-ease) !important;
   white-space: nowrap !important;
-  letter-spacing: 0.1px !important;
 }
 .universe-overlay .disco-header > div:last-child > button:first-child:hover {
-  background: rgba(59,142,255,0.22) !important;
-  border-color: rgba(59,142,255,0.48) !important;
+  background: rgba(74,158,255,0.24) !important;
+  border-color: rgba(74,158,255,0.5) !important;
   transform: translateY(-1px) !important;
 }
 
-/* Close */
 .universe-overlay .disco-close {
   width: 36px !important;
   height: 36px !important;
@@ -192,8 +184,8 @@
   align-items: center !important;
   justify-content: center !important;
   border-radius: 50% !important;
-  background: var(--dr-bg2) !important;
-  border: 0.5px solid var(--dr-border) !important;
+  background: var(--dr-s1) !important;
+  border: 0.5px solid var(--dr-brd) !important;
   color: var(--dr-sub) !important;
   cursor: pointer !important;
   transition: all 0.18s !important;
@@ -201,133 +193,129 @@
   font-size: 1rem !important;
 }
 .universe-overlay .disco-close:hover {
-  background: var(--dr-bg3) !important;
-  color: var(--dr-text) !important;
-  border-color: var(--dr-border-hi) !important;
+  background: var(--dr-s2) !important;
+  color: var(--dr-txt) !important;
+  border-color: var(--dr-brd2) !important;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   GENRE NAV
-═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════
+   GENRE NAV — pill chips
+═══════════════════════════════ */
 #discoNav,
 .universe-overlay .disco-nav {
   display: flex !important;
   align-items: center !important;
   gap: 5px !important;
-  padding: 0 var(--dr-px) !important;
-  height: var(--dr-nh) !important;
+  padding: 0 var(--px) !important;
+  height: 50px !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   scrollbar-width: none !important;
   flex-shrink: 0 !important;
-  background: rgba(8,8,15,0.7) !important;
-  border-bottom: 0.5px solid var(--dr-border) !important;
+  background: rgba(6,6,16,0.75) !important;
+  border-bottom: 0.5px solid var(--dr-brd) !important;
   position: sticky !important;
-  top: var(--dr-hh) !important;
-  z-index: 90 !important;
-  backdrop-filter: blur(28px) !important;
-  -webkit-backdrop-filter: blur(28px) !important;
+  top: var(--hh) !important;
+  z-index: 100 !important;
+  backdrop-filter: blur(32px) !important;
+  -webkit-backdrop-filter: blur(32px) !important;
 }
 #discoNav::-webkit-scrollbar,
 .universe-overlay .disco-nav::-webkit-scrollbar { display: none !important; }
 
-/* Nav items — clean pill style */
 .universe-overlay .disco-nav-item,
 #discoNav .disco-nav-item {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
-  padding: 7px 16px !important;
-  border-radius: 22px !important;
+  gap: 5px !important;
+  padding: 6px 15px !important;
+  border-radius: 24px !important;
   border: 0.5px solid transparent !important;
   background: transparent !important;
   color: var(--dr-sub) !important;
-  font-family: var(--dr-font-b) !important;
-  font-size: 0.8rem !important;
+  font-family: var(--dr-fb) !important;
+  font-size: 0.78rem !important;
   font-weight: 500 !important;
   cursor: pointer !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
-  transition: all 0.18s var(--dr-ease) !important;
+  transition: all 0.16s var(--dr-ease) !important;
   user-select: none !important;
-  letter-spacing: 0 !important;
-  /* override inline styles from app.js */
-  transform: none !important;
 }
 .universe-overlay .disco-nav-item::before { display: none !important; }
-.universe-overlay .disco-nav-item:hover {
-  background: var(--dr-bg2) !important;
-  border-color: var(--dr-border) !important;
-  color: var(--dr-text) !important;
+
+.universe-overlay .disco-nav-item:hover,
+#discoNav .disco-nav-item:hover {
+  background: var(--dr-s2) !important;
+  border-color: var(--dr-brd) !important;
+  color: var(--dr-txt) !important;
 }
 
-/* ACTIVE — přepsat mf-disco-fx a inline style */
 .universe-overlay .disco-nav-item.active,
 .universe-overlay .disco-nav-item.mf-chip-optimistic,
 #discoNav .disco-nav-item.active,
 #discoNav .disco-nav-item.mf-chip-optimistic {
   background: rgba(255,255,255,0.1) !important;
-  border-color: rgba(255,255,255,0.18) !important;
-  color: var(--dr-text) !important;
+  border-color: rgba(255,255,255,0.2) !important;
+  color: var(--dr-txt) !important;
   font-weight: 700 !important;
   box-shadow: none !important;
   transform: none !important;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   DISCO BODY
-═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════
+   BODY
+═══════════════════════════════ */
 #discoBody,
 .universe-overlay .disco-body {
   flex: 1 1 auto !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   scrollbar-width: thin !important;
-  scrollbar-color: rgba(255,255,255,0.07) transparent !important;
+  scrollbar-color: rgba(255,255,255,0.06) transparent !important;
   padding-bottom: 100px !important;
   position: relative !important;
   z-index: 1 !important;
 }
 #discoBody::-webkit-scrollbar { width: 3px !important; }
 #discoBody::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.07) !important;
+  background: rgba(255,255,255,0.06) !important;
   border-radius: 3px !important;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   HERO
-═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════
+   HERO — velky, filmovy
+═══════════════════════════════ */
 .universe-overlay .disco-hero {
   position: relative !important;
-  height: 440px !important;
+  height: 480px !important;
   overflow: hidden !important;
   cursor: pointer !important;
-  margin-bottom: 0 !important;
-  display: block !important;
 }
 
 .universe-overlay .disco-hero-img {
+  position: absolute !important;
+  inset: -10% 0 !important;
   width: 100% !important;
-  height: 115% !important;
+  height: 120% !important;
   object-fit: cover !important;
-  object-position: center 20% !important;
+  object-position: center 22% !important;
   display: block !important;
-  transition: transform 7s ease !important;
-  transform: scale(1.04) translateY(0) !important;
+  transition: transform 8s ease !important;
+  transform: scale(1.04) !important;
+  filter: saturate(1.15) !important;
 }
 .universe-overlay .disco-hero:hover .disco-hero-img {
-  transform: scale(1.08) translateY(-8px) !important;
+  transform: scale(1.09) translateY(-10px) !important;
 }
 
+/* Gradient — silnejsi, dramatictejsi */
 .universe-overlay .disco-hero-grad {
   position: absolute !important;
   inset: 0 !important;
   background:
-    linear-gradient(to top,
-      rgba(8,8,15,1.0)  0%,
-      rgba(8,8,15,0.75) 35%,
-      rgba(8,8,15,0.25) 60%,
-      transparent       85%) !important;
+    linear-gradient(to right, rgba(6,6,16,0.95) 0%, rgba(6,6,16,0.5) 50%, transparent 100%),
+    linear-gradient(to top,   rgba(6,6,16,1.0)  0%, rgba(6,6,16,0.5) 35%, transparent 70%) !important;
   z-index: 2 !important;
 }
 
@@ -335,8 +323,8 @@
   position: absolute !important;
   bottom: 0 !important;
   left: 0 !important;
-  right: 0 !important;
-  padding: 40px var(--dr-px) !important;
+  right: 55% !important;
+  padding: 44px var(--px) !important;
   z-index: 5 !important;
 }
 
@@ -344,51 +332,59 @@
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
-  margin-bottom: 14px !important;
+  margin-bottom: 16px !important;
+  flex-wrap: wrap !important;
 }
 
 .universe-overlay .disco-hero-badge-type {
-  font-family: var(--dr-font-b) !important;
-  font-size: 0.62rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 1.4px !important;
+  font-family: var(--dr-fb) !important;
+  font-size: 0.6rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.8px !important;
   text-transform: uppercase !important;
   color: var(--dr-sub) !important;
   background: rgba(255,255,255,0.07) !important;
-  border: 0.5px solid rgba(255,255,255,0.14) !important;
-  padding: 4px 11px !important;
+  border: 0.5px solid rgba(255,255,255,0.15) !important;
+  padding: 4px 12px !important;
   border-radius: 20px !important;
   backdrop-filter: blur(8px) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
 }
 
 .universe-overlay .disco-hero-badge-rating {
-  font-size: 0.75rem !important;
-  font-weight: 700 !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
   color: var(--dr-gold) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
 }
 
 .universe-overlay .disco-hero-badge-year {
   font-size: 0.72rem !important;
   color: var(--dr-muted) !important;
+  font-weight: 500 !important;
 }
 
 .universe-overlay .disco-hero-title {
-  font-family: var(--dr-font-d) !important;
-  font-size: clamp(2rem, 4.5vw, 3.2rem) !important;
-  font-weight: 800 !important;
-  color: var(--dr-text) !important;
-  letter-spacing: -1.5px !important;
-  line-height: 1.05 !important;
-  margin-bottom: 12px !important;
-  text-shadow: 0 2px 30px rgba(0,0,0,0.5) !important;
+  font-family: var(--dr-fd) !important;
+  font-size: clamp(2.2rem, 5vw, 3.6rem) !important;
+  font-weight: 900 !important;
+  color: var(--dr-txt) !important;
+  letter-spacing: -2px !important;
+  line-height: 1.0 !important;
+  margin-bottom: 14px !important;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.6) !important;
 }
 
 .universe-overlay .disco-hero-desc {
   font-size: 0.875rem !important;
   color: var(--dr-sub) !important;
-  line-height: 1.65 !important;
-  max-width: 520px !important;
-  margin-bottom: 24px !important;
+  line-height: 1.7 !important;
+  max-width: 480px !important;
+  margin-bottom: 26px !important;
   font-weight: 400 !important;
 }
 
@@ -402,33 +398,30 @@
   display: inline-flex !important;
   align-items: center !important;
   gap: 8px !important;
-  padding: 13px 28px !important;
+  padding: 14px 30px !important;
   border-radius: 14px !important;
-  font-family: var(--dr-font-b) !important;
+  font-family: var(--dr-fb) !important;
   font-size: 0.9rem !important;
   font-weight: 700 !important;
   cursor: pointer !important;
   border: none !important;
   transition: all 0.22s var(--dr-ease) !important;
-  white-space: nowrap !important;
   letter-spacing: -0.1px !important;
 }
-
 .universe-overlay .disco-hero-btn.primary {
   background: var(--dr-blue) !important;
   color: #fff !important;
-  box-shadow: 0 6px 28px rgba(59,142,255,0.4) !important;
+  box-shadow: 0 8px 32px rgba(74,158,255,0.45) !important;
 }
 .universe-overlay .disco-hero-btn.primary:hover {
-  background: #5aaaff !important;
+  background: #6fb3ff !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 10px 36px rgba(59,142,255,0.55) !important;
+  box-shadow: 0 14px 40px rgba(74,158,255,0.6) !important;
 }
-
 .universe-overlay .disco-hero-btn.secondary {
   background: rgba(255,255,255,0.1) !important;
-  color: var(--dr-text) !important;
-  border: 0.5px solid rgba(255,255,255,0.18) !important;
+  color: var(--dr-txt) !important;
+  border: 0.5px solid rgba(255,255,255,0.2) !important;
   backdrop-filter: blur(12px) !important;
 }
 .universe-overlay .disco-hero-btn.secondary:hover {
@@ -436,55 +429,26 @@
   transform: translateY(-2px) !important;
 }
 
-/* Scroll indicator */
-.universe-overlay .disco-hero .disco-scroll-hint {
-  position: absolute !important;
-  bottom: 18px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  z-index: 10 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  gap: 4px !important;
-  color: rgba(255,255,255,0.25) !important;
-  font-size: 0.55rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 2px !important;
-  text-transform: uppercase !important;
-  animation: dr-bounce 2.5s ease-in-out infinite !important;
-  cursor: pointer !important;
-  pointer-events: auto !important;
-}
-@keyframes dr-bounce {
-  0%,100% { transform: translateX(-50%) translateY(0); }
-  55%      { transform: translateX(-50%) translateY(5px); }
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   ROWS
-═══════════════════════════════════════════════════════════════ */
-.universe-overlay .disco-row {
-  margin-bottom: 0 !important;
-}
-
+/* ═══════════════════════════════
+   ROW HEADER
+═══════════════════════════════ */
 .universe-overlay .disco-row-header,
 #discoBody .disco-row-header {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  padding: 30px var(--dr-px) 14px !important;
+  padding: 36px var(--px) 16px !important;
   gap: 16px !important;
 }
 
 .universe-overlay .disco-row-title,
 #discoBody .disco-row-title {
-  font-family: var(--dr-font-d) !important;
-  font-size: 1.15rem !important;
-  font-weight: 800 !important;
-  color: var(--dr-text) !important;
-  letter-spacing: -0.5px !important;
-  line-height: 1.2 !important;
+  font-family: var(--dr-fd) !important;
+  font-size: 1.2rem !important;
+  font-weight: 900 !important;
+  color: var(--dr-txt) !important;
+  letter-spacing: -0.6px !important;
+  line-height: 1.15 !important;
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
@@ -492,25 +456,19 @@
 
 .universe-overlay .drt-tag,
 #discoBody .drt-tag {
-  font-family: var(--dr-font-b) !important;
-  font-size: 0.52rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 1.8px !important;
+  font-family: var(--dr-fb) !important;
+  font-size: 0.5rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 2px !important;
   text-transform: uppercase !important;
   color: var(--dr-blue) !important;
-  background: var(--dr-blue-dim) !important;
-  border: 0.5px solid rgba(59,142,255,0.22) !important;
+  background: var(--dr-bdim) !important;
+  border: 0.5px solid rgba(74,158,255,0.22) !important;
   padding: 3px 9px !important;
   border-radius: 7px !important;
 }
 
-/* Row nav buttons */
-.universe-overlay .disco-row-nav {
-  display: flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-  flex-shrink: 0 !important;
-}
+.universe-overlay .disco-row-nav { display: flex !important; align-items: center !important; gap: 4px !important; }
 
 .universe-overlay .disco-row-nav-btn,
 #discoBody .disco-row-nav-btn {
@@ -520,135 +478,112 @@
   align-items: center !important;
   justify-content: center !important;
   border-radius: 50% !important;
-  background: var(--dr-bg2) !important;
-  border: 0.5px solid var(--dr-border) !important;
+  background: var(--dr-s1) !important;
+  border: 0.5px solid var(--dr-brd) !important;
   color: var(--dr-sub) !important;
   cursor: pointer !important;
   transition: all 0.18s !important;
-  flex-shrink: 0 !important;
 }
 .universe-overlay .disco-row-nav-btn:hover,
 #discoBody .disco-row-nav-btn:hover {
-  background: var(--dr-bg3) !important;
-  color: var(--dr-text) !important;
-  border-color: var(--dr-border-hi) !important;
-}
-.universe-overlay .disco-row-nav-btn svg,
-#discoBody .disco-row-nav-btn svg {
-  width: 14px !important;
-  height: 14px !important;
+  background: var(--dr-s2) !important;
+  color: var(--dr-txt) !important;
+  border-color: var(--dr-brd2) !important;
 }
 
-/* "Nová doporučení" button */
 #discoBody button[onclick*="refreshPersonalisedRow"],
 .universe-overlay button[onclick*="refreshPersonalisedRow"] {
-  font-family: var(--dr-font-b) !important;
+  font-family: var(--dr-fb) !important;
   font-size: 0.68rem !important;
   font-weight: 700 !important;
   color: var(--dr-blue) !important;
-  background: var(--dr-blue-dim) !important;
-  border: 0.5px solid rgba(59,142,255,0.22) !important;
-  border-radius: 22px !important;
+  background: var(--dr-bdim) !important;
+  border: 0.5px solid rgba(74,158,255,0.22) !important;
+  border-radius: 24px !important;
   padding: 7px 16px !important;
   cursor: pointer !important;
   transition: all 0.2s !important;
   white-space: nowrap !important;
   letter-spacing: 0 !important;
-  text-transform: none !important;
-}
-#discoBody button[onclick*="refreshPersonalisedRow"]:hover,
-.universe-overlay button[onclick*="refreshPersonalisedRow"]:hover {
-  background: rgba(59,142,255,0.22) !important;
-  border-color: rgba(59,142,255,0.38) !important;
 }
 
-/* Row scroll */
 .universe-overlay .disco-row-scroll,
 #discoBody .disco-row-scroll {
   display: flex !important;
   gap: 12px !important;
   overflow-x: auto !important;
   scrollbar-width: none !important;
-  padding: 6px var(--dr-px) 28px !important;
+  padding: 8px var(--px) 32px !important;
   scroll-behavior: smooth !important;
-  -webkit-overflow-scrolling: touch !important;
 }
 .universe-overlay .disco-row-scroll::-webkit-scrollbar,
 #discoBody .disco-row-scroll::-webkit-scrollbar { display: none !important; }
 
-/* Row separator */
 .universe-overlay .disco-row + .disco-row {
-  border-top: 0.5px solid var(--dr-border) !important;
+  border-top: 0.5px solid var(--dr-brd) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   CARDS — NOVÝ STYL: název vždy viditelný, glassmorphism info
+   KARTY — LANDSCAPE FORMAT (16:10) s nazvem VZDY DOLE
+   Pryc od posteroveho formatu — siroky cinematicky format.
 ═══════════════════════════════════════════════════════════════ */
-
-/* ── Wrapper karta ── */
 .universe-overlay .disco-card,
 #discoBody .disco-card {
   position: relative !important;
-  width: var(--dr-cw) !important;
-  min-width: var(--dr-cw) !important;
-  height: var(--dr-ch) !important;
+  width: var(--cw) !important;
+  min-width: var(--cw) !important;
+  height: var(--ch) !important;
   flex-shrink: 0 !important;
-  border-radius: var(--dr-cr) !important;
-  overflow: hidden !important;
+  border-radius: var(--cr) !important;
+  overflow: visible !important;        /* kvuli shadow efektum */
   cursor: pointer !important;
-  background: #141420 !important;
+  background: #12121e !important;
   border: none !important;
-  box-shadow:
-    0 2px 8px rgba(0,0,0,0.45),
-    inset 0 0 0 0.5px rgba(255,255,255,0.05) !important;
-  transition:
-    transform    0.32s cubic-bezier(0.34,1.44,0.64,1),
-    box-shadow   0.32s cubic-bezier(0.25,1,0.5,1) !important;
+  transition: transform 0.32s var(--dr-spring), box-shadow 0.32s var(--dr-ease) !important;
   transform-origin: bottom center !important;
   outline: none !important;
-  display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .universe-overlay .disco-card:hover,
 #discoBody .disco-card:hover {
-  transform: translateY(-18px) scale(1.06) !important;
+  transform: translateY(-16px) scale(1.05) !important;
   box-shadow:
-    0 40px 80px rgba(0,0,0,0.95),
-    inset 0 0 0 0.5px rgba(255,255,255,0.12) !important;
+    0 36px 80px rgba(0,0,0,0.95),
+    0 0 0 0.5px rgba(255,255,255,0.12) !important;
   z-index: 10 !important;
 }
 
-/* ── Poster image — plná výška ── */
+/* Poster container — gorni cast karty */
+.universe-overlay .disco-card-inner,
+#discoBody .disco-card-inner {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: var(--cr) !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+}
+
+/* Poster image */
 .universe-overlay .disco-card-img,
 #discoBody .disco-card-img {
-  position: absolute !important;
-  inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
-  object-position: center top !important;
+  object-position: center 20% !important;
   display: block !important;
   border-radius: 0 !important;
-  transition: transform 0.5s cubic-bezier(0.25,1,0.5,1),
-              filter   0.3s ease !important;
-  transform: scale(1) !important;
+  transition: transform 0.5s var(--dr-ease), filter 0.3s ease !important;
 }
-
 .universe-overlay .disco-card:hover .disco-card-img,
 #discoBody .disco-card:hover .disco-card-img {
-  transform: scale(1.06) !important;
-  filter: brightness(0.5) saturate(1.1) !important;
+  transform: scale(1.08) !important;
+  filter: brightness(0.45) saturate(1.15) !important;
 }
 
-/* ── card-inner: nepoužívá se v app.js ale pojistit ── */
-.universe-overlay .disco-card-inner,
-#discoBody .disco-card-inner {
-  position: absolute !important;
-  inset: 0 !important;
-  border-radius: 0 !important;
-}
-
-/* ── Gradient overlay — vždy viditelný dole ── */
+/* Gradient overlay — silnejsi v dolni casti */
 .universe-overlay .disco-card-overlay,
 #discoBody .disco-card-overlay {
   position: absolute !important;
@@ -656,125 +591,114 @@
   background:
     linear-gradient(
       to top,
-      rgba(8,8,18,1.0)   0%,
-      rgba(8,8,18,0.82)  28%,
-      rgba(8,8,18,0.28)  55%,
-      transparent        80%) !important;
-  border-radius: 0 !important;
+      rgba(6,6,16,1.0)  0%,
+      rgba(6,6,16,0.85) 30%,
+      rgba(6,6,16,0.2)  62%,
+      transparent       85%) !important;
   z-index: 2 !important;
-  transition: none !important;
   opacity: 1 !important;
+  border-radius: 0 !important;
 }
 
-/* ── Glow — off ── */
 .universe-overlay .disco-card-glow,
 #discoBody .disco-card-glow { display: none !important; }
 
-/* ── INFO — vždy viditelný, ve spodní části ── */
+/* ── INFO — vzdy viditelny, vespod postera ── */
 .universe-overlay .disco-card-info,
 #discoBody .disco-card-info {
   position: absolute !important;
   bottom: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  padding: 10px 11px 12px !important;
+  padding: 8px 11px 11px !important;
   z-index: 5 !important;
   opacity: 1 !important;
   transform: none !important;
   transition: none !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 5px !important;
+  gap: 4px !important;
+  pointer-events: none !important;
 }
 
-/* Název — vždy viditelný */
 .universe-overlay .disco-card-name,
 #discoBody .disco-card-name {
-  font-family: var(--dr-font-b) !important;
+  font-family: var(--dr-fb) !important;
   font-size: 0.72rem !important;
   font-weight: 700 !important;
-  color: rgba(255,255,255,0.95) !important;
-  letter-spacing: -0.15px !important;
-  line-height: 1.3 !important;
+  color: rgba(255,255,255,0.97) !important;
+  letter-spacing: -0.1px !important;
+  line-height: 1.25 !important;
+  text-shadow: 0 1px 10px rgba(0,0,0,1) !important;
   overflow: hidden !important;
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.8) !important;
+  margin-bottom: 3px !important;
 }
 
-/* Meta row */
 .universe-overlay .disco-card-meta,
 #discoBody .disco-card-meta {
   display: flex !important;
   align-items: center !important;
   gap: 5px !important;
+  flex-wrap: wrap !important;
 }
 
-/* Typ — Film / Seriál pill */
 .universe-overlay .disco-card-type,
 #discoBody .disco-card-type {
   display: inline-flex !important;
   align-items: center !important;
   gap: 3px !important;
-  font-family: var(--dr-font-b) !important;
-  font-size: 0.55rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.4px !important;
-  color: rgba(255,255,255,0.5) !important;
+  font-size: 0.52rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+  color: rgba(255,255,255,0.45) !important;
   background: rgba(255,255,255,0.07) !important;
   border: 0.5px solid rgba(255,255,255,0.1) !important;
-  padding: 2px 6px !important;
+  padding: 2px 7px !important;
   border-radius: 5px !important;
+  text-transform: uppercase !important;
 }
 
-/* Rating */
 .universe-overlay .disco-card-rating,
 #discoBody .disco-card-rating {
-  font-family: var(--dr-font-b) !important;
-  font-size: 0.62rem !important;
-  font-weight: 700 !important;
-  color: #e8c050 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 2px !important;
+  display: none !important;
 }
 
-/* ── Play button — uprostřed, jen na hover ── */
+/* Play button */
 .universe-overlay .disco-play-btn,
 #discoBody .disco-play-btn {
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
-  transform: translate(-50%,-54%) scale(0.6) !important;
-  width: 52px !important;
-  height: 52px !important;
+  transform: translate(-50%,-60%) scale(0.55) !important;
+  width: 56px !important;
+  height: 56px !important;
   border-radius: 50% !important;
-  background: rgba(255,255,255,0.97) !important;
+  background: rgba(255,255,255,0.96) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   opacity: 0 !important;
-  transition:
-    opacity 0.25s var(--dr-ease),
-    transform 0.28s var(--dr-spring) !important;
+  transition: opacity 0.22s, transform 0.28s var(--dr-spring) !important;
   z-index: 6 !important;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.7) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.8) !important;
 }
 .universe-overlay .disco-play-btn svg,
 #discoBody .disco-play-btn svg {
-  width: 17px !important;
-  height: 17px !important;
-  fill: #08080f !important;
-  margin-left: 3px !important;
+  width: 18px !important;
+  height: 18px !important;
+  fill: #060610 !important;
+  margin-left: 4px !important;
 }
 .universe-overlay .disco-card:hover .disco-play-btn,
 #discoBody .disco-card:hover .disco-play-btn {
   opacity: 1 !important;
-  transform: translate(-50%,-54%) scale(1) !important;
+  transform: translate(-50%,-60%) scale(1) !important;
 }
 
-/* ── Finder button — vpravo nahoře ── */
+/* Finder btn */
 .universe-overlay .disco-card-finder-btn,
 #discoBody .disco-card-finder-btn {
   position: absolute !important;
@@ -783,7 +707,7 @@
   width: 28px !important;
   height: 28px !important;
   border-radius: 50% !important;
-  background: rgba(8,8,18,0.75) !important;
+  background: rgba(6,6,16,0.78) !important;
   border: 0.5px solid rgba(255,255,255,0.15) !important;
   display: flex !important;
   align-items: center !important;
@@ -794,339 +718,125 @@
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
   opacity: 0 !important;
-  transform: translateY(-4px) scale(0.8) !important;
+  transform: scale(0.7) translateY(-4px) !important;
   transition: all 0.22s var(--dr-spring) !important;
+  pointer-events: auto !important;
 }
 .universe-overlay .disco-card-finder-btn svg,
-#discoBody .disco-card-finder-btn svg {
-  width: 12px !important;
-  height: 12px !important;
-}
+#discoBody .disco-card-finder-btn svg { width: 12px !important; height: 12px !important; }
 .universe-overlay .disco-card:hover .disco-card-finder-btn,
 #discoBody .disco-card:hover .disco-card-finder-btn {
   opacity: 1 !important;
-  transform: translateY(0) scale(1) !important;
+  transform: scale(1) translateY(0) !important;
 }
 .universe-overlay .disco-card-finder-btn:hover,
 #discoBody .disco-card-finder-btn:hover {
-  background: rgba(59,142,255,0.35) !important;
-  border-color: rgba(59,142,255,0.5) !important;
+  background: rgba(74,158,255,0.35) !important;
+  border-color: rgba(74,158,255,0.55) !important;
   color: #fff !important;
 }
 
-/* ── AI Match badge — vlevo nahoře ── */
+/* AI badge */
 .universe-overlay .ai-match-badge,
 #discoBody .ai-match-badge {
   position: absolute !important;
   top: 9px !important;
   left: 9px !important;
-  font-family: var(--dr-font-b) !important;
   font-size: 0.5rem !important;
   font-weight: 800 !important;
-  letter-spacing: 0.4px !important;
-  color: rgba(255,255,255,0.55) !important;
-  background: rgba(8,8,18,0.82) !important;
-  border: 0.5px solid rgba(255,255,255,0.1) !important;
-  padding: 3px 8px !important;
+  color: rgba(255,255,255,0.38) !important;
+  background: rgba(6,6,16,0.82) !important;
+  border: 0.5px solid rgba(255,255,255,0.08) !important;
+  padding: 3px 7px !important;
   border-radius: 20px !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
-  z-index: 7 !important;
+  z-index: 9 !important;
 }
 
-/* Shoda% — zmenšit důraz */
-.universe-overlay .ai-match-badge[style*="Shoda"],
-#discoBody .ai-match-badge[style*="Shoda"] {
-  color: rgba(255,255,255,0.35) !important;
-  border-color: rgba(255,255,255,0.07) !important;
-}
-
-/* AI match card — subtle blue glow on hover */
-.universe-overlay .ai-match-card:hover,
-#discoBody .ai-match-card:hover {
-  box-shadow:
-    0 40px 80px rgba(0,0,0,0.95),
-    inset 0 0 0 0.5px rgba(59,142,255,0.2) !important;
-}
-
-/* AI reason text */
-.universe-overlay .disco-card-info [style*="font-size:0.42rem"],
-#discoBody .disco-card-info [style*="font-size:0.42rem"] {
-  font-size: 0.56rem !important;
-  line-height: 1.4 !important;
-  opacity: 0.7 !important;
-  display: none !important; /* skrýt — zobrazíme jen na hover */
-}
-.universe-overlay .disco-card:hover .disco-card-info [style*="font-size:0.42rem"],
-#discoBody .disco-card:hover .disco-card-info [style*="font-size:0.42rem"] {
-  display: block !important;
-  animation: dr-enter 0.2s var(--dr-ease) both !important;
-}
-
-/* ── Trailer overlay (app.js) — necháme fungovat ── */
-.universe-overlay .disco-card [style*="z-index:8"],
-#discoBody .disco-card [style*="z-index:8"] {
-  border-radius: var(--dr-cr) !important;
-}
-
-/* ── Keyboard focus ── */
-.universe-overlay .disco-card.mf-disco-kb-focus,
-#discoBody .disco-card.mf-disco-kb-focus {
-  transform: translateY(-18px) scale(1.06) !important;
-  box-shadow:
-    0 40px 80px rgba(0,0,0,0.95),
-    0 0 0 2px rgba(255,255,255,0.9) !important;
-  z-index: 10 !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   LOADING STATE
-═══════════════════════════════════════════════════════════════ */
-.universe-overlay .disco-loading,
-#discoBody .disco-loading {
-  display: flex !important;
-  flex-direction: column !important;
+/* Rating top badge (JS prida) */
+.dr-rating-top {
+  position: absolute !important;
+  z-index: 9 !important;
+  display: inline-flex !important;
   align-items: center !important;
-  justify-content: center !important;
-  padding: 80px 20px !important;
-  gap: 14px !important;
-  color: var(--dr-muted) !important;
-  font-family: var(--dr-font-b) !important;
-  font-size: 0.875rem !important;
+  gap: 3px !important;
+  font-size: 0.6rem !important;
+  font-weight: 800 !important;
+  color: var(--dr-gold) !important;
+  background: rgba(6,6,16,0.88) !important;
+  border: 0.5px solid rgba(240,201,74,0.25) !important;
+  padding: 3px 8px !important;
+  border-radius: 20px !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  pointer-events: none !important;
+  line-height: 1 !important;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   ENTRANCE ANIMATIONS
-═══════════════════════════════════════════════════════════════ */
+/* Animace */
 @keyframes dr-enter {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes dr-shimmer {
-  0%   { background-position: -600px 0; }
-  100% { background-position:  600px 0; }
+@keyframes dr-bounce {
+  0%,100% { transform: translateX(-50%) translateY(0); }
+  55%      { transform: translateX(-50%) translateY(6px); }
 }
 
 .universe-overlay .disco-row {
-  animation: dr-enter 0.28s var(--dr-ease) both !important;
+  animation: dr-enter 0.26s var(--dr-ease) both !important;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   OVERRIDE mf-disco-fx inline injected styles (app.js)
-═══════════════════════════════════════════════════════════════ */
-
-/* Přepisujeme mf-disco-fx spacing injected do <style> tagu */
-#discoBody .disco-row-header {
-  padding: 30px var(--dr-px) 14px !important;
-}
-#discoBody .disco-row-scroll {
-  gap: 12px !important;
-  padding-left: var(--dr-px) !important;
-  padding-right: var(--dr-px) !important;
-  padding-bottom: 28px !important;
-}
-
-/* mf-skeleton tiles — větší */
-.mf-skeleton-tile {
-  width: var(--dr-cw) !important;
-  min-width: var(--dr-cw) !important;
-  height: var(--dr-ch) !important;
-  border-radius: var(--dr-cr) !important;
-}
+/* Skeletons */
+.mf-skeleton-tile,
 .mf-disco-skel-card {
-  width: var(--dr-cw) !important;
-  height: var(--dr-ch) !important;
-  border-radius: var(--dr-cr) !important;
+  width: var(--cw) !important;
+  min-width: var(--cw) !important;
+  height: var(--ch) !important;
+  border-radius: var(--cr) !important;
 }
 
-/* Přepsat mf-disco-fx typography injected styles */
-#discoBody .disco-row-title,
-.universe-overlay .disco-row-title {
-  font-size: 1.15rem !important;
-  font-family: var(--dr-font-d) !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.5px !important;
-}
-#discoBody .disco-card-name,
-.universe-overlay .disco-card-name {
-  font-size: 0.78rem !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.2px !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   KEYBOARD FOCUS (přepsat mf-disco-fx)
-═══════════════════════════════════════════════════════════════ */
+/* KB focus */
 .mf-disco-kb-focus {
-  outline: none !important;
-  transform: translateY(-14px) scale(1.05) !important;
-  box-shadow:
-    0 32px 70px rgba(0,0,0,0.9),
-    0 0 0 2px rgba(255,255,255,0.85) !important;
+  transform: translateY(-16px) scale(1.05) !important;
+  box-shadow: 0 36px 80px rgba(0,0,0,0.95), 0 0 0 2px rgba(255,255,255,0.9) !important;
   z-index: 10 !important;
-  position: relative !important;
-}
-.mf-disco-kb-focus .disco-card-info {
-  opacity: 1 !important;
-  transform: translateY(0) !important;
-}
-.mf-disco-kb-focus .disco-card-overlay {
-  opacity: 1 !important;
-}
-.mf-disco-kb-focus .disco-play-btn {
-  opacity: 1 !important;
-  transform: translate(-50%,-50%) scale(1) !important;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE — TABLET
-═══════════════════════════════════════════════════════════════ */
-@media (max-width: 960px) {
-  :root {
-    --dr-px:  28px;
-    --dr-cw:  152px;
-    --dr-ch:  228px;
-    --dr-cr:  13px;
-  }
-  .universe-overlay .disco-hero { height: 360px !important; }
-  .universe-overlay .disco-hero-title { font-size: 2rem !important; }
+/* ═══════════════════════════════
+   RESPONSIVE
+═══════════════════════════════ */
+@media (max-width: 1100px) {
+  :root { --cw: 190px; --ch: 118px; --px: 32px; }
 }
-
-@media (max-width: 700px) {
-  :root {
-    --dr-px:  16px;
-    --dr-cw:  136px;
-    --dr-ch:  204px;
-    --dr-cr:  11px;
-    --dr-hh:  auto;
-  }
-  .universe-overlay .disco-header {
-    height: auto !important;
-    padding: max(14px,env(safe-area-inset-top,14px)) 16px 12px !important;
-    flex-wrap: wrap !important;
-    gap: 10px !important;
-  }
-  .universe-overlay .uni-search-wrap {
-    flex: 0 0 100% !important;
-    max-width: 100% !important;
-    order: 3 !important;
-  }
-  .universe-overlay .disco-hero { height: 280px !important; }
-  .universe-overlay .disco-hero-title { font-size: 1.6rem !important; }
+@media (max-width: 800px) {
+  :root { --cw: 165px; --ch: 103px; --px: 18px; --cr: 10px; }
+  .universe-overlay .disco-hero { height: 340px !important; }
+  .universe-overlay .disco-hero-content { right: 5% !important; }
+  .universe-overlay .disco-hero-title { font-size: 1.8rem !important; }
   .universe-overlay .disco-hero-desc { display: none !important; }
-  .universe-overlay .disco-hero-btn {
-    padding: 11px 22px !important;
-    font-size: 0.85rem !important;
-  }
-  .universe-overlay .disco-nav { padding: 0 16px !important; }
+}
+@media (max-width: 520px) {
+  :root { --cw: 140px; --ch: 88px; --px: 14px; --cr: 9px; --hh: auto; }
+  .universe-overlay .disco-header { height:auto !important; padding: max(14px,env(safe-area-inset-top,14px)) 14px 12px !important; flex-wrap:wrap !important; gap:10px !important; }
+  .universe-overlay .uni-search-wrap { flex: 0 0 100% !important; max-width: 100% !important; order: 3 !important; }
+  .universe-overlay .disco-hero { height: 260px !important; }
+  .universe-overlay .disco-hero-title { font-size: 1.4rem !important; }
   .universe-overlay .disco-row-nav-btn { display: none !important; }
+  .universe-overlay .disco-card-name { font-size: 0.62rem !important; }
 }
 
-@media (max-width: 420px) {
-  :root {
-    --dr-cw:  118px;
-    --dr-ch:  177px;
-    --dr-cr:  10px;
+/* Hover touch fix */
+@media (hover: none) {
+  .universe-overlay .disco-card-info,
+  #discoBody .disco-card-info {
+    opacity: 1 !important;
+    transform: none !important;
   }
-  .universe-overlay .disco-hero { height: 240px !important; }
-  .universe-overlay .disco-hero-title { font-size: 1.3rem !important; }
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   CARD LABEL BELOW — název pod posterem (vždy viditelný)
-   App.js generuje info UVNITŘ karty. Přidáme pseudoelement
-   který zobrazí gradient + jméno i bez hoveru.
-═══════════════════════════════════════════════════════════════ */
-
-/* Rating badge vlevo nahoře — přidává JS */
-.dr-rating-top {
-  font-family: var(--dr-font-b) !important;
-  font-size: 0.58rem !important;
-  font-weight: 800 !important;
-}
-
-/* Silnější gradient ve spodní třetině — vždy */
-.universe-overlay .disco-card::after,
-#discoBody .disco-card::after {
-  content: '' !important;
-  position: absolute !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  height: 55% !important;
-  background: linear-gradient(
-    to top,
-    rgba(8,8,18,1.0)  0%,
-    rgba(8,8,18,0.92) 30%,
-    rgba(8,8,18,0.55) 60%,
-    transparent       100%) !important;
-  z-index: 3 !important;
-  pointer-events: none !important;
-  border-radius: 0 0 var(--dr-cr) var(--dr-cr) !important;
-}
-
-/* Hover: tmavší aby byl lepší kontrast textu */
-.universe-overlay .disco-card:hover::after,
-#discoBody .disco-card:hover::after {
-  background: linear-gradient(
-    to top,
-    rgba(8,8,18,1.0)  0%,
-    rgba(8,8,18,0.96) 40%,
-    rgba(8,8,18,0.7)  65%,
-    transparent       90%) !important;
-}
-
-/* Info je nad ::after z-indexem */
-.universe-overlay .disco-card-info,
-#discoBody .disco-card-info {
-  z-index: 5 !important;
-}
-
-/* Trailer overlay (app.js) — musí být nad info */
-.universe-overlay .disco-card > div[style*="z-index:8"],
-#discoBody .disco-card > div[style*="z-index:8"] {
-  z-index: 4 !important;
-  border-radius: var(--dr-cr) !important;
-}
-/* Ale info musí být nad trailerem */
-.universe-overlay .disco-card:has(> div[style*="opacity: 1"]) .disco-card-info,
-#discoBody .disco-card:has(> div[style*="opacity: 1"]) .disco-card-info {
-  z-index: 25 !important;
-}
-
-/* ── Hover: jméno se zvětší trochu ── */
-.universe-overlay .disco-card:hover .disco-card-name,
-#discoBody .disco-card:hover .disco-card-name {
-  -webkit-line-clamp: 3 !important;
-}
-
-/* ── Špatná Shoda% text — menší, méně rušivá ── */
-.universe-overlay .ai-match-badge,
-#discoBody .ai-match-badge {
-  font-size: 0.48rem !important;
-  opacity: 0.7 !important;
-}
-
-/* ── Responzivní card sizes ── */
-@media (max-width: 960px) {
-  .universe-overlay .disco-card,
-  #discoBody .disco-card { width: 152px !important; min-width: 152px !important; height: 228px !important; }
-  .universe-overlay .disco-card-inner,
-  #discoBody .disco-card-inner { width: 152px !important; height: 228px !important; }
-}
-@media (max-width: 700px) {
-  .universe-overlay .disco-card,
-  #discoBody .disco-card { width: 136px !important; min-width: 136px !important; height: 204px !important; }
-  .universe-overlay .disco-card-inner,
-  #discoBody .disco-card-inner { width: 136px !important; height: 204px !important; }
-  .universe-overlay .disco-card-name,
-  #discoBody .disco-card-name { font-size: 0.68rem !important; }
-}
-@media (max-width: 420px) {
-  .universe-overlay .disco-card,
-  #discoBody .disco-card { width: 118px !important; min-width: 118px !important; height: 177px !important; }
-  .universe-overlay .disco-card-inner,
-  #discoBody .disco-card-inner { width: 118px !important; height: 177px !important; }
-  .universe-overlay .disco-card-name,
-  #discoBody .disco-card-name { font-size: 0.62rem !important; }
+  .universe-overlay .disco-card-finder-btn,
+  #discoBody .disco-card-finder-btn {
+    opacity: 1 !important;
+    transform: scale(1) translateY(0) !important;
+  }
 }
