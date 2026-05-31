@@ -22,9 +22,9 @@
   --dr-spring: cubic-bezier(0.34,1.44,0.64,1);
 
   /* Karta — landscape 16:10 format */
-  --cw: 220px;
-  --ch: 138px;
-  --cr: 12px;
+  --cw: 172px;
+  --ch: 258px;
+  --cr: 14px;
   --px: 52px;
   --hh: 70px;
 }
@@ -535,7 +535,7 @@
   height: var(--ch) !important;
   flex-shrink: 0 !important;
   border-radius: var(--cr) !important;
-  overflow: visible !important;        /* kvuli shadow efektum */
+  overflow: hidden !important;
   cursor: pointer !important;
   background: #12121e !important;
   border: none !important;
@@ -842,57 +842,219 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   HOVER PANEL DOPLNENI — disco-card-info skryt, hover panel ho
-   nahrazuje. Tranzice jen na kartach s hover panelem.
+   HOVER POPUP BUBBLE — pozicovaná mimo kartu, nikdy neoříznutá
 ═══════════════════════════════════════════════════════════════ */
 
-/* Info panel — defaultne skryty POKUD karta ma hover panel */
-.disco-card:has(.dr-hover-panel) .disco-card-info {
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* Sousedni karty — scale down + fade pri hover na jinou kartu */
-.disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
-  transform: scale(0.94) translateY(0) !important;
-  opacity: 0.55 !important;
-  transition: transform 0.25s ease, opacity 0.25s ease !important;
-}
-
-/* Loader bar top gradient */
+/* Loader bar nahoře na kartě */
 .dr-loader-bar {
-  background: linear-gradient(to right, #4a9eff, #a855f7) !important;
+  position: absolute;
+  top: 0; left: 0;
+  height: 2.5px;
+  width: 0;
+  background: linear-gradient(to right, #4a9eff, #a855f7);
+  border-radius: 0 2px 2px 0;
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+}
+.disco-card:hover .dr-loader-bar {
+  opacity: 1;
+  animation: dr-load 1.1s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes dr-load {
+  0%   { width: 0%;   opacity: 1; }
+  65%  { width: 88%;  opacity: 1; }
+  95%  { width: 97%;  opacity: 1; }
+  100% { width: 100%; opacity: 0; }
 }
 
-/* Hover panel border-radius sedi s kartou */
-.disco-card .dr-hover-panel {
-  border-radius: var(--cr) !important;
+/* Spotlight — sousedni karty ztemni */
+.disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
+  opacity: 0.48 !important;
+  filter: brightness(0.75) !important;
+  transition: opacity 0.22s ease, filter 0.22s ease !important;
+}
+.disco-card {
+  transition:
+    transform    0.32s cubic-bezier(0.34,1.44,0.64,1),
+    box-shadow   0.32s cubic-bezier(0.25,1,0.5,1),
+    opacity      0.22s ease,
+    filter       0.22s ease !important;
 }
 
-/* Hover titulek — Syne font fallback */
-.dr-hover-title {
-  font-family: 'Syne', -apple-system, sans-serif !important;
+/* Popup bubble — fixed position, JS ho umisti */
+#dr-popup {
+  position: fixed;
+  z-index: 99999;
+  width: 210px;
+  background: rgba(10,10,20,0.97);
+  border: 0.5px solid rgba(255,255,255,0.13);
+  border-radius: 16px;
+  padding: 14px 14px 12px;
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.9),
+    0 0 0 0.5px rgba(255,255,255,0.05),
+    0 0 40px rgba(0,0,0,0.6);
+  backdrop-filter: blur(32px) saturate(1.8);
+  -webkit-backdrop-filter: blur(32px) saturate(1.8);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(6px) scale(0.96);
+  transition:
+    opacity   0.2s cubic-bezier(0.25,1,0.5,1),
+    transform 0.24s cubic-bezier(0.34,1.44,0.64,1);
+}
+#dr-popup.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
-/* Play btn — prenos barvy z --dr-blue */
-.dr-hover-btn.play {
-  background: var(--dr-blue) !important;
+/* Malý šipka / ukazatel na kartu */
+#dr-popup::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px; height: 10px;
+  background: rgba(10,10,20,0.97);
+  border-right: 0.5px solid rgba(255,255,255,0.13);
+  border-bottom: 0.5px solid rgba(255,255,255,0.13);
+  rotate: 45deg;
 }
-.dr-hover-btn.play:hover {
-  filter: brightness(1.18) !important;
+#dr-popup.arrow-down::after { bottom: -5px; top: auto; rotate: 45deg; }
+#dr-popup.arrow-up::after   { top: -5px; bottom: auto; rotate: 225deg; }
+
+/* Thumb — miniatura posteru nahoře v popupu */
+#dr-popup .dr-pop-thumb {
+  width: 100%;
+  height: 90px;
+  border-radius: 10px;
+  object-fit: cover;
+  object-position: center 20%;
+  display: block;
+  flex-shrink: 0;
 }
 
-/* Mobilni — hover panel disabled, info vzdy viditelny */
-@media (hover: none) {
-  .disco-card .dr-hover-panel {
-    display: none !important;
-  }
-  .disco-card .disco-card-info {
-    opacity: 1 !important;
-    pointer-events: none !important;
-  }
-  .disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
-    transform: none !important;
-    opacity: 1 !important;
-  }
+/* Title */
+#dr-popup .dr-pop-title {
+  font-family: 'Syne', -apple-system, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.97);
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+}
+
+/* Meta */
+#dr-popup .dr-pop-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+#dr-popup .dr-pop-type {
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.07);
+  border: 0.5px solid rgba(255,255,255,0.1);
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+#dr-popup .dr-pop-dot {
+  width: 2px; height: 2px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+#dr-popup .dr-pop-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #f0c94a;
+}
+#dr-popup .dr-pop-year {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.35);
+}
+
+/* Popis */
+#dr-popup .dr-pop-desc {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.48);
+  line-height: 1.55;
+  font-weight: 400;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* Genres */
+#dr-popup .dr-pop-genres {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+#dr-popup .dr-pop-genre {
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.055);
+  border: 0.5px solid rgba(255,255,255,0.09);
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+/* Akční tlačítka */
+#dr-popup .dr-pop-btns {
+  display: flex;
+  gap: 7px;
+}
+#dr-popup .dr-pop-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-family: 'DM Sans', -apple-system, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.18s cubic-bezier(0.25,1,0.5,1);
+  white-space: nowrap;
+  letter-spacing: -0.1px;
+}
+#dr-popup .dr-pop-btn.play {
+  flex: 1;
+  background: #4a9eff;
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(74,158,255,0.45);
+}
+#dr-popup .dr-pop-btn.play:hover {
+  background: #6fb3ff;
+  transform: translateY(-1px);
+  box-shadow: 0 7px 24px rgba(74,158,255,0.6);
+}
+#dr-popup .dr-pop-btn.wl {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+  border: 0.5px solid rgba(255,255,255,0.14);
+  padding: 9px 12px;
+}
+#dr-popup .dr-pop-btn.wl:hover {
+  background: rgba(255,255,255,0.16);
+  color: #fff;
 }
