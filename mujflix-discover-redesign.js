@@ -292,6 +292,9 @@
       /* Animace */
       '@keyframes dr-bounce{0%,100%{transform:translateX(-50%) translateY(0)}55%{transform:translateX(-50%) translateY(6px)}}',
       '@keyframes dr-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}',
+      /* Glass cards */
+      '.disco-card{background:rgba(255,255,255,.04)!important;backdrop-filter:blur(12px) saturate(1.4)!important;-webkit-backdrop-filter:blur(12px) saturate(1.4)!important;border:.5px solid rgba(255,255,255,.1)!important;box-shadow:0 2px 16px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)!important;}',
+      '.disco-card:hover{border-color:rgba(255,255,255,.18)!important;}',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -404,7 +407,16 @@
       '<button class="dr-pop-btn wl" title="Watchlist">' + PLUS + '</button>',
     '</div>',
   ].join('');
-  document.body.appendChild(popup);
+  /* Vloz popup jako PRVNI dite body — pred universe-overlay.
+     universe-overlay ma backdrop-filter + overflow:hidden ktery
+     rozbiji fixed positioning vsech potomku.
+     Umistenim pred nej a pouzitim fixed + high z-index to obejdeme. */
+  var uov = document.getElementById('universeOverlay');
+  if (uov && uov.parentNode === document.body) {
+    document.body.insertBefore(popup, uov);
+  } else {
+    document.body.appendChild(popup);
+  }
 
   /* ── State ── */
   var activeCard = null;
@@ -452,50 +464,45 @@
   }
 
   function positionPopup(card) {
+    /* popup je vlozeny PRED universe-overlay v DOM.
+       Pouzivame position:fixed — viewport souradnice bez scroll offsetu. */
     var rect = card.getBoundingClientRect();
-    var pw = popup.offsetWidth  || 218;
-    var ph = popup.offsetHeight || 300;
-    var vw = window.innerWidth;
-    var vh = window.innerHeight;
-    var GAP = 12;
+    var pw   = popup.offsetWidth  || 218;
+    var ph   = popup.offsetHeight || 300;
+    var vw   = window.innerWidth;
+    var vh   = window.innerHeight;
+    var GAP  = 14;
 
-    /* KLIC: universe-overlay ma backdrop-filter ktery rozbiji position:fixed.
-       Proto pouzivame position:absolute na body a pocitame scroll offset. */
-    var scrollX = window.pageXOffset || document.documentElement.scrollLeft;
-    var scrollY = window.pageYOffset || document.documentElement.scrollTop;
+    var top, left;
 
-    var top, left, arrowDir;
-    var spaceAbove = rect.top - GAP;
+    var spaceAbove = rect.top    - GAP;
     var spaceBelow = vh - rect.bottom - GAP;
 
-    if (spaceAbove >= ph + 8) {
-      top = rect.top + scrollY - ph - GAP;
-      arrowDir = 'down';
-    } else if (spaceBelow >= ph + 8) {
-      top = rect.bottom + scrollY + GAP;
-      arrowDir = 'up';
+    if (spaceAbove >= ph) {
+      /* NAD kartou */
+      top = rect.top - ph - GAP;
+      popup.classList.remove('arrow-up');
+      popup.classList.add('arrow-down');
+    } else if (spaceBelow >= ph) {
+      /* POD kartou */
+      top = rect.bottom + GAP;
+      popup.classList.remove('arrow-down');
+      popup.classList.add('arrow-up');
     } else {
-      /* Vedle */
-      top = rect.top + scrollY + (rect.height / 2) - (ph / 2);
-      top = Math.max(scrollY + 8, Math.min(top, scrollY + vh - ph - 8));
-      arrowDir = 'none';
-      if (rect.right + pw + GAP <= vw) {
-        left = rect.right + scrollX + GAP;
-      } else {
-        left = rect.left + scrollX - pw - GAP;
-      }
-      popup.classList.remove('arrow-up','arrow-down');
+      /* VEDLE — vpravo nebo vlevo */
+      popup.classList.remove('arrow-up', 'arrow-down');
+      top  = Math.max(8, Math.min(rect.top + rect.height / 2 - ph / 2, vh - ph - 8));
+      left = (rect.right + pw + GAP <= vw)
+           ? rect.right + GAP
+           : rect.left  - pw - GAP;
       popup.style.top  = Math.round(top)  + 'px';
       popup.style.left = Math.round(left) + 'px';
       return;
     }
 
-    left = rect.left + scrollX + (rect.width / 2) - (pw / 2);
-    left = Math.max(scrollX + 8, Math.min(left, scrollX + vw - pw - 8));
-
-    popup.classList.remove('arrow-up','arrow-down');
-    if (arrowDir === 'down') popup.classList.add('arrow-down');
-    if (arrowDir === 'up')   popup.classList.add('arrow-up');
+    /* Horizontalne vycentrovat na kartu */
+    left = rect.left + rect.width / 2 - pw / 2;
+    left = Math.max(8, Math.min(left, vw - pw - 8));
 
     popup.style.top  = Math.round(top)  + 'px';
     popup.style.left = Math.round(left) + 'px';
