@@ -261,7 +261,7 @@
       '.disco-row-header{padding:36px 52px 16px!important;}',
       '.disco-row-scroll{gap:12px!important;padding-left:52px!important;padding-right:52px!important;padding-bottom:32px!important;}',
       /* Card — landscape format */
-      '.disco-card{position:relative!important;width:220px!important;min-width:220px!important;height:138px!important;border-radius:12px!important;overflow:hidden!important;background:#12121e!important;box-shadow:0 2px 10px rgba(0,0,0,.5),inset 0 0 0 .5px rgba(255,255,255,.04)!important;transition:transform .32s cubic-bezier(.34,1.44,.64,1),box-shadow .32s cubic-bezier(.25,1,.5,1)!important;display:block!important;}',
+      '.disco-card{position:relative!important;width:172px!important;min-width:172px!important;height:258px!important;border-radius:14px!important;overflow:hidden!important;background:#12121e!important;box-shadow:0 2px 10px rgba(0,0,0,.5),inset 0 0 0 .5px rgba(255,255,255,.04)!important;transition:transform .32s cubic-bezier(.34,1.44,.64,1),box-shadow .32s cubic-bezier(.25,1,.5,1)!important;display:block!important;}',
       '.disco-card:hover{transform:translateY(-16px) scale(1.05)!important;box-shadow:0 36px 80px rgba(0,0,0,.95),0 0 0 .5px rgba(255,255,255,.12)!important;z-index:10!important;}',
       /* Image */
       '.disco-card-img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center 20%!important;border-radius:0!important;transition:transform .5s,filter .3s!important;transform:scale(1)!important;}',
@@ -284,7 +284,7 @@
       '.disco-card:hover .disco-card-finder-btn{opacity:1!important;transform:scale(1) translateY(0)!important;}',
       '.disco-card-finder-btn:hover{background:rgba(74,158,255,.35)!important;border-color:rgba(74,158,255,.55)!important;color:#fff!important;}',
       /* Skeletons */
-      '.mf-skeleton-tile,.mf-disco-skel-card{width:220px!important;min-width:220px!important;height:138px!important;border-radius:12px!important;}',
+      '.mf-skeleton-tile,.mf-disco-skel-card{width:172px!important;min-width:172px!important;height:258px!important;border-radius:14px!important;}',
       /* Hero */
       '.disco-hero-btn.primary{background:#4a9eff!important;color:#fff!important;box-shadow:0 8px 32px rgba(74,158,255,.45)!important;}',
       '.disco-hero-btn.primary:hover{background:#6fb3ff!important;transform:translateY(-2px)!important;}',
@@ -372,405 +372,286 @@
 })();
 
 /* ══════════════════════════════════════════════════════════════
-   HOVER BEHAVIOUR — spustí se jednou na každé kartě
-   Co se děje při hover:
-   1. Expanduje info panel — jméno + rok + genre tagy
-   2. Fade-in akcí: tlačítka Přehrát + Přidat
-   3. Jemný glow border podle dominantní barvy posteru
-   4. Zatáhne sousední karty zpět (scale down)
-   5. Loader bar animace (simulation "rychle se načítá")
+   HOVER POPUP SYSTEM v2
+   Popup bubble se zobrazí NAD kartou (fixed position),
+   nikdy není oříznutá overflow:hidden na scroll kontejneru.
 ══════════════════════════════════════════════════════════════ */
-(function setupHoverBehaviour() {
-  var CSS_ID = 'dr-hover-css';
-  if (document.getElementById(CSS_ID)) return;
+(function setupPopup() {
+  'use strict';
 
-  /* ── Inject hover CSS ── */
-  var style = document.createElement('style');
-  style.id = CSS_ID;
-  style.textContent = `
-    /* Card hover state — expand info */
-    .disco-card .dr-hover-panel {
-      position: absolute;
-      inset: 0;
-      z-index: 20;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 0;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.22s cubic-bezier(0.25,1,0.5,1);
-    }
-    .disco-card:hover .dr-hover-panel {
-      opacity: 1;
-      pointer-events: auto;
-    }
+  var STAR = '<svg viewBox="0 0 12 12" fill="#f0c94a" width="10" height="10"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9.2,11 6,9.2 2.8,11 3.5,7.5 1,5 4.5,4.5"/></svg>';
+  var PLAY = '<svg viewBox="0 0 14 14" fill="currentColor" width="12" height="12"><polygon points="3,2 12,7 3,12"/></svg>';
+  var PLUS = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="12" height="12"><path d="M7 3v8M3 7h8"/></svg>';
 
-    /* Dark overlay only on hover */
-    .disco-card .dr-hover-panel::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 12px;
-      background: linear-gradient(
-        to top,
-        rgba(4,4,12,0.98) 0%,
-        rgba(4,4,12,0.94) 40%,
-        rgba(4,4,12,0.65) 68%,
-        rgba(4,4,12,0.15) 90%,
-        transparent       100%
-      );
-      z-index: 0;
-    }
+  /* ── Vytvoř singleton popup element ── */
+  var popup = document.createElement('div');
+  popup.id = 'dr-popup';
+  popup.innerHTML = [
+    '<img class="dr-pop-thumb" src="" alt="" />',
+    '<div class="dr-pop-title"></div>',
+    '<div class="dr-pop-meta">',
+      '<span class="dr-pop-type"></span>',
+      '<span class="dr-pop-dot"></span>',
+      '<span class="dr-pop-rating">' + STAR + '<span class="dr-pop-rat-val" style="margin-left:3px"></span></span>',
+      '<span class="dr-pop-dot"></span>',
+      '<span class="dr-pop-year"></span>',
+    '</div>',
+    '<div class="dr-pop-genres"></div>',
+    '<div class="dr-pop-desc"></div>',
+    '<div class="dr-pop-btns">',
+      '<button class="dr-pop-btn play">' + PLAY + '<span>Přehrát</span></button>',
+      '<button class="dr-pop-btn wl" title="Watchlist">' + PLUS + '</button>',
+    '</div>',
+  ].join('');
+  document.body.appendChild(popup);
 
-    /* Hover content wrapper */
-    .disco-card .dr-hover-content {
-      position: relative;
-      z-index: 2;
-      padding: 10px 12px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transform: translateY(6px);
-      transition: transform 0.28s cubic-bezier(0.34,1.44,0.64,1);
-    }
-    .disco-card:hover .dr-hover-content {
-      transform: translateY(0);
-    }
+  /* ── State ── */
+  var activeCard = null;
+  var showTimer  = null;
+  var hideTimer  = null;
 
-    /* Hover název — větší */
-    .dr-hover-title {
-      font-family: 'Syne', -apple-system, sans-serif;
-      font-size: 0.82rem;
-      font-weight: 800;
-      color: rgba(255,255,255,0.98);
-      letter-spacing: -0.3px;
-      line-height: 1.2;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      text-shadow: 0 1px 12px rgba(0,0,0,0.9);
-    }
+  /* ── Helpers ── */
+  function el(sel) { return popup.querySelector(sel); }
 
-    /* Meta row — rok, rating, typ */
-    .dr-hover-meta {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .dr-hover-year {
-      font-size: 0.58rem;
-      font-weight: 600;
-      color: rgba(255,255,255,0.42);
-    }
-    .dr-hover-dot {
-      width: 2px; height: 2px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.2);
-      flex-shrink: 0;
-    }
-    .dr-hover-rating {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 0.6rem;
-      font-weight: 800;
-      color: #f0c94a;
-    }
-    .dr-hover-type {
-      font-size: 0.52rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.38);
-      background: rgba(255,255,255,0.07);
-      border: 0.5px solid rgba(255,255,255,0.1);
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
+  function getCardData(card) {
+    var nameEl  = card.querySelector('.disco-card-name');
+    var ratTop  = card.querySelector('.dr-rating-top');
+    var ratEl   = card.querySelector('.disco-card-rating');
+    var typeEl  = card.querySelector('.disco-card-type');
+    var imgEl   = card.querySelector('.disco-card-img');
+    var aiBadge = card.querySelector('.ai-match-badge');
 
-    /* Genre tagy */
-    .dr-hover-genres {
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-    }
-    .dr-hover-genre {
-      font-size: 0.5rem;
-      font-weight: 700;
-      letter-spacing: 0.4px;
-      color: rgba(255,255,255,0.38);
-      background: rgba(255,255,255,0.055);
-      border: 0.5px solid rgba(255,255,255,0.09);
-      padding: 2px 7px;
-      border-radius: 20px;
+    var title = nameEl ? nameEl.textContent.trim() : '';
+
+    var rTxt = '';
+    if (ratTop)     rTxt = ratTop.textContent.replace(/[^0-9.]/g,'').trim();
+    else if (ratEl) rTxt = ratEl.textContent.replace(/[^0-9.]/g,'').trim();
+
+    var type = typeEl ? typeEl.textContent.replace(/[^a-zA-ZáčďéěíňóřšťůúýžÁČĎÉĚÍŇÓŘŠŤŮÚÝŽ\s]/g,'').trim() : '';
+
+    var img = imgEl ? (imgEl.src || imgEl.getAttribute('src') || '') : '';
+    /* Pokus o hires */
+    img = img.replace('/w342/','/w500/').replace('/w185/','/w500/');
+
+    /* Rok — z onclick atributu */
+    var year = '';
+    var oc = card.getAttribute('onclick') || '';
+    var ym = oc.match(/[,\s](\d{4})[,\s\)]/);
+    if (ym) year = ym[1];
+
+    /* Žánry z data-genres nebo z card class */
+    var genres = [];
+    var dg = card.getAttribute('data-genres') || card.dataset.genres || '';
+    if (dg) genres = dg.split(',').map(function(g){ return g.trim(); }).filter(Boolean).slice(0,4);
+
+    /* Popis z data-overview */
+    var desc = card.getAttribute('data-overview') || card.dataset.overview || '';
+
+    return { title: title, rating: rTxt, type: type, img: img, year: year, genres: genres, desc: desc };
+  }
+
+  function positionPopup(card) {
+    var rect = card.getBoundingClientRect();
+    var pw = popup.offsetWidth  || 210;
+    var ph = popup.offsetHeight || 320;
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var GAP = 10;
+
+    /* Preferuj zobrazení NAD kartou */
+    var top, left;
+    var spaceAbove = rect.top - GAP;
+    var spaceBelow = vh - rect.bottom - GAP;
+
+    if (spaceAbove >= ph) {
+      /* Nahoře */
+      top = rect.top - ph - GAP;
+      popup.classList.remove('arrow-up');
+      popup.classList.add('arrow-down');
+    } else if (spaceBelow >= ph) {
+      /* Pod kartou */
+      top = rect.bottom + GAP;
+      popup.classList.remove('arrow-down');
+      popup.classList.add('arrow-up');
+    } else {
+      /* Vedle — vpravo nebo vlevo */
+      top = Math.max(8, Math.min(rect.top, vh - ph - 8));
+      popup.classList.remove('arrow-up','arrow-down');
+      if (rect.right + pw + GAP <= vw) {
+        left = rect.right + GAP;
+      } else {
+        left = rect.left - pw - GAP;
+      }
+      popup.style.top  = Math.round(top)  + 'px';
+      popup.style.left = Math.round(left) + 'px';
+      return;
     }
 
-    /* Akční tlačítka */
-    .dr-hover-btns {
-      display: flex;
-      gap: 6px;
-      margin-top: 2px;
-    }
-    .dr-hover-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-family: 'DM Sans', -apple-system, sans-serif;
-      font-size: 0.65rem;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      transition: all 0.18s cubic-bezier(0.25,1,0.5,1);
-      white-space: nowrap;
-      pointer-events: auto;
-    }
-    .dr-hover-btn.play {
-      background: #4a9eff;
-      color: #fff;
-      flex: 1;
-      justify-content: center;
-      box-shadow: 0 4px 16px rgba(74,158,255,0.45);
-    }
-    .dr-hover-btn.play:hover {
-      background: #6fb3ff;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(74,158,255,0.6);
-    }
-    .dr-hover-btn.more {
-      background: rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.75);
-      border: 0.5px solid rgba(255,255,255,0.15);
-      padding: 6px 10px;
-    }
-    .dr-hover-btn.more:hover {
-      background: rgba(255,255,255,0.18);
-      color: #fff;
-      transform: translateY(-1px);
+    /* Horizontální zarovnání — vycentrovat na kartu, ale nepřetékat */
+    left = rect.left + (rect.width / 2) - (pw / 2);
+    left = Math.max(8, Math.min(left, vw - pw - 8));
+
+    popup.style.top  = Math.round(top)  + 'px';
+    popup.style.left = Math.round(left) + 'px';
+  }
+
+  function fillPopup(card) {
+    var d = getCardData(card);
+
+    /* Thumb */
+    var thumb = el('.dr-pop-thumb');
+    if (d.img) {
+      thumb.src = d.img;
+      thumb.style.display = 'block';
+    } else {
+      thumb.style.display = 'none';
     }
 
-    /* Glow border na hover */
-    .disco-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 12px;
-      box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.05);
-      transition: box-shadow 0.3s ease;
-      z-index: 25;
-      pointer-events: none;
-    }
-    .disco-card:hover::after {
-      box-shadow:
-        inset 0 0 0 0.5px rgba(255,255,255,0.14),
-        0 0 0 0.5px rgba(255,255,255,0.06);
-    }
+    /* Title */
+    el('.dr-pop-title').textContent = d.title;
 
-    /* Sousední karty — scale down */
-    .disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
-      transform: scale(0.95) !important;
-      opacity: 0.6 !important;
-      transition: transform 0.28s ease, opacity 0.28s ease !important;
-    }
+    /* Type */
+    var typeEl = el('.dr-pop-type');
+    typeEl.textContent = d.type;
+    typeEl.style.display = d.type ? '' : 'none';
 
-    /* Loader bar nahoře na hover */
-    .dr-loader-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 2.5px;
-      width: 0%;
-      background: linear-gradient(to right, #4a9eff, #a855f7);
-      border-radius: 0 2px 2px 0;
-      z-index: 30;
-      opacity: 0;
-      transition: opacity 0.15s;
-    }
-    .disco-card:hover .dr-loader-bar {
-      opacity: 1;
-      animation: dr-load 1.2s cubic-bezier(0.4,0,0.2,1) forwards;
-    }
-    @keyframes dr-load {
-      0%   { width: 0%;   opacity: 1; }
-      60%  { width: 85%;  opacity: 1; }
-      90%  { width: 95%;  opacity: 1; }
-      100% { width: 100%; opacity: 0; }
+    /* Rating */
+    var rVal = parseFloat(d.rating);
+    var ratWrap = el('.dr-pop-rating');
+    el('.dr-pop-rat-val').textContent = d.rating;
+    ratWrap.style.display = rVal > 0 ? 'inline-flex' : 'none';
+
+    /* Year */
+    var yearEl = el('.dr-pop-year');
+    yearEl.textContent = d.year;
+    yearEl.style.display = d.year ? '' : 'none';
+
+    /* Dots */
+    var dots = popup.querySelectorAll('.dr-pop-dot');
+    /* Skryj tecky pokud nema souseda */
+    dots[0].style.display = (d.type && (rVal > 0 || d.year)) ? '' : 'none';
+    dots[1].style.display = (rVal > 0 && d.year) ? '' : 'none';
+
+    /* Genres */
+    var genreEl = el('.dr-pop-genres');
+    genreEl.innerHTML = '';
+    if (d.genres.length > 0) {
+      d.genres.forEach(function(g) {
+        var span = document.createElement('span');
+        span.className = 'dr-pop-genre';
+        span.textContent = g;
+        genreEl.appendChild(span);
+      });
+      genreEl.style.display = 'flex';
+    } else {
+      genreEl.style.display = 'none';
     }
 
-    /* Původní disco-card-info skrýt — hover panel ho nahrazuje */
-    .disco-card .disco-card-info {
-      opacity: 0 !important;
-      pointer-events: none !important;
-      transition: none !important;
-    }
-  `;
-  document.head.appendChild(style);
+    /* Desc */
+    var descEl = el('.dr-pop-desc');
+    descEl.textContent = d.desc;
+    descEl.style.display = d.desc ? '' : 'none';
+  }
 
-  /* ── Attach hover panel na každou kartu ── */
-  function attachHoverPanel(card) {
-    if (card._drHoverAttached) return;
-    card._drHoverAttached = true;
+  function showPopup(card) {
+    if (activeCard === card) return;
+    activeCard = card;
+    clearTimeout(hideTimer);
 
-    /* Data z existujících elementů */
-    var nameEl   = card.querySelector('.disco-card-name');
-    var ratingEl = card.querySelector('.disco-card-rating, .dr-rating-top');
-    var typeEl   = card.querySelector('.disco-card-type');
-    var aiBadge  = card.querySelector('.ai-match-badge');
+    fillPopup(card);
+    /* Schovej aby se mohl renderovat a zmerit */
+    popup.style.visibility = 'hidden';
+    popup.classList.remove('visible');
+    popup.style.display = 'flex';
 
-    var title  = nameEl   ? nameEl.textContent.trim() : '';
-    var rTxt   = (function(){
-      var el = card.querySelector('.dr-rating-top');
-      if (el) return el.textContent.replace(/[^0-9.]/g,'').trim();
-      var r  = card.querySelector('.disco-card-rating');
-      return r ? r.textContent.replace(/[^0-9.]/g,'').trim() : '';
-    })();
-    var type   = typeEl   ? typeEl.textContent.replace(/[^a-zA-ZáčďéěíňóřšťůúýžÁČĎÉĚÍŇÓŘŠŤŮÚÝŽ\s]/g,'').trim() : '';
+    /* Po jednom frame zmerime a umistime */
+    requestAnimationFrame(function() {
+      positionPopup(card);
+      popup.style.visibility = '';
+      popup.classList.add('visible');
+    });
+  }
 
-    /* Rok z data-year nebo z badge textu */
-    var year = card.dataset.year || card.getAttribute('data-year') || '';
-    if (!year) {
-      var yearM = (card.getAttribute('onclick') || '').match(/,\s*(\d{4})\s*[,)]/);
-      if (yearM) year = yearM[1];
-    }
+  function hidePopup() {
+    activeCard = null;
+    popup.classList.remove('visible');
+    hideTimer = setTimeout(function() {
+      popup.style.display = 'none';
+    }, 220);
+  }
 
-    /* Žánry z data-genres */
-    var genresRaw = card.dataset.genres || card.getAttribute('data-genres') || '';
-    var genres = genresRaw ? genresRaw.split(',').map(function(g){ return g.trim(); }).filter(Boolean).slice(0,3) : [];
+  /* Kliknutí v popupu */
+  el('.dr-pop-btn.play').addEventListener('click', function() {
+    if (activeCard) activeCard.click();
+  });
+  el('.dr-pop-btn.wl').addEventListener('click', function() {
+    if (!activeCard) return;
+    /* Najdi watchlist tlacitko na karte nebo spust finder */
+    var finder = activeCard.querySelector('.disco-card-finder-btn');
+    if (finder) finder.click();
+    else activeCard.click();
+  });
 
-    var PLAY_SVG = '<svg viewBox="0 0 14 14" fill="currentColor" width="11" height="11"><polygon points="3,2 12,7 3,12"/></svg>';
-    var MORE_SVG = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><circle cx="7" cy="7" r="5.5"/><path d="M7 4.5v3l1.5 1.5"/></svg>';
-    var STAR_SVG = '<svg viewBox="0 0 12 12" fill="#f0c94a" width="9" height="9"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9.2,11 6,9.2 2.8,11 3.5,7.5 1,5 4.5,4.5"/></svg>';
+  /* Hover popup zůstane viditelný i při přejetí na popup */
+  popup.addEventListener('mouseenter', function() {
+    clearTimeout(hideTimer);
+    clearTimeout(showTimer);
+  });
+  popup.addEventListener('mouseleave', function() {
+    hideTimer = setTimeout(hidePopup, 120);
+  });
+
+  /* ── Attach na karty ── */
+  function attachCard(card) {
+    if (card._drPopupDone) return;
+    card._drPopupDone = true;
 
     /* Loader bar */
-    var loader = document.createElement('div');
-    loader.className = 'dr-loader-bar';
-
-    /* Hover panel */
-    var panel = document.createElement('div');
-    panel.className = 'dr-hover-panel';
-
-    var content = document.createElement('div');
-    content.className = 'dr-hover-content';
-
-    /* Titulek */
-    var titleEl = document.createElement('div');
-    titleEl.className = 'dr-hover-title';
-    titleEl.textContent = title;
-    content.appendChild(titleEl);
-
-    /* Meta — rok + rating + typ */
-    if (year || rTxt || type) {
-      var meta = document.createElement('div');
-      meta.className = 'dr-hover-meta';
-
-      if (type) {
-        var typeTag = document.createElement('span');
-        typeTag.className = 'dr-hover-type';
-        typeTag.textContent = type;
-        meta.appendChild(typeTag);
-        var dot = document.createElement('span');
-        dot.className = 'dr-hover-dot';
-        meta.appendChild(dot);
-      }
-      if (rTxt && parseFloat(rTxt) > 0) {
-        var rat = document.createElement('span');
-        rat.className = 'dr-hover-rating';
-        rat.innerHTML = STAR_SVG + '<span style="margin-left:2px">' + rTxt + '</span>';
-        meta.appendChild(rat);
-      }
-      if (year) {
-        if (rTxt || type) {
-          var dot2 = document.createElement('span');
-          dot2.className = 'dr-hover-dot';
-          meta.appendChild(dot2);
-        }
-        var yr = document.createElement('span');
-        yr.className = 'dr-hover-year';
-        yr.textContent = year;
-        meta.appendChild(yr);
-      }
-      content.appendChild(meta);
+    if (!card.querySelector('.dr-loader-bar')) {
+      var lb = document.createElement('div');
+      lb.className = 'dr-loader-bar';
+      card.appendChild(lb);
     }
 
-    /* Žánry */
-    if (genres.length > 0) {
-      var genreRow = document.createElement('div');
-      genreRow.className = 'dr-hover-genres';
-      genres.forEach(function(g) {
-        var tag = document.createElement('span');
-        tag.className = 'dr-hover-genre';
-        tag.textContent = g;
-        genreRow.appendChild(tag);
-      });
-      content.appendChild(genreRow);
-    }
-
-    /* Tlačítka */
-    var btns = document.createElement('div');
-    btns.className = 'dr-hover-btns';
-
-    var playBtn = document.createElement('button');
-    playBtn.className = 'dr-hover-btn play';
-    playBtn.innerHTML = PLAY_SVG + '<span>Přehrát</span>';
-    playBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      card.click();
-    });
-    btns.appendChild(playBtn);
-
-    var moreBtn = document.createElement('button');
-    moreBtn.className = 'dr-hover-btn more';
-    moreBtn.innerHTML = MORE_SVG;
-    moreBtn.title = 'Detail';
-    moreBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      /* Zkus otevrit series modal nebo cinema info */
-      var finderBtn = card.querySelector('.disco-card-finder-btn');
-      if (finderBtn) finderBtn.click();
-      else card.click();
-    });
-    btns.appendChild(moreBtn);
-    content.appendChild(btns);
-
-    panel.appendChild(content);
-    card.appendChild(loader);
-    card.appendChild(panel);
-
-    /* Reset loader animace pri opakovanem hoveru */
     card.addEventListener('mouseenter', function() {
-      loader.style.animation = 'none';
-      loader.offsetHeight; /* reflow */
-      loader.style.animation = '';
+      clearTimeout(hideTimer);
+      clearTimeout(showTimer);
+      /* Reset loader */
+      var lb = card.querySelector('.dr-loader-bar');
+      if (lb) { lb.style.animation = 'none'; lb.offsetHeight; lb.style.animation = ''; }
+      /* Kratky delay aby nesviitlo pri rychlem projeti */
+      showTimer = setTimeout(function() { showPopup(card); }, 180);
+    });
+
+    card.addEventListener('mouseleave', function() {
+      clearTimeout(showTimer);
+      hideTimer = setTimeout(hidePopup, 160);
     });
   }
 
-  /* ── Observer — spusti attachHoverPanel na nove karty ── */
   function scanCards() {
-    document.querySelectorAll('#discoBody .disco-card, .universe-overlay .disco-card').forEach(attachHoverPanel);
+    document.querySelectorAll('#discoBody .disco-card, .universe-overlay .disco-card').forEach(attachCard);
   }
 
-  /* Spustit ihned + observer */
-  var scanTimer;
+  /* Observer + polling */
+  var scanT;
   var body = document.getElementById('discoBody');
   if (body) {
     new MutationObserver(function() {
-      clearTimeout(scanTimer);
-      scanTimer = setTimeout(scanCards, 100);
+      clearTimeout(scanT);
+      scanT = setTimeout(scanCards, 100);
     }).observe(body, { childList: true, subtree: true });
   }
 
-  /* Retry dokud discoBody nevznikne */
-  var hoverPoll = setInterval(function() {
+  var poll = setInterval(function() {
     var b = document.getElementById('discoBody');
     if (!b) return;
-    clearInterval(hoverPoll);
+    clearInterval(poll);
     scanCards();
-    setTimeout(scanCards, 600);
-    setTimeout(scanCards, 1500);
+    [600, 1500, 3000].forEach(function(t) { setTimeout(scanCards, t); });
   }, 150);
+
+  /* Skryj popup při scrollu */
+  document.addEventListener('scroll', hidePopup, true);
+
 })();
