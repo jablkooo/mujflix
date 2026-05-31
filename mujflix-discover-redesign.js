@@ -370,3 +370,407 @@
 
   console.log('[MFDiscover] v4 loaded');
 })();
+
+/* ══════════════════════════════════════════════════════════════
+   HOVER BEHAVIOUR — spustí se jednou na každé kartě
+   Co se děje při hover:
+   1. Expanduje info panel — jméno + rok + genre tagy
+   2. Fade-in akcí: tlačítka Přehrát + Přidat
+   3. Jemný glow border podle dominantní barvy posteru
+   4. Zatáhne sousední karty zpět (scale down)
+   5. Loader bar animace (simulation "rychle se načítá")
+══════════════════════════════════════════════════════════════ */
+(function setupHoverBehaviour() {
+  var CSS_ID = 'dr-hover-css';
+  if (document.getElementById(CSS_ID)) return;
+
+  /* ── Inject hover CSS ── */
+  var style = document.createElement('style');
+  style.id = CSS_ID;
+  style.textContent = `
+    /* Card hover state — expand info */
+    .disco-card .dr-hover-panel {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.22s cubic-bezier(0.25,1,0.5,1);
+    }
+    .disco-card:hover .dr-hover-panel {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Dark overlay only on hover */
+    .disco-card .dr-hover-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      background: linear-gradient(
+        to top,
+        rgba(4,4,12,0.98) 0%,
+        rgba(4,4,12,0.94) 40%,
+        rgba(4,4,12,0.65) 68%,
+        rgba(4,4,12,0.15) 90%,
+        transparent       100%
+      );
+      z-index: 0;
+    }
+
+    /* Hover content wrapper */
+    .disco-card .dr-hover-content {
+      position: relative;
+      z-index: 2;
+      padding: 10px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transform: translateY(6px);
+      transition: transform 0.28s cubic-bezier(0.34,1.44,0.64,1);
+    }
+    .disco-card:hover .dr-hover-content {
+      transform: translateY(0);
+    }
+
+    /* Hover název — větší */
+    .dr-hover-title {
+      font-family: 'Syne', -apple-system, sans-serif;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: rgba(255,255,255,0.98);
+      letter-spacing: -0.3px;
+      line-height: 1.2;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      text-shadow: 0 1px 12px rgba(0,0,0,0.9);
+    }
+
+    /* Meta row — rok, rating, typ */
+    .dr-hover-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .dr-hover-year {
+      font-size: 0.58rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.42);
+    }
+    .dr-hover-dot {
+      width: 2px; height: 2px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+    .dr-hover-rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.6rem;
+      font-weight: 800;
+      color: #f0c94a;
+    }
+    .dr-hover-type {
+      font-size: 0.52rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+      background: rgba(255,255,255,0.07);
+      border: 0.5px solid rgba(255,255,255,0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Genre tagy */
+    .dr-hover-genres {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .dr-hover-genre {
+      font-size: 0.5rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      color: rgba(255,255,255,0.38);
+      background: rgba(255,255,255,0.055);
+      border: 0.5px solid rgba(255,255,255,0.09);
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    /* Akční tlačítka */
+    .dr-hover-btns {
+      display: flex;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .dr-hover-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.18s cubic-bezier(0.25,1,0.5,1);
+      white-space: nowrap;
+      pointer-events: auto;
+    }
+    .dr-hover-btn.play {
+      background: #4a9eff;
+      color: #fff;
+      flex: 1;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(74,158,255,0.45);
+    }
+    .dr-hover-btn.play:hover {
+      background: #6fb3ff;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(74,158,255,0.6);
+    }
+    .dr-hover-btn.more {
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.75);
+      border: 0.5px solid rgba(255,255,255,0.15);
+      padding: 6px 10px;
+    }
+    .dr-hover-btn.more:hover {
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Glow border na hover */
+    .disco-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.05);
+      transition: box-shadow 0.3s ease;
+      z-index: 25;
+      pointer-events: none;
+    }
+    .disco-card:hover::after {
+      box-shadow:
+        inset 0 0 0 0.5px rgba(255,255,255,0.14),
+        0 0 0 0.5px rgba(255,255,255,0.06);
+    }
+
+    /* Sousední karty — scale down */
+    .disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
+      transform: scale(0.95) !important;
+      opacity: 0.6 !important;
+      transition: transform 0.28s ease, opacity 0.28s ease !important;
+    }
+
+    /* Loader bar nahoře na hover */
+    .dr-loader-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 2.5px;
+      width: 0%;
+      background: linear-gradient(to right, #4a9eff, #a855f7);
+      border-radius: 0 2px 2px 0;
+      z-index: 30;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .disco-card:hover .dr-loader-bar {
+      opacity: 1;
+      animation: dr-load 1.2s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    @keyframes dr-load {
+      0%   { width: 0%;   opacity: 1; }
+      60%  { width: 85%;  opacity: 1; }
+      90%  { width: 95%;  opacity: 1; }
+      100% { width: 100%; opacity: 0; }
+    }
+
+    /* Původní disco-card-info skrýt — hover panel ho nahrazuje */
+    .disco-card .disco-card-info {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transition: none !important;
+    }
+  `;
+  document.head.appendChild(style);
+
+  /* ── Attach hover panel na každou kartu ── */
+  function attachHoverPanel(card) {
+    if (card._drHoverAttached) return;
+    card._drHoverAttached = true;
+
+    /* Data z existujících elementů */
+    var nameEl   = card.querySelector('.disco-card-name');
+    var ratingEl = card.querySelector('.disco-card-rating, .dr-rating-top');
+    var typeEl   = card.querySelector('.disco-card-type');
+    var aiBadge  = card.querySelector('.ai-match-badge');
+
+    var title  = nameEl   ? nameEl.textContent.trim() : '';
+    var rTxt   = (function(){
+      var el = card.querySelector('.dr-rating-top');
+      if (el) return el.textContent.replace(/[^0-9.]/g,'').trim();
+      var r  = card.querySelector('.disco-card-rating');
+      return r ? r.textContent.replace(/[^0-9.]/g,'').trim() : '';
+    })();
+    var type   = typeEl   ? typeEl.textContent.replace(/[^a-zA-ZáčďéěíňóřšťůúýžÁČĎÉĚÍŇÓŘŠŤŮÚÝŽ\s]/g,'').trim() : '';
+
+    /* Rok z data-year nebo z badge textu */
+    var year = card.dataset.year || card.getAttribute('data-year') || '';
+    if (!year) {
+      var yearM = (card.getAttribute('onclick') || '').match(/,\s*(\d{4})\s*[,)]/);
+      if (yearM) year = yearM[1];
+    }
+
+    /* Žánry z data-genres */
+    var genresRaw = card.dataset.genres || card.getAttribute('data-genres') || '';
+    var genres = genresRaw ? genresRaw.split(',').map(function(g){ return g.trim(); }).filter(Boolean).slice(0,3) : [];
+
+    var PLAY_SVG = '<svg viewBox="0 0 14 14" fill="currentColor" width="11" height="11"><polygon points="3,2 12,7 3,12"/></svg>';
+    var MORE_SVG = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><circle cx="7" cy="7" r="5.5"/><path d="M7 4.5v3l1.5 1.5"/></svg>';
+    var STAR_SVG = '<svg viewBox="0 0 12 12" fill="#f0c94a" width="9" height="9"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9.2,11 6,9.2 2.8,11 3.5,7.5 1,5 4.5,4.5"/></svg>';
+
+    /* Loader bar */
+    var loader = document.createElement('div');
+    loader.className = 'dr-loader-bar';
+
+    /* Hover panel */
+    var panel = document.createElement('div');
+    panel.className = 'dr-hover-panel';
+
+    var content = document.createElement('div');
+    content.className = 'dr-hover-content';
+
+    /* Titulek */
+    var titleEl = document.createElement('div');
+    titleEl.className = 'dr-hover-title';
+    titleEl.textContent = title;
+    content.appendChild(titleEl);
+
+    /* Meta — rok + rating + typ */
+    if (year || rTxt || type) {
+      var meta = document.createElement('div');
+      meta.className = 'dr-hover-meta';
+
+      if (type) {
+        var typeTag = document.createElement('span');
+        typeTag.className = 'dr-hover-type';
+        typeTag.textContent = type;
+        meta.appendChild(typeTag);
+        var dot = document.createElement('span');
+        dot.className = 'dr-hover-dot';
+        meta.appendChild(dot);
+      }
+      if (rTxt && parseFloat(rTxt) > 0) {
+        var rat = document.createElement('span');
+        rat.className = 'dr-hover-rating';
+        rat.innerHTML = STAR_SVG + '<span style="margin-left:2px">' + rTxt + '</span>';
+        meta.appendChild(rat);
+      }
+      if (year) {
+        if (rTxt || type) {
+          var dot2 = document.createElement('span');
+          dot2.className = 'dr-hover-dot';
+          meta.appendChild(dot2);
+        }
+        var yr = document.createElement('span');
+        yr.className = 'dr-hover-year';
+        yr.textContent = year;
+        meta.appendChild(yr);
+      }
+      content.appendChild(meta);
+    }
+
+    /* Žánry */
+    if (genres.length > 0) {
+      var genreRow = document.createElement('div');
+      genreRow.className = 'dr-hover-genres';
+      genres.forEach(function(g) {
+        var tag = document.createElement('span');
+        tag.className = 'dr-hover-genre';
+        tag.textContent = g;
+        genreRow.appendChild(tag);
+      });
+      content.appendChild(genreRow);
+    }
+
+    /* Tlačítka */
+    var btns = document.createElement('div');
+    btns.className = 'dr-hover-btns';
+
+    var playBtn = document.createElement('button');
+    playBtn.className = 'dr-hover-btn play';
+    playBtn.innerHTML = PLAY_SVG + '<span>Přehrát</span>';
+    playBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      card.click();
+    });
+    btns.appendChild(playBtn);
+
+    var moreBtn = document.createElement('button');
+    moreBtn.className = 'dr-hover-btn more';
+    moreBtn.innerHTML = MORE_SVG;
+    moreBtn.title = 'Detail';
+    moreBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      /* Zkus otevrit series modal nebo cinema info */
+      var finderBtn = card.querySelector('.disco-card-finder-btn');
+      if (finderBtn) finderBtn.click();
+      else card.click();
+    });
+    btns.appendChild(moreBtn);
+    content.appendChild(btns);
+
+    panel.appendChild(content);
+    card.appendChild(loader);
+    card.appendChild(panel);
+
+    /* Reset loader animace pri opakovanem hoveru */
+    card.addEventListener('mouseenter', function() {
+      loader.style.animation = 'none';
+      loader.offsetHeight; /* reflow */
+      loader.style.animation = '';
+    });
+  }
+
+  /* ── Observer — spusti attachHoverPanel na nove karty ── */
+  function scanCards() {
+    document.querySelectorAll('#discoBody .disco-card, .universe-overlay .disco-card').forEach(attachHoverPanel);
+  }
+
+  /* Spustit ihned + observer */
+  var scanTimer;
+  var body = document.getElementById('discoBody');
+  if (body) {
+    new MutationObserver(function() {
+      clearTimeout(scanTimer);
+      scanTimer = setTimeout(scanCards, 100);
+    }).observe(body, { childList: true, subtree: true });
+  }
+
+  /* Retry dokud discoBody nevznikne */
+  var hoverPoll = setInterval(function() {
+    var b = document.getElementById('discoBody');
+    if (!b) return;
+    clearInterval(hoverPoll);
+    scanCards();
+    setTimeout(scanCards, 600);
+    setTimeout(scanCards, 1500);
+  }, 150);
+})();
