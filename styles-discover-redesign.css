@@ -1,61 +1,84 @@
 /* ═══════════════════════════════════════════════════════════════
-   MujFlix — DISCOVER TOTAL REDESIGN v4
-   Uplne jiny vizualni jazyk nez originál.
+   MujFlix — DISCOVER GLASS THEME v5
+   Portovano z JellyfinGlassTheme → MujFlix selektory.
+   Stejny vizualni jazyk: Inter font, glassmorphism, rounded UI,
+   blur pozadi, hover shimmer, cinematic hero.
 ═══════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/* ── DESIGN TOKENS (preneseno z JellyfinGlassTheme :root) ── */
 :root {
-  --dr-bg:     #060610;
-  --dr-s1:     rgba(255,255,255,0.03);
-  --dr-s2:     rgba(255,255,255,0.055);
-  --dr-brd:    rgba(255,255,255,0.07);
-  --dr-brd2:   rgba(255,255,255,0.13);
-  --dr-blue:   #4a9eff;
-  --dr-bdim:   rgba(74,158,255,0.14);
-  --dr-gold:   #f0c94a;
-  --dr-txt:    rgba(255,255,255,0.97);
-  --dr-sub:    rgba(255,255,255,0.52);
-  --dr-muted:  rgba(255,255,255,0.25);
-  --dr-fd:     'Syne', -apple-system, sans-serif;
-  --dr-fb:     'DM Sans', -apple-system, sans-serif;
-  --dr-ease:   cubic-bezier(0.25,1,0.5,1);
-  --dr-spring: cubic-bezier(0.34,1.44,0.64,1);
+  /* Barvy — stejne jako Jellyfin Glass */
+  --jg-dark:      #000000;
+  --jg-dark-a:    rgba(17,24,39,0.85);
+  --jg-mid-a:     rgba(29,38,53,0.85);
+  --jg-surface:   #0a0a0a;
+  --jg-border:    hsl(214,13%,32%);
+  --jg-border-d:  hsl(214,13%,22%);
+  --jg-border-l:  hsla(0,0%,100%,0.2);
+  --jg-active-a:  rgba(255,255,255,0.1);
+  --jg-active:    #e0e0e0;
+  --jg-text:      #dedede;
+  --jg-dim:       #777777;
+  --jg-shadow:    0 20px 50px rgba(0,0,0,0.9);
+  --jg-r-lg:      14px;
+  --jg-r-sm:      8px;
+  --jg-blur-sm:   blur(5px);
+  --jg-blur-md:   blur(10px);
+  --jg-blur-lg:   blur(20px);
 
-  /* Karta — landscape 16:10 format */
-  --cw: 172px;
-  --ch: 258px;
-  --cr: 14px;
-  --px: 52px;
-  --hh: 70px;
+  /* MujFlix specifika */
+  --dr-blue:      #4a9eff;
+  --dr-gold:      #f0c94a;
+  --dr-font:      'Inter', -apple-system, sans-serif;
+  --dr-ease:      cubic-bezier(0.25,1,0.5,1);
+  --dr-spring:    cubic-bezier(0.34,1.44,0.64,1);
+
+  /* Card dimensions — poster format */
+  --cw:  172px;
+  --ch:  258px;
+  --cr:  14px;
+  --px:  52px;
+  --hh:  70px;
 }
 
-/* ═══════════════════════════════
-   OVERLAY
-═══════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL FONT — Inter (stejny jako JellyfinGlassTheme)
+═══════════════════════════════════════════════════════════════ */
+.universe-overlay,
+.universe-overlay * {
+  font-family: var(--dr-font) !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OVERLAY — cierne pozadi s gradient ambient
+═══════════════════════════════════════════════════════════════ */
 .universe-overlay {
-  background: var(--dr-bg) !important;
-  font-family: var(--dr-fb) !important;
+  background: var(--jg-dark) !important;
   flex-direction: column !important;
   height: 100dvh !important;
   overflow: hidden !important;
 }
 .universe-overlay.open { display: flex !important; }
 
-/* Noise texture + gradient bg */
 .universe-overlay.open::before {
   content: '' !important;
   position: fixed !important;
   inset: 0 !important;
   background:
-    radial-gradient(ellipse 70% 50% at 10% -5%,  rgba(74,158,255,0.065) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 60% at 92% 105%, rgba(160,74,255,0.045) 0%, transparent 55%) !important;
+    radial-gradient(ellipse 60% 40% at 15% -5%,
+      rgba(74,158,255,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 55% at 88% 108%,
+      rgba(120,74,255,0.045) 0%, transparent 55%) !important;
   pointer-events: none !important;
   z-index: 0 !important;
 }
 
-/* ═══════════════════════════════
-   HEADER — kompaktni, cistý
-═══════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   HEADER — glass blur (ako Jellyfin top bar)
+═══════════════════════════════════════════════════════════════ */
 .universe-overlay .disco-header {
   position: sticky !important;
   top: 0 !important;
@@ -65,10 +88,13 @@
   display: flex !important;
   align-items: center !important;
   gap: 20px !important;
-  background: rgba(6,6,16,0.92) !important;
-  backdrop-filter: blur(52px) saturate(2) !important;
-  -webkit-backdrop-filter: blur(52px) saturate(2) !important;
-  border-bottom: 0.5px solid var(--dr-brd) !important;
+  background: linear-gradient(180deg,
+    rgba(10,10,20,0.95) 30%,
+    rgba(10,10,20,0.85) 70%,
+    transparent 100%) !important;
+  backdrop-filter: blur(20px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+  border-bottom: 1px solid var(--jg-border-d) !important;
   flex-shrink: 0 !important;
 }
 
@@ -80,59 +106,57 @@
 }
 
 .universe-overlay .disco-logo {
-  font-family: var(--dr-fd) !important;
   font-size: 0.65rem !important;
-  font-weight: 900 !important;
+  font-weight: 800 !important;
   letter-spacing: 4px !important;
   text-transform: uppercase !important;
-  color: var(--dr-muted) !important;
+  color: var(--jg-dim) !important;
 }
 
 .universe-overlay .disco-title {
-  font-family: var(--dr-fd) !important;
-  font-size: 1.6rem !important;
-  font-weight: 900 !important;
-  letter-spacing: -1.2px !important;
-  color: var(--dr-txt) !important;
+  font-size: 1.55rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -1px !important;
+  color: var(--jg-text) !important;
   line-height: 1 !important;
 }
 
+/* Search */
 .universe-overlay .uni-search-wrap {
   flex: 1 !important;
   max-width: 460px !important;
   position: relative !important;
 }
-
 .universe-overlay .uni-search-icon {
   position: absolute !important;
-  left: 15px !important;
+  left: 14px !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
   width: 15px !important;
   height: 15px !important;
-  color: var(--dr-muted) !important;
+  color: var(--jg-dim) !important;
   pointer-events: none !important;
 }
-
 .universe-overlay .uni-input {
   width: 100% !important;
-  background: var(--dr-s1) !important;
-  border: 0.5px solid var(--dr-brd) !important;
-  border-radius: 28px !important;
-  padding: 11px 44px !important;
-  font-family: var(--dr-fb) !important;
+  background: rgba(55,65,81,0.35) !important;
+  border: 1px solid var(--jg-border-d) !important;
+  border-radius: var(--jg-r-lg) !important;
+  padding: 10px 44px !important;
+  font-family: var(--dr-font) !important;
   font-size: 0.875rem !important;
-  color: var(--dr-txt) !important;
+  font-weight: 425 !important;
+  color: var(--jg-text) !important;
   outline: none !important;
   transition: all 0.2s !important;
+  backdrop-filter: var(--jg-blur-sm) !important;
 }
-.universe-overlay .uni-input::placeholder { color: var(--dr-muted) !important; }
+.universe-overlay .uni-input::placeholder { color: var(--jg-dim) !important; }
 .universe-overlay .uni-input:focus {
-  border-color: rgba(74,158,255,0.42) !important;
-  background: var(--dr-s2) !important;
-  box-shadow: 0 0 0 3px rgba(74,158,255,0.08) !important;
+  border-color: var(--jg-border-l) !important;
+  background: rgba(55,65,81,0.5) !important;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.06) !important;
 }
-
 .universe-overlay .uni-clear-btn {
   position: absolute !important;
   right: 12px !important;
@@ -140,12 +164,11 @@
   transform: translateY(-50%) !important;
   background: none !important;
   border: none !important;
-  color: var(--dr-muted) !important;
+  color: var(--jg-dim) !important;
   cursor: pointer !important;
-  padding: 4px !important;
-  display: flex !important;
 }
 
+/* Header pravá strana */
 .universe-overlay .disco-header > div:last-child {
   display: flex !important;
   align-items: center !important;
@@ -153,30 +176,26 @@
   margin-left: auto !important;
   flex-shrink: 0 !important;
 }
-
-/* AI button */
 .universe-overlay .disco-header > div:last-child > button:first-child {
   display: inline-flex !important;
   align-items: center !important;
   gap: 7px !important;
-  padding: 9px 20px !important;
-  border-radius: 24px !important;
-  background: var(--dr-bdim) !important;
-  border: 0.5px solid rgba(74,158,255,0.28) !important;
+  padding: 8px 20px !important;
+  border-radius: var(--jg-r-lg) !important;
+  background: rgba(74,158,255,0.12) !important;
+  border: 1px solid rgba(74,158,255,0.25) !important;
   color: var(--dr-blue) !important;
-  font-family: var(--dr-fb) !important;
+  font-family: var(--dr-font) !important;
   font-size: 0.78rem !important;
   font-weight: 600 !important;
   cursor: pointer !important;
-  transition: all 0.22s var(--dr-ease) !important;
+  transition: all 0.18s var(--dr-ease) !important;
   white-space: nowrap !important;
 }
 .universe-overlay .disco-header > div:last-child > button:first-child:hover {
-  background: rgba(74,158,255,0.24) !important;
-  border-color: rgba(74,158,255,0.5) !important;
-  transform: translateY(-1px) !important;
+  background: rgba(74,158,255,0.22) !important;
+  border-color: rgba(74,158,255,0.45) !important;
 }
-
 .universe-overlay .disco-close {
   width: 36px !important;
   height: 36px !important;
@@ -184,41 +203,41 @@
   align-items: center !important;
   justify-content: center !important;
   border-radius: 50% !important;
-  background: var(--dr-s1) !important;
-  border: 0.5px solid var(--dr-brd) !important;
-  color: var(--dr-sub) !important;
+  background: rgba(55,65,81,0.4) !important;
+  border: 1px solid var(--jg-border-d) !important;
+  color: var(--jg-text) !important;
   cursor: pointer !important;
   transition: all 0.18s !important;
   flex-shrink: 0 !important;
   font-size: 1rem !important;
+  backdrop-filter: var(--jg-blur-sm) !important;
 }
 .universe-overlay .disco-close:hover {
-  background: var(--dr-s2) !important;
-  color: var(--dr-txt) !important;
-  border-color: var(--dr-brd2) !important;
+  background: rgba(255,255,255,0.1) !important;
+  border-color: var(--jg-border-l) !important;
 }
 
-/* ═══════════════════════════════
-   GENRE NAV — redesign
-═══════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   GENRE NAV — glass tabs (ako Jellyfin emby-tabs)
+═══════════════════════════════════════════════════════════════ */
 #discoNav,
 .universe-overlay .disco-nav {
   display: flex !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 3px !important;
   padding: 0 var(--px) !important;
-  height: 54px !important;
+  height: 52px !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   scrollbar-width: none !important;
   flex-shrink: 0 !important;
-  background: rgba(6,6,16,0.85) !important;
-  border-bottom: 0.5px solid rgba(255,255,255,0.055) !important;
+  background: rgba(10,10,20,0.7) !important;
+  border-bottom: 1px solid var(--jg-border-d) !important;
   position: sticky !important;
   top: var(--hh) !important;
   z-index: 100 !important;
-  backdrop-filter: blur(32px) !important;
-  -webkit-backdrop-filter: blur(32px) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
 }
 #discoNav::-webkit-scrollbar,
 .universe-overlay .disco-nav::-webkit-scrollbar { display: none !important; }
@@ -228,52 +247,46 @@
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
-  padding: 7px 16px !important;
-  border-radius: 10px !important;
-  border: 0.5px solid transparent !important;
+  padding: 6px 14px !important;
+  border-radius: var(--jg-r-sm) !important;
+  border: 1px solid transparent !important;
   background: transparent !important;
-  color: rgba(255,255,255,0.38) !important;
-  font-family: var(--dr-fb) !important;
-  font-size: 0.76rem !important;
+  color: var(--jg-dim) !important;
+  font-family: var(--dr-font) !important;
+  font-size: 0.78rem !important;
   font-weight: 500 !important;
   cursor: pointer !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
-  transition: all 0.16s var(--dr-ease) !important;
+  transition: all 0.125s ease !important;
   user-select: none !important;
-  letter-spacing: 0.1px !important;
   position: relative !important;
 }
 .universe-overlay .disco-nav-item::before { display: none !important; }
 
-/* SVG ikona v nav */
-.universe-overlay .disco-nav-item svg,
-#discoNav .disco-nav-item svg {
-  flex-shrink: 0 !important;
-  opacity: 0.6 !important;
-  transition: opacity 0.16s !important;
-}
-
 .universe-overlay .disco-nav-item:hover,
 #discoNav .disco-nav-item:hover {
-  background: rgba(255,255,255,0.06) !important;
-  border-color: rgba(255,255,255,0.09) !important;
-  color: rgba(255,255,255,0.75) !important;
+  background: var(--jg-active-a) !important;
+  border-color: var(--jg-border-d) !important;
+  color: var(--jg-active) !important;
+}
+.universe-overlay .disco-nav-item svg,
+#discoNav .disco-nav-item svg {
+  opacity: 0.55 !important;
+  flex-shrink: 0 !important;
 }
 .universe-overlay .disco-nav-item:hover svg,
-#discoNav .disco-nav-item:hover svg {
-  opacity: 0.85 !important;
-}
+#discoNav .disco-nav-item:hover svg { opacity: 0.9 !important; }
 
-/* AKTIVNÍ — výrazný modrou čárou dole */
+/* Aktivní chip */
 .universe-overlay .disco-nav-item.active,
 .universe-overlay .disco-nav-item.mf-chip-optimistic,
 #discoNav .disco-nav-item.active,
 #discoNav .disco-nav-item.mf-chip-optimistic {
-  background: rgba(74,158,255,0.1) !important;
-  border-color: rgba(74,158,255,0.22) !important;
-  color: #4a9eff !important;
-  font-weight: 700 !important;
+  background: rgba(224,224,224,0.1) !important;
+  border-color: var(--jg-border) !important;
+  color: var(--jg-active) !important;
+  font-weight: 600 !important;
   box-shadow: none !important;
   transform: none !important;
 }
@@ -282,25 +295,24 @@
 #discoNav .disco-nav-item.active svg,
 #discoNav .disco-nav-item.mf-chip-optimistic svg {
   opacity: 1 !important;
-  stroke: #4a9eff !important;
+  stroke: var(--jg-active) !important;
 }
-
-/* Spodní indikátor na aktivním */
+/* Spodní indikátor */
 .universe-overlay .disco-nav-item.active::after,
 #discoNav .disco-nav-item.active::after {
   content: '' !important;
   position: absolute !important;
   bottom: -1px !important;
-  left: 20% !important;
-  right: 20% !important;
+  left: 15% !important;
+  right: 15% !important;
   height: 2px !important;
-  background: #4a9eff !important;
+  background: var(--jg-active) !important;
   border-radius: 2px 2px 0 0 !important;
 }
 
-/* ═══════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
    BODY
-═══════════════════════════════ */
+═══════════════════════════════════════════════════════════════ */
 #discoBody,
 .universe-overlay .disco-body {
   flex: 1 1 auto !important;
@@ -314,197 +326,180 @@
 }
 #discoBody::-webkit-scrollbar { width: 3px !important; }
 #discoBody::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.06) !important;
+  background: var(--jg-border-d) !important;
   border-radius: 3px !important;
 }
 
-/* ═══════════════════════════════
-   HERO — velky, filmovy
-═══════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   HERO — cinematic, levy gradient (ako Jellyfin item page)
+═══════════════════════════════════════════════════════════════ */
 .universe-overlay .disco-hero {
   position: relative !important;
-  height: 480px !important;
+  height: 460px !important;
   overflow: hidden !important;
   cursor: pointer !important;
 }
-
 .universe-overlay .disco-hero-img {
   position: absolute !important;
-  inset: -10% 0 !important;
+  inset: -8% 0 !important;
   width: 100% !important;
-  height: 120% !important;
+  height: 116% !important;
   object-fit: cover !important;
-  object-position: center 22% !important;
+  object-position: center 18% !important;
   display: block !important;
   transition: transform 8s ease !important;
-  transform: scale(1.04) !important;
-  filter: saturate(1.15) !important;
+  transform: scale(1.03) !important;
+  filter: saturate(1.1) !important;
 }
 .universe-overlay .disco-hero:hover .disco-hero-img {
-  transform: scale(1.09) translateY(-10px) !important;
+  transform: scale(1.07) translateY(-8px) !important;
 }
-
-/* Gradient — silnejsi, dramatictejsi */
 .universe-overlay .disco-hero-grad {
   position: absolute !important;
   inset: 0 !important;
   background:
-    linear-gradient(to right, rgba(6,6,16,0.95) 0%, rgba(6,6,16,0.5) 50%, transparent 100%),
-    linear-gradient(to top,   rgba(6,6,16,1.0)  0%, rgba(6,6,16,0.5) 35%, transparent 70%) !important;
+    linear-gradient(to right,
+      rgba(0,0,0,0.96) 0%,
+      rgba(0,0,0,0.7)  35%,
+      rgba(0,0,0,0.25) 60%,
+      transparent      85%),
+    linear-gradient(to top,
+      rgba(0,0,0,1.0)  0%,
+      rgba(0,0,0,0.5)  35%,
+      transparent      65%) !important;
   z-index: 2 !important;
 }
-
 .universe-overlay .disco-hero-content {
   position: absolute !important;
   bottom: 0 !important;
   left: 0 !important;
-  right: 55% !important;
-  padding: 44px var(--px) !important;
+  right: 50% !important;
+  padding: 40px var(--px) !important;
   z-index: 5 !important;
 }
-
 .universe-overlay .disco-hero-badge {
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 14px !important;
   flex-wrap: wrap !important;
 }
-
 .universe-overlay .disco-hero-badge-type {
-  font-family: var(--dr-fb) !important;
   font-size: 0.6rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 1.8px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
   text-transform: uppercase !important;
-  color: var(--dr-sub) !important;
-  background: rgba(255,255,255,0.07) !important;
-  border: 0.5px solid rgba(255,255,255,0.15) !important;
-  padding: 4px 12px !important;
-  border-radius: 20px !important;
-  backdrop-filter: blur(8px) !important;
+  color: var(--jg-dim) !important;
+  background: rgba(55,65,81,0.5) !important;
+  border: 1px solid var(--jg-border-d) !important;
+  padding: 4px 11px !important;
+  border-radius: var(--jg-r-lg) !important;
+  backdrop-filter: var(--jg-blur-sm) !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 5px !important;
 }
-
 .universe-overlay .disco-hero-badge-rating {
-  font-size: 0.78rem !important;
-  font-weight: 800 !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
   color: var(--dr-gold) !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 4px !important;
 }
-
 .universe-overlay .disco-hero-badge-year {
-  font-size: 0.72rem !important;
-  color: var(--dr-muted) !important;
+  font-size: 0.7rem !important;
+  color: var(--jg-dim) !important;
   font-weight: 500 !important;
 }
-
 .universe-overlay .disco-hero-title {
-  font-family: var(--dr-fd) !important;
-  font-size: clamp(2.2rem, 5vw, 3.6rem) !important;
+  font-size: clamp(2rem,4.5vw,3.4rem) !important;
   font-weight: 900 !important;
-  color: var(--dr-txt) !important;
-  letter-spacing: -2px !important;
-  line-height: 1.0 !important;
-  margin-bottom: 14px !important;
-  text-shadow: 0 4px 40px rgba(0,0,0,0.6) !important;
+  color: var(--jg-text) !important;
+  letter-spacing: -1.5px !important;
+  line-height: 1.05 !important;
+  margin-bottom: 12px !important;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.8) !important;
 }
-
 .universe-overlay .disco-hero-desc {
   font-size: 0.875rem !important;
-  color: var(--dr-sub) !important;
-  line-height: 1.7 !important;
-  max-width: 480px !important;
-  margin-bottom: 26px !important;
-  font-weight: 400 !important;
+  color: var(--jg-dim) !important;
+  line-height: 1.65 !important;
+  max-width: 500px !important;
+  margin-bottom: 24px !important;
+  font-weight: 425 !important;
 }
-
 .universe-overlay .disco-hero-btns {
   display: flex !important;
   gap: 10px !important;
   align-items: center !important;
 }
-
 .universe-overlay .disco-hero-btn {
   display: inline-flex !important;
   align-items: center !important;
   gap: 8px !important;
-  padding: 14px 30px !important;
-  border-radius: 14px !important;
-  font-family: var(--dr-fb) !important;
-  font-size: 0.9rem !important;
+  padding: 13px 28px !important;
+  border-radius: var(--jg-r-lg) !important;
+  font-family: var(--dr-font) !important;
+  font-size: 0.88rem !important;
   font-weight: 700 !important;
   cursor: pointer !important;
   border: none !important;
-  transition: all 0.22s var(--dr-ease) !important;
-  letter-spacing: -0.1px !important;
+  transition: all 0.18s var(--dr-ease) !important;
 }
 .universe-overlay .disco-hero-btn.primary {
   background: var(--dr-blue) !important;
   color: #fff !important;
-  box-shadow: 0 8px 32px rgba(74,158,255,0.45) !important;
+  box-shadow: 0 6px 28px rgba(74,158,255,0.4) !important;
 }
 .universe-overlay .disco-hero-btn.primary:hover {
   background: #6fb3ff !important;
   transform: translateY(-2px) !important;
-  box-shadow: 0 14px 40px rgba(74,158,255,0.6) !important;
+  box-shadow: 0 10px 36px rgba(74,158,255,0.55) !important;
 }
 .universe-overlay .disco-hero-btn.secondary {
-  background: rgba(255,255,255,0.1) !important;
-  color: var(--dr-txt) !important;
-  border: 0.5px solid rgba(255,255,255,0.2) !important;
-  backdrop-filter: blur(12px) !important;
+  background: rgba(55,65,81,0.5) !important;
+  color: var(--jg-text) !important;
+  border: 1px solid var(--jg-border) !important;
+  backdrop-filter: var(--jg-blur-md) !important;
 }
 .universe-overlay .disco-hero-btn.secondary:hover {
-  background: rgba(255,255,255,0.18) !important;
+  background: rgba(55,65,81,0.75) !important;
   transform: translateY(-2px) !important;
 }
 
-/* ═══════════════════════════════
-   ROW HEADER
-═══════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   ROW HEADERS
+═══════════════════════════════════════════════════════════════ */
 .universe-overlay .disco-row-header,
 #discoBody .disco-row-header {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  padding: 36px var(--px) 16px !important;
+  padding: 34px var(--px) 14px !important;
   gap: 16px !important;
 }
-
 .universe-overlay .disco-row-title,
 #discoBody .disco-row-title {
-  font-family: var(--dr-fd) !important;
-  font-size: 1.2rem !important;
-  font-weight: 900 !important;
-  color: var(--dr-txt) !important;
-  letter-spacing: -0.6px !important;
-  line-height: 1.15 !important;
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+  color: var(--jg-text) !important;
+  letter-spacing: -0.4px !important;
+  line-height: 1.2 !important;
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
 }
-
 .universe-overlay .drt-tag,
 #discoBody .drt-tag {
-  font-family: var(--dr-fb) !important;
   font-size: 0.5rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 2px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.8px !important;
   text-transform: uppercase !important;
   color: var(--dr-blue) !important;
-  background: var(--dr-bdim) !important;
-  border: 0.5px solid rgba(74,158,255,0.22) !important;
+  background: rgba(74,158,255,0.12) !important;
+  border: 1px solid rgba(74,158,255,0.22) !important;
   padding: 3px 9px !important;
-  border-radius: 7px !important;
+  border-radius: 6px !important;
 }
-
 .universe-overlay .disco-row-nav { display: flex !important; align-items: center !important; gap: 4px !important; }
-
 .universe-overlay .disco-row-nav-btn,
 #discoBody .disco-row-nav-btn {
   width: 32px !important;
@@ -513,54 +508,56 @@
   align-items: center !important;
   justify-content: center !important;
   border-radius: 50% !important;
-  background: var(--dr-s1) !important;
-  border: 0.5px solid var(--dr-brd) !important;
-  color: var(--dr-sub) !important;
+  background: rgba(55,65,81,0.4) !important;
+  border: 1px solid var(--jg-border-d) !important;
+  color: var(--jg-dim) !important;
   cursor: pointer !important;
-  transition: all 0.18s !important;
+  transition: all 0.15s !important;
+  backdrop-filter: var(--jg-blur-sm) !important;
 }
 .universe-overlay .disco-row-nav-btn:hover,
 #discoBody .disco-row-nav-btn:hover {
-  background: var(--dr-s2) !important;
-  color: var(--dr-txt) !important;
-  border-color: var(--dr-brd2) !important;
+  background: rgba(255,255,255,0.1) !important;
+  border-color: var(--jg-border) !important;
+  color: var(--jg-text) !important;
 }
-
 #discoBody button[onclick*="refreshPersonalisedRow"],
 .universe-overlay button[onclick*="refreshPersonalisedRow"] {
-  font-family: var(--dr-fb) !important;
+  font-family: var(--dr-font) !important;
   font-size: 0.68rem !important;
-  font-weight: 700 !important;
+  font-weight: 600 !important;
   color: var(--dr-blue) !important;
-  background: var(--dr-bdim) !important;
-  border: 0.5px solid rgba(74,158,255,0.22) !important;
-  border-radius: 24px !important;
-  padding: 7px 16px !important;
+  background: rgba(74,158,255,0.1) !important;
+  border: 1px solid rgba(74,158,255,0.2) !important;
+  border-radius: var(--jg-r-lg) !important;
+  padding: 6px 14px !important;
   cursor: pointer !important;
-  transition: all 0.2s !important;
+  transition: all 0.15s !important;
   white-space: nowrap !important;
-  letter-spacing: 0 !important;
 }
-
 .universe-overlay .disco-row-scroll,
 #discoBody .disco-row-scroll {
   display: flex !important;
   gap: 12px !important;
   overflow-x: auto !important;
   scrollbar-width: none !important;
-  padding: 8px var(--px) 32px !important;
+  padding: 6px var(--px) 30px !important;
   scroll-behavior: smooth !important;
+  /* Fade edges — ako Jellyfin row scroll */
+  -webkit-mask-image: linear-gradient(
+    to right, transparent 0, black 32px, black calc(100% - 40px), transparent 100%) !important;
+  mask-image: linear-gradient(
+    to right, transparent 0, black 32px, black calc(100% - 40px), transparent 100%) !important;
 }
 .universe-overlay .disco-row-scroll::-webkit-scrollbar,
 #discoBody .disco-row-scroll::-webkit-scrollbar { display: none !important; }
-
 .universe-overlay .disco-row + .disco-row {
-  border-top: 0.5px solid var(--dr-brd) !important;
+  border-top: 1px solid var(--jg-border-d) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   KARTY — LANDSCAPE FORMAT (16:10) s nazvem VZDY DOLE
-   Pryc od posteroveho formatu — siroky cinematicky format.
+   KARTY — glass style (preneseno z .cardScalable)
+   Rounded 14px, border, blur pozadi, hover scale 1.02
 ═══════════════════════════════════════════════════════════════ */
 .universe-overlay .disco-card,
 #discoBody .disco-card {
@@ -572,80 +569,100 @@
   border-radius: var(--cr) !important;
   overflow: hidden !important;
   cursor: pointer !important;
-  background: #12121e !important;
-  border: none !important;
-  transition: transform 0.32s var(--dr-spring), box-shadow 0.32s var(--dr-ease) !important;
+  /* Glass karta — stejne jako Jellyfin .cardScalable */
+  background: var(--jg-surface) !important;
+  border: 1px solid var(--jg-border-d) !important;
+  box-shadow: 0 0 0.25em rgba(0,0,0,0.4) !important;
+  transition: transform 125ms ease, box-shadow 0.3s ease, border-color 0.2s ease !important;
   transform-origin: bottom center !important;
   outline: none !important;
-  display: flex !important;
-  flex-direction: column !important;
 }
 
+/* Hover — Jellyfin-style scale (ne dramaticky) */
 .universe-overlay .disco-card:hover,
 #discoBody .disco-card:hover {
-  transform: translateY(-16px) scale(1.05) !important;
-  box-shadow:
-    0 36px 80px rgba(0,0,0,0.95),
-    0 0 0 0.5px rgba(255,255,255,0.12) !important;
+  transform: translateY(-12px) scale(1.06) !important;
+  box-shadow: var(--jg-shadow) !important;
+  border-color: rgba(255,255,255,0.25) !important;
   z-index: 10 !important;
 }
 
-/* Poster container — gorni cast karty */
-.universe-overlay .disco-card-inner,
-#discoBody .disco-card-inner {
-  position: relative !important;
-  width: 100% !important;
-  height: 100% !important;
+/* Jellyfin hover shimmer efekt (--hoverGradientV portovany) */
+.universe-overlay .disco-card::before,
+#discoBody .disco-card::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
   border-radius: var(--cr) !important;
-  overflow: hidden !important;
-  flex-shrink: 0 !important;
+  background: linear-gradient(0deg,
+    transparent,
+    rgba(255,255,255,0.06) 45%,
+    rgba(255,255,255,0.06) 55%,
+    transparent) !important;
+  opacity: 0 !important;
+  transition: opacity 0.5s ease !important;
+  z-index: 3 !important;
+  pointer-events: none !important;
+  transform: translateY(50%) !important;
+}
+.universe-overlay .disco-card:hover::before,
+#discoBody .disco-card:hover::before {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
 }
 
-/* Poster image */
+/* Image */
+.universe-overlay .disco-card-inner,
+#discoBody .disco-card-inner {
+  position: absolute !important;
+  inset: 0 !important;
+  border-radius: 0 !important;
+}
 .universe-overlay .disco-card-img,
 #discoBody .disco-card-img {
+  position: absolute !important;
+  inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
-  object-position: center 20% !important;
+  object-position: center top !important;
   display: block !important;
   border-radius: 0 !important;
-  transition: transform 0.5s var(--dr-ease), filter 0.3s ease !important;
+  /* Jellyfin .cardImageContainer transition */
+  transition: transform 0.375s ease, filter 0.3s ease !important;
 }
 .universe-overlay .disco-card:hover .disco-card-img,
 #discoBody .disco-card:hover .disco-card-img {
-  transform: scale(1.08) !important;
-  filter: brightness(0.45) saturate(1.15) !important;
+  /* Jellyfin: scale(1.025) — mene agresivni */
+  transform: scale(1.06) !important;
+  filter: brightness(0.5) saturate(1.1) !important;
 }
 
-/* Gradient overlay — silnejsi v dolni casti */
+/* Gradient overlay — --cardFooterGradient portovany */
 .universe-overlay .disco-card-overlay,
 #discoBody .disco-card-overlay {
   position: absolute !important;
   inset: 0 !important;
-  background:
-    linear-gradient(
-      to top,
-      rgba(6,6,16,1.0)  0%,
-      rgba(6,6,16,0.85) 30%,
-      rgba(6,6,16,0.2)  62%,
-      transparent       85%) !important;
+  background: linear-gradient(0deg,
+    rgba(0,0,0,0.92) 0%,
+    rgba(0,0,0,0.75) 28%,
+    rgba(0,0,0,0.2)  58%,
+    transparent      82%) !important;
   z-index: 2 !important;
   opacity: 1 !important;
   border-radius: 0 !important;
 }
-
 .universe-overlay .disco-card-glow,
 #discoBody .disco-card-glow { display: none !important; }
 
-/* ── INFO — vzdy viditelny, vespod postera ── */
+/* INFO — vzdy viditelny */
 .universe-overlay .disco-card-info,
 #discoBody .disco-card-info {
   position: absolute !important;
   bottom: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  padding: 8px 11px 11px !important;
+  padding: 9px 11px 12px !important;
   z-index: 5 !important;
   opacity: 1 !important;
   transform: none !important;
@@ -655,23 +672,20 @@
   gap: 4px !important;
   pointer-events: none !important;
 }
-
 .universe-overlay .disco-card-name,
 #discoBody .disco-card-name {
-  font-family: var(--dr-fb) !important;
-  font-size: 0.72rem !important;
-  font-weight: 700 !important;
-  color: rgba(255,255,255,0.97) !important;
+  font-size: 0.74rem !important;
+  font-weight: 600 !important;
+  color: var(--jg-text) !important;
   letter-spacing: -0.1px !important;
-  line-height: 1.25 !important;
-  text-shadow: 0 1px 10px rgba(0,0,0,1) !important;
+  line-height: 1.3 !important;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.95) !important;
   overflow: hidden !important;
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
   margin-bottom: 3px !important;
 }
-
 .universe-overlay .disco-card-meta,
 #discoBody .disco-card-meta {
   display: flex !important;
@@ -679,61 +693,59 @@
   gap: 5px !important;
   flex-wrap: wrap !important;
 }
-
 .universe-overlay .disco-card-type,
 #discoBody .disco-card-type {
   display: inline-flex !important;
   align-items: center !important;
   gap: 3px !important;
   font-size: 0.52rem !important;
-  font-weight: 800 !important;
+  font-weight: 700 !important;
   letter-spacing: 0.5px !important;
-  color: rgba(255,255,255,0.45) !important;
-  background: rgba(255,255,255,0.07) !important;
-  border: 0.5px solid rgba(255,255,255,0.1) !important;
-  padding: 2px 7px !important;
-  border-radius: 5px !important;
   text-transform: uppercase !important;
+  color: rgba(255,255,255,0.45) !important;
+  background: rgba(55,65,81,0.5) !important;
+  border: 1px solid var(--jg-border-d) !important;
+  padding: 2px 7px !important;
+  border-radius: var(--jg-r-sm) !important;
 }
-
 .universe-overlay .disco-card-rating,
-#discoBody .disco-card-rating {
-  display: none !important;
-}
+#discoBody .disco-card-rating { display: none !important; }
 
-/* Play button */
+/* Play button — Jellyfin --overlayPlayButtonPosition style */
 .universe-overlay .disco-play-btn,
 #discoBody .disco-play-btn {
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
-  transform: translate(-50%,-60%) scale(0.55) !important;
-  width: 56px !important;
-  height: 56px !important;
+  transform: translate(-50%,-56%) scale(0.55) !important;
+  width: 54px !important;
+  height: 54px !important;
   border-radius: 50% !important;
-  background: rgba(255,255,255,0.96) !important;
+  background: rgba(255,255,255,0.95) !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   opacity: 0 !important;
-  transition: opacity 0.22s, transform 0.28s var(--dr-spring) !important;
+  transition: opacity 0.22s ease, transform 0.28s var(--dr-spring) !important;
   z-index: 6 !important;
   box-shadow: 0 8px 32px rgba(0,0,0,0.8) !important;
+  backdrop-filter: var(--jg-blur-sm) !important;
 }
 .universe-overlay .disco-play-btn svg,
 #discoBody .disco-play-btn svg {
   width: 18px !important;
   height: 18px !important;
-  fill: #060610 !important;
+  fill: #000 !important;
   margin-left: 4px !important;
 }
 .universe-overlay .disco-card:hover .disco-play-btn,
 #discoBody .disco-card:hover .disco-play-btn {
   opacity: 1 !important;
-  transform: translate(-50%,-60%) scale(1) !important;
+  transform: translate(-50%,-56%) scale(1) !important;
 }
 
-/* Finder btn */
+/* Finder button */
 .universe-overlay .disco-card-finder-btn,
 #discoBody .disco-card-finder-btn {
   position: absolute !important;
@@ -742,19 +754,18 @@
   width: 28px !important;
   height: 28px !important;
   border-radius: 50% !important;
-  background: rgba(6,6,16,0.78) !important;
-  border: 0.5px solid rgba(255,255,255,0.15) !important;
+  background: rgba(10,10,20,0.72) !important;
+  border: 1px solid var(--jg-border) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  color: rgba(255,255,255,0.75) !important;
+  color: var(--jg-text) !important;
   cursor: pointer !important;
   z-index: 8 !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: var(--jg-blur-md) !important;
   opacity: 0 !important;
   transform: scale(0.7) translateY(-4px) !important;
-  transition: all 0.22s var(--dr-spring) !important;
+  transition: all 0.2s var(--dr-spring) !important;
   pointer-events: auto !important;
 }
 .universe-overlay .disco-card-finder-btn svg,
@@ -766,9 +777,8 @@
 }
 .universe-overlay .disco-card-finder-btn:hover,
 #discoBody .disco-card-finder-btn:hover {
-  background: rgba(74,158,255,0.35) !important;
-  border-color: rgba(74,158,255,0.55) !important;
-  color: #fff !important;
+  background: rgba(74,158,255,0.3) !important;
+  border-color: rgba(74,158,255,0.5) !important;
 }
 
 /* AI badge */
@@ -777,19 +787,18 @@
   position: absolute !important;
   top: 9px !important;
   left: 9px !important;
-  font-size: 0.5rem !important;
-  font-weight: 800 !important;
+  font-size: 0.49rem !important;
+  font-weight: 700 !important;
   color: rgba(255,255,255,0.38) !important;
-  background: rgba(6,6,16,0.82) !important;
-  border: 0.5px solid rgba(255,255,255,0.08) !important;
-  padding: 3px 7px !important;
-  border-radius: 20px !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
+  background: rgba(10,10,20,0.78) !important;
+  border: 1px solid var(--jg-border-d) !important;
+  padding: 2px 6px !important;
+  border-radius: var(--jg-r-lg) !important;
+  backdrop-filter: var(--jg-blur-sm) !important;
   z-index: 9 !important;
 }
 
-/* Rating top badge (JS prida) */
+/* Rating top badge (JS přidá) */
 .dr-rating-top {
   position: absolute !important;
   z-index: 9 !important;
@@ -797,98 +806,24 @@
   align-items: center !important;
   gap: 3px !important;
   font-size: 0.6rem !important;
-  font-weight: 800 !important;
+  font-weight: 700 !important;
   color: var(--dr-gold) !important;
-  background: rgba(6,6,16,0.88) !important;
-  border: 0.5px solid rgba(240,201,74,0.25) !important;
-  padding: 3px 8px !important;
-  border-radius: 20px !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
+  background: rgba(10,10,20,0.82) !important;
+  border: 1px solid rgba(240,201,74,0.22) !important;
+  padding: 2px 8px !important;
+  border-radius: var(--jg-r-lg) !important;
+  backdrop-filter: var(--jg-blur-sm) !important;
   pointer-events: none !important;
   line-height: 1 !important;
 }
 
-/* Animace */
-@keyframes dr-enter {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes dr-bounce {
-  0%,100% { transform: translateX(-50%) translateY(0); }
-  55%      { transform: translateX(-50%) translateY(6px); }
-}
-
-.universe-overlay .disco-row {
-  animation: dr-enter 0.26s var(--dr-ease) both !important;
-}
-
-/* Skeletons */
-.mf-skeleton-tile,
-.mf-disco-skel-card {
-  width: var(--cw) !important;
-  min-width: var(--cw) !important;
-  height: var(--ch) !important;
-  border-radius: var(--cr) !important;
-}
-
-/* KB focus */
-.mf-disco-kb-focus {
-  transform: translateY(-16px) scale(1.05) !important;
-  box-shadow: 0 36px 80px rgba(0,0,0,0.95), 0 0 0 2px rgba(255,255,255,0.9) !important;
-  z-index: 10 !important;
-}
-
-/* ═══════════════════════════════
-   RESPONSIVE
-═══════════════════════════════ */
-@media (max-width: 1100px) {
-  :root { --cw: 190px; --ch: 118px; --px: 32px; }
-}
-@media (max-width: 800px) {
-  :root { --cw: 165px; --ch: 103px; --px: 18px; --cr: 10px; }
-  .universe-overlay .disco-hero { height: 340px !important; }
-  .universe-overlay .disco-hero-content { right: 5% !important; }
-  .universe-overlay .disco-hero-title { font-size: 1.8rem !important; }
-  .universe-overlay .disco-hero-desc { display: none !important; }
-}
-@media (max-width: 520px) {
-  :root { --cw: 140px; --ch: 88px; --px: 14px; --cr: 9px; --hh: auto; }
-  .universe-overlay .disco-header { height:auto !important; padding: max(14px,env(safe-area-inset-top,14px)) 14px 12px !important; flex-wrap:wrap !important; gap:10px !important; }
-  .universe-overlay .uni-search-wrap { flex: 0 0 100% !important; max-width: 100% !important; order: 3 !important; }
-  .universe-overlay .disco-hero { height: 260px !important; }
-  .universe-overlay .disco-hero-title { font-size: 1.4rem !important; }
-  .universe-overlay .disco-row-nav-btn { display: none !important; }
-  .universe-overlay .disco-card-name { font-size: 0.62rem !important; }
-}
-
-/* Hover touch fix */
-@media (hover: none) {
-  .universe-overlay .disco-card-info,
-  #discoBody .disco-card-info {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  .universe-overlay .disco-card-finder-btn,
-  #discoBody .disco-card-finder-btn {
-    opacity: 1 !important;
-    transform: scale(1) translateY(0) !important;
-  }
-}
-
-body { position: relative; }
-
-/* ═══════════════════════════════════════════════════════════════
-   HOVER POPUP BUBBLE — pozicovaná mimo kartu, nikdy neoříznutá
-═══════════════════════════════════════════════════════════════ */
-
-/* Loader bar nahoře na kartě */
+/* ── Loader bar */
 .dr-loader-bar {
   position: absolute;
   top: 0; left: 0;
-  height: 2.5px;
+  height: 2px;
   width: 0;
-  background: linear-gradient(to right, #4a9eff, #a855f7);
+  background: linear-gradient(to right, var(--dr-blue), rgba(160,74,255,0.9));
   border-radius: 0 2px 2px 0;
   z-index: 30;
   opacity: 0;
@@ -899,416 +834,188 @@ body { position: relative; }
   animation: dr-load 1.1s cubic-bezier(0.4,0,0.2,1) forwards;
 }
 @keyframes dr-load {
-  0%   { width: 0%;   opacity: 1; }
-  65%  { width: 88%;  opacity: 1; }
-  95%  { width: 97%;  opacity: 1; }
-  100% { width: 100%; opacity: 0; }
+  0%   { width:0%;   opacity:1; }
+  65%  { width:88%;  opacity:1; }
+  95%  { width:97%;  opacity:1; }
+  100% { width:100%; opacity:0; }
 }
 
-/* Spotlight — sousedni karty ztemni */
+/* Spotlight na sousedni karty */
 .disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
-  opacity: 0.48 !important;
-  filter: brightness(0.75) !important;
-  transition: opacity 0.22s ease, filter 0.22s ease !important;
+  opacity: 0.45 !important;
+  filter: brightness(0.7) !important;
+  transition: opacity 0.2s ease, filter 0.2s ease !important;
 }
 .disco-card {
-  transition:
-    transform    0.32s cubic-bezier(0.34,1.44,0.64,1),
-    box-shadow   0.32s cubic-bezier(0.25,1,0.5,1),
-    opacity      0.22s ease,
-    filter       0.22s ease !important;
+  transition: transform 125ms ease, box-shadow 0.3s ease,
+              opacity 0.2s ease, filter 0.2s ease,
+              border-color 0.2s ease !important;
 }
 
-/* Popup bubble — fixed position, JS ho umisti */
+/* ── Skeletons */
+.mf-skeleton-tile,
+.mf-disco-skel-card {
+  width: var(--cw) !important;
+  min-width: var(--cw) !important;
+  height: var(--ch) !important;
+  border-radius: var(--cr) !important;
+  background: var(--jg-surface) !important;
+  border: 1px solid var(--jg-border-d) !important;
+}
+
+/* Popup bubble — glass */
+body { position: relative; }
 #dr-popup {
-  position: absolute;
-  z-index: 99999;
-  width: 210px;
-  background: rgba(10,10,20,0.97);
-  border: 0.5px solid rgba(255,255,255,0.13);
-  border-radius: 16px;
-  padding: 14px 14px 12px;
-  box-shadow:
-    0 24px 60px rgba(0,0,0,0.9),
-    0 0 0 0.5px rgba(255,255,255,0.05),
-    0 0 40px rgba(0,0,0,0.6);
-  backdrop-filter: blur(32px) saturate(1.8);
-  -webkit-backdrop-filter: blur(32px) saturate(1.8);
+  position: fixed;
+  z-index: 9999999;
+  width: 218px;
+  background: rgba(10,10,20,0.94);
+  border: 1px solid var(--jg-border);
+  border-radius: var(--jg-r-lg);
+  padding: 14px;
+  box-shadow: var(--jg-shadow);
+  backdrop-filter: blur(40px) saturate(2);
+  -webkit-backdrop-filter: blur(40px) saturate(2);
   pointer-events: auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
   opacity: 0;
-  transform: translateY(6px) scale(0.96);
-  transition:
-    opacity   0.2s cubic-bezier(0.25,1,0.5,1),
-    transform 0.24s cubic-bezier(0.34,1.44,0.64,1);
+  transform: translateY(8px) scale(0.96);
+  transition: opacity 0.18s ease, transform 0.22s var(--dr-spring);
 }
 #dr-popup.visible {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
-
-/* Malý šipka / ukazatel na kartu */
 #dr-popup::after {
   content: '';
   position: absolute;
-  bottom: -5px;
-  left: 50%;
-  transform: translateX(-50%);
   width: 10px; height: 10px;
-  background: rgba(10,10,20,0.97);
-  border-right: 0.5px solid rgba(255,255,255,0.13);
-  border-bottom: 0.5px solid rgba(255,255,255,0.13);
+  background: rgba(10,10,20,0.94);
+  border-right: 1px solid var(--jg-border);
+  border-bottom: 1px solid var(--jg-border);
   rotate: 45deg;
 }
-#dr-popup.arrow-down::after { bottom: -5px; top: auto; rotate: 45deg; }
-#dr-popup.arrow-up::after   { top: -5px; bottom: auto; rotate: 225deg; }
+#dr-popup.arrow-down::after { bottom: -5px; left: 50%; transform: translateX(-50%); }
+#dr-popup.arrow-up::after   { top: -5px; left: 50%; transform: translateX(-50%) rotate(180deg); }
 
-/* Thumb — miniatura posteru nahoře v popupu */
 #dr-popup .dr-pop-thumb {
-  width: 100%;
-  height: 90px;
-  border-radius: 10px;
-  object-fit: cover;
-  object-position: center 20%;
-  display: block;
-  flex-shrink: 0;
+  width: 100%; height: 88px;
+  border-radius: var(--jg-r-sm);
+  object-fit: cover; object-position: center 18%;
+  border: 1px solid var(--jg-border-d);
 }
-
-/* Title */
 #dr-popup .dr-pop-title {
-  font-family: 'Syne', -apple-system, sans-serif;
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: rgba(255,255,255,0.97);
-  letter-spacing: -0.4px;
-  line-height: 1.2;
+  font-family: var(--dr-font);
+  font-size: 0.9rem; font-weight: 800;
+  color: var(--jg-text);
+  letter-spacing: -0.3px; line-height: 1.2;
 }
-
-/* Meta */
 #dr-popup .dr-pop-meta {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  flex-wrap: wrap;
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
 }
 #dr-popup .dr-pop-type {
-  font-size: 0.56rem;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.4);
-  background: rgba(255,255,255,0.07);
-  border: 0.5px solid rgba(255,255,255,0.1);
-  padding: 2px 7px;
-  border-radius: 5px;
+  font-size: 0.55rem; font-weight: 700; letter-spacing: 0.6px;
+  text-transform: uppercase; color: var(--jg-dim);
+  background: rgba(55,65,81,0.5);
+  border: 1px solid var(--jg-border-d);
+  padding: 2px 7px; border-radius: var(--jg-r-sm);
 }
 #dr-popup .dr-pop-dot {
-  width: 2px; height: 2px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  flex-shrink: 0;
+  width: 2px; height: 2px; border-radius: 50%;
+  background: var(--jg-dim); flex-shrink: 0;
 }
 #dr-popup .dr-pop-rating {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 0.68rem;
-  font-weight: 800;
-  color: #f0c94a;
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 0.65rem; font-weight: 700; color: var(--dr-gold);
 }
 #dr-popup .dr-pop-year {
-  font-size: 0.6rem;
-  font-weight: 500;
-  color: rgba(255,255,255,0.35);
+  font-size: 0.6rem; font-weight: 500; color: var(--jg-dim);
 }
-
-/* Popis */
 #dr-popup .dr-pop-desc {
-  font-size: 0.68rem;
-  color: rgba(255,255,255,0.48);
-  line-height: 1.55;
-  font-weight: 400;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  font-size: 0.68rem; color: var(--jg-dim);
+  line-height: 1.55; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
 }
-
-/* Genres */
 #dr-popup .dr-pop-genres {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
+  display: flex; gap: 4px; flex-wrap: wrap;
 }
 #dr-popup .dr-pop-genre {
-  font-size: 0.52rem;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  color: rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.055);
-  border: 0.5px solid rgba(255,255,255,0.09);
-  padding: 3px 8px;
-  border-radius: 20px;
+  font-size: 0.52rem; font-weight: 600;
+  color: var(--jg-dim);
+  background: rgba(55,65,81,0.4);
+  border: 1px solid var(--jg-border-d);
+  padding: 3px 8px; border-radius: var(--jg-r-lg);
 }
-
-/* Akční tlačítka */
-#dr-popup .dr-pop-btns {
-  display: flex;
-  gap: 7px;
-}
+#dr-popup .dr-pop-btns { display: flex; gap: 7px; }
 #dr-popup .dr-pop-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 9px 16px;
-  border-radius: 10px;
-  font-family: 'DM Sans', -apple-system, sans-serif;
-  font-size: 0.72rem;
-  font-weight: 700;
-  cursor: pointer;
-  border: none;
-  transition: all 0.18s cubic-bezier(0.25,1,0.5,1);
+  display: inline-flex; align-items: center;
+  justify-content: center; gap: 6px;
+  padding: 9px 16px; border-radius: var(--jg-r-sm);
+  font-family: var(--dr-font); font-size: 0.72rem; font-weight: 700;
+  cursor: pointer; border: none;
+  transition: all 0.15s var(--dr-ease);
   white-space: nowrap;
-  letter-spacing: -0.1px;
 }
 #dr-popup .dr-pop-btn.play {
-  flex: 1;
-  background: #4a9eff;
-  color: #fff;
-  box-shadow: 0 4px 18px rgba(74,158,255,0.45);
+  flex: 1; background: var(--dr-blue); color: #fff;
+  box-shadow: 0 4px 16px rgba(74,158,255,0.4);
 }
-#dr-popup .dr-pop-btn.play:hover {
-  background: #6fb3ff;
-  transform: translateY(-1px);
-  box-shadow: 0 7px 24px rgba(74,158,255,0.6);
-}
+#dr-popup .dr-pop-btn.play:hover { background: #6fb3ff; transform: translateY(-1px); }
 #dr-popup .dr-pop-btn.wl {
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.7);
-  border: 0.5px solid rgba(255,255,255,0.14);
-  padding: 9px 12px;
+  background: rgba(55,65,81,0.5); color: var(--jg-text);
+  border: 1px solid var(--jg-border); padding: 9px 12px;
+  backdrop-filter: var(--jg-blur-sm);
 }
-#dr-popup .dr-pop-btn.wl:hover {
-  background: rgba(255,255,255,0.16);
-  color: #fff;
+#dr-popup .dr-pop-btn.wl:hover { background: rgba(255,255,255,0.1); }
+
+/* Animace */
+@keyframes dr-enter {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes dr-bounce {
+  0%,100% { transform:translateX(-50%) translateY(0); }
+  55%      { transform:translateX(-50%) translateY(6px); }
+}
+.universe-overlay .disco-row { animation: dr-enter 0.24s ease both !important; }
+
+/* KB focus */
+.mf-disco-kb-focus {
+  transform: translateY(-12px) scale(1.06) !important;
+  box-shadow: var(--jg-shadow), 0 0 0 2px rgba(255,255,255,0.85) !important;
+  border-color: rgba(255,255,255,0.4) !important;
+  z-index: 10 !important;
 }
 
-
-/* ═══════════════════════════════════════════════════════════════
-   GLASSMORPHISM — inspirováno JellyfinGlassTheme
-   Frosted glass cards, blur overlays, průhledné panely.
-═══════════════════════════════════════════════════════════════ */
-
-/* ── Karty — skleněný efekt ── */
-.universe-overlay .disco-card,
-#discoBody .disco-card {
-  background: rgba(255,255,255,0.04) !important;
-  backdrop-filter: blur(12px) saturate(1.4) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(1.4) !important;
-  border: 0.5px solid rgba(255,255,255,0.1) !important;
-  box-shadow:
-    0 2px 16px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    inset 0 0 0 0.5px rgba(255,255,255,0.06) !important;
+/* Responsive */
+@media (max-width: 960px) {
+  :root { --cw:152px; --ch:228px; --px:28px; }
 }
-
-.universe-overlay .disco-card:hover,
-#discoBody .disco-card:hover {
-  border-color: rgba(255,255,255,0.18) !important;
-  box-shadow:
-    0 40px 80px rgba(0,0,0,0.92),
-    inset 0 1px 0 rgba(255,255,255,0.14),
-    inset 0 0 0 0.5px rgba(255,255,255,0.12) !important;
+@media (max-width: 700px) {
+  :root { --cw:136px; --ch:204px; --px:16px; --cr:12px; }
+  .universe-overlay .disco-hero { height:320px !important; }
+  .universe-overlay .disco-hero-content { right:5% !important; }
+  .universe-overlay .disco-hero-title { font-size:1.8rem !important; }
+  .universe-overlay .disco-hero-desc { display:none !important; }
+  .universe-overlay .disco-row-nav-btn { display:none !important; }
 }
-
-/* ── Overlay gradient na kartě — více průhledný ── */
-.universe-overlay .disco-card-overlay,
-#discoBody .disco-card-overlay {
-  background:
-    linear-gradient(
-      to top,
-      rgba(6,6,16,0.97)  0%,
-      rgba(6,6,16,0.75)  32%,
-      rgba(6,6,16,0.15)  65%,
-      transparent        88%) !important;
+@media (max-width: 480px) {
+  :root { --cw:118px; --ch:177px; --px:12px; --cr:10px; --hh:auto; }
+  .universe-overlay .disco-header {
+    height:auto !important;
+    padding:max(14px,env(safe-area-inset-top,14px)) 14px 12px !important;
+    flex-wrap:wrap !important; gap:10px !important;
+  }
+  .universe-overlay .uni-search-wrap { flex:0 0 100% !important; max-width:100% !important; order:3 !important; }
+  .universe-overlay .disco-hero { height:240px !important; }
+  .universe-overlay .disco-hero-title { font-size:1.4rem !important; }
 }
-
-/* ── Row header — glass panel ── */
-.universe-overlay .disco-row-header,
-#discoBody .disco-row-header {
-  background: transparent !important;
-}
-
-/* ── Hero gradient — dramatičtější, dvoubarevný ── */
-.universe-overlay .disco-hero-grad {
-  background:
-    linear-gradient(105deg,
-      rgba(6,6,16,0.98)  0%,
-      rgba(6,6,16,0.82)  30%,
-      rgba(6,6,16,0.4)   55%,
-      transparent        80%),
-    linear-gradient(to top,
-      rgba(6,6,16,1.0)   0%,
-      rgba(6,6,16,0.55)  38%,
-      transparent        70%) !important;
-}
-
-/* ── Popup bubble — glass ── */
-#dr-popup {
-  background: rgba(12,12,22,0.92) !important;
-  backdrop-filter: blur(48px) saturate(2) !important;
-  -webkit-backdrop-filter: blur(48px) saturate(2) !important;
-  border: 0.5px solid rgba(255,255,255,0.1) !important;
-  box-shadow:
-    0 32px 80px rgba(0,0,0,0.92),
-    inset 0 1px 0 rgba(255,255,255,0.08),
-    0 0 0 0.5px rgba(255,255,255,0.04) !important;
-}
-#dr-popup::after {
-  background: rgba(12,12,22,0.92) !important;
-}
-
-/* ── Popup thumb — glass frame ── */
-#dr-popup .dr-pop-thumb {
-  border-radius: 10px !important;
-  border: 0.5px solid rgba(255,255,255,0.08) !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
-}
-
-/* ── Rating badge — glass ── */
-.dr-rating-top {
-  background: rgba(6,6,16,0.72) !important;
-  backdrop-filter: blur(16px) saturate(1.6) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(1.6) !important;
-  border: 0.5px solid rgba(240,201,74,0.22) !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;
-}
-
-/* ── AI badge — glass ── */
-.universe-overlay .ai-match-badge,
-#discoBody .ai-match-badge {
-  background: rgba(6,6,16,0.68) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-}
-
-/* ── Nav items hover — glass ── */
-.universe-overlay .disco-nav-item:hover,
-#discoNav .disco-nav-item:hover {
-  background: rgba(255,255,255,0.07) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-}
-
-/* ── Play button na kartě — glass white ── */
-.universe-overlay .disco-play-btn,
-#discoBody .disco-play-btn {
-  background: rgba(255,255,255,0.94) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.7),
-    inset 0 1px 0 rgba(255,255,255,0.4) !important;
-}
-
-/* ── Finder button — glass ── */
-.universe-overlay .disco-card-finder-btn,
-#discoBody .disco-card-finder-btn {
-  background: rgba(6,6,16,0.65) !important;
-  backdrop-filter: blur(16px) saturate(1.8) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(1.8) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1) !important;
-}
-
-/* ── Row scroll fade edges — mask ── */
-.universe-overlay .disco-row-scroll,
-#discoBody .disco-row-scroll {
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0px,
-    black 36px,
-    black calc(100% - 48px),
-    transparent 100%) !important;
-  mask-image: linear-gradient(
-    to right,
-    transparent 0px,
-    black 36px,
-    black calc(100% - 48px),
-    transparent 100%) !important;
-}
-
-/* ── Overlay background — subtle noise texture ── */
-.universe-overlay.open::before {
-  background:
-    radial-gradient(ellipse 65% 45% at 12% -8%,  rgba(74,158,255,0.07) 0%, transparent 52%),
-    radial-gradient(ellipse 45% 55% at 90% 108%, rgba(160,74,255,0.052) 0%, transparent 52%),
-    radial-gradient(ellipse 80% 30% at 50% 50%,  rgba(74,158,255,0.018) 0%, transparent 70%) !important;
-}
-
-/* ── Card image — subtilní zoom OUT na load ── */
-.universe-overlay .disco-card-img,
-#discoBody .disco-card-img {
-  animation: dr-img-load 0.6s var(--dr-ease) both !important;
-}
-@keyframes dr-img-load {
-  from { transform: scale(1.04); filter: brightness(0.7) blur(4px); }
-  to   { transform: scale(1);    filter: brightness(1)   blur(0px); }
-}
-.universe-overlay .disco-card:hover .disco-card-img,
-#discoBody .disco-card:hover .disco-card-img {
-  animation: none !important;
-  transform: scale(1.08) !important;
-  filter: brightness(0.45) saturate(1.15) !important;
-}
-
-/* ── Row title — gradient text na Pro tebe ── */
-.universe-overlay .disco-row.dr-featured-row .disco-row-title,
-#discoBody .disco-row:first-child .disco-row-title {
-  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-}
-
-/* ── Loader bar — glass shimmer ── */
-.dr-loader-bar {
-  background: linear-gradient(to right,
-    rgba(74,158,255,0.8),
-    rgba(168,85,247,0.8),
-    rgba(74,158,255,0.8)) !important;
-  background-size: 200% 100% !important;
-  animation: dr-load 1.1s ease forwards, dr-shimmer-bar 1.4s linear infinite !important;
-}
-@keyframes dr-shimmer-bar {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* ── Popup tlačítka — glass style ── */
-#dr-popup .dr-pop-btn.wl {
-  background: rgba(255,255,255,0.07) !important;
-  backdrop-filter: blur(8px) !important;
-  border: 0.5px solid rgba(255,255,255,0.12) !important;
-}
-#dr-popup .dr-pop-btn.wl:hover {
-  background: rgba(255,255,255,0.14) !important;
-}
-
-/* ── Genres v popupu — glass pills ── */
-#dr-popup .dr-pop-genre {
-  background: rgba(255,255,255,0.06) !important;
-  border: 0.5px solid rgba(255,255,255,0.1) !important;
-  backdrop-filter: blur(4px) !important;
-}
-
-/* ── Hero tlačítka — glass secondary ── */
-.universe-overlay .disco-hero-btn.secondary {
-  background: rgba(255,255,255,0.08) !important;
-  backdrop-filter: blur(20px) saturate(1.8) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
-  border: 0.5px solid rgba(255,255,255,0.18) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12) !important;
+@media (hover: none) {
+  .disco-card .disco-card-info { opacity:1 !important; transform:none !important; }
+  .disco-card-finder-btn { opacity:1 !important; transform:scale(1) translateY(0) !important; }
+  .disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
+    opacity:1 !important; filter:none !important;
+  }
 }
