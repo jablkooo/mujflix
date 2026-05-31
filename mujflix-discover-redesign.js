@@ -254,8 +254,9 @@
     s.id = 'dr-ov4';
     s.textContent = [
       /* Nav */
-      '.disco-nav-item{font-family:"DM Sans",-apple-system,sans-serif!important;font-size:.78rem!important;font-weight:500!important;letter-spacing:0!important;}',
-      '.disco-nav-item.active,.disco-nav-item.mf-chip-optimistic{background:rgba(255,255,255,.1)!important;border-color:rgba(255,255,255,.2)!important;color:rgba(255,255,255,.97)!important;font-weight:700!important;box-shadow:none!important;transform:none!important;}',
+      '.disco-nav-item{font-family:"DM Sans",-apple-system,sans-serif!important;font-size:.76rem!important;font-weight:500!important;letter-spacing:.1px!important;color:rgba(255,255,255,.38)!important;border-radius:10px!important;padding:7px 16px!important;gap:6px!important;}',
+      '.disco-nav-item:hover{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.09)!important;color:rgba(255,255,255,.75)!important;}',
+      '.disco-nav-item.active,.disco-nav-item.mf-chip-optimistic{background:rgba(74,158,255,.1)!important;border-color:rgba(74,158,255,.22)!important;color:#4a9eff!important;font-weight:700!important;box-shadow:none!important;transform:none!important;}',
       /* Rows */
       '.disco-row-title{font-family:"Syne",-apple-system,sans-serif!important;font-size:1.2rem!important;font-weight:900!important;letter-spacing:-.6px!important;}',
       '.disco-row-header{padding:36px 52px 16px!important;}',
@@ -452,44 +453,49 @@
 
   function positionPopup(card) {
     var rect = card.getBoundingClientRect();
-    var pw = popup.offsetWidth  || 210;
-    var ph = popup.offsetHeight || 320;
+    var pw = popup.offsetWidth  || 218;
+    var ph = popup.offsetHeight || 300;
     var vw = window.innerWidth;
     var vh = window.innerHeight;
-    var GAP = 10;
+    var GAP = 12;
 
-    /* Preferuj zobrazení NAD kartou */
-    var top, left;
+    /* KLIC: universe-overlay ma backdrop-filter ktery rozbiji position:fixed.
+       Proto pouzivame position:absolute na body a pocitame scroll offset. */
+    var scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+    var scrollY = window.pageYOffset || document.documentElement.scrollTop;
+
+    var top, left, arrowDir;
     var spaceAbove = rect.top - GAP;
     var spaceBelow = vh - rect.bottom - GAP;
 
-    if (spaceAbove >= ph) {
-      /* Nahoře */
-      top = rect.top - ph - GAP;
-      popup.classList.remove('arrow-up');
-      popup.classList.add('arrow-down');
-    } else if (spaceBelow >= ph) {
-      /* Pod kartou */
-      top = rect.bottom + GAP;
-      popup.classList.remove('arrow-down');
-      popup.classList.add('arrow-up');
+    if (spaceAbove >= ph + 8) {
+      top = rect.top + scrollY - ph - GAP;
+      arrowDir = 'down';
+    } else if (spaceBelow >= ph + 8) {
+      top = rect.bottom + scrollY + GAP;
+      arrowDir = 'up';
     } else {
-      /* Vedle — vpravo nebo vlevo */
-      top = Math.max(8, Math.min(rect.top, vh - ph - 8));
-      popup.classList.remove('arrow-up','arrow-down');
+      /* Vedle */
+      top = rect.top + scrollY + (rect.height / 2) - (ph / 2);
+      top = Math.max(scrollY + 8, Math.min(top, scrollY + vh - ph - 8));
+      arrowDir = 'none';
       if (rect.right + pw + GAP <= vw) {
-        left = rect.right + GAP;
+        left = rect.right + scrollX + GAP;
       } else {
-        left = rect.left - pw - GAP;
+        left = rect.left + scrollX - pw - GAP;
       }
+      popup.classList.remove('arrow-up','arrow-down');
       popup.style.top  = Math.round(top)  + 'px';
       popup.style.left = Math.round(left) + 'px';
       return;
     }
 
-    /* Horizontální zarovnání — vycentrovat na kartu, ale nepřetékat */
-    left = rect.left + (rect.width / 2) - (pw / 2);
-    left = Math.max(8, Math.min(left, vw - pw - 8));
+    left = rect.left + scrollX + (rect.width / 2) - (pw / 2);
+    left = Math.max(scrollX + 8, Math.min(left, scrollX + vw - pw - 8));
+
+    popup.classList.remove('arrow-up','arrow-down');
+    if (arrowDir === 'down') popup.classList.add('arrow-down');
+    if (arrowDir === 'up')   popup.classList.add('arrow-up');
 
     popup.style.top  = Math.round(top)  + 'px';
     popup.style.left = Math.round(left) + 'px';
