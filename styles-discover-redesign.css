@@ -199,21 +199,21 @@
 }
 
 /* ═══════════════════════════════
-   GENRE NAV — pill chips
+   GENRE NAV — redesign
 ═══════════════════════════════ */
 #discoNav,
 .universe-overlay .disco-nav {
   display: flex !important;
   align-items: center !important;
-  gap: 5px !important;
+  gap: 4px !important;
   padding: 0 var(--px) !important;
-  height: 50px !important;
+  height: 54px !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   scrollbar-width: none !important;
   flex-shrink: 0 !important;
-  background: rgba(6,6,16,0.75) !important;
-  border-bottom: 0.5px solid var(--dr-brd) !important;
+  background: rgba(6,6,16,0.85) !important;
+  border-bottom: 0.5px solid rgba(255,255,255,0.055) !important;
   position: sticky !important;
   top: var(--hh) !important;
   z-index: 100 !important;
@@ -227,40 +227,75 @@
 #discoNav .disco-nav-item {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 5px !important;
-  padding: 6px 15px !important;
-  border-radius: 24px !important;
+  gap: 6px !important;
+  padding: 7px 16px !important;
+  border-radius: 10px !important;
   border: 0.5px solid transparent !important;
   background: transparent !important;
-  color: var(--dr-sub) !important;
+  color: rgba(255,255,255,0.38) !important;
   font-family: var(--dr-fb) !important;
-  font-size: 0.78rem !important;
+  font-size: 0.76rem !important;
   font-weight: 500 !important;
   cursor: pointer !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
   transition: all 0.16s var(--dr-ease) !important;
   user-select: none !important;
+  letter-spacing: 0.1px !important;
+  position: relative !important;
 }
 .universe-overlay .disco-nav-item::before { display: none !important; }
 
-.universe-overlay .disco-nav-item:hover,
-#discoNav .disco-nav-item:hover {
-  background: var(--dr-s2) !important;
-  border-color: var(--dr-brd) !important;
-  color: var(--dr-txt) !important;
+/* SVG ikona v nav */
+.universe-overlay .disco-nav-item svg,
+#discoNav .disco-nav-item svg {
+  flex-shrink: 0 !important;
+  opacity: 0.6 !important;
+  transition: opacity 0.16s !important;
 }
 
+.universe-overlay .disco-nav-item:hover,
+#discoNav .disco-nav-item:hover {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,255,255,0.09) !important;
+  color: rgba(255,255,255,0.75) !important;
+}
+.universe-overlay .disco-nav-item:hover svg,
+#discoNav .disco-nav-item:hover svg {
+  opacity: 0.85 !important;
+}
+
+/* AKTIVNÍ — výrazný modrou čárou dole */
 .universe-overlay .disco-nav-item.active,
 .universe-overlay .disco-nav-item.mf-chip-optimistic,
 #discoNav .disco-nav-item.active,
 #discoNav .disco-nav-item.mf-chip-optimistic {
-  background: rgba(255,255,255,0.1) !important;
-  border-color: rgba(255,255,255,0.2) !important;
-  color: var(--dr-txt) !important;
+  background: rgba(74,158,255,0.1) !important;
+  border-color: rgba(74,158,255,0.22) !important;
+  color: #4a9eff !important;
   font-weight: 700 !important;
   box-shadow: none !important;
   transform: none !important;
+}
+.universe-overlay .disco-nav-item.active svg,
+.universe-overlay .disco-nav-item.mf-chip-optimistic svg,
+#discoNav .disco-nav-item.active svg,
+#discoNav .disco-nav-item.mf-chip-optimistic svg {
+  opacity: 1 !important;
+  stroke: #4a9eff !important;
+}
+
+/* Spodní indikátor na aktivním */
+.universe-overlay .disco-nav-item.active::after,
+#discoNav .disco-nav-item.active::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -1px !important;
+  left: 20% !important;
+  right: 20% !important;
+  height: 2px !important;
+  background: #4a9eff !important;
+  border-radius: 2px 2px 0 0 !important;
 }
 
 /* ═══════════════════════════════
@@ -841,6 +876,8 @@
   }
 }
 
+body { position: relative; }
+
 /* ═══════════════════════════════════════════════════════════════
    HOVER POPUP BUBBLE — pozicovaná mimo kartu, nikdy neoříznutá
 ═══════════════════════════════════════════════════════════════ */
@@ -884,7 +921,7 @@
 
 /* Popup bubble — fixed position, JS ho umisti */
 #dr-popup {
-  position: fixed;
+  position: absolute;
   z-index: 99999;
   width: 210px;
   background: rgba(10,10,20,0.97);
