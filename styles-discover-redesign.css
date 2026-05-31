@@ -840,3 +840,59 @@
     transform: scale(1) translateY(0) !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   HOVER PANEL DOPLNENI — disco-card-info skryt, hover panel ho
+   nahrazuje. Tranzice jen na kartach s hover panelem.
+═══════════════════════════════════════════════════════════════ */
+
+/* Info panel — defaultne skryty POKUD karta ma hover panel */
+.disco-card:has(.dr-hover-panel) .disco-card-info {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Sousedni karty — scale down + fade pri hover na jinou kartu */
+.disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
+  transform: scale(0.94) translateY(0) !important;
+  opacity: 0.55 !important;
+  transition: transform 0.25s ease, opacity 0.25s ease !important;
+}
+
+/* Loader bar top gradient */
+.dr-loader-bar {
+  background: linear-gradient(to right, #4a9eff, #a855f7) !important;
+}
+
+/* Hover panel border-radius sedi s kartou */
+.disco-card .dr-hover-panel {
+  border-radius: var(--cr) !important;
+}
+
+/* Hover titulek — Syne font fallback */
+.dr-hover-title {
+  font-family: 'Syne', -apple-system, sans-serif !important;
+}
+
+/* Play btn — prenos barvy z --dr-blue */
+.dr-hover-btn.play {
+  background: var(--dr-blue) !important;
+}
+.dr-hover-btn.play:hover {
+  filter: brightness(1.18) !important;
+}
+
+/* Mobilni — hover panel disabled, info vzdy viditelny */
+@media (hover: none) {
+  .disco-card .dr-hover-panel {
+    display: none !important;
+  }
+  .disco-card .disco-card-info {
+    opacity: 1 !important;
+    pointer-events: none !important;
+  }
+  .disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
