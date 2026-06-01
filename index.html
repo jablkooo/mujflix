@@ -71,8 +71,8 @@
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="styles-premium.css" />
     <link rel="stylesheet" href="styles-apple-tv.css" />
+    <link rel="stylesheet" href="styles-glass.css" />
     <link rel="stylesheet" href="styles-discover-redesign.css" />
-    <link rel="stylesheet" href="styles-mobile.css" />
 
     <!-- ⚡ PROFILE GATE GUARD — gate je vždy první, obsah se odemkne až po výběru profilu -->
 
@@ -9176,29 +9176,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
   
   <script>
-  /* MůjFlix Design Patch — inline (kompatibilní s discover redesignem) */
+  /* MůjFlix Design Patch — inline */
   (function(){
-    function fixPrimaryBtns(){
-      // Primary hero btns — barva z CSS proměnné redesignu
-      document.querySelectorAll('.disco-hero-btn.primary').forEach(function(el){
-        el.style.removeProperty('background');
-        el.style.removeProperty('color');
-      });
-    }
-    function fixNavItems(){
-      // Nav items — odstraň případné inline přepsání, CSS třídy spravuje app.js
+    var A='rgba(10,132,255,0.16)',B='rgba(10,132,255,0.38)';
+    function fix(){
+      // Přepiš inline styly na nav itemech
       document.querySelectorAll('.disco-nav-item').forEach(function(el){
-        el.style.removeProperty('background');
-        el.style.removeProperty('border-color');
-        el.style.removeProperty('color');
+        var on=el.classList.contains('active')||el.classList.contains('mf-chip-optimistic');
+        el.style.setProperty('background', on?A:'transparent','important');
+        el.style.setProperty('border-color', on?B:'rgba(255,255,255,0.09)','important');
+        el.style.setProperty('color', on?'#fff':'rgba(255,255,255,0.42)','important');
+      });
+      // Header sticky
+      document.querySelectorAll('.disco-header').forEach(function(el){
+        el.style.setProperty('position','sticky','important');
+        el.style.setProperty('top','0','important');
+        el.style.setProperty('z-index','20','important');
+        el.style.setProperty('background','rgba(6,6,9,0.92)','important');
+        el.style.setProperty('backdrop-filter','blur(44px) saturate(1.8)','important');
+        el.style.setProperty('-webkit-backdrop-filter','blur(44px) saturate(1.8)','important');
+      });
+      // Primary btns
+      document.querySelectorAll('.disco-hero-btn.primary').forEach(function(el){
+        el.style.setProperty('background','var(--accent)','important');
+        el.style.setProperty('color','#fff','important');
       });
     }
     function go(){
-      fixPrimaryBtns();
-      fixNavItems();
+      fix();
+      // MutationObserver na #discoNav
       var nav=document.getElementById('discoNav');
-      if(nav) new MutationObserver(function(){ fixNavItems(); }).observe(nav,{subtree:true,attributes:true,attributeFilter:['style']});
-      [300,800,1500].forEach(function(t){setTimeout(function(){ fixPrimaryBtns(); fixNavItems(); },t);});
+      if(nav) new MutationObserver(fix).observe(nav,{subtree:true,attributes:true,attributeFilter:['class','style']});
+      // Sleduj head pro mf-disco-fx
+      new MutationObserver(function(){
+        var fx=document.getElementById('mf-disco-fx');
+        if(fx&&!fx._p){fx._p=1;setTimeout(function(){
+          fx.textContent=fx.textContent.replace(/\.disco-nav-item\.mf-chip-optimistic\s*\{[^}]*\}/g,
+            '.disco-nav-item.mf-chip-optimistic{background:'+A+'!important;border-color:'+B+'!important;color:#fff!important}');
+        },0);}
+      }).observe(document.head,{childList:true});
+      [200,500,1000,2000].forEach(function(t){setTimeout(fix,t);});
     }
     document.readyState==='loading'?document.addEventListener('DOMContentLoaded',go):go();
   })();
