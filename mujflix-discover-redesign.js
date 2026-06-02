@@ -264,14 +264,15 @@
       '.disco-row-header { padding:1.25em 52px 0!important; margin-bottom:-.5em!important; }',
       '.disco-row-scroll { gap:1em!important; padding:1.25em 52px!important; }',
       /* Card — .cardScalable 1:1 */
-      '.disco-card { position:relative!important; width:172px!important; min-width:172px!important; height:258px!important; border-radius:14px!important; overflow:hidden!important; background:#0a0a0a!important; border:none!important; box-shadow:0 0 .25em rgba(0,0,0,.4)!important; transition:transform 125ms ease,box-shadow .2s ease,filter .2s ease,opacity .2s ease!important; }',
+      '.disco-card { position:relative!important; width:172px!important; min-width:172px!important; height:258px!important; border-radius:14px!important; overflow:visible!important; background:#0a0a0a!important; border:none!important; box-shadow:0 0 .25em rgba(0,0,0,.4)!important; transition:transform 125ms ease,box-shadow .2s ease,filter .2s ease,opacity .2s ease!important; }',
       /* .card-hoverable:hover 1:1 */
-      '.disco-card:hover { transform:scale(1.05)!important; z-index:9999!important; box-shadow:0 25px 60px rgba(0,0,0,.9)!important; filter:brightness(1.1)!important; }',
+      '.disco-card:hover { transform:translateY(-8px) scale(1.04)!important; z-index:50!important; box-shadow:0 25px 60px rgba(0,0,0,.9)!important; filter:brightness(1.05)!important; }',
       /* Image */
-      '.disco-card-img { position:absolute!important; inset:0!important; width:100%!important; height:100%!important; object-fit:cover!important; object-position:center top!important; border-radius:0!important; transition:transform .375s ease,filter .3s ease!important; }',
+      '.disco-card-img { position:absolute!important; inset:0!important; width:100%!important; height:100%!important; object-fit:cover!important; object-position:center top!important; border-radius:0!important; z-index:1!important; transition:transform .375s ease,filter .3s ease!important; }',
       '.disco-card:hover .disco-card-img { transform:scale(1.025)!important; filter:brightness(.55)!important; }',
       /* Footer gradient */
-      '.disco-card-overlay { position:absolute!important; inset:0!important; background:linear-gradient(0deg,rgb(0 0 0/90%),40%,transparent)!important; opacity:1!important; z-index:2!important; }',
+      '.disco-card-inner { position:absolute!important; inset:0!important; overflow:hidden!important; border-radius:14px!important; z-index:1!important; }',
+      '.disco-card-overlay { position:absolute!important; inset:0!important; background:linear-gradient(0deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.55) 35%,transparent 70%)!important; opacity:1!important; z-index:2!important; }',
       '.disco-card-glow { display:none!important; }',
       /* Info */
       '.disco-card-info { position:absolute!important; bottom:0!important; left:0!important; right:0!important; padding:9px 11px 12px!important; z-index:5!important; display:flex!important; flex-direction:column!important; gap:4px!important; pointer-events:none!important; opacity:1!important; transform:none!important; transition:none!important; }',
@@ -376,248 +377,122 @@
 })();
 
 /* ══════════════════════════════════════════════════════════════
-   HOVER POPUP SYSTEM v2
-   Popup bubble se zobrazí NAD kartou (fixed position),
-   nikdy není oříznutá overflow:hidden na scroll kontejneru.
+   CARD EXPAND HOVER SYSTEM
+   Panel vyjede dole z karty — žádný popup, žádné oříznutí.
 ══════════════════════════════════════════════════════════════ */
-(function setupPopup() {
+(function setupExpandHover() {
   'use strict';
 
-  var STAR = '<svg viewBox="0 0 12 12" fill="#f0c94a" width="10" height="10"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9.2,11 6,9.2 2.8,11 3.5,7.5 1,5 4.5,4.5"/></svg>';
-  var PLAY = '<svg viewBox="0 0 14 14" fill="currentColor" width="12" height="12"><polygon points="3,2 12,7 3,12"/></svg>';
-  var PLUS = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="12" height="12"><path d="M7 3v8M3 7h8"/></svg>';
-
-  /* ── Vytvoř singleton popup element ── */
-  var popup = document.createElement('div');
-  popup.id = 'dr-popup';
-  popup.innerHTML = [
-    '<img class="dr-pop-thumb" src="" alt="" />',
-    '<div class="dr-pop-title"></div>',
-    '<div class="dr-pop-meta">',
-      '<span class="dr-pop-type"></span>',
-      '<span class="dr-pop-dot"></span>',
-      '<span class="dr-pop-rating">' + STAR + '<span class="dr-pop-rat-val" style="margin-left:3px"></span></span>',
-      '<span class="dr-pop-dot"></span>',
-      '<span class="dr-pop-year"></span>',
-    '</div>',
-    '<div class="dr-pop-genres"></div>',
-    '<div class="dr-pop-desc"></div>',
-    '<div class="dr-pop-btns">',
-      '<button class="dr-pop-btn play">' + PLAY + '<span>Přehrát</span></button>',
-      '<button class="dr-pop-btn wl" title="Watchlist">' + PLUS + '</button>',
-    '</div>',
-  ].join('');
-  /* Vloz popup jako PRVNI dite body — pred universe-overlay.
-     universe-overlay ma backdrop-filter + overflow:hidden ktery
-     rozbiji fixed positioning vsech potomku.
-     Umistenim pred nej a pouzitim fixed + high z-index to obejdeme. */
-  var uov = document.getElementById('universeOverlay');
-  if (uov && uov.parentNode === document.body) {
-    document.body.insertBefore(popup, uov);
-  } else {
-    document.body.appendChild(popup);
-  }
-
-  /* ── State ── */
-  var activeCard = null;
-  var showTimer  = null;
-  var hideTimer  = null;
-
-  /* ── Helpers ── */
-  function el(sel) { return popup.querySelector(sel); }
+  var STAR = '<svg viewBox="0 0 12 12" fill="#f0c94a" width="9" height="9"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9.2,11 6,9.2 2.8,11 3.5,7.5 1,5 4.5,4.5"/></svg>';
+  var PLAY = '<svg viewBox="0 0 14 14" fill="currentColor" width="11" height="11"><polygon points="3,2 12,7 3,12"/></svg>';
+  var PLUS = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="11" height="11"><path d="M7 3v8M3 7h8"/></svg>';
 
   function getCardData(card) {
     var nameEl  = card.querySelector('.disco-card-name');
     var ratTop  = card.querySelector('.dr-rating-top');
-    var ratEl   = card.querySelector('.disco-card-rating');
     var typeEl  = card.querySelector('.disco-card-type');
-    var imgEl   = card.querySelector('.disco-card-img');
-    var aiBadge = card.querySelector('.ai-match-badge');
 
     var title = nameEl ? nameEl.textContent.trim() : '';
 
     var rTxt = '';
-    if (ratTop)     rTxt = ratTop.textContent.replace(/[^0-9.]/g,'').trim();
-    else if (ratEl) rTxt = ratEl.textContent.replace(/[^0-9.]/g,'').trim();
+    if (ratTop) rTxt = ratTop.textContent.replace(/[^0-9.]/g,'').trim();
+    else {
+      var rEl = card.querySelector('.disco-card-rating');
+      if (rEl) rTxt = rEl.textContent.replace(/[^0-9.]/g,'').trim();
+    }
 
     var type = typeEl ? typeEl.textContent.replace(/[^a-zA-ZáčďéěíňóřšťůúýžÁČĎÉĚÍŇÓŘŠŤŮÚÝŽ\s]/g,'').trim() : '';
 
-    var img = imgEl ? (imgEl.src || imgEl.getAttribute('src') || '') : '';
-    /* Pokus o hires */
-    img = img.replace('/w342/','/w500/').replace('/w185/','/w500/');
-
-    /* Rok — z onclick atributu */
+    /* Rok z onclick */
     var year = '';
     var oc = card.getAttribute('onclick') || '';
     var ym = oc.match(/[,\s](\d{4})[,\s\)]/);
     if (ym) year = ym[1];
 
-    /* Žánry z data-genres nebo z card class */
-    var genres = [];
-    var dg = card.getAttribute('data-genres') || card.dataset.genres || '';
-    if (dg) genres = dg.split(',').map(function(g){ return g.trim(); }).filter(Boolean).slice(0,4);
-
-    /* Popis z data-overview */
-    var desc = card.getAttribute('data-overview') || card.dataset.overview || '';
-
-    return { title: title, rating: rTxt, type: type, img: img, year: year, genres: genres, desc: desc };
+    return { title: title, rating: rTxt, type: type, year: year };
   }
 
-  function positionPopup(card) {
-    /* popup je vlozeny PRED universe-overlay v DOM.
-       Pouzivame position:fixed — viewport souradnice bez scroll offsetu. */
-    var rect = card.getBoundingClientRect();
-    var pw   = popup.offsetWidth  || 218;
-    var ph   = popup.offsetHeight || 300;
-    var vw   = window.innerWidth;
-    var vh   = window.innerHeight;
-    var GAP  = 14;
-
-    var top, left;
-
-    var spaceAbove = rect.top    - GAP;
-    var spaceBelow = vh - rect.bottom - GAP;
-
-    if (spaceAbove >= ph) {
-      /* NAD kartou */
-      top = rect.top - ph - GAP;
-      popup.classList.remove('arrow-up');
-      popup.classList.add('arrow-down');
-    } else if (spaceBelow >= ph) {
-      /* POD kartou */
-      top = rect.bottom + GAP;
-      popup.classList.remove('arrow-down');
-      popup.classList.add('arrow-up');
-    } else {
-      /* VEDLE — vpravo nebo vlevo */
-      popup.classList.remove('arrow-up', 'arrow-down');
-      top  = Math.max(8, Math.min(rect.top + rect.height / 2 - ph / 2, vh - ph - 8));
-      left = (rect.right + pw + GAP <= vw)
-           ? rect.right + GAP
-           : rect.left  - pw - GAP;
-      popup.style.top  = Math.round(top)  + 'px';
-      popup.style.left = Math.round(left) + 'px';
-      return;
-    }
-
-    /* Horizontalne vycentrovat na kartu */
-    left = rect.left + rect.width / 2 - pw / 2;
-    left = Math.max(8, Math.min(left, vw - pw - 8));
-
-    popup.style.top  = Math.round(top)  + 'px';
-    popup.style.left = Math.round(left) + 'px';
-  }
-
-  function fillPopup(card) {
+  function buildExpand(card) {
     var d = getCardData(card);
 
-    /* Thumb */
-    var thumb = el('.dr-pop-thumb');
-    if (d.img) {
-      thumb.src = d.img;
-      thumb.style.display = 'block';
-    } else {
-      thumb.style.display = 'none';
+    var wrap = document.createElement('div');
+    wrap.className = 'dr-expand';
+
+    /* Titulek */
+    var titleEl = document.createElement('div');
+    titleEl.className = 'dr-expand-title';
+    titleEl.textContent = d.title;
+    wrap.appendChild(titleEl);
+
+    /* Meta */
+    var meta = document.createElement('div');
+    meta.className = 'dr-expand-meta';
+
+    if (d.type) {
+      var t = document.createElement('span');
+      t.className = 'dr-expand-type';
+      t.textContent = d.type;
+      meta.appendChild(t);
     }
 
-    /* Title */
-    el('.dr-pop-title').textContent = d.title;
-
-    /* Type */
-    var typeEl = el('.dr-pop-type');
-    typeEl.textContent = d.type;
-    typeEl.style.display = d.type ? '' : 'none';
-
-    /* Rating */
     var rVal = parseFloat(d.rating);
-    var ratWrap = el('.dr-pop-rating');
-    el('.dr-pop-rat-val').textContent = d.rating;
-    ratWrap.style.display = rVal > 0 ? 'inline-flex' : 'none';
-
-    /* Year */
-    var yearEl = el('.dr-pop-year');
-    yearEl.textContent = d.year;
-    yearEl.style.display = d.year ? '' : 'none';
-
-    /* Dots */
-    var dots = popup.querySelectorAll('.dr-pop-dot');
-    /* Skryj tecky pokud nema souseda */
-    dots[0].style.display = (d.type && (rVal > 0 || d.year)) ? '' : 'none';
-    dots[1].style.display = (rVal > 0 && d.year) ? '' : 'none';
-
-    /* Genres */
-    var genreEl = el('.dr-pop-genres');
-    genreEl.innerHTML = '';
-    if (d.genres.length > 0) {
-      d.genres.forEach(function(g) {
-        var span = document.createElement('span');
-        span.className = 'dr-pop-genre';
-        span.textContent = g;
-        genreEl.appendChild(span);
-      });
-      genreEl.style.display = 'flex';
-    } else {
-      genreEl.style.display = 'none';
+    if (rVal > 0) {
+      if (d.type) {
+        var dot = document.createElement('span');
+        dot.className = 'dr-expand-dot';
+        meta.appendChild(dot);
+      }
+      var r = document.createElement('span');
+      r.className = 'dr-expand-rating';
+      r.innerHTML = STAR + '<span style="margin-left:2px">' + d.rating + '</span>';
+      meta.appendChild(r);
     }
 
-    /* Desc */
-    var descEl = el('.dr-pop-desc');
-    descEl.textContent = d.desc;
-    descEl.style.display = d.desc ? '' : 'none';
-  }
+    if (d.year) {
+      var dot2 = document.createElement('span');
+      dot2.className = 'dr-expand-dot';
+      meta.appendChild(dot2);
+      var y = document.createElement('span');
+      y.className = 'dr-expand-year';
+      y.textContent = d.year;
+      meta.appendChild(y);
+    }
 
-  function showPopup(card) {
-    if (activeCard === card) return;
-    activeCard = card;
-    clearTimeout(hideTimer);
+    if (meta.children.length > 0) wrap.appendChild(meta);
 
-    fillPopup(card);
-    /* Schovej aby se mohl renderovat a zmerit */
-    popup.style.visibility = 'hidden';
-    popup.classList.remove('visible');
-    popup.style.display = 'flex';
+    /* Tlačítka */
+    var btns = document.createElement('div');
+    btns.className = 'dr-expand-btns';
 
-    /* Po jednom frame zmerime a umistime */
-    requestAnimationFrame(function() {
-      positionPopup(card);
-      popup.style.visibility = '';
-      popup.classList.add('visible');
+    var playBtn = document.createElement('button');
+    playBtn.className = 'dr-expand-btn-play';
+    playBtn.innerHTML = PLAY + '<span style="margin-left:5px">Přehrát</span>';
+    playBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      card.click();
     });
+
+    var wlBtn = document.createElement('button');
+    wlBtn.className = 'dr-expand-btn-wl';
+    wlBtn.innerHTML = PLUS;
+    wlBtn.title = 'Přidat do Watchlist';
+    wlBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var finder = card.querySelector('.disco-card-finder-btn');
+      if (finder) finder.click();
+      else card.click();
+    });
+
+    btns.appendChild(playBtn);
+    btns.appendChild(wlBtn);
+    wrap.appendChild(btns);
+
+    return wrap;
   }
 
-  function hidePopup() {
-    activeCard = null;
-    popup.classList.remove('visible');
-    hideTimer = setTimeout(function() {
-      popup.style.display = 'none';
-    }, 220);
-  }
-
-  /* Kliknutí v popupu */
-  el('.dr-pop-btn.play').addEventListener('click', function() {
-    if (activeCard) activeCard.click();
-  });
-  el('.dr-pop-btn.wl').addEventListener('click', function() {
-    if (!activeCard) return;
-    /* Najdi watchlist tlacitko na karte nebo spust finder */
-    var finder = activeCard.querySelector('.disco-card-finder-btn');
-    if (finder) finder.click();
-    else activeCard.click();
-  });
-
-  /* Hover popup zůstane viditelný i při přejetí na popup */
-  popup.addEventListener('mouseenter', function() {
-    clearTimeout(hideTimer);
-    clearTimeout(showTimer);
-  });
-  popup.addEventListener('mouseleave', function() {
-    hideTimer = setTimeout(hidePopup, 120);
-  });
-
-  /* ── Attach na karty ── */
   function attachCard(card) {
-    if (card._drPopupDone) return;
-    card._drPopupDone = true;
+    if (card._drExpandDone) return;
+    card._drExpandDone = true;
 
     /* Loader bar */
     if (!card.querySelector('.dr-loader-bar')) {
@@ -626,19 +501,14 @@
       card.appendChild(lb);
     }
 
+    /* Expand panel */
+    var expand = buildExpand(card);
+    card.appendChild(expand);
+
+    /* Reset loader animace */
     card.addEventListener('mouseenter', function() {
-      clearTimeout(hideTimer);
-      clearTimeout(showTimer);
-      /* Reset loader */
       var lb = card.querySelector('.dr-loader-bar');
       if (lb) { lb.style.animation = 'none'; lb.offsetHeight; lb.style.animation = ''; }
-      /* Kratky delay aby nesviitlo pri rychlem projeti */
-      showTimer = setTimeout(function() { showPopup(card); }, 180);
-    });
-
-    card.addEventListener('mouseleave', function() {
-      clearTimeout(showTimer);
-      hideTimer = setTimeout(hidePopup, 160);
     });
   }
 
@@ -646,7 +516,7 @@
     document.querySelectorAll('#discoBody .disco-card, .universe-overlay .disco-card').forEach(attachCard);
   }
 
-  /* Observer + polling */
+  /* Observer */
   var scanT;
   var body = document.getElementById('discoBody');
   if (body) {
@@ -663,8 +533,5 @@
     scanCards();
     [600, 1500, 3000].forEach(function(t) { setTimeout(scanCards, t); });
   }, 150);
-
-  /* Skryj popup při scrollu */
-  document.addEventListener('scroll', hidePopup, true);
 
 })();
