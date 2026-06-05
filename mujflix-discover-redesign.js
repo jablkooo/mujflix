@@ -264,12 +264,13 @@
       '.disco-row-header { padding:1.25em 52px 0!important; margin-bottom:-.5em!important; }',
       '.disco-row-scroll { gap:1em!important; padding:1.25em 52px!important; }',
       /* Card — .cardScalable 1:1 */
-      '.disco-card { position:relative!important; width:172px!important; min-width:172px!important; height:258px!important; border-radius:14px!important; overflow:visible!important; background:#0a0a0a!important; border:none!important; box-shadow:0 0 .25em rgba(0,0,0,.4)!important; transition:transform 125ms ease,box-shadow .2s ease,filter .2s ease,opacity .2s ease!important; }',
+      '.disco-card { position:relative!important; width:172px!important; min-width:172px!important; height:258px!important; border-radius:14px!important; overflow:visible!important; background:#0a0a0a!important; background:#0a0a0a!important; border:none!important; box-shadow:0 0 .25em rgba(0,0,0,.4)!important; transition:transform 125ms ease,box-shadow .2s ease,filter .2s ease,opacity .2s ease!important; }',
       /* .card-hoverable:hover 1:1 */
-      '.disco-card:hover { transform:translateY(-8px) scale(1.04)!important; z-index:50!important; box-shadow:0 25px 60px rgba(0,0,0,.9)!important; filter:brightness(1.05)!important; }',
+      '.disco-card:hover { transform:translateY(-6px) scale(1.04)!important; z-index:50!important; box-shadow:0 25px 60px rgba(0,0,0,.9)!important; filter:brightness(1.05)!important; }',
       /* Image */
-      '.disco-card-img { position:absolute!important; inset:0!important; width:100%!important; height:100%!important; object-fit:cover!important; object-position:center top!important; border-radius:0!important; z-index:1!important; transition:transform .375s ease,filter .3s ease!important; }',
-      '.disco-card:hover .disco-card-img { transform:scale(1.025)!important; filter:brightness(.55)!important; }',
+      '.disco-card-inner { display:none!important; }',
+      '.disco-card-img { position:absolute!important; inset:0!important; width:100%!important; height:100%!important; object-fit:cover!important; object-position:center top!important; border-radius:14px!important; z-index:1!important; transition:transform .375s ease,filter .3s ease!important; }',
+      '.disco-card:hover .disco-card-img { transform:scale(1.025)!important; filter:brightness(.5)!important; }',
       /* Footer gradient */
       '.disco-card-inner { position:absolute!important; inset:0!important; overflow:hidden!important; border-radius:14px!important; z-index:1!important; }',
       '.disco-card-overlay { position:absolute!important; inset:0!important; background:linear-gradient(0deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.55) 35%,transparent 70%)!important; opacity:1!important; z-index:2!important; }',
@@ -303,6 +304,7 @@
   function runAll() {
     upgradeNavIcons();
     upgradeHeroBtns();
+    upgradeHeroBadge();
     upgradeCards();
     addCardCounts();
     upgradeHeroImage();
