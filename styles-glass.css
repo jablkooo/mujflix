@@ -234,7 +234,7 @@ input[type="text"]:focus {
 .movie-card,
 .content-card,
 .ep-card,
-[class*="-card"]:not(.disco-card):not(#dr-popup *) {
+[class*="-card"]:not([class*="disco-card"]):not(.disco-card *):not(#dr-popup *) {
   background: var(--jg-surface) !important;
   border-radius: var(--jg-r-lg) !important;
   border: 0px solid var(--jg-border-d) !important;
@@ -243,7 +243,7 @@ input[type="text"]:focus {
   transition: transform 125ms ease, box-shadow 0.2s ease, filter 0.2s ease !important;
 }
 
-[class*="-card"]:not(.disco-card):not(#dr-popup *):hover {
+[class*="-card"]:not([class*="disco-card"]):not(.disco-card *):not(#dr-popup *):hover {
   transform: scale(1.02) !important;
   border-color: white !important;
   box-shadow: 0 25px 60px rgba(0,0,0,0.9) !important;
