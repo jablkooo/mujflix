@@ -1,19 +1,41 @@
-// MůjFlix TMDB Proxy → ulož jako: functions/api/tmdb/[[catchall]].js
-// Nastav: wrangler secret put TMDB_KEY
+// MůjFlix TMDB Image Proxy → ulož jako: functions/api/tmdb-img/[[catchall]].js
+//
+// Důvod: image.tmdb.org běží za Cloudflare Polish, která obrázky automaticky
+// konvertuje na WebP podle Accept headeru prohlížeče. Na některých systémech
+// se tahle konkrétní WebP varianta nevykresluje správně (zůstává černá/
+// průhledná, i když se reálně stáhne). Tento proxy si vždy vyžádá čistý JPEG
+// přímo od TMDB a takový ho i vrátí — obchází tak WebP negotiation úplně.
 
-export const onRequest = async ({ request, env }) => {
-  const TMDB_KEY = env.TMDB_KEY || "36a429855b5872e5db851b6e04db81f0";
+export const onRequest = async ({ request }) => {
   const url = new URL(request.url);
-  const path = url.searchParams.get('path') || url.pathname.replace('/api/tmdb', '');
+  const path = url.pathname.replace('/api/tmdb-img', '');
 
-  if (!path) return new Response('{"error":"Chybí path"}', { status: 400, headers: { 'Content-Type': 'application/json' } });
+  if (!path) {
+    return new Response('Chybí path', { status: 400 });
+  }
 
-  const tmdbUrl = new URL(`https://api.themoviedb.org/3${path.startsWith('/') ? path : '/' + path}`);
-  tmdbUrl.searchParams.set('api_key', TMDB_KEY);
-  tmdbUrl.searchParams.set('language', 'cs-CZ');
-  url.searchParams.forEach((v, k) => k !== 'path' && tmdbUrl.searchParams.set(k, v));
+  const tmdbUrl = `https://image.tmdb.org${path}`;
 
-  const resp = await fetch(tmdbUrl.toString());
-  const data = await resp.json();
-  return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300' } });
+  let resp;
+  try {
+    resp = await fetch(tmdbUrl, {
+      headers: {
+        // Vědomě NEuvádíme image/webp ani image/avif, aby Cloudflare Polish
+        // na straně TMDB neměla důvod konvertovat z JPEG.
+        'Accept': 'image/jpeg,image/png,image/*;q=0.5,*/*;q=0.1',
+      },
+    });
+  } catch (err) {
+    return new Response('Chyba při načítání obrázku', { status: 502 });
+  }
+
+  if (!resp.ok) {
+    return new Response('Obrázek se nepodařilo načíst', { status: resp.status });
+  }
+
+  const headers = new Headers(resp.headers);
+  headers.set('Cache-Control', 'public, max-age=604800, immutable');
+  headers.delete('vary'); // ať si Cloudflare necachuje zvlášť podle Accept headeru klienta
+
+  return new Response(resp.body, { status: 200, headers });
 };
