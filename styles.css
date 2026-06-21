@@ -2666,8 +2666,6 @@ body::after {
     transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1),
     box-shadow 0.22s ease;
   aspect-ratio: 2/3;
-  content-visibility: auto;
-  contain-intrinsic-size: 120px 180px;
 }
 .sh-card:hover {
   will-change: transform;
@@ -3199,8 +3197,6 @@ body::after {
   width: 154px;
   box-shadow: none;
   will-change: transform;
-  content-visibility: auto;
-  contain-intrinsic-size: 154px 231px;
   isolation: isolate;
 }
 .disco-card-inner {
@@ -3764,7 +3760,6 @@ body::after {
   border: none !important;
   box-shadow: none !important;
   width: 154px !important;
-  contain-intrinsic-size: 154px 231px !important;
   transition:
     transform 0.38s cubic-bezier(0.25, 1, 0.5, 1),
     box-shadow 0.38s cubic-bezier(0.25, 1, 0.5, 1) !important;
