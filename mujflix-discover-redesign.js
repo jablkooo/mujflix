@@ -302,13 +302,14 @@
   }
 
   function runAll() {
-    upgradeNavIcons();
-    upgradeHeroBtns();
-    upgradeHeroBadge();
-    upgradeCards();
-    addCardCounts();
-    upgradeHeroImage();
-    addScrollHint();
+    var steps = [upgradeNavIcons, upgradeHeroBtns, upgradeCards, addCardCounts, upgradeHeroImage, addScrollHint];
+    steps.forEach(function(fn) {
+      try {
+        if (typeof fn === 'function') fn();
+      } catch (err) {
+        console.warn('[MFDiscover] runAll step failed:', fn && fn.name, err);
+      }
+    });
   }
 
   function setupObserver() {
