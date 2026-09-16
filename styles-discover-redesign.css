@@ -386,6 +386,89 @@
     padding: max(14px, env(safe-area-inset-top, 14px)) 14px 12px !important;
     gap: 10px !important;
   }
+
+  /* Discover keeps the shared MůjFlix chrome, but removes distractions while open. */
+  body.discover-open #mfProfileBadge {
+    display: none !important;
+  }
+  body.discover-open #mfDock {
+    opacity: 0.72 !important;
+    transform: translateX(-50%) scale(0.88) !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 8px)) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
+  }
+  body.discover-open #mfDock .dock-btn {
+    min-width: 58px !important;
+    padding: 7px 9px !important;
+  }
+  body.discover-open #mfDock .dock-label {
+    font-size: 0.62rem !important;
+  }
+
+  /* Use the same system typography and chrome as the rest of the application. */
+  .universe-overlay,
+  .universe-overlay * {
+    font-family: var(--font-sf, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif) !important;
+  }
+  .universe-overlay .disco-header {
+    height: 78px !important;
+    padding-inline: clamp(18px, 4vw, 56px) !important;
+    background: rgba(8, 8, 12, 0.94) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+  }
+  .universe-overlay .disco-title {
+    font-size: 1.35rem !important;
+    font-weight: 600 !important;
+  }
+  .universe-overlay .uni-search-wrap {
+    max-width: 560px !important;
+    min-height: 44px !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+  }
+  .universe-overlay .disco-nav {
+    padding: 8px clamp(18px, 4vw, 56px) !important;
+    background: rgba(8, 8, 12, 0.9) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  }
+  .universe-overlay .disco-nav-item {
+    min-height: 34px !important;
+    padding: 7px 14px !important;
+    border-radius: 10px !important;
+    font-size: 0.78rem !important;
+  }
+  .universe-overlay .disco-body {
+    padding-bottom: 104px !important;
+  }
+  .universe-overlay .disco-card,
+  .universe-overlay .disco-card-inner {
+    border-radius: 14px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28) !important;
+  }
+  .universe-overlay .disco-card:hover {
+    transform: translateY(-3px) !important;
+  }
+  .universe-overlay .disco-card-glow,
+  .universe-overlay .disco-card::before {
+    display: none !important;
+  }
+  @media (max-width: 760px) {
+    .universe-overlay .disco-header {
+      height: auto !important;
+      padding: max(12px, env(safe-area-inset-top, 12px)) 14px 10px !important;
+    }
+    body.discover-open #mfDock {
+      transform: translateX(-50%) scale(0.82) !important;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body.discover-open #mfDock,
+    .universe-overlay .disco-card {
+      transition: none !important;
+    }
+  }
   .universe-overlay .disco-header-left {
     min-width: 0 !important;
     flex: 1 !important;

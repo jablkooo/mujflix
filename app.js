@@ -635,7 +635,7 @@ let _searchPlatform = "movies",
 
 function openUniverse() {
   const e = document.getElementById("universeOverlay");
-  e.classList.add("open"), requestAnimationFrame(() => requestAnimationFrame(() => {
+  document.body.classList.add("discover-open"), e.classList.add("open"), requestAnimationFrame(() => requestAnimationFrame(() => {
     e.classList.add("visible");
     const t = document.getElementById("searchTitleInput");
     t && (renderSearchHistory(), setTimeout(() => t.focus(), 40));
@@ -654,7 +654,7 @@ function openDiscover() {
 
 function closeUniverse() {
   const e = document.getElementById("universeOverlay");
-  e.classList.remove("visible"), setTimeout(() => {
+  document.body.classList.remove("discover-open"), e.classList.remove("visible"), setTimeout(() => {
     e.classList.remove("open")
   }, 350), kbLayer = "menu", resumeBgParticles();
   const t = document.getElementById("searchTitleInput");
