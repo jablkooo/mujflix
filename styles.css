@@ -19217,6 +19217,127 @@ nav.mf-dock {
   border: 0.5px solid var(--glass-border) !important;
   box-shadow: var(--glass-shadow) !important;
 }
+
+/* Ruleta was removed from the user interface. Keep old markup harmless for
+   stored links and older sessions while preventing an inaccessible control. */
+.ruleta-fab,
+.ruleta-overlay,
+#ruletaOverlay,
+[onclick*="openRuleta"],
+[onclick*="adminOpenRuleta"] {
+  display: none !important;
+}
+
+/* ── HOME UX ── */
+.mf-home-intro {
+  width: min(1180px, calc(100% - 40px));
+  margin: 18px auto 8px;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  box-sizing: border-box;
+  background: linear-gradient(115deg, rgba(10, 132, 255, 0.14), rgba(255, 255, 255, 0.035) 55%, rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
+}
+.mf-home-kicker {
+  display: block;
+  margin-bottom: 7px;
+  color: #4da6ff;
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+.mf-home-intro h1 {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: clamp(1.25rem, 3vw, 1.8rem);
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+.mf-home-intro p {
+  margin: 7px 0 0;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 0.82rem;
+}
+.mf-home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.mf-home-action {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(255, 255, 255, 0.78);
+  font: 600 0.74rem/1 var(--font-ui);
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+.mf-home-action:hover,
+.mf-home-action:focus-visible {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+.mf-home-action:focus-visible,
+.dock-btn:focus-visible,
+.mf-header-btn:focus-visible {
+  outline: 2px solid rgba(77, 166, 255, 0.9);
+  outline-offset: 3px;
+}
+.mf-home-action-primary {
+  background: #0a84ff;
+  border-color: #0a84ff;
+  color: #fff;
+}
+.mf-home-action-primary:hover,
+.mf-home-action-primary:focus-visible {
+  background: #2493ff;
+  border-color: #2493ff;
+}
+
+@media (max-width: 700px) {
+  .mf-home-intro {
+    width: min(100% - 24px, 560px);
+    margin-top: 12px;
+    padding: 18px;
+    display: block;
+  }
+  .mf-home-intro p {
+    font-size: 0.76rem;
+  }
+  .mf-home-actions {
+    justify-content: stretch;
+    margin-top: 16px;
+  }
+  .mf-home-action {
+    flex: 1 1 0;
+    justify-content: center;
+    padding-inline: 8px;
+    font-size: 0.68rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
 .key-hint,
 .kh-group kbd {
   background: rgba(255, 255, 255, 0.07) !important;
