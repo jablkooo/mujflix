@@ -295,7 +295,7 @@ async function tmdbGet(e, forceDirect = false) {
       const cached = _tmdbMemGet(proxyUrl);
       if (cached) return cached;
 
-      const resp = await fetch(proxyUrl);
+      const resp = await mfFetch(proxyUrl);
       if (!resp.ok) {
         console.warn("[TMDB-Proxy] HTTP error:", resp.status, resp.statusText);
         // ⚠️ FALLBACK: Pokud proxy selže, zkusíme přímé volání
@@ -321,7 +321,7 @@ async function tmdbGet(e, forceDirect = false) {
     const o = n.toString();
     const cached = _tmdbMemGet(o);
     if (cached) return cached;
-    const i = await fetch(o);
+    const i = await mfFetch(o);
     if (!i.ok) {
       console.warn("[TMDB] HTTP error:", i.status, i.statusText);
       return null;
@@ -337,6 +337,16 @@ async function tmdbGet(e, forceDirect = false) {
   } catch (e) {
     console.error("[TMDB] Fetch error:", e.message);
     return null
+  }
+}
+
+async function mfFetch(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
   }
 }
 async function fetchTmdbSeason(e, t) {
@@ -603,7 +613,7 @@ function handleContinueClick() {
 
 function showToast(e, t) {
   let n = document.getElementById("mf-toast");
-  n || (n = document.createElement("div"), n.id = "mf-toast", n.style.cssText = "position:fixed;bottom:85px;left:50%;transform:translateX(-50%) translateY(12px);z-index:99999;background:rgba(10,10,12,0.96);color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.8rem;padding:10px 22px;border-radius:50px;opacity:0;transition:opacity 0.25s,transform 0.3s cubic-bezier(0.34,1.4,0.64,1),border-color 0.2s;pointer-events:none;backdrop-filter:blur(20px);white-space:nowrap;max-width:90vw;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.7);", document.body.appendChild(n)), n.style.border = "1px solid " + ("success" === t ? "rgba(100,255,120,0.5)" : "error" === t ? "rgba(255,80,80,0.5)" : "rgba(0,122,255,0.25)"), n.textContent = e, n.style.opacity = "1", n.style.transform = "translateX(-50%) translateY(0)", clearTimeout(n._tm), n._tm = setTimeout(() => {
+  n || (n = document.createElement("div"), n.id = "mf-toast", n.setAttribute("role", "status"), n.setAttribute("aria-live", "polite"), n.style.cssText = "position:fixed;bottom:85px;left:50%;transform:translateX(-50%) translateY(12px);z-index:99999;background:rgba(10,10,12,0.96);color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.8rem;padding:10px 22px;border-radius:50px;opacity:0;transition:opacity 0.25s,transform 0.3s cubic-bezier(0.34,1.4,0.64,1),border-color 0.2s;pointer-events:none;backdrop-filter:blur(20px);white-space:nowrap;max-width:90vw;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.7);", document.body.appendChild(n)), n.style.border = "1px solid " + ("success" === t ? "rgba(100,255,120,0.5)" : "error" === t ? "rgba(255,80,80,0.5)" : "rgba(0,122,255,0.25)"), n.textContent = e, n.style.opacity = "1", n.style.transform = "translateX(-50%) translateY(0)", clearTimeout(n._tm), n._tm = setTimeout(() => {
     n.style.opacity = "0", n.style.transform = "translateX(-50%) translateY(8px)"
   }, "error" === t ? 3500 : 2400)
 }
@@ -4360,544 +4370,7 @@ function updateSsClock() {
     passive: !0
   })
 });
-let _ruletaSpinning = !1,
-  _ruletaFilter = "all",
-  _ruletaWinner = null,
-  _ruletaSpinCount = 0,
-  _ruletaPool = null,
-  _ruletaPinned = null,
-  _ruletaSearchDebounce = null,
-  _ruletaWheelAngle = 0,
-  _ruletaWheelRaf = null,
-  _ruletaHighlightRaf = null,
-  _ruletaWheelCanvas = null,
-  _ruletaWheelCtx = null,
-  _ruletaFinalBallAngle = 0,
-  _ruletaFinalBallR = 0,
-  _ruletaWinSegIdx = 0,
-  _ruletaAnimDone = !1;
-const _ROULETTE_NUMS = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26],
-  _ROULETTE_RED = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]),
-  _SEGMENT_COUNT = _ROULETTE_NUMS.length,
-  _SEG_ANGLE = 2 * Math.PI / _SEGMENT_COUNT;
 
-function _ruletaAccent() {
-  return getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#007AFF"
-}
-
-function _hexToRgb(e) {
-  3 === (e = e.replace("#", "")).length && (e = e.split("").map(e => e + e).join(""));
-  const t = parseInt(e, 16);
-  return [t >> 16 & 255, t >> 8 & 255, 255 & t]
-}
-let _ruletaAC = null;
-
-function _getAC() {
-  if (!_ruletaAC) try {
-    _ruletaAC = new(window.AudioContext || window.webkitAudioContext)
-  } catch (e) {}
-  return _ruletaAC
-}
-
-function _tick(e, t) {
-  try {
-    const e = _getAC();
-    if (!e) return;
-    const n = e.createBuffer(1, Math.floor(.022 * e.sampleRate), e.sampleRate),
-      o = n.getChannelData(0);
-    for (let e = 0; e < o.length; e++) o[e] = (2 * Math.random() - 1) * Math.pow(1 - e / o.length, 3);
-    const i = e.createBufferSource();
-    i.buffer = n;
-    const a = e.createGain();
-    a.gain.setValueAtTime(Math.min(t, .15), e.currentTime), a.gain.exponentialRampToValueAtTime(1e-4, e.currentTime + .022), i.connect(a), a.connect(e.destination), i.start()
-  } catch (e) {}
-}
-
-function _spinWhirr(e) {
-  try {
-    const t = _getAC();
-    if (!t) return;
-    const n = t.createOscillator(),
-      o = t.createGain();
-    n.type = "sawtooth", n.frequency.value = 60 + 80 * (1 - e), o.gain.setValueAtTime(.012, t.currentTime), o.gain.exponentialRampToValueAtTime(1e-4, t.currentTime + .08), n.connect(o), o.connect(t.destination), n.start(), n.stop(t.currentTime + .08)
-  } catch (e) {}
-}
-
-function _winChime() {
-  try {
-    const e = _getAC();
-    if (!e) return;
-    [523.25, 659.25, 783.99, 1046.5].forEach((t, n) => {
-      const o = e.createOscillator(),
-        i = e.createGain();
-      o.type = "sine", o.frequency.value = t;
-      const a = e.currentTime + .12 * n;
-      i.gain.setValueAtTime(0, a), i.gain.linearRampToValueAtTime(.22, a + .03), i.gain.exponentialRampToValueAtTime(1e-4, a + .55), o.connect(i), i.connect(e.destination), o.start(a), o.stop(a + .6)
-    })
-  } catch (e) {}
-}
-const _croupierLines = ["Jackpot! <strong>{t}</strong> je pecka!", "Krupiér vybral! Dneska koukáš na <strong>{t}</strong>.", "Skvělá volba! AI schvaluje — <strong>{t}</strong>.", "Pohodlně se usaďte. Vytáhni popcorn! 🍿", "Tohle bude jízda! <strong>{t}</strong> tě dostane.", "Osud rozhodl. Žádné výmluvy! 🎰"];
-
-function _croupierLine(e) {
-  return _croupierLines[Math.floor(Math.random() * _croupierLines.length)].replace("{t}", e)
-}
-
-function ruletaOnSearchInput(e) {
-  const t = document.getElementById("ruletaSearchClear");
-  t && (t.style.display = e ? "block" : "none"), clearTimeout(_ruletaSearchDebounce);
-  const n = document.getElementById("ruletaSearchResults");
-  !e || e.length < 2 ? n && n.classList.remove("open") : _ruletaSearchDebounce = setTimeout(() => _ruletaDoSearch(e), 300)
-}
-async function _ruletaDoSearch(e) {
-  try {
-    const t = await tmdbGet("/search/multi?query=" + encodeURIComponent(e) + "&page=1"),
-      n = (t?.results || []).filter(e => e.poster_path && ("movie" === e.media_type || "tv" === e.media_type)).slice(0, 8),
-      o = document.getElementById("ruletaSearchResults");
-    if (!o) return;
-    o.innerHTML = "", n.forEach(e => {
-      const t = e.name || e.title || "",
-        n = (e.release_date || e.first_air_date || "").slice(0, 4),
-        i = e.vote_average ? "★ " + e.vote_average.toFixed(1) : "",
-        a = "movie" === e.media_type ? "🎬 Film" : "📺 Seriál",
-        s = document.createElement("div");
-      s.className = "ruleta-search-item", s.innerHTML = '<img src="https://image.tmdb.org/t/p/w92' + e.poster_path + '" alt="" onerror="this.style.opacity=0"><div class="ruleta-search-item-info"><div class="ruleta-search-item-name">' + t + '</div><div class="ruleta-search-item-meta">' + a + (n ? " · " + n : "") + (i ? " · " + i : "") + '</div></div><div class="ruleta-search-item-pin">Vybrat</div>', s.onclick = () => ruletaPinItem(e), o.appendChild(s)
-    }), o.classList[n.length ? "add" : "remove"]("open")
-  } catch (e) {}
-}
-
-function ruletaPinItem(e) {
-  _ruletaPinned = {
-    ...e,
-    media_type: e.media_type || (e.title ? "movie" : "tv")
-  }, _ruletaPool = null;
-  const t = e.name || e.title || "",
-    n = document.getElementById("ruletaPinnedName"),
-    o = document.getElementById("ruletaPinnedImg"),
-    i = document.getElementById("ruletaSearchPinned"),
-    a = document.getElementById("ruletaSearchResults"),
-    s = document.getElementById("ruletaSearchInput"),
-    r = document.getElementById("ruletaSearchClear");
-  n && (n.textContent = t), o && (o.src = e.poster_path ? "https://image.tmdb.org/t/p/w92" + e.poster_path : ""), i && i.classList.add("visible"), a && a.classList.remove("open"), s && (s.value = ""), r && (r.style.display = "none"), "function" == typeof showToast && showToast('📌 "' + t + '" připnuto!')
-}
-
-function ruletaUnpin() {
-  _ruletaPinned = null, _ruletaPool = null;
-  const e = document.getElementById("ruletaSearchPinned");
-  e && e.classList.remove("visible")
-}
-
-function ruletaClearSearch() {
-  const e = document.getElementById("ruletaSearchInput"),
-    t = document.getElementById("ruletaSearchClear"),
-    n = document.getElementById("ruletaSearchResults");
-  e && (e.value = ""), t && (t.style.display = "none"), n && n.classList.remove("open")
-}
-
-function setRuletaFilter(e, t) {
-  _ruletaFilter = t, _ruletaPool = null, document.querySelectorAll(".ruleta-filter-btn").forEach(e => e.classList.remove("active")), e && e.classList.add("active")
-}
-const GENRES = [];
-let _gsSpinning = !1;
-
-function initGenreSlots() {}
-
-function spinGenreSlots() {
-  spinRuleta()
-}
-
-function pullLever() {
-  if (_ruletaSpinning) return;
-  const e = document.getElementById("ruletaLever");
-  e && (e.classList.add("pulled"), setTimeout(() => e.classList.remove("pulled"), 500)), spinRuleta()
-}
-
-function openRuleta() {
-  const e = document.getElementById("ruletaOverlay");
-  if (!e) return;
-  e.classList.add("open"), _ruletaPool = null, _ruletaSpinCount = 0, _ruletaWinner = null;
-  ["ruletaResult", "ruletaJackpot"].forEach(e => {
-    const t = document.getElementById(e);
-    t && (t.style.display = "", t.classList.remove("visible"))
-  }), document.getElementById("ruletaResult").style.display = "none", ["ruletaAgainBtn", "ruletaPlayBtn"].forEach(e => {
-    const t = document.getElementById(e);
-    t && t.classList.remove("visible")
-  });
-  const t = document.getElementById("ruletaCroupier");
-  t && t.classList.remove("visible");
-  const n = document.getElementById("ruletaSpinCount");
-  n && (n.classList.remove("visible"), n.textContent = "");
-  const o = document.getElementById("ruletaSpinLabel");
-  o && (o.textContent = "ZATOČIT");
-  const i = document.getElementById("ruletaSpinBtn");
-  i && (i.disabled = !1), ruletaUnpin(), ruletaClearSearch(), _ruletaApplyTheme(), _ruletaWheelAngle = 0, _buildRuletaWheel(), _buildNumberStrip(), _drawRuletaWheel(_ruletaWheelAngle), _startBulbIdle(), "function" == typeof pauseBgParticles && pauseBgParticles(), "function" == typeof playOpen && playOpen()
-}
-
-function closeRuleta() {
-  const e = document.getElementById("ruletaOverlay");
-  if (!e) return;
-  e.classList.remove("spinning"), e.classList.remove("open"), _ruletaAnimDone = !1, _stopBulbIdle(), _ruletaWheelRaf && (cancelAnimationFrame(_ruletaWheelRaf), _ruletaWheelRaf = null), _ruletaHighlightRaf && (cancelAnimationFrame(_ruletaHighlightRaf), _ruletaHighlightRaf = null);
-  const t = document.getElementById("ruletaResultTrailer");
-  t && (t.innerHTML = ""), "function" == typeof resumeBgParticles && resumeBgParticles()
-}
-
-function _ruletaApplyTheme() {
-  const e = _ruletaAccent();
-  document.querySelectorAll(".ruleta-filter-btn.active").forEach(t => {
-    t.style.borderColor = e, t.style.color = e
-  });
-  const t = document.getElementById("ruletaSpinBtn");
-  t && (t.style.background = e)
-}
-let _ruletaBulbIdleTimer = null;
-
-function _startBulbIdle() {
-  _stopBulbIdle();
-  const e = document.querySelectorAll(".ruleta-bulb");
-  let t = 0;
-  _ruletaBulbIdleTimer = setInterval(() => {
-    e.forEach((e, n) => {
-      e.classList.remove("on", "on-r", "winner");
-      const o = (n + t) % 6;
-      0 === o && e.classList.add("on"), 3 === o && e.classList.add("on-r")
-    }), t++
-  }, 200)
-}
-
-function _stopBulbIdle() {
-  _ruletaBulbIdleTimer && (clearInterval(_ruletaBulbIdleTimer), _ruletaBulbIdleTimer = null)
-}
-
-function ruletaPlay() {
-  if (!_ruletaWinner) return;
-  const e = _ruletaWinner,
-    t = e.title || e.name || "",
-    n = !(!e.title && "movie" !== e.media_type);
-  "function" == typeof openWithCopy && openWithCopy(t, n ? "movie" : "tv")
-}
-
-function _buildRuletaWheel() {
-  if (_ruletaWheelCanvas = document.getElementById("ruletaWheelCanvas"), !_ruletaWheelCanvas) return;
-  _ruletaWheelCtx = _ruletaWheelCanvas.getContext("2d");
-  const e = Math.min(window.devicePixelRatio || 1, 2),
-    t = Math.min(360, window.innerWidth < 720 ? 280 : 360);
-  _ruletaWheelCanvas.width = t * e, _ruletaWheelCanvas.height = t * e, _ruletaWheelCanvas.style.width = t + "px", _ruletaWheelCanvas.style.height = t + "px", _ruletaWheelCtx.scale(e, e)
-}
-
-function _drawRuletaWheel(e, t, n) {
-  if (!_ruletaWheelCanvas || !_ruletaWheelCtx) return;
-  const o = _ruletaWheelCtx,
-    i = parseInt(_ruletaWheelCanvas.style.width) || 360,
-    a = i,
-    s = i,
-    r = a / 2,
-    l = s / 2,
-    c = .485 * a,
-    d = .465 * a,
-    m = .445 * a,
-    u = .39 * a,
-    p = .36 * a,
-    g = .32 * a,
-    f = .28 * a,
-    y = .415 * a;
-  o.clearRect(0, 0, a, s);
-  const h = o.createRadialGradient(r - .12 * a, l - .12 * a, 0, r, l, c);
-  h.addColorStop(0, "#3a2800"), h.addColorStop(.4, "#1e1600"), h.addColorStop(.7, "#2a1e00"), h.addColorStop(1, "#0e0b00"), o.beginPath(), o.arc(r, l, c, 0, 2 * Math.PI), o.fillStyle = h, o.fill(), o.save(), o.beginPath(), o.arc(r, l, c, 0, 2 * Math.PI), o.clip();
-  for (let e = -c; e < c; e += 4) o.beginPath(), o.moveTo(r + e, l - c), o.lineTo(r + e + .15 * c, l + c), o.strokeStyle = "rgba(255,200,80,0.02)", o.lineWidth = 1.5, o.stroke();
-  o.restore();
-  const v = o.createLinearGradient(r - d, l - d, r + d, l + d);
-  v.addColorStop(0, "#f0d060"), v.addColorStop(.3, "#c8a400"), v.addColorStop(.6, "#8a6e00"), v.addColorStop(1, "#c8a400"), o.beginPath(), o.arc(r, l, d, 0, 2 * Math.PI), o.strokeStyle = v, o.lineWidth = 5, o.stroke(), o.beginPath(), o.arc(r, l, m + 4, 0, 2 * Math.PI), o.fillStyle = "#0a0800", o.fill(), o.beginPath(), o.arc(r, l, u + 4, 0, 2 * Math.PI), o.strokeStyle = "rgba(200,164,0,0.25)", o.lineWidth = 1.5, o.stroke();
-  for (let t = 0; t < _SEGMENT_COUNT; t++) {
-    const n = _ROULETTE_NUMS[t],
-      i = e + t * _SEG_ANGLE - Math.PI / 2,
-      s = i + _SEG_ANGLE,
-      c = i + _SEG_ANGLE / 2;
-    o.beginPath(), o.arc(r, l, u, i, s), o.arc(r, l, p, s, i, !0), o.closePath();
-    const d = r + Math.cos(c) * (.7 * p),
-      m = l + Math.sin(c) * (.7 * p),
-      f = o.createRadialGradient(d - 3, m - 3, 0, d, m, .35 * u);
-    0 === n ? (f.addColorStop(0, "#2a8050"), f.addColorStop(1, "#0e4020")) : _ROULETTE_RED.has(n) ? (f.addColorStop(0, "#d42828"), f.addColorStop(1, "#6a1010")) : (f.addColorStop(0, "#1e1e1e"), f.addColorStop(1, "#060606")), o.fillStyle = f, o.fill(), o.beginPath(), o.moveTo(r + Math.cos(i) * (g + 4), l + Math.sin(i) * (g + 4)), o.lineTo(r + Math.cos(i) * (u + 2), l + Math.sin(i) * (u + 2)), o.strokeStyle = "rgba(200,164,0,0.6)", o.lineWidth = 1.2, o.stroke();
-    const h = r + Math.cos(i) * u,
-      v = l + Math.sin(i) * u;
-    o.beginPath(), o.arc(h, v, 1.8, 0, 2 * Math.PI), o.fillStyle = "#c8a400", o.fill(), o.save(), o.translate(r + Math.cos(c) * y, l + Math.sin(c) * y), o.rotate(c + Math.PI / 2), o.shadowColor = "rgba(0,0,0,0.8)", o.shadowBlur = 3, o.font = `bold ${.038*a}px Outfit,Arial,sans-serif`, o.fillStyle = "#fff", o.textAlign = "center", o.textBaseline = "middle", o.fillText(String(n), 0, 0), o.shadowColor = "transparent", o.restore();
-    const b = r + Math.cos(c) * (.82 * p),
-      w = l + Math.sin(c) * (.82 * p),
-      _ = o.createRadialGradient(b, w, 0, b, w, .03 * a);
-    _.addColorStop(0, "rgba(255,255,255,0.1)"), _.addColorStop(1, "rgba(255,255,255,0)"), o.beginPath(), o.arc(r, l, u, i, s), o.arc(r, l, p, s, i, !0), o.closePath(), o.fillStyle = _, o.fill()
-  }
-  const b = o.createLinearGradient(r - g, l - g, r + g, l + g);
-  b.addColorStop(0, "#c8a400"), b.addColorStop(.5, "#7a5e00"), b.addColorStop(1, "#c8a400"), o.beginPath(), o.arc(r, l, g, 0, 2 * Math.PI), o.strokeStyle = b, o.lineWidth = 3, o.stroke();
-  const w = o.createRadialGradient(r - .05 * a, l - .06 * a, 0, r, l, f);
-  w.addColorStop(0, "#2a8050"), w.addColorStop(.5, "#1e6040"), w.addColorStop(.8, "#165030"), w.addColorStop(1, "#0a3018"), o.beginPath(), o.arc(r, l, f, 0, 2 * Math.PI), o.fillStyle = w, o.fill();
-  for (let e = 0; e < 8; e++) {
-    const t = e / 8 * Math.PI * 2;
-    o.beginPath(), o.moveTo(r, l), o.lineTo(r + Math.cos(t) * f, l + Math.sin(t) * f), o.strokeStyle = "rgba(200,164,0,0.18)", o.lineWidth = .8, o.stroke()
-  } [.45, .7, .88].forEach(e => {
-    o.beginPath(), o.arc(r, l, f * e, 0, 2 * Math.PI), o.strokeStyle = "rgba(200,164,0,0.15)", o.lineWidth = .8, o.stroke()
-  });
-  const _ = .055 * a,
-    S = o.createRadialGradient(r - .3 * _, l - .3 * _, 0, r, l, _);
-  S.addColorStop(0, "#f0d060"), S.addColorStop(.4, "#c8a400"), S.addColorStop(.8, "#7a5e00"), S.addColorStop(1, "#3a2e00"), o.beginPath(), o.arc(r, l, _, 0, 2 * Math.PI), o.fillStyle = S, o.fill(), o.beginPath(), o.arc(r, l, .018 * a, 0, 2 * Math.PI), o.fillStyle = "#1a1200", o.fill(), o.beginPath(), o.arc(r - 1, l - 1, .006 * a, 0, 2 * Math.PI), o.fillStyle = "rgba(255,240,120,0.55)", o.fill();
-  const k = o.createRadialGradient(r - .2 * a, l - .22 * a, 0, r, l, c);
-  if (k.addColorStop(0, "rgba(255,255,255,0.06)"), k.addColorStop(.4, "rgba(255,255,255,0.015)"), k.addColorStop(.7, "rgba(0,0,0,0)"), k.addColorStop(1, "rgba(0,0,0,0.22)"), o.beginPath(), o.arc(r, l, c, 0, 2 * Math.PI), o.fillStyle = k, o.fill(), void 0 !== t && void 0 !== n && n > 0) {
-    const e = r + Math.cos(t) * n,
-      i = l + Math.sin(t) * n,
-      s = .026 * a;
-    o.beginPath(), o.arc(e, i + 2, 1.3 * s, 0, 2 * Math.PI);
-    const c = o.createRadialGradient(e, i + 2, 0, e, i + 2, 1.3 * s);
-    c.addColorStop(0, "rgba(0,0,0,0.45)"), c.addColorStop(1, "rgba(0,0,0,0)"), o.fillStyle = c, o.fill();
-    const d = o.createRadialGradient(e - .38 * s, i - .42 * s, 0, e, i, s);
-    d.addColorStop(0, "#fff"), d.addColorStop(.25, "#f0f0f0"), d.addColorStop(.6, "#c8c8c8"), d.addColorStop(.85, "#a0a0a0"), d.addColorStop(1, "#606060"), o.beginPath(), o.arc(e, i, s, 0, 2 * Math.PI), o.fillStyle = d, o.fill(), o.beginPath(), o.arc(e - .3 * s, i - .38 * s, .32 * s, 0, 2 * Math.PI), o.fillStyle = "rgba(255,255,255,0.9)", o.fill(), o.beginPath(), o.arc(e + .2 * s, i + .15 * s, .14 * s, 0, 2 * Math.PI), o.fillStyle = "rgba(255,255,255,0.22)", o.fill(), o.beginPath(), o.arc(e, i, s, 0, 2 * Math.PI), o.strokeStyle = "rgba(0,0,0,0.35)", o.lineWidth = .7, o.stroke()
-  }
-  if (_ruletaAnimDone && void 0 !== _ruletaWinSegIdx && _ruletaWinner) {
-    const t = e + _ruletaWinSegIdx * _SEG_ANGLE - Math.PI / 2,
-      n = t + _SEG_ANGLE,
-      i = .5 + .5 * Math.sin(.006 * performance.now()),
-      [a, s, c] = _hexToRgb(_ruletaAccent());
-    o.beginPath(), o.arc(r, l, u, t, n), o.arc(r, l, p, n, t, !0), o.closePath(), o.fillStyle = `rgba(${a},${s},${c},${.12+.2*i})`, o.fill(), o.beginPath(), o.arc(r, l, u, t, n), o.arc(r, l, p, n, t, !0), o.closePath(), o.strokeStyle = `rgba(${a},${s},${c},${.4+.5*i})`, o.lineWidth = 1.5, o.stroke(), requestAnimationFrame(() => _drawRuletaWheel(_ruletaWheelAngle, _ruletaFinalBallAngle, _ruletaFinalBallR))
-  }
-}
-
-function _buildNumberStrip() {
-  const e = document.getElementById("ruletaNumberStrip");
-  e && (e.innerHTML = "", [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5].forEach(t => {
-    const n = document.createElement("span");
-    n.className = "rns-num " + (0 === t ? "green" : _ROULETTE_RED.has(t) ? "red" : "black"), n.textContent = t, e.appendChild(n)
-  }))
-}
-
-function ruletaSparks() {
-  const e = document.getElementById("ruletaCanvas");
-  if (!e) return;
-  const t = e.parentElement;
-  e.width = t.offsetWidth, e.height = t.offsetHeight;
-  const n = e.getContext("2d"),
-    o = e.width / 2,
-    i = .35 * e.height,
-    a = _ruletaAccent(),
-    [s, r, l] = _hexToRgb(a),
-    c = Array.from({
-      length: 70
-    }, () => ({
-      x: o,
-      y: i,
-      vx: 14 * (Math.random() - .5),
-      vy: 11 * (Math.random() - .85),
-      life: 1,
-      size: 3.5 * Math.random() + 1.5,
-      useAccent: Math.random() < .5
-    }));
-  let d;
-  d && cancelAnimationFrame(d),
-    function t() {
-      n.clearRect(0, 0, e.width, e.height);
-      let o = !1;
-      c.forEach(e => {
-        e.x += e.vx, e.y += e.vy, e.vy += .4, e.life -= .022, e.life <= 0 || (o = !0, n.globalAlpha = e.life * e.life, n.fillStyle = e.useAccent ? `rgba(${s},${r},${l},1)` : "hsl(0,100%,65%)", n.beginPath(), n.arc(e.x, e.y, e.size * e.life, 0, 2 * Math.PI), n.fill())
-      }), n.globalAlpha = 1, o ? d = requestAnimationFrame(t) : n.clearRect(0, 0, e.width, e.height)
-    }()
-}
-async function spinRuleta() {
-  if (_ruletaSpinning) return;
-  _ruletaSpinning = !0, _ruletaAnimDone = !1, _ruletaSpinCount++;
-  const e = document.getElementById("ruletaSpinBtn"),
-    t = document.getElementById("ruletaAgainBtn"),
-    n = document.getElementById("ruletaPlayBtn"),
-    o = document.getElementById("ruletaSpinLabel"),
-    i = document.getElementById("ruletaSpinCount"),
-    a = document.getElementById("ruletaOverlay"),
-    s = document.getElementById("ruletaCroupier"),
-    r = document.getElementById("ruletaCroupierText");
-  e && (e.disabled = !0), o && (o.textContent = "Točím…"), t && t.classList.remove("visible"), n && n.classList.remove("visible");
-  const l = document.getElementById("ruletaResult");
-  l && (l.style.display = "none"), s && s.classList.remove("visible"), a && a.classList.add("spinning"), _stopBulbIdle();
-  const c = document.querySelectorAll(".ruleta-bulb");
-  let d = 0;
-  const m = setInterval(() => {
-    c.forEach((e, t) => {
-      e.classList.remove("on", "on-r", "winner");
-      const n = (t + d) % 4;
-      0 === n && e.classList.add("on"), 2 === n && e.classList.add("on-r")
-    }), d++
-  }, 60);
-  let u = _ruletaPool;
-  if (_ruletaPinned) u = [_ruletaPinned], _ruletaPool = u;
-  else if (!u) {
-    u = [];
-    try {
-      if (TMDB_KEY) {
-        const e = await _userAwareFetch(_ruletaFilter);
-        if (e.length) u = e;
-        else {
-          const e = Math.floor(8 * Math.random()) + 1,
-            t = Math.floor(8 * Math.random()) + 1,
-            n = _ruletaFilter,
-            o = [];
-          "all" !== n && "movie" !== n || (o.push(tmdbGet("/trending/movie/week?language=cs&page=" + e)), o.push(tmdbGet("/discover/movie?sort_by=popularity.desc&vote_count.gte=200&vote_average.gte=6.0&language=cs&page=" + t))), "all" !== n && "tv" !== n || (o.push(tmdbGet("/trending/tv/week?language=cs&page=" + e)), o.push(tmdbGet("/discover/tv?sort_by=popularity.desc&vote_count.gte=100&vote_average.gte=6.0&language=cs&page=" + t))), "top" === n && (o.push(tmdbGet("/movie/top_rated?language=cs&page=" + e)), o.push(tmdbGet("/tv/top_rated?language=cs&page=" + e))), "trending" === n && (o.push(tmdbGet("/trending/all/day?language=cs&page=" + e)), o.push(tmdbGet("/trending/all/week?language=cs&page=" + t)));
-          (await Promise.allSettled(o)).forEach(e => {
-            "fulfilled" === e.status && e.value?.results && e.value.results.filter(e => e.poster_path).forEach(e => {
-              const t = e.media_type || (e.title ? "movie" : "tv");
-              "movie" !== t && "tv" !== t || u.push({
-                ...e,
-                media_type: t
-              })
-            })
-          })
-        }
-      }
-    } catch (e) {}
-    try {
-      getWatchlist().forEach(e => {
-        e.name && !u.find(t => (t.title || t.name) === e.name) && u.push({
-          title: e.name,
-          name: e.name,
-          poster_path: null,
-          id: null,
-          media_type: "movie" === e.type ? "movie" : "tv",
-          _fromWatchlist: !0,
-          _poster: e.poster
-        })
-      })
-    } catch (e) {}
-    u.length || (u = [{
-      title: "Breaking Bad",
-      name: "Breaking Bad",
-      media_type: "tv"
-    }, {
-      title: "Inception",
-      name: "Inception",
-      media_type: "movie"
-    }, {
-      title: "Interstellar",
-      name: "Interstellar",
-      media_type: "movie"
-    }, {
-      title: "Game of Thrones",
-      name: "Game of Thrones",
-      media_type: "tv"
-    }]);
-    const e = new Set;
-    u = u.filter(t => {
-      const n = (t.title || t.name || "").toLowerCase();
-      return !e.has(n) && (e.add(n), !0)
-    }), _ruletaPool = u
-  }
-  const p = _ruletaWinner ? _ruletaWinner.title || _ruletaWinner.name : "",
-    g = u.filter(e => (e.title || e.name) !== p),
-    f = (g.length ? g : u)[Math.floor(Math.random() * (g.length || u.length))];
-  _ruletaWinner = f;
-  try {
-    addToUserHistory(f)
-  } catch (e) {}
-  const y = f.title || f.name || "?",
-    h = f.poster_path ? "https://image.tmdb.org/t/p/w300" + f.poster_path : f._poster || "",
-    v = Math.floor(Math.random() * _SEGMENT_COUNT);
-  _ruletaWinSegIdx = v;
-  const b = parseInt(_ruletaWheelCanvas?.style.width || "360"),
-    w = .44 * b,
-    _ = .375 * b,
-    S = 7 + 4 * Math.random(),
-    k = -Math.PI / 2 - (v + .5) * _SEG_ANGLE,
-    x = _ruletaWheelAngle,
-    E = x - S * Math.PI * 2 + (k - x % (2 * Math.PI)),
-    I = Math.random() * Math.PI * 2,
-    T = 2.4 * S + 2 + Math.random(),
-    C = 5600 + 800 * Math.random(),
-    B = .68,
-    L = .92;
-  let P = 0,
-    A = -1,
-    M = 0;
-
-  function $(e) {
-    return 1 - Math.pow(1 - e, 5)
-  }
-  const F = performance.now();
-  _ruletaWheelRaf && cancelAnimationFrame(_ruletaWheelRaf), _ruletaWheelRaf = requestAnimationFrame(function e(t) {
-    const n = t - F,
-      o = Math.min(n / C, 1),
-      i = $(o);
-    let a, s;
-    if (_ruletaWheelAngle = x + (E - x) * i, o < B) {
-      const e = o / B;
-      a = I - T * Math.PI * 2 * ((r = e) >= 1 ? 1 : 1 - Math.pow(2, -10 * r)), s = w;
-      const n = Math.max(25, 120 * o * o + 30);
-      t - P > n && (_tick(800 - 300 * o, .07 - .035 * o), P = t)
-    } else if (o < L) {
-      const e = (o - B) / .24,
-        t = $(e);
-      s = w - (w - _) * t;
-      a = (I - T * Math.PI * 2) * (1 - .85 * t) + (_ruletaWheelAngle + (v + .5) * _SEG_ANGLE - Math.PI / 2) * (.85 * t);
-      const n = ((a - _ruletaWheelAngle + Math.PI / 2) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI),
-        i = Math.floor(n / _SEG_ANGLE) % _SEGMENT_COUNT;
-      i !== A && e < .7 && (A = i, _tick(400 - 200 * e, .1 - .05 * e))
-    } else {
-      const e = (o - L) / (1 - L);
-      s = _ + Math.sin(e * Math.PI * 3) * (w - _) * .035 * (1 - e), a = _ruletaWheelAngle + (v + .5) * _SEG_ANGLE - Math.PI / 2
-    }
-    var r;
-    o < .5 && t - M > 180 && (_spinWhirr(o), M = t), _drawRuletaWheel(_ruletaWheelAngle, a, s), o < 1 ? _ruletaWheelRaf = requestAnimationFrame(e) : (_ruletaFinalBallAngle = _ruletaWheelAngle + (v + .5) * _SEG_ANGLE - Math.PI / 2, _ruletaFinalBallR = _, _drawRuletaWheel(_ruletaWheelAngle, _ruletaFinalBallAngle, _ruletaFinalBallR), _ruletaWheelRaf = null, _winChime(), _ruletaAnimDone = !0, requestAnimationFrame(() => _drawRuletaWheel(_ruletaWheelAngle, _ruletaFinalBallAngle, _ruletaFinalBallR)))
-  }), await new Promise(e => setTimeout(e, C + 120)), clearInterval(m), a && a.classList.remove("spinning"), c.forEach((e, t) => {
-    e.classList.remove("on", "on-r"), setTimeout(() => e.classList.add("winner"), 30 * t), setTimeout(() => {
-      e.classList.remove("winner"), e.classList.add(t % 2 == 0 ? "on" : "on-r")
-    }, 30 * t + 1500)
-  }), setTimeout(() => c.forEach(e => e.classList.remove("winner")), 3e3), "function" == typeof playSuccess && playSuccess(), ruletaSparks();
-  const z = document.getElementById("ruletaBox");
-  if (z && (z.classList.add("shake"), setTimeout(() => z.classList.remove("shake"), 400)), "function" == typeof confetti) {
-    const e = _ruletaAccent();
-    confetti({
-      particleCount: 150,
-      spread: 70,
-      origin: {
-        y: .55
-      },
-      colors: [e, "#ffffff", "#ff4444", "#00cfff"]
-    }), setTimeout(() => confetti({
-      particleCount: 70,
-      angle: 60,
-      spread: 55,
-      origin: {
-        x: 0,
-        y: .6
-      },
-      colors: [e, "#fff"]
-    }), 250), setTimeout(() => confetti({
-      particleCount: 70,
-      angle: 120,
-      spread: 55,
-      origin: {
-        x: 1,
-        y: .6
-      },
-      colors: [e, "#fff"]
-    }), 400)
-  }
-  const R = document.getElementById("ruletaJackpot"),
-    j = document.getElementById("ruletaJackpotSub");
-  R && j && (j.textContent = y, R.classList.add("visible"), setTimeout(() => R.classList.remove("visible"), 2200)), await new Promise(e => setTimeout(e, 650)), document.getElementById("ruletaResultTitle").textContent = y;
-  const O = (f.release_date || f.first_air_date || "").slice(0, 4),
-    D = "tv" === f.media_type || !f.title,
-    N = [];
-  f.vote_average && N.push("⭐ " + f.vote_average.toFixed(1)), O && N.push(O), N.push(D ? "📺 Seriál" : "🎬 Film"), f.overview && N.push(f.overview.slice(0, 90) + "…"), document.getElementById("ruletaResultMeta").textContent = N.join(" · ");
-  document.getElementById("ruletaResultPoster").innerHTML = h ? '<img src="' + h + '" alt="" loading="lazy">' : "";
-  const W = document.getElementById("ruletaResultTrailer");
-  if (W.innerHTML = "", f.id && TMDB_KEY) try {
-    const e = D ? "tv" : "movie",
-      t = await tmdbGet("/" + e + "/" + f.id + "/videos?language=cs"),
-      n = (t?.results || []).find(e => "YouTube" === e.site && ("Trailer" === e.type || "Teaser" === e.type));
-    n && (W.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + n.key + '?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=0&fs=1&playsinline=1&cc_load_policy=0" allow="autoplay;encrypted-media;picture-in-picture" allowfullscreen></iframe>')
-  } catch (e) {}
-  l && (l.style.display = "flex"), s && r && (r.innerHTML = _croupierLine(y), s.classList.add("visible")), i && (i.textContent = _ruletaSpinCount + "× točeno", i.classList.add("visible")), e && (e.disabled = !1), o && (o.textContent = _ruletaSpinCount > 1 ? "↻ Jiný výběr" : "↻ Znovu"), t && t.classList.add("visible"), n && n.classList.add("visible");
-  const G = document.getElementById("aiCroupierBubble");
-  G && (G.textContent = ["Jackpot! 🎰 Vytáhni popcorn!", "Krupiér rozhodl! 🍿", "Skvělá volba!", "Osud promluvil! 🎲", "Dneska koukáš na tohle!"][Math.floor(5 * Math.random())], G.style.display = "block", setTimeout(() => {
-    G.style.display = "none"
-  }, 3e3));
-  const H = _ROULETTE_NUMS[v];
-  document.querySelectorAll(".rns-num").forEach(e => {
-    e.classList.remove("active-win"), +e.textContent === H && e.classList.add("active-win")
-  }), _ruletaSpinning = !1
-}
-
-function onWheelStop() {}
 
 function getPartialWatched() {
   try {
@@ -5529,22 +5002,7 @@ window.mfNotify = function(e, t, n) {
   };
   window._swReg ? window._swReg.showNotification(e, o) : new Notification(e, o)
 };
-const _origCheckNewEps = "function" == typeof checkNewEpisodes ? checkNewEpisodes : null,
-  DRUM_SERIES = [],
-  DRUM_ITEM_H = 80;
-let _drumOffset = 0,
-  _drumAnimId = null,
-  _drumSpinning = !1,
-  _drumWinner = null;
-
-function initSpinDrum() {
-  _drumSpinning = !1
-}
-
-function spinDrum() {}
-
-function _onDrumStop() {}
-const SERIES_DATA = [];
+const _origCheckNewEps = "function" == typeof checkNewEpisodes ? checkNewEpisodes : null;
 document.addEventListener("keydown", e => {
   "v" === e.key || "V" === e.key ? speechManager.startListening() : "m" !== e.key && "M" !== e.key || speechManager.stopListening();
 });
@@ -5682,9 +5140,7 @@ function _applyUserPreferences() {
   const e = getActiveProfile();
   if (!e) return;
   const t = e.prefs?.features || {};
-  "function" == typeof _setSoundEnabled && _setSoundEnabled(!1 !== t.soundEnabled);
-  const n = document.getElementById("ruletaOverlay");
-  n && n.setAttribute("data-theme", !1 !== t.darkGold ? "gold" : "accent")
+  "function" == typeof _setSoundEnabled && _setSoundEnabled(!1 !== t.soundEnabled)
 }
 async function _userAwareFetch(e) {
   const t = getActiveProfile(),
@@ -5753,7 +5209,7 @@ function _saveContentPref(e, t) {
   const n = getActiveProfileId();
   n && (updateUserPrefs(n, {
     contentPref: e
-  }), _ruletaPool = null, t.closest("div").querySelectorAll("button").forEach(t => {
+  }), t.closest("div").querySelectorAll("button").forEach(t => {
     const n = t.dataset.pref === e;
     t.style.borderColor = n ? "rgba(200,164,0,0.5)" : "rgba(255,255,255,0.1)", t.style.background = n ? "rgba(200,164,0,0.12)" : "rgba(255,255,255,0.03)", t.style.color = n ? "#c8a400" : "rgba(255,255,255,0.5)"
   }))
@@ -5946,8 +5402,7 @@ const ProfileGate = {
           showRating: !0,
           confettiOnWin: !0,
           soundEnabled: !0,
-          darkGold: !0,
-          ruletaAutoOpen: !1
+          darkGold: !0
         },
         contentPref: "all",
         lang: "cs"
@@ -6071,7 +5526,7 @@ class SpeechManager {
     }, this.synth.speak(o)
   }
   handleSpeechResult(e) {
-    window.MF_DEBUG && console.log("🎯 Zpracovávám:", e), e.toLowerCase().includes("simpsons") || e.toLowerCase().includes("simpsonovi") ? (this.speak("Otevírám The Simpsons!"), "function" == typeof openSeries && openSeries("the-simpsons")) : e.toLowerCase().includes("south park") ? (this.speak("South Park se otevírá!"), "function" == typeof openSeries && openSeries("south-park")) : e.toLowerCase().includes("family guy") ? (this.speak("Family Guy, tady jsem!"), "function" == typeof openSeries && openSeries("family-guy")) : e.toLowerCase().includes("futurama") ? (this.speak("Futurama se otevírá!"), "function" == typeof openSeries && openSeries("futurama")) : e.toLowerCase().includes("ruleta") || e.toLowerCase().includes("zatočit") ? (this.speak("Zatáčím ruletou!"), roulette.spin && roulette.spin()) : this.speak("Pochopil jsem: " + e)
+    window.MF_DEBUG && console.log("🎯 Zpracovávám:", e), e.toLowerCase().includes("simpsons") || e.toLowerCase().includes("simpsonovi") ? (this.speak("Otevírám The Simpsons!"), "function" == typeof openSeries && openSeries("the-simpsons")) : e.toLowerCase().includes("south park") ? (this.speak("South Park se otevírá!"), "function" == typeof openSeries && openSeries("south-park")) : e.toLowerCase().includes("family guy") ? (this.speak("Family Guy, tady jsem!"), "function" == typeof openSeries && openSeries("family-guy")) : e.toLowerCase().includes("futurama") ? (this.speak("Futurama se otevírá!"), "function" == typeof openSeries && openSeries("futurama")) : e.toLowerCase().includes("náhodný") || e.toLowerCase().includes("nevím co koukat") ? (this.speak("Otevírám vyhledávání."), openSearch()) : this.speak("Pochopil jsem: " + e)
   }
 }
 const speechManager = new SpeechManager;
@@ -6080,7 +5535,7 @@ async function _checkAdminCredentials(e, t) {
     o = await crypto.subtle.digest("SHA-256", n);
   return "8f10270aba9208087a115fb18fc008a47e349f3d17ceeba3292eddbc7be97b37" === Array.from(new Uint8Array(o)).map(e => e.toString(16).padStart(2, "0")).join("")
 }
-console.log("🎤 Speech Manager zaregistrován!"), console.log("💡 Zkratky: V = start listening, M = stop, R = roulette"),
+console.log("🎤 Speech Manager zaregistrován!"), console.log("💡 Zkratky: V = start listening, M = stop"),
   function() {
     const e = document.getElementById("ai-bubble-canvas");
     if (!e) return;
@@ -6482,12 +5937,6 @@ function adminTestConfetti() {
       y: .5
     }
   }) : "function" == typeof showToast && showToast("❌ confetti není dostupné")
-}
-
-function adminOpenRuleta() {
-  adminLogout(), setTimeout(() => {
-    "function" == typeof openRuleta && openRuleta()
-  }, 300)
 }
 
 function adminForceWrapped() {
@@ -7201,7 +6650,7 @@ function processVoiceCommand(e) {
     a = "";
   const s = e.match(/(?:pusť|přehraj|spusť|dej mi)\s+(?:další díl\s+)?(.+)/i),
     r = e.match(/(?:najdi|hledej|ukaž)\s+(?:mi\s+)?(?:nějaký\s+|nějaké\s+|film\s+)?(.+)/i),
-    l = e.match(/náhodný|ruleta|nevím co koukat|něco náhodného/i),
+    l = e.match(/náhodný|nevím co koukat|něco náhodného/i),
     c = e.match(/premiéry|co vychází|what.s on/i);
   e.match(/(?:pusť|otevři|dej)\s+(?:seriál\s+)?(.+)/i);
   if (l) i = () => {
@@ -7242,8 +6691,7 @@ function processVoiceCommand(e) {
 document.addEventListener("keydown", e => {
   "INPUT" !== e.target.tagName && "TEXTAREA" !== e.target.tagName && ("v" !== e.key && "V" !== e.key || e.ctrlKey || e.metaKey || (e.preventDefault(), openVoiceCmd()))
 }), document.addEventListener("DOMContentLoaded", () => {
-  const e = document.getElementById("ruletaWheelCanvas");
-  e && (e.width = 380, e.height = 380), setTimeout(() => {
+  setTimeout(() => {
     const e = document.getElementById("premiereFabBadge");
     e && e.classList.remove("has-items")
   }, 500), renderCollectionsGrid()
@@ -7698,11 +7146,6 @@ const EDIT_STORAGE_KEY = "mf_fab_layout_v2",
     icon: "🎬",
     selector: "#statsFab"
   }, {
-    id: "editRuletaFab",
-    name: "Ruleta",
-    icon: "🎰",
-    selector: ".ruleta-fab"
-  }, {
     id: "editPremiereFab",
     name: "Premiéry",
     icon: "📅",
@@ -7865,7 +7308,7 @@ function toggleEditProp(e, t) {
       break;
     case "label":
       a.label = !1 === a.label;
-      const e = n.querySelector(".mf-fab-label,.ruleta-fab-label,.premiere-fab-label,.collections-fab-label,.mf-fab-label");
+      const e = n.querySelector(".mf-fab-label,.premiere-fab-label,.collections-fab-label");
       e && (e.style.display = !1 === a.label ? "none" : ""), _syncToggle("editToggleLabel", !1 !== a.label);
       break;
     case "magnet":
@@ -7962,7 +7405,7 @@ function _clearFabStyles(e) {
   t.style.width = "", t.style.height = "", t.style.borderRadius = "", t.style.boxShadow = "", t.style.filter = "", t.style.borderColor = "", t.style.backdropFilter = "", t.style.borderWidth = "";
   const n = e.querySelector("svg");
   n && (n.style.color = "");
-  const o = e.querySelector(".mf-fab-label,.ruleta-fab-label,.premiere-fab-label,.collections-fab-label");
+  const o = e.querySelector(".mf-fab-label,.premiere-fab-label,.collections-fab-label");
   o && (o.style.display = "")
 }
 
@@ -7970,7 +7413,7 @@ function _applyColor(e, t, n) {
   t.style.borderColor = n + "55", t.style.boxShadow = `0 4px 20px rgba(0,0,0,0.6), 0 0 18px ${n}22`;
   const o = e.querySelector("svg");
   o && (o.style.color = n);
-  const i = e.querySelector(".mf-fab-label,.ruleta-fab-label,.premiere-fab-label,.collections-fab-label");
+  const i = e.querySelector(".mf-fab-label,.premiere-fab-label,.collections-fab-label");
   i && (i.style.color = n)
 }
 
@@ -8058,7 +7501,7 @@ function _applyStoredProps(e, t) {
   if (!n) return;
   const o = e.querySelector(".mf-fab-icon") || e;
   void 0 !== n.x && (e.style.left = "auto", e.style.right = "auto", e.style.left = n.x + "px"), void 0 !== n.y && (e.style.bottom = "auto", e.style.top = "auto", e.style.bottom = n.y + "px"), n.w && (o.style.width = n.w + "px"), n.h && (o.style.height = n.h + "px"), void 0 !== n.r && (o.style.borderRadius = n.r + "px"), void 0 !== n.opacity && (e.style.opacity = n.opacity / 100), n.color && _applyColor(e, o, n.color), !1 === n.shadow && (o.style.boxShadow = "none"), !1 === n.glow && (o.style.filter = "none"), !1 === n.blur && (o.style.backdropFilter = "none"), !1 === n.border && (o.style.borderWidth = "0"), n.pulse && (e.style.animation = "fabPulse 2s ease-in-out infinite");
-  const i = e.querySelector(".mf-fab-label,.ruleta-fab-label,.premiere-fab-label,.collections-fab-label");
+  const i = e.querySelector(".mf-fab-label,.premiere-fab-label,.collections-fab-label");
   i && !1 === n.label && (i.style.display = "none"), n.hidden ? e.classList.add("fab-hidden-by-user") : e.classList.remove("fab-hidden-by-user")
 }
 
@@ -9164,7 +8607,7 @@ function triggerPwaInstall() {
     let t = null;
 
     function n() {
-      const e = [".ruleta-overlay.open", ".wrapped-overlay.open", "#ai-voice-bubble-overlay.open", ".premiere-overlay.open", ".collections-overlay.open", ".trakt-overlay.open", ".voice-cmd-overlay.open", ".mood-overlay.open", ".universe-overlay.open", ".genre-editor-overlay.open", "#epRatingOverlay.open", "#syncOverlay.open", "#voiceCmdOverlay.open", "#syncModal.open", ".pm-overlay.open", ".watchlist-overlay.open"].some(e => !!document.querySelector(e));
+      const e = [".wrapped-overlay.open", "#ai-voice-bubble-overlay.open", ".premiere-overlay.open", ".collections-overlay.open", ".trakt-overlay.open", ".voice-cmd-overlay.open", ".mood-overlay.open", ".universe-overlay.open", ".genre-editor-overlay.open", "#epRatingOverlay.open", "#syncOverlay.open", "#voiceCmdOverlay.open", "#syncModal.open", ".pm-overlay.open", ".watchlist-overlay.open"].some(e => !!document.querySelector(e));
       document.body.classList.toggle("modal-open", e)
     }
     localStorage.setItem = function(n, o) {

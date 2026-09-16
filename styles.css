@@ -400,16 +400,8 @@ button:not(.mood-btn):not(.timer-preset-btn):not(.pg-add-btn):not(
 .wl-btn {
   border-radius: 10px !important;
 }
-.ruleta-overlay {
-  background: rgba(0, 0, 0, 0.82) !important;
-  backdrop-filter: blur(20px) saturate(1.5) !important;
-}
-.ruleta-box {
-  background: rgba(12, 12, 20, 0.99) !important;
-  border: 1px solid rgba(255, 255, 255, 0.07) !important;
-  border-radius: var(--radius-lg) !important;
-  box-shadow: var(--shadow-lg) !important;
-}
+
+
 .section-title,
 .shelf-title,
 h2,
@@ -442,6 +434,15 @@ h3 {
 }
 * {
   margin: 0;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent, #007aff);
+  outline-offset: 3px;
   padding: 0;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -9568,479 +9569,62 @@ body.grain-off::after {
   padding-top: 12px;
   border-top: 1px solid var(--border);
 }
-.ruleta-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 8000;
-  background: #06050a;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-.ruleta-overlay.open {
-  display: flex;
-}
-.ruleta-overlay::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      ellipse 80% 60% at 50% 0,
-      rgba(200, 150, 0, 0.07) 0,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse 50% 80% at 0 50%,
-      rgba(120, 60, 0, 0.05) 0,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse 50% 80% at 100% 50%,
-      rgba(80, 40, 120, 0.04) 0,
-      transparent 55%
-    ),
-    radial-gradient(
-      ellipse 60% 40% at 50% 100%,
-      rgba(200, 100, 0, 0.04) 0,
-      transparent 60%
-    );
-  animation: ruletaBgPulse 8s ease-in-out infinite alternate;
-}
-@keyframes ruletaBgPulse {
-  0% {
-    opacity: 0.7;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-.ruleta-overlay::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.028) 0,
-    rgba(0, 0, 0, 0.028) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-}
-.ruleta-bulbs {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 5;
-  display: flex;
-  gap: 0;
-  overflow: hidden;
-  height: 18px;
-}
-.ruleta-bulb {
-  flex: 1;
-  height: 18px;
-  background: rgba(15, 10, 2, 0.97);
-  border-radius: 0 0 50% 50%;
-  border-bottom: 1px solid rgba(200, 164, 0, 0.1);
-  transition:
-    background 80ms,
-    box-shadow 80ms;
-}
-.ruleta-bulb.on {
-  background: rgba(255, 200, 0, 0.97);
-  box-shadow:
-    0 4px 16px rgba(255, 185, 0, 0.9),
-    0 0 6px #ffdc00;
-}
-.ruleta-bulb.on-r {
-  background: rgba(255, 65, 0, 0.92);
-  box-shadow:
-    0 4px 14px rgba(255, 55, 0, 0.75),
-    0 0 6px #ff5000;
-}
-.ruleta-bulb.winner {
-  background: var(--accent, #007aff) !important;
-  box-shadow:
-    0 4px 20px var(--accent, #007aff),
-    0 0 10px var(--accent, #007aff) !important;
-}
-.ruleta-bulbs-bottom {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 5;
-  display: flex;
-  gap: 0;
-  overflow: hidden;
-  height: 18px;
-  transform: scaleY(-1);
-}
-.ruleta-casino-wrap {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  gap: 0;
-  align-items: stretch;
-  width: min(1040px, 98vw);
-  height: min(680px, 94vh);
-  border-radius: 20px;
-  overflow: hidden;
-  border: 1px solid rgba(200, 164, 0, 0.18);
-  box-shadow:
-    0 0 0 1px rgba(255, 220, 100, 0.06) inset,
-    0 2px 0 rgba(255, 220, 100, 0.12) inset,
-    0 40px 120px rgba(0, 0, 0, 0.95),
-    0 0 80px rgba(200, 150, 0, 0.08);
-}
-.ruleta-box {
-  width: 360px;
-  flex-shrink: 0;
-  background: rgba(8, 6, 2, 0.99);
-  border-right: 1px solid rgba(200, 164, 0, 0.13);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.ruleta-box::-webkit-scrollbar {
-  display: none;
-}
-.ruleta-box::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(200, 164, 0, 0.5) 40%,
-    rgba(255, 220, 100, 0.8) 50%,
-    rgba(200, 164, 0, 0.5) 60%,
-    transparent
-  );
-  pointer-events: none;
-  z-index: 5;
-}
-.ruleta-box::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(
-    circle at 0 0,
-    rgba(200, 164, 0, 0.04) 0,
-    transparent 70%
-  );
-  pointer-events: none;
-}
-.ruleta-canvas {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 20;
-  border-radius: 0;
-}
-.ruleta-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 30;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  color: rgba(255, 255, 255, 0.22);
-  cursor: pointer;
-  padding: 4px 10px;
-  font-size: 0.54rem;
-  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  letter-spacing: 2px;
-  transition: all 0.18s;
-}
-.ruleta-close:hover {
-  color: rgba(255, 255, 255, 0.6);
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.06);
-}
-.ruleta-spin-count {
-  position: absolute;
-  top: 13px;
-  left: 14px;
-  font-size: 0.5rem;
-  font-weight: 900;
-  color: rgba(200, 164, 0, 0.4);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  z-index: 25;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.ruleta-spin-count.visible {
-  opacity: 1;
-}
-.ruleta-inner-pad {
-  padding: 22px 20px 20px;
-  overflow-y: auto;
-  flex: 1;
-  scrollbar-width: none;
-}
-.ruleta-inner-pad::-webkit-scrollbar {
-  display: none;
-}
-.ruleta-header {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  margin-bottom: 20px;
-}
-.ruleta-icon-wrap {
-  width: 42px;
-  height: 42px;
-  border-radius: 11px;
-  background: linear-gradient(
-    135deg,
-    rgba(200, 164, 0, 0.12) 0,
-    rgba(120, 80, 0, 0.06) 100%
-  );
-  border: 1px solid rgba(200, 164, 0, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.5),
-    0 0 14px rgba(200, 164, 0, 0.06);
-}
-.ruleta-title {
-  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  font-size: 1.05rem;
-  font-weight: 900;
-  letter-spacing: -0.5px;
-  line-height: 1.1;
-}
-.ruleta-title span {
-  color: #c8a400;
-  text-shadow: 0 0 22px rgba(200, 164, 0, 0.45);
-}
-.ruleta-subtitle {
-  font-size: 0.5rem;
-  color: rgba(255, 255, 255, 0.22);
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  margin-top: 3px;
-}
-.ruleta-search-wrap {
-  position: relative;
-  margin-bottom: 10px;
-}
-.ruleta-search-icon {
-  position: absolute;
-  left: 11px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 13px;
-  height: 13px;
-  color: rgba(255, 255, 255, 0.18);
-  pointer-events: none;
-}
-.ruleta-search-input {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  padding: 10px 30px 10px 32px;
-  color: #fff;
-  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  font-size: 0.8rem;
-  outline: 0;
-  box-sizing: border-box;
-  transition: all 0.22s;
-}
-.ruleta-search-input:focus {
-  border-color: rgba(200, 164, 0, 0.32);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 0 3px rgba(200, 164, 0, 0.06);
-}
-.ruleta-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.16);
-}
-.ruleta-search-clear {
-  position: absolute;
-  right: 9px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: 0 0;
-  border: none;
-  color: rgba(255, 255, 255, 0.25);
-  cursor: pointer;
-  font-size: 0.7rem;
-  display: none;
-  padding: 4px;
-  transition: color 0.15s;
-}
-.ruleta-search-clear:hover {
-  color: rgba(255, 255, 255, 0.55);
-}
-.ruleta-search-results {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background: rgba(8, 6, 2, 0.99);
-  border: 1px solid rgba(200, 164, 0, 0.2);
-  border-radius: 11px;
-  z-index: 100;
-  max-height: 220px;
-  overflow-y: auto;
-  display: none;
-  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.9);
-  scrollbar-width: none;
-}
-.ruleta-search-results.open {
-  display: block;
-}
-.ruleta-search-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 13px;
-  cursor: pointer;
-  transition: background 0.12s;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-}
-.ruleta-search-item:last-child {
-  border-bottom: none;
-}
-.ruleta-search-item:hover {
-  background: rgba(200, 164, 0, 0.06);
-}
-.ruleta-search-item img {
-  width: 32px;
-  height: 46px;
-  object-fit: cover;
-  border-radius: 5px;
-  flex-shrink: 0;
-  background: #111;
-}
-.ruleta-search-item-name {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
-}
-.ruleta-search-item-meta {
-  font-size: 0.58rem;
-  color: rgba(255, 255, 255, 0.3);
-  margin-top: 2px;
-}
-.ruleta-search-item-pin {
-  margin-left: auto;
-  font-size: 0.55rem;
-  font-weight: 800;
-  color: #c8a400;
-  background: rgba(200, 164, 0, 0.09);
-  border: 1px solid rgba(200, 164, 0, 0.22);
-  border-radius: 5px;
-  padding: 2px 7px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.ruleta-search-pinned {
-  display: none;
-  align-items: center;
-  gap: 9px;
-  background: rgba(200, 164, 0, 0.06);
-  border: 1px solid rgba(200, 164, 0, 0.2);
-  border-radius: 10px;
-  padding: 7px 11px;
-  margin-bottom: 10px;
-}
-.ruleta-search-pinned.visible {
-  display: flex;
-}
-.ruleta-search-pinned-img {
-  width: 24px;
-  height: 34px;
-  object-fit: cover;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-.ruleta-search-pinned-name {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #c8a400;
-  flex: 1;
-}
-.ruleta-search-pinned-clear {
-  background: 0 0;
-  border: none;
-  color: rgba(255, 255, 255, 0.25);
-  cursor: pointer;
-  font-size: 0.72rem;
-  transition: color 0.15s;
-}
-.ruleta-search-pinned-clear:hover {
-  color: rgba(255, 255, 255, 0.55);
-}
-.ruleta-filters {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
-}
-.ruleta-filter-btn {
-  flex: 1;
-  min-width: 0;
-  padding: 6px 4px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.02);
-  color: rgba(255, 255, 255, 0.32);
-  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  font-size: 0.58rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.18s;
-  white-space: nowrap;
-  text-align: center;
-}
-.ruleta-filter-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.62);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-.ruleta-filter-btn.active {
-  border-color: rgba(200, 164, 0, 0.45);
-  color: #c8a400;
-  background: rgba(200, 164, 0, 0.09);
-  box-shadow: 0 0 12px rgba(200, 164, 0, 0.09);
-}
-.ruleta-jackpot {
-  text-align: center;
-  padding: 10px 0;
-  opacity: 0;
-  transform: scale(0.8);
-  transition: all 0.35s cubic-bezier(0.34, 1.5, 0.64, 1);
-  pointer-events: none;
-  height: 0;
-  overflow: hidden;
-}
-.ruleta-jackpot.visible {
-  opacity: 1;
-  transform: scale(1);
-  height: auto;
-  pointer-events: auto;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .rj-text {
   font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
   font-size: 1.6rem;
@@ -10066,109 +9650,21 @@ body.grain-off::after {
   color: rgba(255, 255, 255, 0.45);
   margin-top: 4px;
 }
-.ruleta-croupier {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  padding: 8px 12px;
-  margin-bottom: 12px;
-  opacity: 0;
-  transform: translateY(5px);
-  transition: all 0.3s ease;
-  pointer-events: none;
-}
-.ruleta-croupier.visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-.ruleta-croupier-icon {
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-.ruleta-croupier-text {
-  font-size: 0.73rem;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.4;
-}
-.ruleta-result {
-  border-radius: 13px;
-  overflow: hidden;
-  margin-bottom: 13px;
-  display: none;
-  position: relative;
-  border: 1px solid rgba(200, 164, 0, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-}
-.ruleta-result.visible {
-  display: block;
-}
-.ruleta-result-poster {
-  width: 100%;
-  overflow: hidden;
-  background: #080600;
-  position: relative;
-  aspect-ratio: 16/9;
-}
-.ruleta-result-poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.ruleta-result-poster::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60%;
-  background: linear-gradient(to top, rgba(8, 6, 2, 0.95) 0, transparent 100%);
-  z-index: 1;
-}
-.ruleta-result-info {
-  background: rgba(8, 6, 2, 0.97);
-  padding: 12px 13px 13px;
-  border-top: 1px solid rgba(200, 164, 0, 0.1);
-}
-.ruleta-result-verdict {
-  font-size: 0.38rem;
-  font-weight: 900;
-  letter-spacing: 3.5px;
-  text-transform: uppercase;
-  color: rgba(200, 164, 0, 0.55);
-  margin-bottom: 5px;
-}
-.ruleta-result-title {
-  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  font-size: 0.92rem;
-  font-weight: 900;
-  letter-spacing: -0.3px;
-  color: #fff;
-  margin-bottom: 3px;
-  line-height: 1.2;
-}
-.ruleta-result-meta {
-  font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.35);
-  margin-bottom: 10px;
-  line-height: 1.5;
-}
-.ruleta-result-trailer {
-  border-radius: 8px;
-  overflow: hidden;
-  position: relative;
-}
-.ruleta-result-trailer iframe {
-  width: 100%;
-  aspect-ratio: 16/9;
-  border: none;
-  border-radius: 8px;
-  display: block;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .tile-trailer .tr-video-container {
   position: relative;
   overflow: hidden;
@@ -10188,86 +9684,15 @@ body.grain-off::after {
   pointer-events: none;
   z-index: 5;
 }
-.ruleta-result-trailer {
-  position: relative;
-  margin-top: 0;
-  border-radius: 10px;
-}
-.ruleta-result-trailer::after,
-.ruleta-result-trailer::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  pointer-events: none;
-}
-.ruleta-result-trailer::before {
-  top: 0;
-  height: 42px;
-  background: linear-gradient(to bottom, #0c0c14 60%, transparent);
-}
-.ruleta-result-trailer::after {
-  bottom: 0;
-  height: 52px;
-  background: linear-gradient(to top, #0c0c14 60%, transparent);
-}
-.ruleta-actions {
-  display: flex;
-  gap: 7px;
-  flex-wrap: wrap;
-}
-.ruleta-spin-btn {
-  flex: 1;
-  min-width: 120px;
-  padding: 13px 16px;
-  border-radius: 11px;
-  border: none;
-  background: linear-gradient(135deg, #c8a400 0, #7a6000 50%, #c8a400 100%);
-  background-size: 200% 100%;
-  color: #000;
-  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  font-size: 0.82rem;
-  font-weight: 900;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.28s cubic-bezier(0.34, 1.2, 0.64, 1);
-  letter-spacing: 0.8px;
-  box-shadow:
-    0 4px 22px rgba(200, 164, 0, 0.28),
-    0 1px 0 rgba(255, 240, 150, 0.35) inset;
-  position: relative;
-  overflow: hidden;
-}
-.ruleta-spin-btn:hover:not(:disabled) {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow:
-    0 12px 36px rgba(200, 164, 0, 0.45),
-    0 1px 0 rgba(255, 240, 150, 0.4) inset;
-  background-position: 100% 0;
-}
-.ruleta-spin-btn:disabled {
-  opacity: 0.38;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-.ruleta-overlay.spinning .ruleta-spin-btn::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 11px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.18),
-    transparent
-  );
-  animation: shimmer 0.9s ease-in-out infinite;
-}
+
+
+
+
+
+
+
+
+
 @keyframes shimmer {
   from {
     transform: translateX(-100%);
@@ -10276,135 +9701,19 @@ body.grain-off::after {
     transform: translateX(100%);
   }
 }
-.ruleta-again-btn,
-.ruleta-play-btn {
-  padding: 13px 13px;
-  border-radius: 11px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.55);
-  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  font-size: 0.76rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.18s;
-  opacity: 0;
-  transform: scale(0.9);
-  pointer-events: none;
-}
-.ruleta-again-btn.visible,
-.ruleta-play-btn.visible {
-  opacity: 1;
-  transform: scale(1);
-  pointer-events: auto;
-}
-.ruleta-play-btn:hover {
-  background: rgba(200, 164, 0, 0.09);
-  color: #c8a400;
-  border-color: rgba(200, 164, 0, 0.28);
-}
-.ruleta-again-btn:hover {
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
-}
-.ruleta-wheel-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  position: relative;
-  background: rgba(6, 5, 1, 0.98);
-  overflow: hidden;
-}
-.ruleta-wheel-section::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      ellipse 65% 65% at 50% 50%,
-      rgba(200, 150, 0, 0.07) 0,
-      transparent 65%
-    ),
-    radial-gradient(
-      ellipse 40% 40% at 50% 90%,
-      rgba(100, 50, 0, 0.06) 0,
-      transparent 60%
-    );
-}
-.ruleta-wheel-section::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(to right, rgba(200, 164, 0, 0.07) 0, transparent 40px),
-    linear-gradient(to bottom, rgba(200, 164, 0, 0.06) 0, transparent 40px),
-    linear-gradient(to left, rgba(200, 164, 0, 0.07) 0, transparent 40px),
-    linear-gradient(to top, rgba(200, 164, 0, 0.06) 0, transparent 40px);
-}
-.ruleta-wheel-canvas-wrap {
-  position: relative;
-  width: 360px;
-  height: 360px;
-  flex-shrink: 0;
-}
-.ruleta-wheel-ring {
-  position: absolute;
-  inset: -12px;
-  border-radius: 50%;
-  border: 2px solid rgba(200, 164, 0, 0.16);
-  background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
-  pointer-events: none;
-  z-index: 1;
-}
-.ruleta-wheel-ring::after {
-  content: "";
-  position: absolute;
-  inset: 7px;
-  border-radius: 50%;
-  border: 1px solid rgba(200, 164, 0, 0.07);
-}
-.ruleta-wheel-marker {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 9px solid transparent;
-  border-right: 9px solid transparent;
-  border-top: 20px solid #c8a400;
-  z-index: 10;
-  filter: drop-shadow(0 4px 10px rgba(200, 164, 0, 0.9));
-}
-.ruleta-wheel-canvas-wrap canvas {
-  display: block;
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 2.5px rgba(200, 164, 0, 0.32),
-    0 0 0 5px rgba(0, 0, 0, 0.6),
-    0 28px 80px rgba(0, 0, 0, 0.95),
-    0 0 70px rgba(200, 164, 0, 0.08);
-}
-.ruleta-wheel-canvas-wrap::before {
-  content: "";
-  position: absolute;
-  inset: -36px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(200, 164, 0, 0.12) 0,
-    rgba(200, 164, 0, 0.04) 40%,
-    transparent 70%
-  );
-  pointer-events: none;
-  z-index: -1;
-  animation: wheelGlowPulse 3s ease-in-out infinite alternate;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
 @keyframes wheelGlowPulse {
   from {
     opacity: 0.4;
@@ -10415,9 +9724,7 @@ body.grain-off::after {
     transform: scale(1.04);
   }
 }
-.ruleta-overlay.spinning .ruleta-wheel-canvas-wrap::before {
-  animation: wheelGlowSpin 0.55s ease-in-out infinite alternate;
-}
+
 @keyframes wheelGlowSpin {
   from {
     background: radial-gradient(
@@ -10434,14 +9741,7 @@ body.grain-off::after {
     );
   }
 }
-.ruleta-number-strip {
-  display: flex;
-  gap: 3px;
-  align-items: center;
-  flex-wrap: nowrap;
-  overflow: hidden;
-  max-width: 360px;
-}
+
 .rns-num {
   width: 26px;
   height: 26px;
@@ -10471,15 +9771,7 @@ body.grain-off::after {
     0 0 22px rgba(200, 164, 0, 0.5);
   transform: scale(1.3);
 }
-.ruleta-lever {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-  width: 38px;
-}
+
 .lever-pole {
   width: 7px;
   height: 60px;
@@ -10513,21 +9805,9 @@ body.grain-off::after {
   border: 1px solid rgba(200, 164, 0, 0.25);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
 }
-.ruleta-lever:hover .lever-pole {
-  transform: rotate(-8deg);
-}
-.ruleta-lever.pulled .lever-pole {
-  transform: rotate(35deg);
-  transition: transform 0.14s cubic-bezier(0.34, 1.5, 0.64, 1);
-}
-.ruleta-wheel-label {
-  font-size: 0.38rem;
-  font-weight: 900;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: rgba(200, 164, 0, 0.3);
-  text-align: center;
-}
+
+
+
 .ai-croupier-bubble {
   position: absolute;
   bottom: 24px;
@@ -10558,9 +9838,7 @@ body.grain-off::after {
     transform: translateX(-50%) scale(1);
   }
 }
-.ruleta-box.shake {
-  animation: boxShake 0.38s ease;
-}
+
 @keyframes boxShake {
   0%,
   100% {
@@ -10574,142 +9852,24 @@ body.grain-off::after {
   }
 }
 @media (max-width: 720px) {
-  .ruleta-casino-wrap {
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    height: auto;
-    max-height: 94vh;
-    overflow-y: auto;
-  }
-  .ruleta-box {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid rgba(200, 164, 0, 0.12);
-  }
-  .ruleta-wheel-section {
-    width: 100%;
-    padding: 20px 0;
-  }
-  .ruleta-wheel-canvas-wrap {
-    width: 270px;
-    height: 270px;
-  }
-  .ruleta-wheel-canvas-wrap canvas {
-    width: 270px !important;
-    height: 270px !important;
-  }
+
+
+
+
+
 }
-@keyframes ruletaGlowPulse {
-  from {
-    opacity: 0.45;
-  }
-  to {
-    opacity: 1;
-  }
-}
-.ruleta-fab {
-  position: fixed;
-  bottom: max(22px, env(safe-area-inset-bottom, 22px));
-  left: 224px;
-  z-index: 500;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  background: 0 0;
-  border: none;
-  padding: 0;
-}
-.ruleta-fab .mf-fab-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(
-    135deg,
-    rgba(18, 14, 6, 0.98) 0,
-    rgba(12, 10, 4, 0.99) 100%
-  );
-  border: 1px solid rgba(200, 164, 0, 0.38);
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(200, 164, 0, 0.08) inset,
-    0 1px 0 rgba(255, 220, 100, 0.12) inset;
-  backdrop-filter: blur(20px);
-  transition: all 0.28s cubic-bezier(0.34, 1.3, 0.64, 1);
-  position: relative;
-  overflow: hidden;
-}
-.ruleta-fab .mf-fab-icon::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(200, 164, 0, 0.07) 0,
-    transparent 60%
-  );
-  pointer-events: none;
-}
-.ruleta-fab .mf-fab-icon::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.07) 0,
-    transparent 55%
-  );
-  border-radius: inherit;
-  pointer-events: none;
-}
-.ruleta-fab .mf-fab-label,
-.ruleta-fab-label {
-  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  font-size: 0.42rem;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  color: rgba(200, 164, 0, 0.85);
-  opacity: 0.6;
-  transition: opacity 0.2s;
-  white-space: nowrap;
-}
-.ruleta-fab:hover .mf-fab-icon,
-.ruleta-fab:hover .ruleta-fab-inner-icon-wrap {
-  transform: translateY(-4px) scale(1.07);
-  border-color: rgba(200, 164, 0, 0.7);
-  box-shadow:
-    0 12px 36px rgba(0, 0, 0, 0.7),
-    0 0 24px rgba(200, 164, 0, 0.22);
-}
-.ruleta-fab:hover .mf-fab-label,
-.ruleta-fab:hover .ruleta-fab-label {
-  opacity: 1;
-}
-.ruleta-fab:active .mf-fab-icon {
-  transform: scale(0.94);
-}
-.ruleta-fab-icon {
-  width: 22px;
-  height: 22px;
-  flex-shrink: 0;
-  color: rgba(200, 164, 0, 0.9);
-  filter: drop-shadow(0 0 4px rgba(200, 164, 0, 0.4));
-  transition: all 0.28s;
-}
-.ruleta-fab:hover .ruleta-fab-icon {
-  color: #c8a400;
-  filter: drop-shadow(0 0 8px rgba(200, 164, 0, 0.75));
-  animation: reelSpin 1.8s linear infinite;
-}
-.ruleta-fab:active .ruleta-fab-icon {
-  animation: reelSpin 0.45s linear infinite;
-}
+
+
+
+
+
+
+
+
+
+
+
+
 @keyframes reelSpin {
   from {
     transform: rotate(0);
@@ -11111,157 +10271,18 @@ body.grain-off::after {
   transform: translateX(16px);
   background: #fff;
 }
-.ruleta-wheel-wrap {
-  position: relative;
-  width: 100%;
-  max-width: 900px;
-  height: 420px;
-  margin: 80px auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 18px;
-  padding: 40px 20px;
-  perspective: 1000px;
-  animation: ruletaPulse 3s ease-in-out infinite;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(0, 122, 255, 0.08) 0,
-    transparent 70%
-  );
-  border-radius: 30px;
-  border: 1px solid rgba(0, 122, 255, 0.15);
-}
-@keyframes ruletaPulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.95;
-  }
-}
-.ruleta-drum {
-  position: relative;
-  width: 160px;
-  height: 380px;
-  border: 2px solid rgba(0, 122, 255, 0.8);
-  border-radius: 20px;
-  overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    rgba(15, 15, 30, 0.95) 0,
-    rgba(40, 40, 80, 0.6) 50%,
-    rgba(15, 15, 30, 0.95) 100%
-  );
-  box-shadow:
-    0 0 50px rgba(0, 122, 255, 0.35),
-    inset 0 0 40px rgba(0, 122, 255, 0.08),
-    0 20px 60px rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-.ruleta-drum:hover {
-  border-color: #007aff;
-  box-shadow:
-    0 0 70px rgba(0, 122, 255, 0.5),
-    inset 0 0 40px rgba(0, 122, 255, 0.12),
-    0 20px 80px rgba(0, 0, 0, 0.7);
-  transform: translateY(-4px);
-}
-.ruleta-drum-inner {
-  position: absolute;
-  width: 100%;
-  left: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 60px 8px;
-  transition: transform 50ms linear;
-}
-.ruleta-item {
-  width: 100%;
-  aspect-ratio: 2/3;
-  border-radius: 12px;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 122, 255, 0.25) 0,
-    rgba(0, 122, 255, 0.08) 100%
-  );
-  border: 1.5px solid rgba(0, 122, 255, 0.4);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
-  flex-shrink: 0;
-  backdrop-filter: blur(8px);
-  letter-spacing: 0.5px;
-  transition: all 0.2s ease;
-  overflow: hidden;
-  position: relative;
-}
-.ruleta-item-poster {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  border-radius: 10px;
-  loading: lazy;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
-}
-.ruleta-drum-inner .ruleta-item:nth-child(2) .ruleta-item-poster {
-  opacity: 1;
-  filter: brightness(1.1) contrast(1.1);
-}
-.ruleta-item:hover .ruleta-item-poster {
-  opacity: 1;
-}
-.ruleta-item-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.8) 0,
-    rgba(0, 0, 0, 0.3) 50%,
-    transparent 100%
-  );
-  display: flex;
-  align-items: flex-end;
-  padding: 8px;
-  z-index: 2;
-}
-.ruleta-item-title {
-  font-size: 0.65rem;
-  font-weight: 800;
-  color: #fff;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
-  text-align: center;
-  width: 100%;
-}
-.ruleta-pointer {
-  position: absolute;
-  top: -18px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 2.8rem;
-  color: var(--accent);
-  z-index: 10;
-  filter: drop-shadow(0 0 12px rgba(0, 122, 255, 1))
-    drop-shadow(0 0 25px rgba(0, 122, 255, 0.6));
-  animation: pointerGlow 1.5s ease-in-out infinite;
-}
+
+
+
+
+
+
+
+
+
+
+
+
 @keyframes pointerGlow {
   0%,
   100% {
@@ -11275,96 +10296,6 @@ body.grain-off::after {
       0 0 40px rgba(0, 122, 255, 0.6);
   }
 }
-.ruleta-drum .ruleta-pointer {
-  position: relative;
-  top: 0;
-  left: 0;
-  transform: none;
-  margin-bottom: 10px;
-}
-.ruleta-drum-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 90px;
-  border-top: 2px solid rgba(0, 122, 255, 0.6);
-  border-bottom: 2px solid rgba(0, 122, 255, 0.6);
-  background: linear-gradient(
-    90deg,
-    transparent 0,
-    rgba(0, 122, 255, 0.15) 50%,
-    transparent 100%
-  );
-  z-index: 5;
-  pointer-events: none;
-  box-shadow:
-    0 0 20px rgba(0, 122, 255, 0.2),
-    inset 0 -10px 20px rgba(0, 122, 255, 0.1);
-}
-#spinDrumWrap {
-  cursor: pointer;
-  user-select: none;
-}
-#spinDrumWrap:hover {
-  border-color: rgba(0, 122, 255, 0.5) !important;
-}
-.spin-drum-item {
-  height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 0 20px;
-  transition: none;
-}
-.spin-drum-item img {
-  width: 52px;
-  height: 72px;
-  object-fit: cover;
-  border-radius: 6px;
-  flex-shrink: 0;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
-}
-.spin-drum-item-logo {
-  width: 110px;
-  height: 44px;
-  object-fit: contain;
-  flex-shrink: 0;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.9));
-}
-.spin-drum-item-name {
-  font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  font-size: 1.1rem;
-  font-weight: 900;
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: -0.3px;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
-  flex: 1;
-}
-.spin-drum-item.winner-item .spin-drum-item-name {
-  color: var(--accent);
-}
-.spin-drum-item.winner-item img {
-  box-shadow:
-    0 0 20px rgba(0, 122, 255, 0.5),
-    0 4px 14px rgba(0, 0, 0, 0.7);
-}
-.ruleta-wheel-canvas-wrap::before {
-  content: "";
-  position: absolute;
-  inset: -20px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(200, 164, 0, 0.12) 0,
-    transparent 70%
-  );
-  pointer-events: none;
-  z-index: -1;
-  animation: wheelGlowPulse 2.5s ease-in-out infinite alternate;
-}
 @keyframes wheelGlowPulse {
   from {
     opacity: 0.6;
@@ -11375,9 +10306,7 @@ body.grain-off::after {
     transform: scale(1.02);
   }
 }
-.ruleta-overlay.spinning .ruleta-wheel-canvas-wrap::before {
-  animation: wheelGlowSpin 0.8s ease-in-out infinite alternate;
-}
+
 @keyframes wheelGlowSpin {
   from {
     opacity: 0.8;
@@ -11396,20 +10325,7 @@ body.grain-off::after {
     );
   }
 }
-.ruleta-overlay::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.03) 0,
-    rgba(0, 0, 0, 0.03) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-}
+
 .rns-num.active-win {
   box-shadow:
     0 0 8px #c8a400,
@@ -13336,28 +12252,7 @@ body.grain-off::after {
   color: rgba(255,255,255,0.6);
 }
 
-.ruleta-wheel-canvas-wrap {
-  position: relative;
-  width: 380px;
-  height: 380px;
-  flex-shrink: 0;
-}
-.ruleta-wheel-ring {
-  position: absolute;
-  inset: -16px;
-  border-radius: 50%;
-  border: none;
-  background: 0 0;
-  box-shadow:
-    0 0 0 2px rgba(200, 164, 0, 0.12),
-    0 0 0 8px rgba(0, 0, 0, 0.8),
-    0 0 0 10px rgba(200, 164, 0, 0.08),
-    0 0 0 16px rgba(0, 0, 0, 0.6),
-    0 0 80px rgba(200, 164, 0, 0.15);
-  pointer-events: none;
-  z-index: 1;
-  animation: ringGlow 4s ease-in-out infinite alternate;
-}
+
 @keyframes ringGlow {
   from {
     box-shadow:
@@ -13376,81 +12271,12 @@ body.grain-off::after {
       0 0 100px rgba(200, 164, 0, 0.3);
   }
 }
-.ruleta-wheel-marker {
-  position: absolute;
-  top: -14px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 11px solid transparent;
-  border-right: 11px solid transparent;
-  border-top: 24px solid #c8a400;
-  z-index: 10;
-  filter: drop-shadow(0 0 12px rgba(200, 164, 0, 1))
-    drop-shadow(0 4px 8px rgba(0, 0, 0, 0.9));
-}
-.ruleta-wheel-canvas-wrap canvas {
-  display: block;
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 3px rgba(200, 164, 0, 0.4),
-    0 0 0 6px rgba(0, 0, 0, 0.9),
-    0 32px 100px rgba(0, 0, 0, 0.98),
-    0 0 100px rgba(200, 164, 0, 0.12),
-    inset 0 0 60px rgba(0, 0, 0, 0.5);
-}
-.ruleta-overlay.spinning .ruleta-wheel-canvas-wrap canvas {
-  box-shadow:
-    0 0 0 3px rgba(200, 164, 0, 0.7),
-    0 0 0 6px rgba(0, 0, 0, 0.9),
-    0 32px 100px rgba(0, 0, 0, 0.98),
-    0 0 140px rgba(200, 164, 0, 0.5),
-    inset 0 0 60px rgba(0, 0, 0, 0.5);
-  transition: box-shadow 0.3s ease;
-}
-.ruleta-wheel-canvas-wrap::before {
-  content: "";
-  position: absolute;
-  inset: -50px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(200, 164, 0, 0.18) 0,
-    rgba(200, 164, 0, 0.06) 45%,
-    transparent 70%
-  );
-  pointer-events: none;
-  z-index: -1;
-  animation: wheelGlowPulse 3s ease-in-out infinite alternate;
-}
-.ruleta-wheel-hub {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  z-index: 5;
-  pointer-events: none;
-  background: radial-gradient(circle at 35% 35%, #fff8e0, #c8a400, #7a6000);
-  border: 2.5px solid rgba(255, 240, 160, 0.5);
-  box-shadow:
-    0 0 0 3px rgba(0, 0, 0, 0.8),
-    0 0 20px rgba(200, 164, 0, 0.8),
-    inset 0 -4px 8px rgba(0, 0, 0, 0.4);
-}
-.ruleta-wheel-hub::after {
-  content: "";
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.6);
-}
+
+
+
+
+
+
 .lever-pole {
   width: 9px;
   height: 70px;
@@ -13506,20 +12332,7 @@ body.grain-off::after {
     0 6px 16px rgba(0, 0, 0, 0.8),
     inset 0 1px 0 rgba(200, 164, 0, 0.2);
 }
-.ruleta-wheel-stand {
-  width: 60px;
-  height: 20px;
-  margin-top: -4px;
-  background: linear-gradient(
-    to bottom,
-    rgba(200, 164, 0, 0.3),
-    rgba(200, 164, 0, 0.08)
-  );
-  border-radius: 0 0 10px 10px;
-  border: 1px solid rgba(200, 164, 0, 0.2);
-  border-top: none;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-}
+
 @keyframes vt-fade-in {
   from {
     opacity: 0;
@@ -14651,14 +13464,7 @@ button.voice-mode-fab {
 button.timer-fab {
   display: none !important;
 }
-#aiFab:not(.dock-btn),
-button.collections-fab,
-button.premiere-fab,
-button.ruleta-fab,
-button.stats-fab,
-button.watchlist-fab.mf-fab {
-  display: none !important;
-}
+
 div.streak-widget#streakWidget {
   display: none !important;
 }
@@ -15357,36 +14163,10 @@ body {
 .mood-btn:active {
   transform: scale(0.96) translateZ(0) !important;
 }
-.ruleta-drum {
-  transition:
-    transform 0.36s cubic-bezier(0.34, 1.3, 0.64, 1),
-    border-color 0.28s ease,
-    box-shadow 0.28s ease !important;
-  transform: translateZ(0);
-  will-change: transform;
-}
-#statsFab,
-.premiere-fab,
-.ruleta-fab,
-.watchlist-fab {
-  transition:
-    transform 0.36s cubic-bezier(0.34, 1.38, 0.64, 1),
-    box-shadow 0.3s ease,
-    border-color 0.25s ease !important;
-  will-change: transform;
-  transform: translateZ(0);
-}
-.premiere-fab:hover,
-.ruleta-fab:hover,
-.watchlist-fab:hover {
-  transform: translateY(-5px) scale(1.08) translateZ(0) !important;
-}
-.premiere-fab:active,
-.ruleta-fab:active,
-.watchlist-fab:active {
-  transform: scale(0.92) translateZ(0) !important;
-  transition: transform 70ms ease !important;
-}
+
+
+
+
 .sh-card {
   transition:
     transform 0.34s cubic-bezier(0.34, 1.3, 0.64, 1),
@@ -15449,15 +14229,7 @@ body.edit-mode-active #hdrEditBtn svg {
     transform: rotate(12deg);
   }
 }
-body.edit-mode-active .collections-fab,
-body.edit-mode-active .mf-fab,
-body.edit-mode-active .premiere-fab,
-body.edit-mode-active .ruleta-fab,
-body.edit-mode-active .stats-fab,
-body.edit-mode-active .voice-mode-fab,
-body.edit-mode-active .watchlist-fab {
-  animation: fabWiggle 0.8s ease-in-out infinite !important;
-}
+
 @keyframes fabWiggle {
   0%,
   100% {
@@ -16442,13 +15214,7 @@ html {
     0 -8px 48px rgba(0, 0, 0, 0.55),
     var(--ios-inset) !important;
 }
-.ruleta-box {
-  background: rgba(12, 12, 20, 0.97) !important;
-  backdrop-filter: blur(60px) !important;
-  border: 0.5px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 26px !important;
-  box-shadow: var(--ios-inset), var(--ios-shadow-lg) !important;
-}
+
 .mf-header-logo {
   color: rgba(255, 255, 255, 0.95) !important;
 }
@@ -17678,36 +16444,8 @@ body::before {
 .edit-mode-overlay.visible {
   opacity: 1;
 }
-.edit-mode-active .ai-fab,
-.edit-mode-active .collections-fab,
-.edit-mode-active .import-trigger,
-.edit-mode-active .mf-fab,
-.edit-mode-active .premiere-fab,
-.edit-mode-active .ruleta-fab,
-.edit-mode-active .speech-mic-btn,
-.edit-mode-active .stats-fab,
-.edit-mode-active .voice-mode-fab,
-.edit-mode-active .watchlist-fab {
-  z-index: 9203 !important;
-  pointer-events: auto !important;
-  cursor: grab !important;
-  outline: 2px dashed rgba(0, 122, 255, 0.3);
-  outline-offset: 4px;
-  transition:
-    outline 0.2s,
-    box-shadow 0.2s,
-    transform 0.2s !important;
-}
-.edit-mode-active .ai-fab:active,
-.edit-mode-active .collections-fab:active,
-.edit-mode-active .mf-fab:active,
-.edit-mode-active .premiere-fab:active,
-.edit-mode-active .ruleta-fab:active,
-.edit-mode-active .stats-fab:active,
-.edit-mode-active .voice-mode-fab:active,
-.edit-mode-active .watchlist-fab:active {
-  cursor: grabbing !important;
-}
+
+
 .edit-mode-active .fab-selected {
   outline: 2px solid var(--accent) !important;
   outline-offset: 5px;
@@ -18076,42 +16814,8 @@ body::before {
   color: var(--accent);
   background: rgba(0, 122, 255, 0.08);
 }
-#ai-voice-bubble-overlay,
-#epRatingOverlay,
-#syncModal,
-#syncOverlay,
-#voiceCmdOverlay,
-.collections-overlay,
-.genre-editor-overlay,
-.mood-overlay,
-.pm-overlay,
-.premiere-overlay,
-.ruleta-overlay,
-.trakt-overlay,
-.universe-overlay,
-.voice-cmd-overlay,
-.watchlist-overlay,
-.wrapped-overlay {
-  z-index: 9999000 !important;
-  isolation: isolate;
-}
-#ai-bubble-close,
-.collections-close,
-.genre-editor-close,
-.mood-close-btn,
-.notif-panel-close,
-.pm-close,
-.premiere-close,
-.ruleta-close,
-.sync-close,
-.trakt-close,
-.voice-cmd-close,
-.wl-close,
-.wrapped-close {
-  position: absolute !important;
-  z-index: 10 !important;
-  pointer-events: auto !important;
-}
+
+
 #mfProfileBadge {
   position: fixed !important;
   top: 8px !important;
@@ -18132,33 +16836,8 @@ body.mf-section-protebe #mfProfileBadge {
   pointer-events: none !important;
   transform: translateY(-6px) !important;
 }
-#adminTriggerBtn,
-#aiFab,
-#statsFab,
-#syncBtn,
-#voiceModeFab,
-#watchlistFab,
-.collections-fab,
-.notif-bell,
-.premiere-fab,
-.ruleta-fab,
-.speech-mic-btn,
-.timer-fab {
-  z-index: 9000 !important;
-}
-body.modal-open #adminTriggerBtn,
-body.modal-open #aiFab,
-body.modal-open #statsFab,
-body.modal-open #syncBtn,
-body.modal-open #voiceModeFab,
-body.modal-open #watchlistFab,
-body.modal-open .collections-fab,
-body.modal-open .premiere-fab,
-body.modal-open .ruleta-fab,
-body.modal-open .timer-fab {
-  z-index: 100 !important;
-  pointer-events: none !important;
-}
+
+
 #syncStatusBadge {
   right: 220px !important;
   top: max(22px, env(safe-area-inset-top, 22px)) !important;
@@ -19160,16 +17839,7 @@ nav.mf-dock {
   border-color: rgba(10, 132, 255, 0.4) !important;
   box-shadow: 0 0 12px rgba(10, 132, 255, 0.2) !important;
 }
-#ruletaResult,
-.ruleta-result-card {
-  background: var(--glass-bg) !important;
-  backdrop-filter: var(--glass-blur) !important;
-  -webkit-backdrop-filter: var(--glass-blur) !important;
-  border: 0.5px solid var(--glass-border) !important;
-  box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-}
+
 .ai-sidebar {
   background: rgba(14, 14, 22, 0.7) !important;
   backdrop-filter: blur(32px) saturate(1.6) !important;
@@ -19218,15 +17888,6 @@ nav.mf-dock {
   box-shadow: var(--glass-shadow) !important;
 }
 
-/* Ruleta was removed from the user interface. Keep old markup harmless for
-   stored links and older sessions while preventing an inaccessible control. */
-.ruleta-fab,
-.ruleta-overlay,
-#ruletaOverlay,
-[onclick*="openRuleta"],
-[onclick*="adminOpenRuleta"] {
-  display: none !important;
-}
 
 .key-hint,
 .kh-group kbd {
@@ -19252,10 +17913,7 @@ nav.mf-dock {
 button {
   -webkit-tap-highlight-color: transparent !important;
 }
-.modal-overlay.open .modal-content,
-.ruleta-overlay.open .ruleta-inner {
-  animation: iosSlideUp 0.42s cubic-bezier(0.34, 1.12, 0.64, 1) both !important;
-}
+
 @keyframes iosSlideUp {
   from {
     transform: translateY(48px) scale(0.97);
@@ -19425,16 +18083,7 @@ button {
     inset 0 1.5px 0 rgba(255, 255, 255, 0.4),
     0 12px 32px rgba(0, 0, 0, 0.6) !important;
 }
-#ruletaResult,
-.ruleta-box {
-  backdrop-filter: blur(50px) saturate(2.2) brightness(1.05) !important;
-  -webkit-backdrop-filter: blur(50px) saturate(2.2) brightness(1.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  box-shadow:
-    0 40px 100px rgba(0, 0, 0, 0.9),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2) !important;
-}
+
 .pg-avatar {
   transition:
     transform 0.32s cubic-bezier(0.34, 1.25, 0.64, 1),

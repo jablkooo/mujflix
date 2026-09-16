@@ -2,6 +2,8 @@
   X-Frame-Options: SAMEORIGIN
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(self), geolocation=()
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
 
 /*.html
   Cache-Control: no-store
