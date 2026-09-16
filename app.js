@@ -5289,7 +5289,7 @@ const ProfileGate = {
       void 0 !== aiBrain && aiBrain.reloadForProfile(), "function" == typeof refreshUserContent && refreshUserContent(), "function" == typeof updateWatchlistBadge && updateWatchlistBadge(), "function" == typeof updateWatchlistBtns && updateWatchlistBtns(), "function" == typeof updateLogoProgress && updateLogoProgress(), "function" == typeof updateContinueWidget && updateContinueWidget()
     }, 100);
     const t = _getProfiles().find(t => t.id === e);
-    t && "function" == typeof showToast && showToast("👤 Vítej, " + t.name + "!", "success")
+    t && "function" == typeof showToast && showToast("✨ Ahoj, " + t.name + " — pojďme něco najít.", "success")
   },
   openPin(e) {
     this._pinBuffer = "", this._pinTargetId = e.id;
@@ -5323,7 +5323,7 @@ const ProfileGate = {
     // FIX: Disable pointer-events on gate so it doesn't swallow clicks on the create modal
     const _gate = document.getElementById("mfProfileGate");
     if (_gate) _gate.style.pointerEvents = "none";
-    document.getElementById("pcModalTitle").textContent = e ? "Upravit profil" : "Nový profil";
+    document.getElementById("pcModalTitle").textContent = e ? "Upravit profil" : "Vytvoř si svůj profil";
     const n = document.getElementById("pcName");
     if (e) {
       const t = _getProfiles().find(t => t.id === e);
@@ -5373,7 +5373,7 @@ const ProfileGate = {
         color: this._selectedColor,
         pin: n
       });
-      this.closeCreate(), this.activateProfile(t)
+      this.closeCreate(), this.activateProfile(t), setTimeout(() => this.openOnboarding(t), 220)
     }
   },
   createProfile({
@@ -5411,6 +5411,30 @@ const ProfileGate = {
       },
       trakt: null
     }), _saveProfiles(a), i
+  },
+  openOnboarding(e) {
+    const t = document.getElementById("mfProfileWelcome"),
+      n = document.getElementById("pwGenres");
+    if (!t || !n) return;
+    const o = [
+      ["28", "⚡ Akce"], ["35", "😂 Komedie"], ["18", "🎭 Drama"],
+      ["878", "🚀 Sci-Fi"], ["27", "👻 Horor"], ["16", "🎨 Animované"],
+      ["10749", "💞 Romantika"], ["14", "✨ Fantasy"], ["53", "🔪 Thriller"]
+    ];
+    n.innerHTML = o.map(([e, t]) => `<button type="button" class="pw-genre" data-genre="${e}" onclick="this.classList.toggle('selected')">${t}</button>`).join("");
+    t.dataset.profileId = e, t.classList.add("show"), t.setAttribute("aria-hidden", "false");
+  },
+  finishOnboarding() {
+    const e = document.getElementById("mfProfileWelcome");
+    if (!e) return;
+    const t = e.dataset.profileId || getActiveProfileId(),
+      n = [...e.querySelectorAll(".pw-genre.selected")].map(e => +e.dataset.genre);
+    if (t) {
+      const o = _getProfiles(), i = o.find(e => e.id === t);
+      i && (n.length && (i.likedGenres = n.slice(0, 5)), i.prefs = { ...i.prefs, onboardingDone: !0 }, _saveProfiles(o));
+      if (getActiveProfileId() === t && void 0 !== aiBrain) n.forEach(e => aiBrain.boostGenreIds([e], .12));
+    }
+    e.classList.remove("show"), e.setAttribute("aria-hidden", "true");
   },
   renderBadge() {
     const e = getActiveProfile(),

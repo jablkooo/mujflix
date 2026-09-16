@@ -587,6 +587,7 @@
     <div id="mfProfileGate" style="display:flex;">
       <div class="pg-logo">Muj<span>Flix</span></div>
       <div class="pg-title">Kdo se dívá?</div>
+      <div class="pg-subtitle">Vyber profil a pusť si svůj večer.</div>
       <div class="pg-profiles" id="pgProfilesList"></div>
       <button class="pg-manage-btn" onclick="window.ProfileGate?.openCreate()">
         + Přidat profil
@@ -2507,7 +2508,8 @@
     <!-- PROFILE CREATE MODAL -->
     <div id="mfProfileCreate">
       <div class="pc-box">
-        <div class="pc-title" id="pcModalTitle">Nový profil</div>
+        <div class="pc-title" id="pcModalTitle">Vytvoř si svůj profil</div>
+        <div class="pc-subtitle">Stačí pár voleb a doporučení budou víc podle tebe.</div>
 
         <div class="pc-label">Jméno</div>
         <input
@@ -2563,12 +2565,6 @@
           />
         </div>
 
-        <div class="pc-trakt-note">
-          🔗 <strong>Trakt.tv</strong> — Každý profil může mít vlastní Trakt.tv
-          účet pro synchronizaci sledovanosti a personalizovaná doporučení.
-          Připoj ho po vytvoření profilu v sekci Trakt.tv.
-        </div>
-
         <div class="pc-btn-row">
           <button class="pc-btn-cancel" onclick="window.ProfileGate?.closeCreate()">
             Zrušit
@@ -2576,6 +2572,19 @@
           <button class="pc-btn-save" onclick="window.ProfileGate?.saveProfile()">
             Vytvořit profil →
           </button>
+        </div>
+      </div>
+
+      <div id="mfProfileWelcome" aria-hidden="true">
+        <div class="pw-box">
+          <div class="pw-kicker">MůjFlix</div>
+          <div class="pw-title">Ještě jedna maličkost</div>
+          <div class="pw-subtitle">Co tě baví? Vyber pár žánrů a my ti připravíme lepší start.</div>
+          <div class="pw-genres" id="pwGenres"></div>
+          <div class="pw-actions">
+            <button class="pw-skip" onclick="window.ProfileGate?.finishOnboarding()">Přeskočit</button>
+            <button class="pw-save" onclick="window.ProfileGate?.finishOnboarding()">Pokračovat</button>
+          </div>
         </div>
       </div>
     </div>
