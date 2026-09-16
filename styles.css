@@ -10504,6 +10504,22 @@ body.grain-off::after {
   from { transform: rotate(-3deg) translate(-1px, 1px); }
   to { transform: rotate(3deg) translate(1px, -2px); }
 }
+
+/* Removal mode: only existing profiles shake, while the add-profile tile stays calm. */
+.pg-profile-item.pg-manage-mode .pg-avatar {
+  animation: pgFearShake .16s ease-in-out infinite alternate !important;
+  transform-origin: 50% 80%;
+}
+.pg-profile-item.pg-manage-mode .pg-avatar::after {
+  opacity: .9;
+  background: radial-gradient(circle at 50% 25%, rgba(255, 90, 90, .18), transparent 58%);
+}
+@keyframes pgFearShake {
+  0% { transform: rotate(-4deg) translate(-2px, 1px); }
+  35% { transform: rotate(3deg) translate(2px, -1px); }
+  70% { transform: rotate(-2deg) translate(1px, 2px); }
+  100% { transform: rotate(4deg) translate(-1px, -1px); }
+}
 @keyframes pgRemove {
   to { opacity: 0; transform: scale(.72) translateY(8px); }
 }
