@@ -5333,7 +5333,7 @@ const ProfileGate = {
     const t = _getProfiles().find(t => t.id === e);
     if (t) {
       const n = document.getElementById("mfWelcomeNote");
-      n && (n.textContent = "Ahoj, " + t.name + " — pojďme něco najít.", n.classList.add("show"), clearTimeout(n._timer), n._timer = setTimeout(() => n.classList.remove("show"), 4200));
+      n && (n.textContent = "Ahoj, " + t.name, n.classList.add("show"), clearTimeout(n._timer), n._timer = setTimeout(() => n.classList.remove("show"), 4200));
     }
   },
   openPin(e) {
