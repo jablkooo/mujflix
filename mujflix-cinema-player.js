@@ -61,8 +61,22 @@
   function showUrl(url, source) {
     ensureModal();
     sourceNode.textContent = source;
-    frame.innerHTML = '<iframe title="Cinema Mode" allow="autoplay; fullscreen" referrerpolicy="no-referrer" src="' +
+    frame.classList.remove("mf-cinema-ready");
+    frame.innerHTML =
+      '<div class="mf-cinema-skeleton" role="status" aria-live="polite">' +
+        '<div class="mf-cinema-skeleton-mark">▶</div>' +
+        '<div class="mf-cinema-skeleton-line mf-cinema-skeleton-line-title"></div>' +
+        '<div class="mf-cinema-skeleton-line mf-cinema-skeleton-line-meta"></div>' +
+        '<span>Načítám přehrávač…</span>' +
+      '</div>' +
+      '<iframe title="Cinema Mode" allow="autoplay; fullscreen" referrerpolicy="no-referrer" src="' +
       url.replace(/"/g, "&quot;") + '"></iframe>';
+    var playerFrame = frame.querySelector("iframe");
+    playerFrame.addEventListener("load", function () {
+      frame.classList.add("mf-cinema-ready");
+      var skeleton = frame.querySelector(".mf-cinema-skeleton");
+      if (skeleton) skeleton.setAttribute("aria-hidden", "true");
+    }, { once: true });
     modal.querySelector("#mfStandaloneCinemaExternal").href = url;
     modal.classList.add("open");
     document.body.style.overflow = "hidden";
