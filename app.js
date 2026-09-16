@@ -1445,9 +1445,14 @@ async function openShItem(e) {
 }
 
 function _showCinemaOrFinderChoice(e, t, n, o) {
-  closeUniverse();
   const i = document.getElementById("mfCinemaChoiceModal");
-  i && i.remove(), openMovieInCinema(e, t, n)
+  i && i.remove();
+  try {
+    closeUniverse()
+  } catch (e) {
+    console.warn("[Cinema] Discover close failed:", e)
+  }
+  openMovieInCinema(e, t, n)
 }! function() {
   const e = document.createElement("style");
   e.textContent = "\n        @keyframes aiMatchPulse {\n          0%, 100% { box-shadow: 0 0 8px var(--accent, #007AFF)55, 0 2px 8px rgba(0,0,0,0.5); }\n          50%       { box-shadow: 0 0 18px var(--accent, #007AFF)99, 0 2px 12px rgba(0,0,0,0.6); }\n        }\n        .ai-match-card .ai-match-badge {\n          transition: transform 0.2s;\n        }\n        .ai-match-card:hover .ai-match-badge {\n          transform: scale(1.08);\n        }\n      ", document.head.appendChild(e)
@@ -10236,6 +10241,8 @@ function closeCinema() {
   const n = document.getElementById("cinemaFileWarn");
   n && (n.style.display = "none"), document.body.style.overflow = ""
 }
+window.openMovieInCinema = openMovieInCinema;
+window.closeCinema = closeCinema;
 document.addEventListener("keydown", function(e) {
     if ("Escape" === e.key) {
       const e = document.getElementById("cinemaModal");
