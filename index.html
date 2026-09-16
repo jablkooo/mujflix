@@ -2695,7 +2695,7 @@
         class="dock-btn active"
         id="dockHome"
         data-hash="#serialy"
-        onclick="mfShowSection('serialy')"
+        onclick="setDockActive('dockHome'); mfShowSection('serialy')"
         title="Domů"
         aria-label="Domů"
       >
@@ -2711,7 +2711,7 @@
         class="dock-btn"
         id="dockFilmy"
         data-hash="#filmy"
-        onclick="openDiscover(); setDockActive('dockFilmy');"
+        onclick="setDockActive('dockFilmy'); openDiscover();"
         title="Objevovat filmy a seriály"
         aria-label="Objevovat filmy a seriály"
       >
@@ -2748,7 +2748,7 @@
         id="dockProtebe"
         style="order:3"
         data-hash="#protebe"
-        onclick="openWatchlist()"
+        onclick="setDockActive('dockProtebe'); openWatchlist()"
         title="Můj seznam"
         aria-label="Můj seznam a doporučení"
       >

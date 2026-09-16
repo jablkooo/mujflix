@@ -9574,6 +9574,13 @@ window.adminSavePerKey = function(e, t) {
         t && (t.style.display = ""), n && (n.style.display = ""), setDockActive("dockHome"), e = "serialy", location.hash = "#serialy"
       }, 50)
     }, window.addEventListener("hashchange", n), document.addEventListener("DOMContentLoaded", () => setTimeout(n, 900));
+    document.addEventListener("click", event => {
+      const button = event.target.closest && event.target.closest(".mf-dock .dock-btn");
+      if (!button) return;
+      const activeId = button.id;
+      if (!activeId) return;
+      setTimeout(() => setDockActive(activeId), 0);
+    }, true);
     const o = window.setDockActive;
     window.setDockActive = function(e) {
       o && o(e), ["dockHome", "dockFilmy", "dockProtebe", "dockProfile", "dockMore"].forEach(t => {
