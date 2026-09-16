@@ -9550,6 +9550,8 @@ window.adminSavePerKey = function(e, t) {
       const s = document.getElementById("mfSectionPlex");
       if (s && (s.style.display = "none"), document.body.classList.remove("mf-section-protebe"), "serialy" === t) {
         "function" == typeof closeUniverse && closeUniverse();
+        const e = document.getElementById("universeOverlay");
+        e && (e.classList.remove("visible", "open"), document.body.classList.remove("discover-open"));
         "function" == typeof closeDockOverlays && closeDockOverlays();
         setDockActive("dockHome");
         location.hash = "#serialy";
