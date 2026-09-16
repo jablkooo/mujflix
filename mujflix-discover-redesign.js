@@ -1,1798 +1,355 @@
-/* ═══════════════════════════════════════════════════════════════
-   MujFlix — DISCOVER GLASS THEME v6
-   Port JellyfinGlassTheme → MujFlix selektory.
-   Zachovava PRESNE hodnoty: barvy, blur, shadow, transition.
-═══════════════════════════════════════════════════════════════ */
+/**
+ * MujFlix Discover — enhancer v5 (lean)
+ * ════════════════════════════════════════════════════════════════
+ * Co dělá: doplňuje ikony do žánrové navigace, hvězdičkové hodnocení
+ * a expand panel na kartách v sekci Objevování.
+ *
+ * Proč přepsáno (v4 → v5):
+ *  - v4 každých 900/1800/3600 ms znovu vkládala celý <style> tag
+ *    (`injectOverrideTag`), i když se obsah nezměnil → zbytečné
+ *    přepočítávání stylů na celé stránce = jeden z hlavních důvodů
+ *    "lagování" Objevování.
+ *  - v4 měla `* { font-family: ... !important }` BEZ omezení na
+ *    .universe-overlay → po prvním otevření Objevování to natrvalo
+ *    přebilo písmo v CELÉ aplikaci (proto vypadalo "jinak" i mimo
+ *    Objevování). V5 tohle nedělá vůbec — vzhled karet/navigace už
+ *    kompletně řeší styles-discover-redesign.css.
+ *  - v4 běžela až 5 nezávislých MutationObserverů + setInterval
+ *    poll (100× po 120 ms) + poll (150 ms) jen proto, aby počkala,
+ *    až se objeví #discoBody — ten je ale v HTML staticky přítomný
+ *    od začátku, takže čekání není potřeba.
+ *  - v4 měla MutationObserver na KAŽDÉ jednotlivé kartě (sledoval
+ *    styl), aby vynutil viditelnost popisku — to už dělá čistě CSS.
+ *
+ * Vizuální výstup zůstává stejný, jen se k němu dochází levněji.
+ */
+(function () {
+  'use strict';
+  if (window._mfDiscoverEnhancer) return;
+  window._mfDiscoverEnhancer = true;
 
-/* Inter + SF Pro stack — stejne jako Jellyfin Glass */
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+  /* ── SVG ikony pro žánrovou navigaci ── */
+  var NAV_ICONS = {
+    trending: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M2 14l4-4 3 3 4-5 3 3"/><path d="M14 6h4v4"/></svg>',
+    film:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><rect x="2" y="4" width="16" height="13" rx="2"/><path d="M2 8h16M7 4v4M13 4v4"/></svg>',
+    serial:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><rect x="1" y="3" width="18" height="13" rx="2"/><path d="M6 17l2-1h4l2 1"/></svg>',
+    komedi:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="9" r="7"/><path d="M7 11c.8 1.5 5.2 1.5 6 0"/><circle cx="8" cy="8" r="0.8" fill="currentColor"/><circle cx="12" cy="8" r="0.8" fill="currentColor"/></svg>',
+    drama:    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M4 14c1-3 4-5 6-3s5 0 6-3"/><path d="M3 7c1 3 4 5 6 3s5 0 6 3"/></svg>',
+    sci:      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><ellipse cx="10" cy="10" rx="4" ry="4"/><ellipse cx="10" cy="10" rx="9" ry="4"/></svg>',
+    krim:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5L18 18"/></svg>',
+    horor:    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M10 2L3 18h14L10 2z"/><path d="M10 8v5"/></svg>',
+    anim:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="10" r="7"/><circle cx="7.5" cy="10" r="1.2" fill="currentColor"/><circle cx="12.5" cy="10" r="1.2" fill="currentColor"/><path d="M7 13c1 1.5 5 1.5 6 0"/></svg>',
+    mysteri:  '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="10" r="8"/><path d="M10 6c-1.6 0-3 1-3 2.5S8.5 11 10 11"/><circle cx="10" cy="14" r="0.9" fill="currentColor"/></svg>',
+    akce:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M12 2L4 12h6l-2 6 8-10h-6z"/></svg>',
+    realit:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="10" r="3.5"/><circle cx="10" cy="10" r="7" stroke-dasharray="2 3"/></svg>',
+    dokum:    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><rect x="4" y="2" width="12" height="16" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>',
+    romant:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M10 17S3 12 3 7a4 4 0 017-2.6A4 4 0 0117 7c0 5-7 10-7 10z"/></svg>',
+    thriller: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M12 2L4 12h6l-2 6 8-10h-6z"/></svg>',
+    fantas:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M10 2l2 6h6l-5 3.5 2 6L10 14l-5 3.5 2-6L2 8h6z"/></svg>'
+  };
 
-/* ── TOKENY — 1:1 z :root JellyfinGlassTheme ── */
-:root {
-  /* Barvy */
-  --jg-bg:          #000000;
-  --jg-surface:     #0a0a0a;
-  --jg-dark-a:      rgba(17,24,39,0.85);
-  --jg-mid-a:       rgba(29,38,53,0.85);
-  --jg-grad-a:      rgba(29,38,53,0.3);
-  --jg-border:      hsl(214,13%,32%);
-  --jg-border-d:    hsl(214,13%,22%);
-  --jg-border-l:    hsla(0,0%,100%,0.2);
-  --jg-selector:    rgb(55,65,81);
-  --jg-selector-a:  rgba(55,65,81,0.5);
-  --jg-active-a:    rgba(255,255,255,0.1);
-  --jg-active:      #e0e0e0;
-  --jg-text:        #dedede;
-  --jg-dim:         #777777;
-
-  /* Gradienty — prenesene 1:1 */
-  --jg-header-grad: linear-gradient(180deg, rgba(30,40,54,0.95) 30%, 55%, transparent 90%);
-  --jg-card-footer: linear-gradient(0deg, rgb(0 0 0 / 90%), 40%, transparent);
-  --jg-hover-v:     linear-gradient(0deg, transparent, rgb(255 255 255 / 100%) 45%, rgb(255 255 255 / 100%) 55%, transparent);
-  --jg-shadow:      0 20px 50px rgba(0,0,0,0.9);
-
-  /* Blur — prenesene 1:1 */
-  --jg-blur-xs:     blur(2px);
-  --jg-blur-sm:     blur(5px);
-  --jg-blur-md:     blur(10px);
-  --jg-blur-lg:     blur(20px);
-
-  /* Radii — prenesene 1:1 */
-  --jg-r-xl:        1.25em;
-  --jg-r-lg:        14px;
-  --jg-r-sm:        8px;
-  --jg-r-xs:        0.375em;
-
-  /* MujFlix specificke */
-  --dr-blue:        #4a9eff;
-  --dr-gold:        #f0c94a;
-  --dr-font:        'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-
-  /* Card dimensions */
-  --cw:  172px;
-  --ch:  258px;
-  --cr:  var(--jg-r-lg);
-  --px:  52px;
-  --hh:  70px;
-}
-
-/* ── FONT — Apple system stack z Jellyfin Glass ── */
-.universe-overlay,
-.universe-overlay * {
-  font-family: var(--dr-font) !important;
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
-  letter-spacing: -0.015em !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   OVERLAY
-═══════════════════════════════════════════════════════════════ */
-.universe-overlay {
-  background: var(--jg-bg) !important;
-  flex-direction: column !important;
-  height: 100dvh !important;
-  overflow: hidden !important;
-}
-.universe-overlay.open { display: flex !important; }
-
-/* Ambient gradient — iz backdrop overlay */
-.universe-overlay.open::before {
-  content: '' !important;
-  position: fixed !important;
-  inset: 0 !important;
-  background:
-    linear-gradient(0deg, var(--jg-bg), 45%, rgba(17,24,39,0.25)) !important;
-  pointer-events: none !important;
-  z-index: 0 !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   HEADER — skinHeader-blurred portovany
-═══════════════════════════════════════════════════════════════ */
-.universe-overlay .disco-header {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 200 !important;
-  height: var(--hh) !important;
-  padding: 0 var(--px) !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 20px !important;
-  /* --headerColorGradient 1:1 */
-  background: var(--jg-header-grad) !important;
-  backdrop-filter: var(--jg-blur-md) !important;
-  -webkit-backdrop-filter: var(--jg-blur-md) !important;
-  border-bottom: 0px solid var(--jg-border) !important;
-  flex-shrink: 0 !important;
-}
-
-.universe-overlay .disco-header-left {
-  display: flex !important;
-  align-items: baseline !important;
-  gap: 8px !important;
-  flex-shrink: 0 !important;
-}
-.universe-overlay .disco-logo {
-  font-size: 0.65rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 4px !important;
-  text-transform: uppercase !important;
-  color: var(--jg-dim) !important;
-}
-.universe-overlay .disco-title {
-  font-size: 1.55rem !important;
-  font-weight: 200 !important; /* itemName h1 font-weight:200 */
-  color: white !important;
-  letter-spacing: -0.8px !important;
-  line-height: 1 !important;
-}
-
-/* Search — searchfields-txtSearch portovany */
-.universe-overlay .uni-search-wrap {
-  flex: 1 !important;
-  max-width: 460px !important;
-  position: relative !important;
-  z-index: 30 !important;
-}
-.universe-overlay .disco-header {
-  gap: 18px !important;
-}
-.universe-overlay .disco-header-left {
-  min-width: 170px !important;
-}
-.universe-overlay .uni-search-wrap {
-  display: flex !important;
-  align-items: center !important;
-  min-height: 46px !important;
-  margin: 0 auto !important;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  border-radius: 15px !important;
-  background: rgba(255,255,255,0.055) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.16) !important;
-  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease !important;
-}
-.universe-overlay .uni-search-wrap:focus-within {
-  border-color: rgba(77,166,255,0.75) !important;
-  background: rgba(255,255,255,0.085) !important;
-  box-shadow: 0 0 0 3px rgba(10,132,255,0.14), 0 10px 30px rgba(0,0,0,0.2) !important;
-}
-.mf-search-label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-.universe-overlay .uni-search-icon {
-  position: absolute !important;
-  left: 14px !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  width: 15px !important;
-  height: 15px !important;
-  color: var(--jg-dim) !important;
-  pointer-events: none !important;
-}
-.universe-overlay .uni-input {
-  width: 100% !important;
-  flex: 1 !important;
-  min-width: 0 !important;
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 15px !important;
-  padding: 0.78em 2.8em 0.78em 2.8em !important;
-  font-family: var(--dr-font) !important;
-  font-size: 0.875rem !important;
-  color: white !important;
-  outline: none !important;
-  transition: border-color 0.2s !important;
-  backdrop-filter: blur(10px) !important;
-}
-.universe-overlay .uni-input::placeholder { color: var(--jg-dim) !important; }
-.universe-overlay .uni-input:focus {
-  border-color: transparent !important;
-}
-.universe-overlay .uni-clear-btn {
-  position: absolute !important;
-  right: 14px !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  background: none !important;
-  border: none !important;
-  color: rgba(255,255,255,0.5) !important;
-  cursor: pointer !important;
-  padding: 0.25em !important;
-}
-.mf-search-history {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
-  padding: 10px;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 14px;
-  background: rgba(14,14,22,0.985);
-  box-shadow: 0 18px 42px rgba(0,0,0,0.45);
-}
-.mf-search-history:empty {
-  display: none;
-}
-.mf-search-history-title {
-  padding: 4px 8px 7px;
-  color: rgba(255,255,255,0.4);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-}
-.mf-search-history-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-height: 42px;
-  padding: 10px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: rgba(255,255,255,0.78);
-  font: 500 0.76rem/1.2 var(--dr-font);
-  text-align: left;
-  cursor: pointer;
-}
-.mf-search-history-item:hover,
-.mf-search-history-item:focus-visible {
-  background: rgba(255,255,255,0.08);
-  outline: none;
-}
-.mf-search-history-item span {
-  color: rgba(255,255,255,0.35);
-}
-.mf-search-empty {
-  min-height: 320px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: rgba(255,255,255,0.5);
-  text-align: center;
-}
-.mf-search-empty-icon {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  margin-bottom: 5px;
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 50%;
-  color: #4da6ff;
-  font-size: 1.5rem;
-}
-.mf-search-empty strong {
-  color: rgba(255,255,255,0.9);
-  font-size: 1rem;
-}
-.mf-search-empty span {
-  font-size: 0.75rem;
-}
-.mf-search-empty button {
-  margin-top: 8px;
-  padding: 9px 14px;
-  border: 1px solid rgba(10,132,255,0.38);
-  border-radius: 10px;
-  background: rgba(10,132,255,0.14);
-  color: #69b4ff;
-  font: 700 0.72rem var(--dr-font);
-  cursor: pointer;
-}
-
-/* ── SMOOTHNESS ──
-   Keep expensive compositing on the shell only. Cards are numerous and should
-   remain cheap to paint while scrolling. */
-.universe-overlay .disco-card,
-.universe-overlay .disco-card-inner,
-.universe-overlay .disco-card-img,
-.ps-tile-wrapper,
-.sh-card {
-  contain: layout paint;
-}
-.universe-overlay .disco-card,
-.ps-tile-wrapper,
-.sh-card {
-  will-change: auto !important;
-}
-.universe-overlay .disco-card:hover,
-.ps-tile-wrapper:hover,
-.sh-card:hover {
-  will-change: transform !important;
-}
-.universe-overlay .disco-row-scroll {
-  contain: layout paint;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-}
-.universe-overlay .disco-row {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 280px;
-}
-.universe-overlay .disco-card::before,
-.universe-overlay .disco-card::after,
-.universe-overlay .disco-card-glow {
-  pointer-events: none !important;
-}
-@media (hover: none), (pointer: coarse) {
-  .universe-overlay .disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
-    opacity: 1 !important;
-    filter: none !important;
-  }
-  .universe-overlay .disco-card:hover,
-  .ps-tile-wrapper:hover,
-  .sh-card:hover {
-    transform: none !important;
-    will-change: auto !important;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .universe-overlay *,
-  .ps-tile-wrapper,
-  .sh-card {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
-}
-.mf-low-power .universe-overlay .disco-card,
-.mf-low-power .ps-tile,
-.mf-low-power .sh-card {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.28) !important;
-}
-.mf-low-power .universe-overlay .disco-card-glow,
-.mf-low-power .tile-glare {
-  display: none !important;
-}
-.mf-low-power .universe-overlay .disco-card:hover,
-.mf-low-power .ps-tile-wrapper:hover,
-.mf-low-power .sh-card:hover {
-  transform: translateY(-3px) !important;
-}
-.universe-overlay .disco-nav {
-  padding-top: 10px !important;
-  padding-bottom: 10px !important;
-}
-.universe-overlay .disco-nav-item {
-  min-height: 38px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-}
-/* ═══════════════════════════════════════════════════════════════
-   DISCOVER OPEN — méně rušivé chrome NAD overlay (VŠECHNY velikosti)
-   Profil badge má vyšší z-index než overlay (9500 vs 500), takže by
-   bez tohoto pravidla "prosvítal" nad Objevováním na každé šířce,
-   ne jen na mobilu. Sjednoceno pro desktop i mobil.
-═══════════════════════════════════════════════════════════════ */
-body.discover-open #mfProfileBadge {
-  display: none !important;
-}
-body.discover-open #mfDock {
-  opacity: 0.55 !important;
-  transform: translateX(-50%) scale(0.86) !important;
-  bottom: max(10px, env(safe-area-inset-bottom, 10px)) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
-  transition: opacity 0.2s ease, transform 0.2s ease !important;
-}
-body.discover-open #mfDock:hover,
-body.discover-open #mfDock:focus-within {
-  opacity: 1 !important;
-  transform: translateX(-50%) scale(1) !important;
-}
-
-@media (max-width: 760px) {
-  .universe-overlay .disco-header {
-    align-items: stretch !important;
-    padding: max(14px, env(safe-area-inset-top, 14px)) 14px 12px !important;
-    gap: 10px !important;
-  }
-
-  body.discover-open #mfDock {
-    opacity: 0.72 !important;
-    transform: translateX(-50%) scale(0.88) !important;
-  }
-  body.discover-open #mfDock .dock-btn {
-    min-width: 58px !important;
-    padding: 7px 9px !important;
-  }
-  body.discover-open #mfDock .dock-label {
-    font-size: 0.62rem !important;
-  }
-
-  /* Use the same system typography and chrome as the rest of the application. */
-  .universe-overlay,
-  .universe-overlay * {
-    font-family: var(--font-sf, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif) !important;
-  }
-  .universe-overlay .disco-header {
-    height: 78px !important;
-    padding-inline: clamp(18px, 4vw, 56px) !important;
-    background: rgba(8, 8, 12, 0.94) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-  }
-  .universe-overlay .disco-title {
-    font-size: 1.35rem !important;
-    font-weight: 600 !important;
-  }
-  .universe-overlay .uni-search-wrap {
-    max-width: 560px !important;
-    min-height: 44px !important;
-    border-radius: 12px !important;
-    box-shadow: none !important;
-  }
-  .universe-overlay .disco-nav {
-    padding: 8px clamp(18px, 4vw, 56px) !important;
-    background: rgba(8, 8, 12, 0.9) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
-  }
-  .universe-overlay .disco-nav-item {
-    min-height: 34px !important;
-    padding: 7px 14px !important;
-    border-radius: 10px !important;
-    font-size: 0.78rem !important;
-  }
-  .universe-overlay .disco-body {
-    padding-bottom: 104px !important;
-  }
-  .universe-overlay .disco-card,
-  .universe-overlay .disco-card-inner {
-    border-radius: 14px !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28) !important;
-  }
-  .universe-overlay .disco-card:hover {
-    transform: translateY(-3px) !important;
-  }
-  .universe-overlay .disco-card-glow,
-  .universe-overlay .disco-card::before {
-    display: none !important;
-  }
-  @media (max-width: 760px) {
-    .universe-overlay .disco-header {
-      height: auto !important;
-      padding: max(12px, env(safe-area-inset-top, 12px)) 14px 10px !important;
+  function getNavIcon(label) {
+    var norm = label.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '');
+    for (var key in NAV_ICONS) {
+      if (norm.indexOf(key) === 0 || key.indexOf(norm.slice(0, 5)) === 0) {
+        return NAV_ICONS[key];
+      }
     }
-    body.discover-open #mfDock {
-      transform: translateX(-50%) scale(0.82) !important;
+    return null;
+  }
+
+  function upgradeNavIcons() {
+    var nav = document.getElementById('discoNav');
+    if (!nav) return;
+    nav.querySelectorAll('.disco-nav-item').forEach(function (item) {
+      if (item._drDone) return;
+      item._drDone = true;
+      var raw = item.textContent.trim();
+      var ico = getNavIcon(raw);
+      if (!ico) return;
+      var clean = raw.replace(/^[^\w\u00C0-\u024F]+/, '').trim();
+      item.innerHTML = ico + '<span style="margin-left:4px">' + clean + '</span>';
+    });
+  }
+
+  function upgradeHeroBtns() {
+    var PLAY = '<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><polygon points="3,2 14,8 3,14"/></svg>';
+    var PLUS = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="13" height="13"><path d="M8 3v10M3 8h10"/></svg>';
+    document.querySelectorAll('.disco-hero-btn').forEach(function (btn) {
+      if (btn._drDone) return;
+      btn._drDone = true;
+      var t = btn.textContent.trim();
+      var n = t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      var isPlay = n.indexOf('prehrat') !== -1 || n.indexOf('spustit') !== -1 || n.indexOf('play') !== -1;
+      btn.innerHTML = (isPlay ? PLAY : PLUS) + '<span style="margin-left:7px">' + t + '</span>';
+    });
+  }
+
+  var STAR = '<svg viewBox="0 0 12 12" fill="#f0c94a" width="9" height="9"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9.2,11 6,9.2 2.8,11 3.5,7.5 1,5 4.5,4.5"/></svg>';
+  var PLAY_SM = '<svg viewBox="0 0 14 14" fill="currentColor" width="11" height="11"><polygon points="3,2 12,7 3,12"/></svg>';
+  var PLUS_SM = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="11" height="11"><path d="M7 3v8M3 7h8"/></svg>';
+  var FILM_ICO = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" width="9" height="9"><rect x=".5" y="2" width="11" height="8" rx="1.2"/><path d=".5 5h11M4 2v3M8 2v3"/></svg>';
+  var TV_ICO   = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" width="9" height="9"><rect x=".5" y="1.5" width="11" height="8" rx="1.2"/><path d="M4 10.5l1.5-1.5h1L8 10.5"/></svg>';
+
+  /* Vizuál karet (rozměry, barvy, hover) žije v styles-discover-redesign.css.
+     Tady se jen jednorázově doplní ikony/badge, které vyžadují text/DOM logiku. */
+  function upgradeCards() {
+    document.querySelectorAll('#discoBody .disco-card').forEach(function (card) {
+      if (card._drDone) return;
+      card._drDone = true;
+
+      /* Rating badge nahoře vlevo (z .disco-card-rating, kterou CSS skryje) */
+      var rEl = card.querySelector('.disco-card-rating');
+      var rTxt = rEl ? rEl.textContent.replace(/[^0-9.]/g, '').trim() : '';
+      var rVal = parseFloat(rTxt);
+      if (rVal > 0) {
+        var hasAI = !!card.querySelector('.ai-match-badge');
+        var rb = document.createElement('div');
+        rb.className = 'dr-rating-top';
+        rb.style.top = hasAI ? '34px' : '9px';
+        rb.style.left = '9px';
+        rb.innerHTML = STAR + '<span style="margin-left:2px">' + rTxt + '</span>';
+        card.appendChild(rb);
+      }
+
+      /* AI match badge — zkrátit na "NN%" */
+      var ai = card.querySelector('.ai-match-badge');
+      if (ai) {
+        var m = ai.textContent.match(/(\d+)\s*%/);
+        if (m) ai.textContent = m[1] + '%';
+      }
+
+      /* Typ (Film/Seriál) — doplnit ikonu, styl řeší CSS */
+      var te = card.querySelector('.disco-card-type');
+      if (te) {
+        var tt = te.textContent.trim();
+        var ico = tt.toLowerCase().indexOf('film') !== -1 ? FILM_ICO : TV_ICO;
+        te.innerHTML = ico + '<span style="margin-left:3px">' + tt + '</span>';
+      }
+
+      /* Skrýt drobný AI "reason" text (kurzíva) — příliš šumu v kartě */
+      card.querySelectorAll('[style*="italic"]').forEach(function (el) {
+        el.style.setProperty('display', 'none', 'important');
+      });
+
+      attachExpand(card);
+    });
+  }
+
+  function addCardCounts() {
+    document.querySelectorAll('#discoBody .disco-row').forEach(function (row) {
+      if (row._drCnt) return;
+      row._drCnt = true;
+      var sc = row.querySelector('.disco-row-scroll');
+      var ti = row.querySelector('.disco-row-title');
+      if (!sc || !ti) return;
+      var n = sc.querySelectorAll('.disco-card').length;
+      if (n < 2) return;
+      var b = document.createElement('span');
+      b.className = 'dr-cnt';
+      b.textContent = n;
+      ti.appendChild(b);
+    });
+  }
+
+  function upgradeHeroImage() {
+    document.querySelectorAll('.disco-hero-img').forEach(function (img) {
+      if (img._drHi || !img.src) return;
+      img._drHi = true;
+      var hi = img.src.replace('/w780/', '/w1280/').replace('/w500/', '/w1280/').replace('/w342/', '/w780/');
+      if (hi !== img.src) {
+        var t = new Image();
+        t.onload = function () { img.src = hi; };
+        t.src = hi;
+      }
+    });
+  }
+
+  function addScrollHint() {
+    var body = document.getElementById('discoBody');
+    if (!body) return;
+    var hero = body.querySelector('.disco-hero');
+    if (!hero || hero.querySelector('.dr-sh')) return;
+    var h = document.createElement('div');
+    h.className = 'dr-sh';
+    h.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="15" height="15"><path d="M4 6l4 4 4-4"/></svg><span>Scroll</span>';
+    h.addEventListener('click', function () { body.scrollBy({ top: 340, behavior: 'smooth' }); });
+    body.addEventListener('scroll', function () { h.style.opacity = body.scrollTop > 50 ? '0' : ''; }, { passive: true });
+    hero.appendChild(h);
+  }
+
+  /* ── Hover expand panel na kartě ── */
+  function getCardData(card) {
+    var nameEl = card.querySelector('.disco-card-name');
+    var ratTop = card.querySelector('.dr-rating-top');
+    var typeEl = card.querySelector('.disco-card-type');
+    var title = nameEl ? nameEl.textContent.trim() : '';
+
+    var rTxt = '';
+    if (ratTop) rTxt = ratTop.textContent.replace(/[^0-9.]/g, '').trim();
+    else {
+      var rEl = card.querySelector('.disco-card-rating');
+      if (rEl) rTxt = rEl.textContent.replace(/[^0-9.]/g, '').trim();
     }
+
+    var type = typeEl ? typeEl.textContent.replace(/[^a-zA-ZáčďéěíňóřšťůúýžÁČĎÉĚÍŇÓŘŠŤŮÚÝŽ\s]/g, '').trim() : '';
+
+    var year = '';
+    var oc = card.getAttribute('onclick') || '';
+    var ym = oc.match(/[,\s](\d{4})[,\s\)]/);
+    if (ym) year = ym[1];
+
+    return { title: title, rating: rTxt, type: type, year: year };
   }
-  @media (prefers-reduced-motion: reduce) {
-    body.discover-open #mfDock,
-    .universe-overlay .disco-card {
-      transition: none !important;
+
+  function buildExpand(card) {
+    var d = getCardData(card);
+    var wrap = document.createElement('div');
+    wrap.className = 'dr-expand';
+
+    var titleEl = document.createElement('div');
+    titleEl.className = 'dr-expand-title';
+    titleEl.textContent = d.title;
+    wrap.appendChild(titleEl);
+
+    var meta = document.createElement('div');
+    meta.className = 'dr-expand-meta';
+
+    function dot() {
+      var el = document.createElement('span');
+      el.className = 'dr-expand-dot';
+      return el;
     }
+
+    if (d.type) {
+      var t = document.createElement('span');
+      t.className = 'dr-expand-type';
+      t.textContent = d.type;
+      meta.appendChild(t);
+    }
+    var rVal = parseFloat(d.rating);
+    if (rVal > 0) {
+      if (d.type) meta.appendChild(dot());
+      var r = document.createElement('span');
+      r.className = 'dr-expand-rating';
+      r.innerHTML = STAR + '<span style="margin-left:2px">' + d.rating + '</span>';
+      meta.appendChild(r);
+    }
+    if (d.year) {
+      if (meta.children.length) meta.appendChild(dot());
+      var y = document.createElement('span');
+      y.className = 'dr-expand-year';
+      y.textContent = d.year;
+      meta.appendChild(y);
+    }
+    if (meta.children.length) wrap.appendChild(meta);
+
+    var btns = document.createElement('div');
+    btns.className = 'dr-expand-btns';
+
+    var playBtn = document.createElement('button');
+    playBtn.className = 'dr-expand-btn-play';
+    playBtn.innerHTML = PLAY_SM + '<span style="margin-left:5px">Přehrát</span>';
+    playBtn.addEventListener('click', function (e) { e.stopPropagation(); card.click(); });
+
+    var wlBtn = document.createElement('button');
+    wlBtn.className = 'dr-expand-btn-wl';
+    wlBtn.innerHTML = PLUS_SM;
+    wlBtn.title = 'Přidat do Watchlist';
+    wlBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var finder = card.querySelector('.disco-card-finder-btn');
+      if (finder) finder.click(); else card.click();
+    });
+
+    btns.appendChild(playBtn);
+    btns.appendChild(wlBtn);
+    wrap.appendChild(btns);
+    return wrap;
   }
-  .universe-overlay .disco-header-left {
-    min-width: 0 !important;
-    flex: 1 !important;
+
+  function attachExpand(card) {
+    if (card.querySelector('.dr-loader-bar')) return;
+    var lb = document.createElement('div');
+    lb.className = 'dr-loader-bar';
+    card.appendChild(lb);
+    card.appendChild(buildExpand(card));
   }
-  .universe-overlay .disco-header-left .disco-title {
-    font-size: 1.25rem !important;
+
+  /* ── Parallax hero (v discoBody) ── */
+  function setupParallax(body) {
+    if (body._drParallax) return;
+    body._drParallax = true;
+    var raf = false;
+    body.addEventListener('scroll', function () {
+      if (raf) return;
+      raf = true;
+      requestAnimationFrame(function () {
+        raf = false;
+        var hero = body.querySelector('.disco-hero');
+        if (!hero) return;
+        var s = body.scrollTop;
+        var img = hero.querySelector('.disco-hero-img');
+        if (img) img.style.transform = 'scale(1.06) translateY(' + Math.min(s * 0.3, 60) + 'px)';
+        var cnt = hero.querySelector('.disco-hero-content');
+        if (cnt) {
+          cnt.style.opacity = Math.max(0, 1 - s / 240);
+          cnt.style.transform = 'translateY(' + s * 0.15 + 'px)';
+        }
+      });
+    }, { passive: true });
   }
-  .universe-overlay .uni-search-wrap {
-    flex: 0 0 100% !important;
-    order: 3 !important;
-    margin: 0 !important;
-    min-height: 50px !important;
+
+  function setupBackTop(overlay, body) {
+    if (document.getElementById('dr-btt')) return;
+    var btn = document.createElement('button');
+    btn.id = 'dr-btt';
+    btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" width="14" height="14"><path d="M4 10l4-4 4 4"/></svg>';
+    btn.addEventListener('click', function () { body.scrollTo({ top: 0, behavior: 'smooth' }); });
+    overlay.appendChild(btn);
+    body.addEventListener('scroll', function () {
+      btn.classList.toggle('dr-visible', body.scrollTop > 300);
+    }, { passive: true });
   }
-  .universe-overlay .uni-input {
-    font-size: 1rem !important;
+
+  /* ── Orchestrace: jeden debounced běh místo pěti observerů + pollingu ── */
+  function runAll() {
+    [upgradeNavIcons, upgradeHeroBtns, upgradeCards, addCardCounts, upgradeHeroImage, addScrollHint]
+      .forEach(function (fn) {
+        try { fn(); } catch (err) { console.warn('[MFDiscover] krok selhal:', fn.name, err); }
+      });
   }
-  .universe-overlay .disco-header > div:last-child > button:first-child {
-    min-width: 42px !important;
-    width: 42px !important;
-    padding: 0 !important;
-    font-size: 0 !important;
+
+  var pending = false;
+  function scheduleRun() {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(function () { pending = false; runAll(); });
   }
-  .universe-overlay .disco-header > div:last-child > button:first-child svg {
-    width: 17px !important;
+
+  function init() {
+    var overlay = document.getElementById('universeOverlay');
+    var body = document.getElementById('discoBody');
+    var nav = document.getElementById('discoNav');
+    if (!overlay || !body) return; // markup ještě není v DOM (nemělo by nastat)
+
+    setupParallax(body);
+    setupBackTop(overlay, body);
+
+    var observer = new MutationObserver(scheduleRun);
+    observer.observe(body, { childList: true, subtree: true });
+    if (nav) observer.observe(nav, { childList: true, subtree: true, attributes: true });
+
+    scheduleRun();
   }
-}
 
-/* Header prava strana */
-.universe-overlay .disco-header > div:last-child {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  margin-left: auto !important;
-  flex-shrink: 0 !important;
-}
-/* AI btn — detailButton.btnPlay portovany */
-.universe-overlay .disco-header > div:last-child > button:first-child {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 7px !important;
-  padding: 0.5em 0.5em !important;
-  border-radius: 3em !important;
-  background: rgba(224,224,224,0.12) !important;
-  border: 0px solid var(--jg-border-l) !important;
-  color: var(--jg-active) !important;
-  font-family: var(--dr-font) !important;
-  font-size: 0.8rem !important;
-  font-weight: 700 !important;
-  cursor: pointer !important;
-  transition: all 0.125s !important;
-  white-space: nowrap !important;
-  min-width: 10em !important;
-  height: 3em !important;
-  justify-content: center !important;
-}
-.universe-overlay .disco-header > div:last-child > button:first-child:hover {
-  background: var(--jg-active) !important;
-  color: black !important;
-}
-.universe-overlay .disco-close {
-  width: 36px !important;
-  height: 36px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 50% !important;
-  background: rgba(255,255,255,0.05) !important;
-  border: 0px solid var(--jg-border-l) !important;
-  color: var(--jg-text) !important;
-  cursor: pointer !important;
-  transition: all 0.125s !important;
-  flex-shrink: 0 !important;
-  font-size: 1rem !important;
-}
-.universe-overlay .disco-close:hover {
-  background: rgba(255,255,255,0.2) !important;
-  color: white !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   GENRE NAV — emby-tab-button portovany
-═══════════════════════════════════════════════════════════════ */
-#discoNav,
-.universe-overlay .disco-nav {
-  display: flex !important;
-  align-items: center !important;
-  gap: 0 !important;
-  padding: 0 var(--px) !important;
-  height: 56px !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  scrollbar-width: none !important;
-  flex-shrink: 0 !important;
-  /* sectionTabs s backdrop */
-  background: rgba(0,0,0,0.6) !important;
-  border-bottom: 0px solid var(--jg-border-d) !important;
-  position: sticky !important;
-  top: var(--hh) !important;
-  z-index: 100 !important;
-  backdrop-filter: var(--jg-blur-md) !important;
-  -webkit-backdrop-filter: var(--jg-blur-md) !important;
-}
-#discoNav::-webkit-scrollbar,
-.universe-overlay .disco-nav::-webkit-scrollbar { display: none !important; }
-
-/* emby-tab-button 1:1 */
-.universe-overlay .disco-nav-item,
-#discoNav .disco-nav-item {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  margin: 0.25em 0.5em !important;
-  padding: 0 1.25em !important;
-  height: 2.5em !important;
-  border-radius: var(--jg-r-lg) !important;
-  border: none !important;
-  background: var(--jg-dark-a) !important;
-  color: var(--jg-text) !important;
-  font-family: var(--dr-font) !important;
-  font-size: 0.8rem !important;
-  font-weight: 400 !important;
-  cursor: pointer !important;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
-  transition: all 0.125s !important;
-  user-select: none !important;
-}
-.universe-overlay .disco-nav-item::before { display: none !important; }
-.universe-overlay .disco-nav-item svg,
-#discoNav .disco-nav-item svg {
-  flex-shrink: 0 !important;
-  opacity: 0.6 !important;
-}
-
-/* emby-tab-button-active 1:1 */
-.universe-overlay .disco-nav-item.active,
-.universe-overlay .disco-nav-item.mf-chip-optimistic,
-#discoNav .disco-nav-item.active,
-#discoNav .disco-nav-item.mf-chip-optimistic {
-  background: var(--jg-active) !important;
-  color: black !important;
-  font-weight: 600 !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-.universe-overlay .disco-nav-item.active svg,
-.universe-overlay .disco-nav-item.mf-chip-optimistic svg,
-#discoNav .disco-nav-item.active svg,
-#discoNav .disco-nav-item.mf-chip-optimistic svg {
-  opacity: 1 !important;
-  stroke: black !important;
-}
-.universe-overlay .disco-nav-item:hover:not(.active),
-#discoNav .disco-nav-item:hover:not(.active) {
-  color: white !important;
-  background: rgba(255,255,255,0.12) !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   BODY
-═══════════════════════════════════════════════════════════════ */
-#discoBody,
-.universe-overlay .disco-body {
-  flex: 1 1 auto !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  scrollbar-width: thin !important;
-  scrollbar-color: var(--jg-border-d) transparent !important;
-  padding-bottom: 100px !important;
-  position: relative !important;
-  z-index: 1 !important;
-}
-#discoBody::-webkit-scrollbar { width: 3px !important; }
-#discoBody::-webkit-scrollbar-thumb {
-  background: var(--jg-border-d) !important;
-  border-radius: 3px !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   HERO — editorsChoiceItemBanner portovany
-═══════════════════════════════════════════════════════════════ */
-.universe-overlay .disco-hero {
-  position: relative !important;
-  height: 85vh !important;
-  max-height: 520px !important;
-  overflow: hidden !important;
-  cursor: pointer !important;
-  background: #000000 !important;
-}
-.universe-overlay .disco-hero-img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  object-position: center top !important;
-  display: block !important;
-  transition: transform 8s ease !important;
-  transform: scale(1.02) !important;
-}
-.universe-overlay .disco-hero:hover .disco-hero-img {
-  transform: scale(1.06) translateY(-6px) !important;
-}
-
-/* editorsChoiceItemBanner > div gradient 1:1 */
-.universe-overlay .disco-hero-grad {
-  position: absolute !important;
-  inset: 0 !important;
-  background: linear-gradient(to bottom,
-    rgba(0,0,0,0.6)  0%,
-    rgba(0,0,0,0.0)  20%,
-    rgba(0,0,0,0.4)  60%,
-    #000000          98%,
-    #000000          100%) !important;
-  z-index: 2 !important;
-}
-
-/* Levy gradient — ako Jellyfin item detail page */
-.universe-overlay .disco-hero-grad::after {
-  content: '' !important;
-  position: absolute !important;
-  inset: 0 !important;
-  background: linear-gradient(to right,
-    rgba(0,0,0,0.9)  0%,
-    rgba(0,0,0,0.5)  35%,
-    transparent      70%) !important;
-  z-index: 1 !important;
-}
-
-/* editorsChoiceItemBanner padding */
-.universe-overlay .disco-hero-content {
-  position: absolute !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 55% !important;
-  padding: 60px 4% !important;
-  z-index: 5 !important;
-}
-
-.universe-overlay .disco-hero-badge {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  margin-bottom: 14px !important;
-  flex-wrap: wrap !important;
-}
-.universe-overlay .disco-hero-badge-type {
-  font-size: 0.6rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 1.5px !important;
-  text-transform: uppercase !important;
-  color: var(--jg-dim) !important;
-  background: rgba(255,255,255,0.07) !important;
-  border: 0px solid var(--jg-border-l) !important;
-  padding: 4px 11px !important;
-  border-radius: var(--jg-r-lg) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-}
-.universe-overlay .disco-hero-badge-rating {
-  font-size: 0.76rem !important;
-  font-weight: 700 !important;
-  color: var(--dr-gold) !important;
-}
-.universe-overlay .disco-hero-badge-year {
-  font-size: 0.7rem !important;
-  color: var(--jg-dim) !important;
-}
-
-/* editorsChoiceItemOverview portovany */
-.universe-overlay .disco-hero-title {
-  font-size: clamp(2rem,5vw,4em) !important;
-  font-weight: 200 !important; /* nameContainer h1 font-weight:200 */
-  color: white !important;
-  letter-spacing: -1px !important;
-  line-height: 1.05 !important;
-  margin-bottom: 12px !important;
-  text-shadow: 0 4px 40px rgba(0,0,0,0.8) !important;
-}
-.universe-overlay .disco-hero-desc {
-  /* editorsChoiceItemOverview */
-  font-size: 1.1rem !important;
-  color: #dcdcdc !important;
-  line-height: 1.5 !important;
-  max-width: 45% !important;
-  margin-bottom: 25px !important;
-  overflow: hidden !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 3 !important;
-  -webkit-box-orient: vertical !important;
-  text-shadow: 2px 2px 5px rgba(0,0,0,1) !important;
-}
-.universe-overlay .disco-hero-btns {
-  display: flex !important;
-  gap: 10px !important;
-  align-items: center !important;
-}
-/* editorsChoiceItemButton 1:1 */
-.universe-overlay .disco-hero-btn.primary {
-  background: #e0e0e0 !important;
-  color: #000000 !important;
-  border: none !important;
-  border-radius: 4px !important;
-  padding: 12px 35px !important;
-  font-size: 1.1rem !important;
-  font-weight: 800 !important;
-  cursor: pointer !important;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  transition: all 0.125s !important;
-  letter-spacing: 1px !important;
-  text-transform: uppercase !important;
-}
-.universe-overlay .disco-hero-btn.primary:hover {
-  background: #ffffff !important;
-  transform: scale(1.05) !important;
-}
-/* detailButton:not(.btnPlay) portovany */
-.universe-overlay .disco-hero-btn.secondary {
-  color: var(--jg-text) !important;
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  border-radius: 50% !important;
-  padding: 0.6em !important;
-  width: 3em !important;
-  height: 3em !important;
-  justify-content: center !important;
-  font-size: 1rem !important;
-  cursor: pointer !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  transition: all 0.125s !important;
-}
-.universe-overlay .disco-hero-btn.secondary:hover {
-  background: white !important;
-  color: black !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   ROW HEADERS — sectionTitleContainer portovany
-═══════════════════════════════════════════════════════════════ */
-.universe-overlay .disco-row-header,
-#discoBody .disco-row-header {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  padding: 1.25em var(--px) 0 !important;
-  margin-bottom: -0.5em !important;
-  gap: 16px !important;
-}
-/* sectionTitle 1.5rem */
-.universe-overlay .disco-row-title,
-#discoBody .disco-row-title {
-  font-size: 1.5rem !important;
-  font-weight: 600 !important;
-  color: var(--jg-text) !important;
-  letter-spacing: -0.3px !important;
-  line-height: 1.2 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-}
-.universe-overlay .drt-tag,
-#discoBody .drt-tag {
-  font-size: 0.5rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 1.8px !important;
-  text-transform: uppercase !important;
-  color: var(--dr-blue) !important;
-  background: rgba(74,158,255,0.12) !important;
-  border: 1px solid rgba(74,158,255,0.22) !important;
-  padding: 3px 9px !important;
-  border-radius: 6px !important;
-}
-.universe-overlay .disco-row-nav { display: flex !important; align-items: center !important; gap: 4px !important; }
-/* emby-scrollbuttons-button portovany */
-.universe-overlay .disco-row-nav-btn,
-#discoBody .disco-row-nav-btn {
-  width: 32px !important;
-  height: 32px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 50% !important;
-  background: rgba(255,255,255,0.05) !important;
-  border: 0px solid var(--jg-border-l) !important;
-  color: var(--jg-text) !important;
-  cursor: pointer !important;
-  transition: all 0.125s !important;
-}
-.universe-overlay .disco-row-nav-btn:hover { background: rgba(255,255,255,0.15) !important; color: white !important; }
-#discoBody button[onclick*="refreshPersonalisedRow"],
-.universe-overlay button[onclick*="refreshPersonalisedRow"] {
-  font-size: 0.68rem !important;
-  font-weight: 600 !important;
-  color: var(--jg-active) !important;
-  background: rgba(224,224,224,0.1) !important;
-  border: 0px solid var(--jg-border-l) !important;
-  border-radius: var(--jg-r-lg) !important;
-  padding: 6px 14px !important;
-  cursor: pointer !important;
-  transition: all 0.125s !important;
-  white-space: nowrap !important;
-}
-#discoBody button[onclick*="refreshPersonalisedRow"]:hover {
-  background: var(--jg-active) !important;
-  color: black !important;
-}
-.universe-overlay .disco-row-scroll,
-#discoBody .disco-row-scroll {
-  display: flex !important;
-  gap: 1em !important;  /* --itemColumnGap 1em */
-  overflow-x: auto !important;
-  scrollbar-width: none !important;
-  padding: 1.25em var(--px) 1.25em !important;
-  scroll-behavior: smooth !important;
-}
-.universe-overlay .disco-row-scroll::-webkit-scrollbar,
-#discoBody .disco-row-scroll::-webkit-scrollbar { display: none !important; }
-.universe-overlay .disco-row + .disco-row {
-  border-top: 0px solid var(--jg-border-d) !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   KARTY — .cardScalable + .card-hoverable portovany 1:1
-═══════════════════════════════════════════════════════════════ */
-.universe-overlay .disco-card,
-#discoBody .disco-card {
-  position: relative !important;
-  width: var(--cw) !important;
-  min-width: var(--cw) !important;
-  height: var(--ch) !important;
-  flex-shrink: 0 !important;
-
-  /* .cardScalable 1:1 */
-  border-radius: var(--jg-r-lg) !important;
-  border: none !important;
-  /* overflow:visible kvuli expand panelu, img klipovani resi pseudo */
-  overflow: visible !important;
-  box-shadow: 0 0 0.25em 0 rgba(0,0,0,0.4) !important;
-  background: var(--jg-surface) !important;
-
-  /* .card-hoverable transition 1:1 */
-  transition: transform 125ms ease,
-              box-shadow 0.2s ease,
-              filter 0.2s ease,
-              opacity 0.2s ease !important;
-  transform-origin: bottom center !important;
-  cursor: pointer !important;
-  outline: none !important;
-}
-
-/* Klipovaci wrapper — obaluje POUZE poster obsah */
-.universe-overlay .disco-card::after,
-#discoBody .disco-card::after {
-  content: '' !important;
-  position: absolute !important;
-  inset: 0 !important;
-  border-radius: var(--jg-r-lg) !important;
-  box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.06) !important;
-  pointer-events: none !important;
-  z-index: 10 !important;
-}
-
-/* .card-hoverable:hover .cardScalable 1:1 */
-.universe-overlay .disco-card:hover,
-#discoBody .disco-card:hover {
-  transform: scale(1.05) !important;
-  z-index: 9999 !important;
-  border-radius: var(--jg-r-lg) !important;
-  border: none !important;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.9) !important;
-  filter: brightness(1.1) !important;
-}
-
-/* disco-card-inner neexistuje v app.js — skryt */
-.universe-overlay .disco-card-inner,
-#discoBody .disco-card-inner {
-  display: none !important;
-}
-
-/* Image — primo v .disco-card, border-radius klipuje na zaoblene rohy */
-.universe-overlay .disco-card-img,
-#discoBody .disco-card-img {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  object-position: center top !important;
-  display: block !important;
-  border-radius: var(--jg-r-lg) !important;
-  z-index: 1 !important;
-  transition: transform 0.375s ease, filter 0.3s ease !important;
-}
-.universe-overlay .disco-card:hover .disco-card-img,
-#discoBody .disco-card:hover .disco-card-img {
-  transform: scale(1.025) !important;
-  filter: brightness(0.5) !important;
-}
-
-/* Shimmer overlay — musi byt nad img ale neblokovano */
-.universe-overlay .disco-card::before,
-#discoBody .disco-card::before {
-  content: '' !important;
-  position: absolute !important;
-  inset: 0 !important;
-  border-radius: var(--jg-r-lg) !important;
-  background: var(--jg-hover-v) !important;
-  opacity: 0 !important;
-  mix-blend-mode: overlay !important;
-  transition: opacity 0.5s, transform 0.5s !important;
-  z-index: 6 !important;
-  pointer-events: none !important;
-  transform: translateY(-50%) !important;
-}
-.universe-overlay .disco-card:hover::before,
-#discoBody .disco-card:hover::before {
-  transform: translateY(50%) !important;
-  opacity: 0 !important;
-}
-
-/* Overlay gradient — --cardFooterGradient 1:1 */
-.universe-overlay .disco-card-overlay,
-#discoBody .disco-card-overlay {
-  position: absolute !important;
-  inset: 0 !important;
-  background: linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 35%, transparent 70%) !important;
-  z-index: 2 !important;
-  opacity: 1 !important;
-  border-radius: var(--jg-r-lg) !important;
-  pointer-events: none !important;
-}
-.universe-overlay .disco-card-glow,
-#discoBody .disco-card-glow { display: none !important; }
-
-/* INFO — vzdy viditelny */
-.universe-overlay .disco-card-info,
-#discoBody .disco-card-info {
-  position: absolute !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  padding: 9px 11px 12px !important;
-  z-index: 5 !important;
-  opacity: 1 !important;
-  transform: none !important;
-  transition: none !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 4px !important;
-  pointer-events: none !important;
-}
-/* .card-hoverable:hover .cardText color */
-.universe-overlay .disco-card-name,
-#discoBody .disco-card-name {
-  font-size: 0.74rem !important;
-  font-weight: 600 !important;
-  color: var(--jg-text) !important;
-  letter-spacing: -0.1px !important;
-  line-height: 1.3 !important;
-  text-shadow: 0 2px 10px rgba(0,0,0,1) !important;
-  overflow: hidden !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;
-  margin-bottom: 3px !important;
-  transition: color 0.125s !important;
-}
-.universe-overlay .disco-card:hover .disco-card-name,
-#discoBody .disco-card:hover .disco-card-name {
-  color: #ffffff !important;
-}
-.universe-overlay .disco-card-meta,
-#discoBody .disco-card-meta {
-  display: flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-}
-.universe-overlay .disco-card-type,
-#discoBody .disco-card-type {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 3px !important;
-  font-size: 0.52rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.5px !important;
-  text-transform: uppercase !important;
-  color: rgba(255,255,255,0.45) !important;
-  background: rgba(255,255,255,0.07) !important;
-  border: 0px solid rgba(255,255,255,0.1) !important;
-  padding: 2px 7px !important;
-  border-radius: var(--jg-r-sm) !important;
-}
-.universe-overlay .disco-card-rating,
-#discoBody .disco-card-rating { display: none !important; }
-
-/* Play button — .cardOverlayFab-primary portovany */
-.universe-overlay .disco-play-btn,
-#discoBody .disco-play-btn {
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%,-56%) scale(0.55) !important;
-  width: 54px !important;
-  height: 54px !important;
-  border-radius: 50% !important;
-  /* --btnMiniPlayColor: rgba(0,0,0,0.7) */
-  background: rgba(0,0,0,0.7) !important;
-  color: white !important;
-  border: 0px solid rgba(255,255,255,0.2) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  opacity: 0 !important;
-  transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.34,1.44,0.64,1) !important;
-  z-index: 6 !important;
-  box-shadow: var(--jg-shadow) !important;
-}
-.universe-overlay .disco-play-btn svg,
-#discoBody .disco-play-btn svg {
-  width: 18px !important;
-  height: 18px !important;
-  fill: white !important;
-  margin-left: 3px !important;
-}
-.universe-overlay .disco-card:hover .disco-play-btn,
-#discoBody .disco-card:hover .disco-play-btn {
-  opacity: 1 !important;
-  transform: translate(-50%,-56%) scale(1) !important;
-}
-
-/* Finder button */
-.universe-overlay .disco-card-finder-btn,
-#discoBody .disco-card-finder-btn {
-  position: absolute !important;
-  top: 9px !important;
-  right: 9px !important;
-  width: 28px !important;
-  height: 28px !important;
-  border-radius: 50% !important;
-  background: rgba(0,0,0,0.7) !important;
-  border: 0px solid rgba(255,255,255,0.2) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  color: white !important;
-  cursor: pointer !important;
-  z-index: 8 !important;
-  backdrop-filter: var(--jg-blur-sm) !important;
-  opacity: 0 !important;
-  transform: scale(0.7) translateY(-4px) !important;
-  transition: all 0.2s cubic-bezier(0.34,1.44,0.64,1) !important;
-  pointer-events: auto !important;
-}
-.universe-overlay .disco-card-finder-btn svg { width: 12px !important; height: 12px !important; }
-.universe-overlay .disco-card:hover .disco-card-finder-btn,
-#discoBody .disco-card:hover .disco-card-finder-btn {
-  opacity: 1 !important;
-  transform: scale(1) translateY(0) !important;
-}
-.universe-overlay .disco-card-finder-btn:hover { background: rgba(255,255,255,0.2) !important; }
-
-/* AI badge */
-.universe-overlay .ai-match-badge,
-#discoBody .ai-match-badge {
-  position: absolute !important;
-  top: 9px !important;
-  left: 9px !important;
-  font-size: 0.49rem !important;
-  font-weight: 700 !important;
-  color: rgba(255,255,255,0.38) !important;
-  background: rgba(0,0,0,0.7) !important;
-  border: 0px solid rgba(255,255,255,0.1) !important;
-  padding: 2px 6px !important;
-  border-radius: var(--jg-r-lg) !important;
-  z-index: 9 !important;
-}
-
-/* Rating top badge (JS prida) */
-.dr-rating-top {
-  position: absolute !important;
-  z-index: 9 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 3px !important;
-  font-size: 0.6rem !important;
-  font-weight: 700 !important;
-  color: var(--dr-gold) !important;
-  background: rgba(0,0,0,0.72) !important;
-  border: 0px solid rgba(240,201,74,0.22) !important;
-  padding: 2px 8px !important;
-  border-radius: var(--jg-r-lg) !important;
-  pointer-events: none !important;
-  line-height: 1 !important;
-}
-
-/* Spotlight sousednich karet */
-.disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
-  opacity: 0.45 !important;
-  filter: brightness(0.7) !important;
-  transition: opacity 0.2s ease, filter 0.2s ease !important;
-}
-
-/* Loader bar */
-.dr-loader-bar {
-  position: absolute;
-  top: 0; left: 0;
-  height: 2px;
-  width: 0;
-  background: var(--jg-active);
-  border-radius: 0 2px 2px 0;
-  z-index: 30;
-  opacity: 0;
-  pointer-events: none;
-}
-.disco-card:hover .dr-loader-bar {
-  opacity: 1;
-  animation: dr-load 1.1s cubic-bezier(0.4,0,0.2,1) forwards;
-}
-@keyframes dr-load {
-  0%   { width:0%;   opacity:1; }
-  65%  { width:88%;  opacity:1; }
-  95%  { width:97%;  opacity:1; }
-  100% { width:100%; opacity:0; }
-}
-
-/* Skeletons */
-.mf-skeleton-tile,
-.mf-disco-skel-card {
-  width: var(--cw) !important;
-  min-width: var(--cw) !important;
-  height: var(--ch) !important;
-  border-radius: var(--cr) !important;
-  background: var(--jg-surface) !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   POPUP BUBBLE — dialog portovany
-═══════════════════════════════════════════════════════════════ */
-body { position: relative; }
-
-#dr-popup {
-  position: fixed;
-  z-index: 9999999;
-  width: 220px;
-  /* .dialog: backdrop-filter + --drawerColor */
-  background: rgba(10,10,10,0.95);
-  border: 0px solid var(--jg-border);
-  border-radius: var(--jg-r-lg);
-  padding: 14px;
-  box-shadow: var(--jg-shadow);
-  backdrop-filter: var(--jg-blur-sm);
-  -webkit-backdrop-filter: var(--jg-blur-sm);
-  pointer-events: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  opacity: 0;
-  transform: translateY(8px) scale(0.96);
-  transition: opacity 0.18s ease, transform 0.22s cubic-bezier(0.34,1.44,0.64,1);
-}
-#dr-popup.visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-#dr-popup::after {
-  content: '';
-  position: absolute;
-  width: 10px; height: 10px;
-  background: rgba(10,10,10,0.95);
-  rotate: 45deg;
-}
-#dr-popup.arrow-down::after { bottom: -5px; left: 50%; transform: translateX(-50%); }
-#dr-popup.arrow-up::after   { top: -5px; left: 50%; transform: translateX(-50%) rotate(180deg); }
-
-#dr-popup .dr-pop-thumb {
-  width: 100%; height: 88px;
-  border-radius: var(--jg-r-sm);
-  object-fit: cover; object-position: center 18%;
-}
-#dr-popup .dr-pop-title {
-  font-size: 0.9rem; font-weight: 600;
-  color: var(--jg-text);
-  letter-spacing: -0.3px; line-height: 1.2;
-}
-#dr-popup .dr-pop-meta { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
-#dr-popup .dr-pop-type {
-  font-size: 0.55rem; font-weight: 700; letter-spacing: 0.6px;
-  text-transform: uppercase; color: var(--jg-dim);
-  background: rgba(55,65,81,0.5);
-  padding: 2px 7px; border-radius: var(--jg-r-sm);
-}
-#dr-popup .dr-pop-dot { width: 2px; height: 2px; border-radius: 50%; background: var(--jg-dim); flex-shrink: 0; }
-#dr-popup .dr-pop-rating { display: inline-flex; align-items: center; gap: 3px; font-size: 0.65rem; font-weight: 700; color: var(--dr-gold); }
-#dr-popup .dr-pop-year { font-size: 0.6rem; font-weight: 500; color: var(--jg-dim); }
-#dr-popup .dr-pop-desc {
-  font-size: 0.68rem; color: var(--jg-dim);
-  line-height: 1.55; overflow: hidden;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-}
-#dr-popup .dr-pop-genres { display: flex; gap: 4px; flex-wrap: wrap; }
-#dr-popup .dr-pop-genre {
-  font-size: 0.52rem; font-weight: 600; color: var(--jg-dim);
-  background: rgba(55,65,81,0.4);
-  padding: 3px 8px; border-radius: var(--jg-r-lg);
-}
-#dr-popup .dr-pop-btns { display: flex; gap: 7px; }
-#dr-popup .dr-pop-btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  font-family: var(--dr-font); font-size: 0.72rem; font-weight: 700;
-  cursor: pointer; transition: all 0.125s;
-}
-/* btnPlay.detailButton 1:1 */
-#dr-popup .dr-pop-btn.play {
-  flex: 1;
-  background: var(--jg-active) !important;
-  color: #000000 !important;
-  border: none !important;
-  border-radius: 3em !important;
-  height: 3em !important;
-  font-weight: 700 !important;
-  box-shadow: 0 0 30px rgba(255,255,255,0.1) !important;
-}
-#dr-popup .dr-pop-btn.play:hover {
-  background: white !important;
-  transform: scale(1.05) !important;
-}
-/* detailButton:not(.btnPlay) */
-#dr-popup .dr-pop-btn.wl {
-  color: var(--jg-active) !important;
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  border-radius: 50% !important;
-  width: 3em !important;
-  height: 3em !important;
-  padding: 0 !important;
-}
-#dr-popup .dr-pop-btn.wl:hover {
-  background: white !important;
-  color: black !important;
-}
-
-/* KB focus */
-.mf-disco-kb-focus {
-  transform: scale(1.05) !important;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.9), 0 0 0 2px white !important;
-  z-index: 10 !important;
-}
-
-/* Animace */
-@keyframes dr-enter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-@keyframes dr-bounce { 0%,100% { transform:translateX(-50%) translateY(0); } 55% { transform:translateX(-50%) translateY(6px); } }
-.universe-overlay .disco-row { animation: dr-enter 0.24s ease both !important; }
-
-/* Responsive */
-@media (max-width: 960px) { :root { --cw:152px; --ch:228px; --px:28px; } }
-@media (max-width: 700px) {
-  :root { --cw:136px; --ch:204px; --px:16px; }
-  .universe-overlay .disco-hero { height:320px !important; max-height:320px !important; }
-  .universe-overlay .disco-hero-desc { display:none !important; }
-  .universe-overlay .disco-hero-content { right:5% !important; }
-  .universe-overlay .disco-row-nav-btn { display:none !important; }
-}
-@media (max-width: 480px) {
-  :root { --cw:118px; --ch:177px; --px:12px; --hh:auto; }
-  .universe-overlay .disco-header { height:auto !important; padding:max(14px,env(safe-area-inset-top,14px)) 14px 12px !important; flex-wrap:wrap !important; gap:10px !important; }
-  .universe-overlay .uni-search-wrap { flex:0 0 100% !important; max-width:100% !important; order:3 !important; }
-  .universe-overlay .disco-hero { height:240px !important; max-height:240px !important; }
-  .universe-overlay .disco-hero-title { font-size:1.8rem !important; }
-}
-@media (hover: none) {
-  .disco-card .disco-card-info { opacity:1 !important; transform:none !important; }
-  .disco-card-finder-btn { opacity:1 !important; transform:scale(1) translateY(0) !important; }
-  .disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) { opacity:1 !important; filter:none !important; }
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   CARD EXPAND HOVER — info panel vyjede dole z karty
-   Karta se zvýší o ~90px, panel se zobrazí pod posterem.
-   Žádný popup, žádné oříznutí — rozšíření samotné karty.
-═══════════════════════════════════════════════════════════════ */
-
-/* Wrapper karty musí mit overflow:visible aby expand panel byl videt */
-.universe-overlay .disco-card,
-#discoBody .disco-card {
-  overflow: visible !important;
-}
-
-/* Ale vnitrni obsah (poster) overflow:hidden */
-.universe-overlay .disco-card-inner,
-#discoBody .disco-card-inner {
-  overflow: hidden !important;
-  border-radius: var(--jg-r-lg) !important;
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 1 !important;
-}
-
-/* Expand panel — vyjede pod kartou */
-.dr-expand {
-  position: absolute !important;
-  top: 100% !important;
-  left: 0 !important;
-  right: 0 !important;
-  background: rgba(10,10,10,0.97) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  border-top: none !important;
-  border-radius: 0 0 var(--jg-r-lg) var(--jg-r-lg) !important;
-  padding: 10px 12px 12px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 8px !important;
-  opacity: 0 !important;
-  transform: translateY(-8px) !important;
-  transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.34,1.44,0.64,1) !important;
-  pointer-events: none !important;
-  z-index: 100 !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.9) !important;
-}
-
-.disco-card:hover .dr-expand {
-  opacity: 1 !important;
-  transform: translateY(0) !important;
-  pointer-events: auto !important;
-}
-
-/* Expand — titulek */
-.dr-expand-title {
-  font-size: 0.78rem !important;
-  font-weight: 700 !important;
-  color: #dedede !important;
-  letter-spacing: -0.2px !important;
-  line-height: 1.3 !important;
-  overflow: hidden !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;
-}
-
-/* Expand — meta řádek */
-.dr-expand-meta {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  flex-wrap: wrap !important;
-}
-.dr-expand-type {
-  font-size: 0.52rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.5px !important;
-  text-transform: uppercase !important;
-  color: rgba(255,255,255,0.45) !important;
-  background: rgba(255,255,255,0.07) !important;
-  padding: 2px 7px !important;
-  border-radius: 5px !important;
-}
-.dr-expand-rating {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 3px !important;
-  font-size: 0.65rem !important;
-  font-weight: 700 !important;
-  color: #f0c94a !important;
-}
-.dr-expand-year {
-  font-size: 0.6rem !important;
-  color: #777777 !important;
-}
-.dr-expand-dot {
-  width: 2px !important;
-  height: 2px !important;
-  border-radius: 50% !important;
-  background: #555 !important;
-  flex-shrink: 0 !important;
-}
-
-/* Expand — tlačítka */
-.dr-expand-btns {
-  display: flex !important;
-  gap: 6px !important;
-}
-/* btnPlay.detailButton 1:1 */
-.dr-expand-btn-play {
-  flex: 1 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  padding: 8px 14px !important;
-  border-radius: 3em !important;
-  background: #e0e0e0 !important;
-  color: #000 !important;
-  border: none !important;
-  font-size: 0.72rem !important;
-  font-weight: 700 !important;
-  cursor: pointer !important;
-  transition: all 0.125s !important;
-  letter-spacing: 0.3px !important;
-}
-.dr-expand-btn-play:hover {
-  background: #fff !important;
-  transform: scale(1.03) !important;
-}
-/* detailButton:not(.btnPlay) 1:1 */
-.dr-expand-btn-wl {
-  width: 34px !important;
-  height: 34px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 50% !important;
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  color: #dedede !important;
-  cursor: pointer !important;
-  transition: all 0.125s !important;
-  flex-shrink: 0 !important;
-}
-.dr-expand-btn-wl:hover {
-  background: #fff !important;
-  color: #000 !important;
-}
-
-/* Loader bar — bílý jako Jellyfin --osdSeekBarPlayedColor */
-.dr-loader-bar {
-  position: absolute;
-  top: 0; left: 0;
-  height: 2px;
-  width: 0;
-  background: #e0e0e0;
-  border-radius: 0 2px 2px 0;
-  z-index: 30;
-  opacity: 0;
-  pointer-events: none;
-}
-.disco-card:hover .dr-loader-bar {
-  opacity: 1;
-  animation: dr-load 1.1s cubic-bezier(0.4,0,0.2,1) forwards;
-}
-
-/* Spotlight na sousedy */
-.disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
-  opacity: 0.45 !important;
-  filter: brightness(0.65) !important;
-  transition: opacity 0.2s ease, filter 0.2s ease !important;
-}
-
-/* Karta pri hover — posun nahoru (expand panel vyjede dole) */
-.universe-overlay .disco-card:hover,
-#discoBody .disco-card:hover {
-  transform: translateY(-8px) scale(1.04) !important;
-  z-index: 50 !important;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.9) !important;
-  filter: brightness(1.05) !important;
-}
-
-/* Responsivni — mensi expand na mobilu */
-@media (max-width: 700px) {
-  .dr-expand { display: none !important; }
-  .universe-overlay .disco-card:hover,
-  #discoBody .disco-card:hover {
-    transform: scale(1.03) !important;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
-}
 
-/* ═══════════════════════════════════════════════════════════════
-   SKELETON SHIMMER — animace při načítání karet
-═══════════════════════════════════════════════════════════════ */
-@keyframes jg-shimmer {
-  0%   { background-position: -800px 0; }
-  100% { background-position:  800px 0; }
-}
-
-.mf-skeleton-tile,
-.mf-disco-skel-card {
-  background:
-    linear-gradient(
-      105deg,
-      rgba(255,255,255,0.02) 20%,
-      rgba(255,255,255,0.06) 48%,
-      rgba(255,255,255,0.09) 50%,
-      rgba(255,255,255,0.06) 52%,
-      rgba(255,255,255,0.02) 80%
-    ) !important;
-  background-size: 800px 100% !important;
-  animation: jg-shimmer 1.8s ease-in-out infinite !important;
-  border: none !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   CARD IMAGE LOAD — plynulý fade-in posterů
-═══════════════════════════════════════════════════════════════ */
-@keyframes jg-img-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.universe-overlay .disco-card-img[src],
-#discoBody .disco-card-img[src] {
-  animation: jg-img-fade 0.4s ease both !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   HERO — vylepšení
-═══════════════════════════════════════════════════════════════ */
-
-/* Fade-in hero při načtení */
-@keyframes jg-hero-enter {
-  from { opacity: 0; transform: scale(1.04); }
-  to   { opacity: 1; transform: scale(1.02); }
-}
-.universe-overlay .disco-hero-img {
-  animation: jg-hero-enter 0.8s cubic-bezier(0.25,1,0.5,1) both !important;
-}
-
-/* Hero badge — FILM/SERIÁL pill */
-.universe-overlay .disco-hero-badge-type {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-}
-
-/* Hero rating — zlate hvezdicky */
-.universe-overlay .disco-hero-badge-rating {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 4px !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   ROW TITLES — animace při vstupu nové řady
-═══════════════════════════════════════════════════════════════ */
-.universe-overlay .disco-row {
-  animation: dr-enter 0.3s cubic-bezier(0.25,1,0.5,1) both !important;
-}
-.universe-overlay .disco-row:nth-child(2) { animation-delay: 0.05s !important; }
-.universe-overlay .disco-row:nth-child(3) { animation-delay: 0.1s !important; }
-.universe-overlay .disco-row:nth-child(4) { animation-delay: 0.15s !important; }
-
-/* ═══════════════════════════════════════════════════════════════
-   NAV — aktivní chip šipka dolů
-═══════════════════════════════════════════════════════════════ */
-.universe-overlay .disco-nav-item.active::after,
-#discoNav .disco-nav-item.active::after {
-  content: '' !important;
-  position: absolute !important;
-  bottom: -8px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  width: 4px !important;
-  height: 4px !important;
-  border-radius: 50% !important;
-  background: var(--jg-active) !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   CARD INFO — info sekce vždy viditelná (lepší čitelnost)
-═══════════════════════════════════════════════════════════════ */
-
-/* Silnejší gradient aby byl text vždy čitelný */
-.universe-overlay .disco-card-overlay,
-#discoBody .disco-card-overlay {
-  background: linear-gradient(
-    to top,
-    rgba(0,0,0,0.95) 0%,
-    rgba(0,0,0,0.7)  28%,
-    rgba(0,0,0,0.15) 60%,
-    transparent      85%
-  ) !important;
-  border-radius: var(--jg-r-lg) !important;
-}
-
-/* Card name vždy viditelny */
-.universe-overlay .disco-card-name,
-#discoBody .disco-card-name {
-  color: #ffffff !important;
-}
-
-/* Expand panel — lepší pozicování kvůli z-indexu row scroll */
-.dr-expand {
-  z-index: 9999 !important;
-}
-
-/* Expand panel border-radius navazuje na kartu */
-.disco-card:hover .dr-expand {
-  box-shadow:
-    0 20px 50px rgba(0,0,0,0.9),
-    0 0 0 0.5px rgba(255,255,255,0.08) !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   ROW SCROLL — fade edges (Jellyfin styl)
-═══════════════════════════════════════════════════════════════ */
-.universe-overlay .disco-row-scroll,
-#discoBody .disco-row-scroll {
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    black calc(var(--px) * 0.5),
-    black calc(100% - calc(var(--px) * 0.5)),
-    transparent 100%
-  ) !important;
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    black calc(var(--px) * 0.5),
-    black calc(100% - calc(var(--px) * 0.5)),
-    transparent 100%
-  ) !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   SCROLLBAR — tenký, Jellyfin styl
-═══════════════════════════════════════════════════════════════ */
-#discoBody::-webkit-scrollbar {
-  width: 4px !important;
-}
-#discoBody::-webkit-scrollbar-track {
-  background: transparent !important;
-}
-#discoBody::-webkit-scrollbar-thumb {
-  background: var(--jg-border-d) !important;
-  border-radius: 4px !important;
-}
-#discoBody::-webkit-scrollbar-thumb:hover {
-  background: var(--jg-border) !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   SCROLL HINT animace
-═══════════════════════════════════════════════════════════════ */
-.dr-sh {
-  animation: dr-bounce 2.5s ease-in-out infinite !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   "PRO TEBE" ROW — jemné zvýraznění pozadí
-═══════════════════════════════════════════════════════════════ */
-#discoBody .disco-row:first-child .disco-row-title {
-  font-size: 1.6rem !important;
-}
-
-/* AI VÝBĚR badge */
-.universe-overlay .drt-tag,
-#discoBody .drt-tag {
-  font-size: 0.5rem !important;
-  letter-spacing: 2px !important;
-}
-
-/* Card count badge (JS přidá) */
-.dr-cnt {
-  font-size: 0.52rem !important;
-  font-weight: 600 !important;
-  color: rgba(255,255,255,0.2) !important;
-  background: rgba(255,255,255,0.05) !important;
-  padding: 2px 7px !important;
-  border-radius: 10px !important;
-  margin-left: 5px !important;
-  vertical-align: middle !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   SCROLL HINT (na heru) a BACK-TO-TOP — přesunuto z JS inline stylů
-   do CSS, aby existoval jeden zdroj vzhledu (dřív JS duplikoval
-   hodnoty, které se z části lišily od téhle třídy → nekonzistence).
-═══════════════════════════════════════════════════════════════ */
-.dr-sh {
-  position: absolute !important;
-  bottom: 20px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  z-index: 10 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  gap: 5px !important;
-  color: rgba(255,255,255,0.25) !important;
-  font-size: 0.48rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 2.5px !important;
-  text-transform: uppercase !important;
-  cursor: pointer !important;
-  pointer-events: auto !important;
-  transition: opacity 0.2s ease !important;
-}
-
-#dr-btt {
-  position: fixed !important;
-  bottom: 88px !important;
-  right: 22px !important;
-  z-index: 400 !important;
-  width: 40px !important;
-  height: 40px !important;
-  border-radius: 50% !important;
-  background: rgba(6,6,16,0.92) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 0.5px solid rgba(255,255,255,0.1) !important;
-  color: rgba(255,255,255,0.5) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  cursor: pointer !important;
-  opacity: 0 !important;
-  transform: translateY(14px) scale(0.8) !important;
-  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(.34,1.3,.64,1) !important;
-  pointer-events: none !important;
-}
-#dr-btt.dr-visible {
-  opacity: 1 !important;
-  transform: translateY(0) scale(1) !important;
-  pointer-events: auto !important;
-}
-#dr-btt:hover {
-  background: rgba(20,20,30,0.95) !important;
-  color: rgba(255,255,255,0.9) !important;
-}
+  console.log('[MFDiscover] v5 (lean) načteno');
+})();
