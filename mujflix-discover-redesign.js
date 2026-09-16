@@ -1,35 +1,51 @@
 /**
- * MujFlix Discover Redesign v4
- * Posledni <script> pred </body>
+ * MujFlix Discover — enhancer v5 (lean)
+ * ════════════════════════════════════════════════════════════════
+ * Co dělá: doplňuje ikony do žánrové navigace, hvězdičkové hodnocení
+ * a expand panel na kartách v sekci Objevování.
+ *
+ * Proč přepsáno (v4 → v5):
+ *  - v4 každých 900/1800/3600 ms znovu vkládala celý <style> tag
+ *    (`injectOverrideTag`), i když se obsah nezměnil → zbytečné
+ *    přepočítávání stylů na celé stránce = jeden z hlavních důvodů
+ *    "lagování" Objevování.
+ *  - v4 měla `* { font-family: ... !important }` BEZ omezení na
+ *    .universe-overlay → po prvním otevření Objevování to natrvalo
+ *    přebilo písmo v CELÉ aplikaci (proto vypadalo "jinak" i mimo
+ *    Objevování). V5 tohle nedělá vůbec — vzhled karet/navigace už
+ *    kompletně řeší styles-discover-redesign.css.
+ *  - v4 běžela až 5 nezávislých MutationObserverů + setInterval
+ *    poll (100× po 120 ms) + poll (150 ms) jen proto, aby počkala,
+ *    až se objeví #discoBody — ten je ale v HTML staticky přítomný
+ *    od začátku, takže čekání není potřeba.
+ *  - v4 měla MutationObserver na KAŽDÉ jednotlivé kartě (sledoval
+ *    styl), aby vynutil viditelnost popisku — to už dělá čistě CSS.
+ *
+ * Vizuální výstup zůstává stejný, jen se k němu dochází levněji.
  */
 (function () {
   'use strict';
-  if (window._mfDRv4) return;
-  window._mfDRv4 = true;
+  if (window._mfDiscoverEnhancer) return;
+  window._mfDiscoverEnhancer = true;
 
-  /* SVG IKONY NAV */
+  /* ── SVG ikony pro žánrovou navigaci ── */
   var NAV_ICONS = {
-    trending:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M2 14l4-4 3 3 4-5 3 3"/><path d="M14 6h4v4"/></svg>',
-    film:       '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><rect x="2" y="4" width="16" height="13" rx="2"/><path d="M2 8h16M7 4v4M13 4v4"/></svg>',
-    serial:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><rect x="1" y="3" width="18" height="13" rx="2"/><path d="M6 17l2-1h4l2 1"/></svg>',
-    komedi:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="9" r="7"/><path d="M7 11c.8 1.5 5.2 1.5 6 0"/><circle cx="8" cy="8" r="0.8" fill="currentColor"/><circle cx="12" cy="8" r="0.8" fill="currentColor"/></svg>',
-    drama:      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M4 14c1-3 4-5 6-3s5 0 6-3"/><path d="M3 7c1 3 4 5 6 3s5 0 6 3"/></svg>',
-    sci:        '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><ellipse cx="10" cy="10" rx="4" ry="4"/><ellipse cx="10" cy="10" rx="9" ry="4"/></svg>',
-    krim:       '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5L18 18"/></svg>',
-    horor:      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M10 2L3 18h14L10 2z"/><path d="M10 8v5"/></svg>',
-    anim:       '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="10" r="7"/><circle cx="7.5" cy="10" r="1.2" fill="currentColor"/><circle cx="12.5" cy="10" r="1.2" fill="currentColor"/><path d="M7 13c1 1.5 5 1.5 6 0"/></svg>',
-    mysteri:    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="10" r="8"/><path d="M10 6c-1.6 0-3 1-3 2.5S8.5 11 10 11"/><circle cx="10" cy="14" r="0.9" fill="currentColor"/></svg>',
-    akce:       '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M12 2L4 12h6l-2 6 8-10h-6z"/></svg>',
-    realit:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="10" r="3.5"/><circle cx="10" cy="10" r="7" stroke-dasharray="2 3"/></svg>',
-    dokum:      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><rect x="4" y="2" width="12" height="16" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>',
-    romant:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M10 17S3 12 3 7a4 4 0 017-2.6A4 4 0 0117 7c0 5-7 10-7 10z"/></svg>',
-    thriller:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M12 2L4 12h6l-2 6 8-10h-6z"/></svg>',
-    fantas:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M10 2l2 6h6l-5 3.5 2 6L10 14l-5 3.5 2-6L2 8h6z"/></svg>',
-    sport:      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="10" r="8"/><path d="M10 2c2 4 2 12 0 16M2 10c4-2 12-2 16 0"/></svg>',
-    hudba:      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M9 17V6l9-2v11"/><circle cx="6" cy="17" r="3"/><circle cx="15" cy="15" r="3"/></svg>',
-    valec:      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M3 15h14M6 12l-3 3M14 12l3 3M10 3v9M7 6l3-3 3 3"/></svg>',
-    histor:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M4 18V9l6-6 6 6v9"/><path d="M8 18v-5h4v5"/></svg>',
-    rodin:      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="7" cy="6" r="2.5"/><circle cx="13" cy="6" r="2.5"/><path d="M2 18c0-4 10-4 10 0"/><circle cx="14.5" cy="13" r="1.8"/><path d="M11 18c0-2.5 7-2.5 7 0"/></svg>'
+    trending: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M2 14l4-4 3 3 4-5 3 3"/><path d="M14 6h4v4"/></svg>',
+    film:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><rect x="2" y="4" width="16" height="13" rx="2"/><path d="M2 8h16M7 4v4M13 4v4"/></svg>',
+    serial:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><rect x="1" y="3" width="18" height="13" rx="2"/><path d="M6 17l2-1h4l2 1"/></svg>',
+    komedi:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="9" r="7"/><path d="M7 11c.8 1.5 5.2 1.5 6 0"/><circle cx="8" cy="8" r="0.8" fill="currentColor"/><circle cx="12" cy="8" r="0.8" fill="currentColor"/></svg>',
+    drama:    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M4 14c1-3 4-5 6-3s5 0 6-3"/><path d="M3 7c1 3 4 5 6 3s5 0 6 3"/></svg>',
+    sci:      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><ellipse cx="10" cy="10" rx="4" ry="4"/><ellipse cx="10" cy="10" rx="9" ry="4"/></svg>',
+    krim:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5L18 18"/></svg>',
+    horor:    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M10 2L3 18h14L10 2z"/><path d="M10 8v5"/></svg>',
+    anim:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="10" r="7"/><circle cx="7.5" cy="10" r="1.2" fill="currentColor"/><circle cx="12.5" cy="10" r="1.2" fill="currentColor"/><path d="M7 13c1 1.5 5 1.5 6 0"/></svg>',
+    mysteri:  '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="10" r="8"/><path d="M10 6c-1.6 0-3 1-3 2.5S8.5 11 10 11"/><circle cx="10" cy="14" r="0.9" fill="currentColor"/></svg>',
+    akce:     '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M12 2L4 12h6l-2 6 8-10h-6z"/></svg>',
+    realit:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><circle cx="10" cy="10" r="3.5"/><circle cx="10" cy="10" r="7" stroke-dasharray="2 3"/></svg>',
+    dokum:    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><rect x="4" y="2" width="12" height="16" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>',
+    romant:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M10 17S3 12 3 7a4 4 0 017-2.6A4 4 0 0117 7c0 5-7 10-7 10z"/></svg>',
+    thriller: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M12 2L4 12h6l-2 6 8-10h-6z"/></svg>',
+    fantas:   '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="13" height="13"><path d="M10 2l2 6h6l-5 3.5 2 6L10 14l-5 3.5 2-6L2 8h6z"/></svg>'
   };
 
   function getNavIcon(label) {
@@ -37,7 +53,7 @@
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]/g, '');
     for (var key in NAV_ICONS) {
-      if (norm.indexOf(key) === 0 || key.indexOf(norm.slice(0,5)) === 0) {
+      if (norm.indexOf(key) === 0 || key.indexOf(norm.slice(0, 5)) === 0) {
         return NAV_ICONS[key];
       }
     }
@@ -47,7 +63,7 @@
   function upgradeNavIcons() {
     var nav = document.getElementById('discoNav');
     if (!nav) return;
-    nav.querySelectorAll('.disco-nav-item').forEach(function(item) {
+    nav.querySelectorAll('.disco-nav-item').forEach(function (item) {
       if (item._drDone) return;
       item._drDone = true;
       var raw = item.textContent.trim();
@@ -55,164 +71,99 @@
       if (!ico) return;
       var clean = raw.replace(/^[^\w\u00C0-\u024F]+/, '').trim();
       item.innerHTML = ico + '<span style="margin-left:4px">' + clean + '</span>';
-      item.style.setProperty('display','inline-flex','important');
-      item.style.setProperty('align-items','center','important');
     });
   }
 
   function upgradeHeroBtns() {
     var PLAY = '<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><polygon points="3,2 14,8 3,14"/></svg>';
     var PLUS = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="13" height="13"><path d="M8 3v10M3 8h10"/></svg>';
-    document.querySelectorAll('.disco-hero-btn').forEach(function(btn) {
-      if (btn._drDone) return; btn._drDone = true;
+    document.querySelectorAll('.disco-hero-btn').forEach(function (btn) {
+      if (btn._drDone) return;
+      btn._drDone = true;
       var t = btn.textContent.trim();
-      var n = t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-      if (n.indexOf('prehrat') !== -1 || n.indexOf('spustit') !== -1 || n.indexOf('play') !== -1) {
-        btn.innerHTML = PLAY + '<span style="margin-left:7px">' + t + '</span>';
-      } else {
-        btn.innerHTML = PLUS + '<span style="margin-left:7px">' + t + '</span>';
-      }
+      var n = t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      var isPlay = n.indexOf('prehrat') !== -1 || n.indexOf('spustit') !== -1 || n.indexOf('play') !== -1;
+      btn.innerHTML = (isPlay ? PLAY : PLUS) + '<span style="margin-left:7px">' + t + '</span>';
     });
   }
 
-  /* KRITICKÁ FUNKCE — prebíjí inline opacity:0 z app.js */
-  function forceInfoVisible(info) {
-    if (!info) return;
-    info.style.setProperty('opacity',        '1',        'important');
-    info.style.setProperty('transform',      'none',     'important');
-    info.style.setProperty('display',        'flex',     'important');
-    info.style.setProperty('flex-direction', 'column',   'important');
-    info.style.setProperty('gap',            '4px',      'important');
-    info.style.setProperty('position',       'absolute', 'important');
-    info.style.setProperty('bottom',         '0',        'important');
-    info.style.setProperty('left',           '0',        'important');
-    info.style.setProperty('right',          '0',        'important');
-    info.style.setProperty('padding',        '8px 11px 11px', 'important');
-    info.style.setProperty('z-index',        '5',        'important');
-    info.style.setProperty('pointer-events', 'none',     'important');
-    info.style.setProperty('transition',     'none',     'important');
-  }
-
   var STAR = '<svg viewBox="0 0 12 12" fill="#f0c94a" width="9" height="9"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9.2,11 6,9.2 2.8,11 3.5,7.5 1,5 4.5,4.5"/></svg>';
+  var PLAY_SM = '<svg viewBox="0 0 14 14" fill="currentColor" width="11" height="11"><polygon points="3,2 12,7 3,12"/></svg>';
+  var PLUS_SM = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="11" height="11"><path d="M7 3v8M3 7h8"/></svg>';
   var FILM_ICO = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" width="9" height="9"><rect x=".5" y="2" width="11" height="8" rx="1.2"/><path d=".5 5h11M4 2v3M8 2v3"/></svg>';
   var TV_ICO   = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" width="9" height="9"><rect x=".5" y="1.5" width="11" height="8" rx="1.2"/><path d="M4 10.5l1.5-1.5h1L8 10.5"/></svg>';
 
+  /* Vizuál karet (rozměry, barvy, hover) žije v styles-discover-redesign.css.
+     Tady se jen jednorázově doplní ikony/badge, které vyžadují text/DOM logiku. */
   function upgradeCards() {
-    document.querySelectorAll('#discoBody .disco-card, .universe-overlay .disco-card').forEach(function(card) {
-      if (card._drV4) return;
-      card._drV4 = true;
+    document.querySelectorAll('#discoBody .disco-card').forEach(function (card) {
+      if (card._drDone) return;
+      card._drDone = true;
 
-      /* 1. INFO vzdy viditelne */
-      var info = card.querySelector('.disco-card-info');
-      forceInfoVisible(info);
-      if (info && !info._drMo) {
-        info._drMo = true;
-        new MutationObserver(function() { forceInfoVisible(info); })
-          .observe(info, { attributes: true, attributeFilter: ['style'] });
-      }
-
-      /* 2. Nazev stylovani */
-      var name = card.querySelector('.disco-card-name');
-      if (name) {
-        name.style.setProperty('font-size',      '0.73rem',                 'important');
-        name.style.setProperty('font-weight',    '700',                     'important');
-        name.style.setProperty('color',          'rgba(255,255,255,0.97)',  'important');
-        name.style.setProperty('line-height',    '1.28',                    'important');
-        name.style.setProperty('text-shadow',    '0 1px 10px rgba(0,0,0,1)','important');
-        name.style.setProperty('letter-spacing', '-0.1px',                  'important');
-        name.style.setProperty('margin-bottom',  '3px',                     'important');
-      }
-
-      /* 3. Rating badge nahore vlevo */
+      /* Rating badge nahoře vlevo (z .disco-card-rating, kterou CSS skryje) */
       var rEl = card.querySelector('.disco-card-rating');
-      var rTxt = rEl ? rEl.textContent.replace(/[^0-9.]/g,'').trim() : '';
+      var rTxt = rEl ? rEl.textContent.replace(/[^0-9.]/g, '').trim() : '';
       var rVal = parseFloat(rTxt);
-      if (rVal > 0 && !card.querySelector('.dr-rating-top')) {
+      if (rVal > 0) {
         var hasAI = !!card.querySelector('.ai-match-badge');
         var rb = document.createElement('div');
         rb.className = 'dr-rating-top';
-        rb.style.cssText = 'position:absolute;top:' + (hasAI ? '34px' : '9px') + ';left:9px;z-index:9;display:inline-flex;align-items:center;gap:3px;font-size:0.6rem;font-weight:800;color:#f0c94a;background:rgba(6,6,16,0.9);border:0.5px solid rgba(240,201,74,0.25);padding:3px 8px 3px 5px;border-radius:20px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);pointer-events:none;line-height:1;';
+        rb.style.top = hasAI ? '34px' : '9px';
+        rb.style.left = '9px';
         rb.innerHTML = STAR + '<span style="margin-left:2px">' + rTxt + '</span>';
         card.appendChild(rb);
       }
-      if (rEl) rEl.style.setProperty('display','none','important');
 
-      /* 4. AI badge — zkratit + zeslabit */
+      /* AI match badge — zkrátit na "NN%" */
       var ai = card.querySelector('.ai-match-badge');
-      if (ai && !ai._drV4) {
-        ai._drV4 = true;
+      if (ai) {
         var m = ai.textContent.match(/(\d+)\s*%/);
         if (m) ai.textContent = m[1] + '%';
-        ai.style.setProperty('font-size',     '0.49rem',                'important');
-        ai.style.setProperty('font-weight',   '700',                    'important');
-        ai.style.setProperty('color',         'rgba(255,255,255,0.36)', 'important');
-        ai.style.setProperty('background',    'rgba(6,6,16,0.8)',       'important');
-        ai.style.setProperty('border',        '0.5px solid rgba(255,255,255,0.07)','important');
-        ai.style.setProperty('padding',       '2px 6px',                'important');
-        ai.style.setProperty('border-radius', '20px',                   'important');
-        ai.style.setProperty('top',           '9px',                    'important');
-        ai.style.setProperty('left',          '9px',                    'important');
-        ai.style.setProperty('z-index',       '9',                      'important');
       }
 
-      /* 5. Type badge — SVG + text */
+      /* Typ (Film/Seriál) — doplnit ikonu, styl řeší CSS */
       var te = card.querySelector('.disco-card-type');
-      if (te && !te._drV4) {
-        te._drV4 = true;
+      if (te) {
         var tt = te.textContent.trim();
-        var ico = (tt.toLowerCase().indexOf('film') !== -1) ? FILM_ICO : TV_ICO;
+        var ico = tt.toLowerCase().indexOf('film') !== -1 ? FILM_ICO : TV_ICO;
         te.innerHTML = ico + '<span style="margin-left:3px">' + tt + '</span>';
-        te.style.cssText = 'display:inline-flex!important;align-items:center;gap:2px;font-size:.52rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.45);background:rgba(255,255,255,.07);border:.5px solid rgba(255,255,255,.1);padding:2px 7px;border-radius:5px;';
       }
 
-      /* 6. AI reason text — skryt */
-      card.querySelectorAll('[style*="italic"],[style*="0.4rem"],[style*="0.42rem"]').forEach(function(el) {
-        if (!el._drHidden) { el._drHidden = true; el.style.setProperty('display','none','important'); }
+      /* Skrýt drobný AI "reason" text (kurzíva) — příliš šumu v kartě */
+      card.querySelectorAll('[style*="italic"]').forEach(function (el) {
+        el.style.setProperty('display', 'none', 'important');
       });
+
+      attachExpand(card);
     });
   }
 
   function addCardCounts() {
-    document.querySelectorAll('#discoBody .disco-row').forEach(function(row) {
-      if (row._drCnt) return; row._drCnt = true;
+    document.querySelectorAll('#discoBody .disco-row').forEach(function (row) {
+      if (row._drCnt) return;
+      row._drCnt = true;
       var sc = row.querySelector('.disco-row-scroll');
       var ti = row.querySelector('.disco-row-title');
       if (!sc || !ti) return;
       var n = sc.querySelectorAll('.disco-card').length;
       if (n < 2) return;
-      var old = ti.querySelector('.dr-cnt'); if (old) old.remove();
       var b = document.createElement('span');
       b.className = 'dr-cnt';
-      b.style.cssText = 'font-size:.54rem;font-weight:600;color:rgba(255,255,255,.18);background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.07);padding:2px 7px;border-radius:10px;margin-left:5px;vertical-align:middle;';
       b.textContent = n;
       ti.appendChild(b);
     });
   }
 
-  function setupParallax() {
-    var body = document.getElementById('discoBody');
-    if (!body) return;
-    var raf = false;
-    body.addEventListener('scroll', function() {
-      if (raf) return; raf = true;
-      requestAnimationFrame(function() {
-        raf = false;
-        var hero = body.querySelector('.disco-hero');
-        if (!hero) return;
-        var s = body.scrollTop;
-        var img = hero.querySelector('.disco-hero-img');
-        if (img) img.style.transform = 'scale(1.06) translateY(' + Math.min(s * 0.3, 60) + 'px)';
-        var cnt = hero.querySelector('.disco-hero-content');
-        if (cnt) { cnt.style.opacity = Math.max(0, 1 - s / 240); cnt.style.transform = 'translateY(' + s * 0.15 + 'px)'; }
-      });
-    }, { passive: true });
-  }
-
   function upgradeHeroImage() {
-    document.querySelectorAll('.disco-hero-img').forEach(function(img) {
-      if (img._drHi || !img.src) return; img._drHi = true;
-      var hi = img.src.replace('/w780/','/w1280/').replace('/w500/','/w1280/').replace('/w342/','/w780/');
-      if (hi !== img.src) { var t = new Image(); t.onload = function(){ img.src = hi; }; t.src = hi; }
+    document.querySelectorAll('.disco-hero-img').forEach(function (img) {
+      if (img._drHi || !img.src) return;
+      img._drHi = true;
+      var hi = img.src.replace('/w780/', '/w1280/').replace('/w500/', '/w1280/').replace('/w342/', '/w780/');
+      if (hi !== img.src) {
+        var t = new Image();
+        t.onload = function () { img.src = hi; };
+        t.src = hi;
+      }
     });
   }
 
@@ -223,190 +174,28 @@
     if (!hero || hero.querySelector('.dr-sh')) return;
     var h = document.createElement('div');
     h.className = 'dr-sh';
-    h.style.cssText = 'position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:5px;color:rgba(255,255,255,.25);font-size:0.48rem;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;animation:dr-bounce 2.5s ease-in-out infinite;pointer-events:auto;';
     h.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="15" height="15"><path d="M4 6l4 4 4-4"/></svg><span>Scroll</span>';
-    h.onclick = function(){ body.scrollBy({top:340,behavior:'smooth'}); };
-    body.addEventListener('scroll', function(){ h.style.opacity = body.scrollTop > 50 ? '0' : ''; }, { passive: true });
+    h.addEventListener('click', function () { body.scrollBy({ top: 340, behavior: 'smooth' }); });
+    body.addEventListener('scroll', function () { h.style.opacity = body.scrollTop > 50 ? '0' : ''; }, { passive: true });
     hero.appendChild(h);
   }
 
-  function setupBackTop() {
-    var ov = document.getElementById('universeOverlay');
-    if (!ov || document.getElementById('dr-btt')) return;
-    var btn = document.createElement('button');
-    btn.id = 'dr-btt';
-    btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" width="14" height="14"><path d="M4 10l4-4 4 4"/></svg>';
-    btn.style.cssText = 'position:fixed;bottom:88px;right:22px;z-index:400;width:40px;height:40px;border-radius:50%;background:rgba(6,6,16,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:0.5px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transform:translateY(14px) scale(0.8);transition:all 0.28s cubic-bezier(.34,1.3,.64,1);pointer-events:none;';
-    btn.onclick = function(){ var b = document.getElementById('discoBody'); if(b) b.scrollTo({top:0,behavior:'smooth'}); };
-    ov.appendChild(btn);
-    var body = document.getElementById('discoBody');
-    if (body) body.addEventListener('scroll', function(){
-      var show = body.scrollTop > 300;
-      btn.style.opacity = show ? '1' : '0';
-      btn.style.transform = show ? 'translateY(0) scale(1)' : 'translateY(14px) scale(0.8)';
-      btn.style.pointerEvents = show ? 'auto' : 'none';
-    }, { passive: true });
-  }
-
-  function injectOverrideTag() {
-    var old = document.getElementById('dr-ov6'); if (old) old.remove();
-    var s = document.createElement('style');
-    s.id = 'dr-ov6';
-    s.textContent = [
-      /* Font — Apple SF Pro stack */
-      '* { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif !important; letter-spacing: -0.015em !important; -webkit-font-smoothing: antialiased !important; }',
-      /* Nav — emby-tab-button 1:1 */
-      '.disco-nav-item { margin:.25em .5em!important; padding:0 1.25em!important; height:2.5em!important; border-radius:14px!important; background:rgba(17,24,39,0.85)!important; color:#dedede!important; font-weight:400!important; font-size:.8rem!important; border:none!important; transition:all .125s!important; }',
-      '.disco-nav-item:hover:not(.active) { background:rgba(255,255,255,.12)!important; color:white!important; }',
-      '.disco-nav-item.active,.disco-nav-item.mf-chip-optimistic { background:#e0e0e0!important; color:black!important; font-weight:600!important; box-shadow:none!important; transform:none!important; }',
-      /* Row title — 1.5rem 1:1 */
-      '.disco-row-title { font-size:1.5rem!important; font-weight:600!important; letter-spacing:-.3px!important; }',
-      '.disco-row-header { padding:1.25em 52px 0!important; margin-bottom:-.5em!important; }',
-      '.disco-row-scroll { gap:1em!important; padding:1.25em 52px!important; }',
-      /* Card — .cardScalable 1:1 */
-      '.disco-card { position:relative!important; width:172px!important; min-width:172px!important; height:258px!important; border-radius:14px!important; overflow:visible!important; background:#0a0a0a!important; background:#0a0a0a!important; border:none!important; box-shadow:0 0 .25em rgba(0,0,0,.4)!important; transition:transform 125ms ease,box-shadow .2s ease,filter .2s ease,opacity .2s ease!important; }',
-      /* .card-hoverable:hover 1:1 */
-      '.disco-card:hover { transform:translateY(-6px) scale(1.04)!important; z-index:50!important; box-shadow:0 25px 60px rgba(0,0,0,.9)!important; filter:brightness(1.05)!important; }',
-      /* Image */
-      '.disco-card-inner { display:none!important; }',
-      '.disco-card-img { position:absolute!important; inset:0!important; width:100%!important; height:100%!important; object-fit:cover!important; object-position:center top!important; border-radius:14px!important; z-index:1!important; transition:transform .375s ease,filter .3s ease!important; }',
-      '.disco-card:hover .disco-card-img { transform:scale(1.025)!important; filter:brightness(.5)!important; }',
-      /* Footer gradient */
-      '.disco-card-inner { position:absolute!important; inset:0!important; overflow:hidden!important; border-radius:14px!important; z-index:1!important; }',
-      '.disco-card-overlay { position:absolute!important; inset:0!important; background:linear-gradient(0deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.55) 35%,transparent 70%)!important; opacity:1!important; z-index:2!important; }',
-      '.disco-card-glow { display:none!important; }',
-      /* Info */
-      '.disco-card-info { position:absolute!important; bottom:0!important; left:0!important; right:0!important; padding:9px 11px 12px!important; z-index:5!important; display:flex!important; flex-direction:column!important; gap:4px!important; pointer-events:none!important; opacity:1!important; transform:none!important; transition:none!important; }',
-      '.disco-card-name { font-size:.74rem!important; font-weight:600!important; color:#dedede!important; line-height:1.3!important; text-shadow:0 2px 10px rgba(0,0,0,1)!important; overflow:hidden!important; display:-webkit-box!important; -webkit-line-clamp:2!important; -webkit-box-orient:vertical!important; }',
-      '.disco-card:hover .disco-card-name { color:#fff!important; }',
-      '.disco-card-meta { display:flex!important; align-items:center!important; gap:5px!important; }',
-      '.disco-card-type { display:inline-flex!important; align-items:center; font-size:.52rem!important; font-weight:700!important; letter-spacing:.5px!important; text-transform:uppercase!important; color:rgba(255,255,255,.45)!important; background:rgba(255,255,255,.07)!important; padding:2px 7px!important; border-radius:8px!important; }',
-      '.disco-card-rating { display:none!important; }',
-      /* Play — cardOverlayFab-primary */
-      '.disco-play-btn { position:absolute!important; top:50%!important; left:50%!important; transform:translate(-50%,-56%) scale(.55)!important; width:54px!important; height:54px!important; border-radius:50%!important; background:rgba(0,0,0,.7)!important; color:white!important; border:0px solid rgba(255,255,255,.2)!important; display:flex!important; align-items:center!important; justify-content:center!important; opacity:0!important; transition:opacity .22s,transform .28s cubic-bezier(.34,1.44,.64,1)!important; z-index:6!important; box-shadow:0 20px 50px rgba(0,0,0,.9)!important; }',
-      '.disco-play-btn svg { fill:white!important; width:18px!important; height:18px!important; margin-left:3px!important; }',
-      '.disco-card:hover .disco-play-btn { opacity:1!important; transform:translate(-50%,-56%) scale(1)!important; }',
-      /* Finder */
-      '.disco-card-finder-btn { position:absolute!important; top:9px!important; right:9px!important; width:28px!important; height:28px!important; border-radius:50%!important; background:rgba(0,0,0,.7)!important; border:0px solid rgba(255,255,255,.2)!important; display:flex!important; align-items:center!important; justify-content:center!important; color:white!important; cursor:pointer!important; z-index:8!important; opacity:0!important; transform:scale(.7) translateY(-4px)!important; transition:all .2s cubic-bezier(.34,1.44,.64,1)!important; }',
-      '.disco-card:hover .disco-card-finder-btn { opacity:1!important; transform:scale(1) translateY(0)!important; }',
-      /* Skeletons */
-      '.mf-skeleton-tile,.mf-disco-skel-card { width:172px!important; min-width:172px!important; height:258px!important; border-radius:14px!important; background:#0a0a0a!important; }',
-      /* Hero btn — editorsChoiceItemButton 1:1 */
-      '.disco-hero-btn.primary { background:#e0e0e0!important; color:#000!important; border:none!important; border-radius:4px!important; padding:12px 35px!important; font-size:1.1rem!important; font-weight:800!important; letter-spacing:1px!important; text-transform:uppercase!important; box-shadow:0 0 20px rgba(0,0,0,.5)!important; }',
-      '.disco-hero-btn.primary:hover { background:#fff!important; transform:scale(1.05)!important; }',
-      /* Animace */
-      '@keyframes dr-bounce{0%,100%{transform:translateX(-50%) translateY(0)}55%{transform:translateX(-50%) translateY(6px)}}',
-      '@keyframes dr-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}',
-    ].join('\n');
-    document.head.appendChild(s);
-  }
-
-  function runAll() {
-    var steps = [upgradeNavIcons, upgradeHeroBtns, upgradeCards, addCardCounts, upgradeHeroImage, addScrollHint];
-    steps.forEach(function(fn) {
-      try {
-        if (typeof fn === 'function') fn();
-      } catch (err) {
-        console.warn('[MFDiscover] runAll step failed:', fn && fn.name, err);
-      }
-    });
-  }
-
-  function setupObserver() {
-    var body = document.getElementById('discoBody');
-    if (!body) return;
-    var timer;
-    new MutationObserver(function() {
-      clearTimeout(timer);
-      timer = setTimeout(function(){ runAll(); injectOverrideTag(); }, 80);
-    }).observe(body, { childList: true, subtree: true });
-
-    var nav = document.getElementById('discoNav');
-    if (nav) new MutationObserver(function() {
-      clearTimeout(timer);
-      timer = setTimeout(upgradeNavIcons, 60);
-    }).observe(nav, { childList: true, subtree: true, attributes: true });
-  }
-
-  /* Prebij mf-disco-fx kdyz se injectuje */
-  function watchHead() {
-    new MutationObserver(function(muts) {
-      muts.forEach(function(m) {
-        m.addedNodes.forEach(function(n) {
-          if (n.id && (n.id.indexOf('mf-disco') !== -1 || n.id.indexOf('mf-fx') !== -1)) {
-            setTimeout(injectOverrideTag, 15);
-          }
-        });
-      });
-    }).observe(document.head, { childList: true });
-  }
-
-  function injectFonts() {
-    if (document.getElementById('dr-fonts')) return;
-    var l = document.createElement('link');
-    l.id = 'dr-fonts'; l.rel = 'stylesheet';
-    l.href = 'https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap';
-    document.head.appendChild(l);
-  }
-
-  function init() {
-    injectFonts();
-    injectOverrideTag();
-    watchHead();
-
-    var tries = 0;
-    var poll = setInterval(function() {
-      if (++tries > 100) { clearInterval(poll); return; }
-      var body = document.getElementById('discoBody');
-      if (!body) return;
-      clearInterval(poll);
-      setupObserver();
-      setupParallax();
-      setupBackTop();
-      setTimeout(runAll, 350);
-      [900, 1800, 3600].forEach(function(t) {
-        setTimeout(function(){ runAll(); injectOverrideTag(); }, t);
-      });
-    }, 120);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(init, 80); });
-  } else {
-    setTimeout(init, 80);
-  }
-
-  console.log('[MFDiscover] v4 loaded');
-})();
-
-/* ══════════════════════════════════════════════════════════════
-   CARD EXPAND HOVER SYSTEM
-   Panel vyjede dole z karty — žádný popup, žádné oříznutí.
-══════════════════════════════════════════════════════════════ */
-(function setupExpandHover() {
-  'use strict';
-
-  var STAR = '<svg viewBox="0 0 12 12" fill="#f0c94a" width="9" height="9"><polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9.2,11 6,9.2 2.8,11 3.5,7.5 1,5 4.5,4.5"/></svg>';
-  var PLAY = '<svg viewBox="0 0 14 14" fill="currentColor" width="11" height="11"><polygon points="3,2 12,7 3,12"/></svg>';
-  var PLUS = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="11" height="11"><path d="M7 3v8M3 7h8"/></svg>';
-
+  /* ── Hover expand panel na kartě ── */
   function getCardData(card) {
-    var nameEl  = card.querySelector('.disco-card-name');
-    var ratTop  = card.querySelector('.dr-rating-top');
-    var typeEl  = card.querySelector('.disco-card-type');
-
+    var nameEl = card.querySelector('.disco-card-name');
+    var ratTop = card.querySelector('.dr-rating-top');
+    var typeEl = card.querySelector('.disco-card-type');
     var title = nameEl ? nameEl.textContent.trim() : '';
 
     var rTxt = '';
-    if (ratTop) rTxt = ratTop.textContent.replace(/[^0-9.]/g,'').trim();
+    if (ratTop) rTxt = ratTop.textContent.replace(/[^0-9.]/g, '').trim();
     else {
       var rEl = card.querySelector('.disco-card-rating');
-      if (rEl) rTxt = rEl.textContent.replace(/[^0-9.]/g,'').trim();
+      if (rEl) rTxt = rEl.textContent.replace(/[^0-9.]/g, '').trim();
     }
 
-    var type = typeEl ? typeEl.textContent.replace(/[^a-zA-ZáčďéěíňóřšťůúýžÁČĎÉĚÍŇÓŘŠŤŮÚÝŽ\s]/g,'').trim() : '';
+    var type = typeEl ? typeEl.textContent.replace(/[^a-zA-ZáčďéěíňóřšťůúýžÁČĎÉĚÍŇÓŘŠŤŮÚÝŽ\s]/g, '').trim() : '';
 
-    /* Rok z onclick */
     var year = '';
     var oc = card.getAttribute('onclick') || '';
     var ym = oc.match(/[,\s](\d{4})[,\s\)]/);
@@ -417,19 +206,22 @@
 
   function buildExpand(card) {
     var d = getCardData(card);
-
     var wrap = document.createElement('div');
     wrap.className = 'dr-expand';
 
-    /* Titulek */
     var titleEl = document.createElement('div');
     titleEl.className = 'dr-expand-title';
     titleEl.textContent = d.title;
     wrap.appendChild(titleEl);
 
-    /* Meta */
     var meta = document.createElement('div');
     meta.className = 'dr-expand-meta';
+
+    function dot() {
+      var el = document.createElement('span');
+      el.className = 'dr-expand-dot';
+      return el;
+    }
 
     if (d.type) {
       var t = document.createElement('span');
@@ -437,104 +229,127 @@
       t.textContent = d.type;
       meta.appendChild(t);
     }
-
     var rVal = parseFloat(d.rating);
     if (rVal > 0) {
-      if (d.type) {
-        var dot = document.createElement('span');
-        dot.className = 'dr-expand-dot';
-        meta.appendChild(dot);
-      }
+      if (d.type) meta.appendChild(dot());
       var r = document.createElement('span');
       r.className = 'dr-expand-rating';
       r.innerHTML = STAR + '<span style="margin-left:2px">' + d.rating + '</span>';
       meta.appendChild(r);
     }
-
     if (d.year) {
-      var dot2 = document.createElement('span');
-      dot2.className = 'dr-expand-dot';
-      meta.appendChild(dot2);
+      if (meta.children.length) meta.appendChild(dot());
       var y = document.createElement('span');
       y.className = 'dr-expand-year';
       y.textContent = d.year;
       meta.appendChild(y);
     }
+    if (meta.children.length) wrap.appendChild(meta);
 
-    if (meta.children.length > 0) wrap.appendChild(meta);
-
-    /* Tlačítka */
     var btns = document.createElement('div');
     btns.className = 'dr-expand-btns';
 
     var playBtn = document.createElement('button');
     playBtn.className = 'dr-expand-btn-play';
-    playBtn.innerHTML = PLAY + '<span style="margin-left:5px">Přehrát</span>';
-    playBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      card.click();
-    });
+    playBtn.innerHTML = PLAY_SM + '<span style="margin-left:5px">Přehrát</span>';
+    playBtn.addEventListener('click', function (e) { e.stopPropagation(); card.click(); });
 
     var wlBtn = document.createElement('button');
     wlBtn.className = 'dr-expand-btn-wl';
-    wlBtn.innerHTML = PLUS;
+    wlBtn.innerHTML = PLUS_SM;
     wlBtn.title = 'Přidat do Watchlist';
-    wlBtn.addEventListener('click', function(e) {
+    wlBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       var finder = card.querySelector('.disco-card-finder-btn');
-      if (finder) finder.click();
-      else card.click();
+      if (finder) finder.click(); else card.click();
     });
 
     btns.appendChild(playBtn);
     btns.appendChild(wlBtn);
     wrap.appendChild(btns);
-
     return wrap;
   }
 
-  function attachCard(card) {
-    if (card._drExpandDone) return;
-    card._drExpandDone = true;
-
-    /* Loader bar */
-    if (!card.querySelector('.dr-loader-bar')) {
-      var lb = document.createElement('div');
-      lb.className = 'dr-loader-bar';
-      card.appendChild(lb);
-    }
-
-    /* Expand panel */
-    var expand = buildExpand(card);
-    card.appendChild(expand);
-
-    /* Reset loader animace */
-    card.addEventListener('mouseenter', function() {
-      var lb = card.querySelector('.dr-loader-bar');
-      if (lb) { lb.style.animation = 'none'; lb.offsetHeight; lb.style.animation = ''; }
-    });
+  function attachExpand(card) {
+    if (card.querySelector('.dr-loader-bar')) return;
+    var lb = document.createElement('div');
+    lb.className = 'dr-loader-bar';
+    card.appendChild(lb);
+    card.appendChild(buildExpand(card));
   }
 
-  function scanCards() {
-    document.querySelectorAll('#discoBody .disco-card, .universe-overlay .disco-card').forEach(attachCard);
+  /* ── Parallax hero (v discoBody) ── */
+  function setupParallax(body) {
+    if (body._drParallax) return;
+    body._drParallax = true;
+    var raf = false;
+    body.addEventListener('scroll', function () {
+      if (raf) return;
+      raf = true;
+      requestAnimationFrame(function () {
+        raf = false;
+        var hero = body.querySelector('.disco-hero');
+        if (!hero) return;
+        var s = body.scrollTop;
+        var img = hero.querySelector('.disco-hero-img');
+        if (img) img.style.transform = 'scale(1.06) translateY(' + Math.min(s * 0.3, 60) + 'px)';
+        var cnt = hero.querySelector('.disco-hero-content');
+        if (cnt) {
+          cnt.style.opacity = Math.max(0, 1 - s / 240);
+          cnt.style.transform = 'translateY(' + s * 0.15 + 'px)';
+        }
+      });
+    }, { passive: true });
   }
 
-  /* Observer */
-  var scanT;
-  var body = document.getElementById('discoBody');
-  if (body) {
-    new MutationObserver(function() {
-      clearTimeout(scanT);
-      scanT = setTimeout(scanCards, 100);
-    }).observe(body, { childList: true, subtree: true });
+  function setupBackTop(overlay, body) {
+    if (document.getElementById('dr-btt')) return;
+    var btn = document.createElement('button');
+    btn.id = 'dr-btt';
+    btn.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" width="14" height="14"><path d="M4 10l4-4 4 4"/></svg>';
+    btn.addEventListener('click', function () { body.scrollTo({ top: 0, behavior: 'smooth' }); });
+    overlay.appendChild(btn);
+    body.addEventListener('scroll', function () {
+      btn.classList.toggle('dr-visible', body.scrollTop > 300);
+    }, { passive: true });
   }
 
-  var poll = setInterval(function() {
-    var b = document.getElementById('discoBody');
-    if (!b) return;
-    clearInterval(poll);
-    scanCards();
-    [600, 1500, 3000].forEach(function(t) { setTimeout(scanCards, t); });
-  }, 150);
+  /* ── Orchestrace: jeden debounced běh místo pěti observerů + pollingu ── */
+  function runAll() {
+    [upgradeNavIcons, upgradeHeroBtns, upgradeCards, addCardCounts, upgradeHeroImage, addScrollHint]
+      .forEach(function (fn) {
+        try { fn(); } catch (err) { console.warn('[MFDiscover] krok selhal:', fn.name, err); }
+      });
+  }
 
+  var pending = false;
+  function scheduleRun() {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(function () { pending = false; runAll(); });
+  }
+
+  function init() {
+    var overlay = document.getElementById('universeOverlay');
+    var body = document.getElementById('discoBody');
+    var nav = document.getElementById('discoNav');
+    if (!overlay || !body) return; // markup ještě není v DOM (nemělo by nastat)
+
+    setupParallax(body);
+    setupBackTop(overlay, body);
+
+    var observer = new MutationObserver(scheduleRun);
+    observer.observe(body, { childList: true, subtree: true });
+    if (nav) observer.observe(nav, { childList: true, subtree: true, attributes: true });
+
+    scheduleRun();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  console.log('[MFDiscover] v5 (lean) načteno');
 })();
