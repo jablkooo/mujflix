@@ -5014,13 +5014,37 @@ const PROFILES_KEY = "mf_profiles_v2",
   PROFILE_EMOJIS = ["🎬", "🍿", "🎭", "🎪", "🎡", "🃏", "🎲", "🎰", "🦁", "🐺", "🦊", "🐸", "👾", "🤖", "🦸", "🧙", "🧛", "🤡", "👻", "🤩", "😎", "🥷", "🦄", "🐉"];
 
 function _getProfiles() {
-  if (window.MFProfilesDB) return window.MFProfilesDB.getSync();
-  try { return safeLS(PROFILES_KEY, "[]"); } catch(e) { return []; }
+  try {
+    const stored = window.MFProfilesDB && typeof window.MFProfilesDB.getSync === "function"
+      ? window.MFProfilesDB.getSync()
+      : [];
+    if (Array.isArray(stored) && stored.length) return stored;
+  } catch (e) {
+    console.warn("[ProfileGate] Nelze načíst profily z databáze:", e);
+  }
+  try {
+    const local = safeLS(PROFILES_KEY, "[]");
+    if (Array.isArray(local) && local.length) return local;
+    const legacy = safeLS("mf_profiles", "[]");
+    if (Array.isArray(legacy)) return legacy;
+    if (legacy && typeof legacy === "object") return Object.values(legacy);
+  } catch (e) {
+    console.warn("[ProfileGate] Nelze načíst profily z úložiště:", e);
+  }
+  return [];
 }
 
 function _saveProfiles(profiles) {
-  if (window.MFProfilesDB) { window.MFProfilesDB.saveProfiles(profiles); return; }
-  try { localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles)); } catch(e) {}
+  try {
+    if (window.MFProfilesDB && typeof window.MFProfilesDB.saveProfiles === "function") {
+      window.MFProfilesDB.saveProfiles(profiles);
+    }
+  } catch (e) {
+    console.warn("[ProfileGate] Nelze uložit profily do databáze:", e);
+  }
+  try { localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles)); } catch(e) {
+    console.warn("[ProfileGate] Nelze uložit profily do úložiště:", e);
+  }
 }
 
 function getActiveProfileId() {
