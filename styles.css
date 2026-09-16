@@ -19154,6 +19154,117 @@ body:not(.tv-mode):not(.appletv-mode) .episode-grid {
   grid-template-columns: unset !important;
 }
 
+/* Friendly episode picker: readable controls and an obvious play action. */
+.ssv-help {
+  margin: -8px 0 18px;
+  color: rgba(255,255,255,.55);
+  font-size: .78rem;
+  line-height: 1.45;
+}
+.ep-view-bar {
+  padding: 14px 20px !important;
+  background: rgba(9, 12, 20, .98) !important;
+  border-bottom-color: rgba(255,255,255,.1) !important;
+}
+.ep-view-back {
+  min-height: 36px;
+  padding: 7px 14px 7px 10px !important;
+  color: rgba(255,255,255,.82) !important;
+  font-size: .72rem !important;
+}
+.ep-view-season-badge {
+  padding: 7px 11px !important;
+  border-radius: 10px !important;
+  background: rgba(10,132,255,.14) !important;
+  border-color: rgba(10,132,255,.38) !important;
+}
+.ep-view-season-text {
+  font-size: .7rem !important;
+}
+.season-all-btn {
+  height: 36px !important;
+  padding: 0 14px !important;
+  color: rgba(255,255,255,.78) !important;
+  background: rgba(255,255,255,.08) !important;
+  border-color: rgba(255,255,255,.15) !important;
+  font-size: .68rem !important;
+}
+.season-all-btn:hover,
+.season-all-btn.active {
+  background: rgba(10,132,255,.2) !important;
+  border-color: rgba(10,132,255,.5) !important;
+  color: #fff !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card {
+  min-height: 128px !important;
+  margin-bottom: 6px !important;
+  background: rgba(255,255,255,.045) !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card:hover {
+  background: rgba(255,255,255,.08) !important;
+  border-color: rgba(10,132,255,.45) !important;
+  transform: translateY(-1px) !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-body {
+  padding: 14px 18px !important;
+  gap: 6px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-num {
+  color: rgba(255,255,255,.58) !important;
+  font-size: .68rem !important;
+  font-weight: 700 !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-title {
+  font-size: 1rem !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-actions {
+  max-height: 36px !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  margin-top: 6px !important;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-btn-play-hbo {
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 8px;
+  background: rgba(10,132,255,.18);
+  border: 1px solid rgba(10,132,255,.38);
+  color: #dceeff;
+  font-weight: 700;
+  cursor: pointer;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-btn-play-hbo:hover {
+  background: #0a84ff;
+  color: #fff;
+}
+body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-btn-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.13);
+}
+@media (max-width: 600px) {
+  .ep-view-bar {
+    flex-wrap: wrap;
+    gap: 8px !important;
+  }
+  .ep-view-title {
+    order: 3;
+    flex-basis: 100%;
+  }
+  body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-thumb {
+    width: 126px !important;
+    min-width: 126px !important;
+  }
+  body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-body {
+    padding: 11px 12px !important;
+  }
+}
+
 /* ══ SKRYTÍ DOCKU + PROFILU PŘI OTEVŘENÉM MODALU ══ */
 body.modal-open #mfDock,
 body.modal-open .mf-dock,

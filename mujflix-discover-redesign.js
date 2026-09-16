@@ -91,18 +91,62 @@
     if (genreItems.length <= 3) return;
     nav._mfGenreCompact = true;
     genreItems.slice(3).forEach(function (item) { item.classList.add('mf-genre-hidden'); });
+
+    var picker = document.createElement('div');
+    picker.className = 'mf-genre-picker';
+    picker.setAttribute('aria-hidden', 'true');
+    picker.innerHTML =
+      '<div class="mf-genre-picker-backdrop" data-mf-genre-close></div>' +
+      '<section class="mf-genre-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="mfGenrePickerTitle">' +
+        '<div class="mf-genre-picker-head">' +
+          '<div><span class="mf-genre-picker-kicker">Objevování</span><h2 id="mfGenrePickerTitle">Vyber žánr</h2></div>' +
+          '<button type="button" class="mf-genre-picker-close" aria-label="Zavřít výběr žánru" data-mf-genre-close>&times;</button>' +
+        '</div>' +
+        '<div class="mf-genre-picker-grid"></div>' +
+      '</section>';
+    document.body.appendChild(picker);
+    var pickerGrid = picker.querySelector('.mf-genre-picker-grid');
+    genreItems.forEach(function (item) {
+      var choice = item.cloneNode(true);
+      choice.classList.remove('mf-genre-hidden');
+      choice.removeAttribute('onclick');
+      choice.removeAttribute('style');
+      choice.addEventListener('click', function () {
+        item.click();
+        closeGenrePicker();
+      });
+      pickerGrid.appendChild(choice);
+    });
+
+    function closeGenrePicker() {
+      picker.classList.remove('is-open');
+      picker.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('mf-genre-picker-open');
+    }
+
+    function openGenrePicker() {
+      picker.classList.add('is-open');
+      picker.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('mf-genre-picker-open');
+      var closeButton = picker.querySelector('.mf-genre-picker-close');
+      if (closeButton) closeButton.focus();
+    }
+
+    picker.querySelectorAll('[data-mf-genre-close]').forEach(function (element) {
+      element.addEventListener('click', closeGenrePicker);
+    });
+    picker.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closeGenrePicker();
+    });
+
     var more = document.createElement('button');
     more.type = 'button';
     more.className = 'disco-nav-more';
-    more.textContent = 'Více';
+    more.textContent = 'Všechny žánry';
     more.setAttribute('aria-expanded', 'false');
+    more.setAttribute('aria-haspopup', 'dialog');
     more.addEventListener('click', function () {
-      var expanded = nav.classList.toggle('mf-genres-expanded');
-      more.textContent = expanded ? 'Méně' : 'Více';
-      more.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-      genreItems.slice(3).forEach(function (item) {
-        item.classList.toggle('mf-genre-hidden', !expanded);
-      });
+      openGenrePicker();
     });
     genreLabel.parentNode.insertBefore(more, genreItems[3]);
   }
