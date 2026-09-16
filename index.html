@@ -2501,10 +2501,20 @@
         />
 
         <div class="pc-label">Vyber si avatar</div>
-        <div class="pc-emoji-grid" id="pcEmojiGrid"></div>
-
-        <div class="pc-label">Barva profilu</div>
-        <div class="pc-color-row" id="pcColorRow"></div>
+        <button class="pc-avatar-picker-toggle" type="button" onclick="window.ProfileGate?.toggleAvatarPicker()">
+          <span class="pc-avatar-preview" id="pcAvatarPreview">🎬</span>
+          <span><strong id="pcAvatarPickerLabel">Vybrat postavu</strong><small>Filmy a seriály</small></span>
+          <span class="pc-avatar-picker-arrow">⌄</span>
+        </button>
+        <div class="pc-avatar-picker" id="pcAvatarPicker" hidden>
+          <div class="pc-avatar-tabs">
+            <button type="button" class="active" data-avatar-type="movie" onclick="window.ProfileGate?.loadAvatarPicker('movie')">Filmy</button>
+            <button type="button" data-avatar-type="tv" onclick="window.ProfileGate?.loadAvatarPicker('tv')">Seriály</button>
+          </div>
+          <div class="pc-avatar-grid" id="pcAvatarGrid">
+            <div class="pc-avatar-loading">Načítám postavy…</div>
+          </div>
+        </div>
 
         <div class="pc-label">PIN <span class="pc-label-note">volitelný</span></div>
         <div class="pc-hint">Nastav ho, pokud chceš profil chránit.</div>
