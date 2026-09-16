@@ -5014,20 +5014,31 @@ const PROFILES_KEY = "mf_profiles_v2",
   PROFILE_EMOJIS = ["🎬", "🍿", "🎭", "🎪", "🎡", "🃏", "🎲", "🎰", "🦁", "🐺", "🦊", "🐸", "👾", "🤖", "🦸", "🧙", "🧛", "🤡", "👻", "🤩", "😎", "🥷", "🦄", "🐉"];
 
 function _getProfiles() {
+  const normalize = (value) => {
+    if (Array.isArray(value)) return value.filter(profile => profile && typeof profile === "object");
+    if (value && typeof value === "object") {
+      return Object.entries(value).map(([id, profile]) => ({
+        ...(profile && typeof profile === "object" ? profile : {}),
+        id: profile && profile.id ? profile.id : "p_" + id
+      }));
+    }
+    return [];
+  };
   try {
     const stored = window.MFProfilesDB && typeof window.MFProfilesDB.getSync === "function"
       ? window.MFProfilesDB.getSync()
       : [];
-    if (Array.isArray(stored) && stored.length) return stored;
+    const databaseProfiles = normalize(stored);
+    if (databaseProfiles.length) return databaseProfiles;
   } catch (e) {
     console.warn("[ProfileGate] Nelze načíst profily z databáze:", e);
   }
   try {
-    const local = safeLS(PROFILES_KEY, "[]");
-    if (Array.isArray(local) && local.length) return local;
-    const legacy = safeLS("mf_profiles", "[]");
-    if (Array.isArray(legacy)) return legacy;
-    if (legacy && typeof legacy === "object") return Object.values(legacy);
+    const keys = [PROFILES_KEY, "mf_profiles", "mujflix_users_v1", "mujflix_users"];
+    for (const key of keys) {
+      const profiles = normalize(safeLS(key, "[]"));
+      if (profiles.length) return profiles;
+    }
   } catch (e) {
     console.warn("[ProfileGate] Nelze načíst profily z úložiště:", e);
   }
