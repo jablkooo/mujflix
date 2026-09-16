@@ -1917,3 +1917,178 @@ body { position: relative; }
   margin-left: 5px !important;
   vertical-align: middle !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   DISCOVER v8 — final visual pass
+   This block intentionally lives last so legacy theme layers cannot
+   make the Discover screen look like a separate application.
+═══════════════════════════════════════════════════════════════ */
+.universe-overlay {
+  background: #080b12 !important;
+}
+.universe-overlay .disco-header {
+  height: 84px !important;
+  padding: 0 4vw !important;
+  background: rgba(8,11,18,.92) !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+}
+.universe-overlay .disco-header-left {
+  min-width: 190px !important;
+}
+.universe-overlay .disco-logo {
+  color: rgba(255,255,255,.38) !important;
+  letter-spacing: 3px !important;
+}
+.universe-overlay .disco-title {
+  color: #fff !important;
+  font-size: 1.25rem !important;
+  font-weight: 750 !important;
+}
+.universe-overlay .uni-search-wrap {
+  min-height: 46px !important;
+  border-radius: 15px !important;
+  background: rgba(255,255,255,.065) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+}
+.universe-overlay .uni-input {
+  font-size: .9rem !important;
+}
+.universe-overlay .disco-nav {
+  height: 62px !important;
+  top: 84px !important;
+  padding: 0 4vw !important;
+  gap: 8px !important;
+  background: rgba(8,11,18,.88) !important;
+}
+.universe-overlay .disco-nav-item,
+#discoNav .disco-nav-item {
+  height: 38px !important;
+  padding: 0 16px !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,.045) !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+  color: rgba(255,255,255,.62) !important;
+  font-size: .72rem !important;
+}
+.universe-overlay .disco-nav-item.active,
+#discoNav .disco-nav-item.active {
+  background: #0a84ff !important;
+  border-color: #0a84ff !important;
+  color: #fff !important;
+  box-shadow: 0 7px 22px rgba(10,132,255,.25) !important;
+}
+.universe-overlay .disco-hero {
+  min-height: 360px !important;
+  height: min(55vh, 500px) !important;
+  max-height: 500px !important;
+}
+.universe-overlay .disco-hero-content {
+  left: 4vw !important;
+  right: 45% !important;
+  padding: 42px 0 !important;
+}
+.universe-overlay .disco-hero-title {
+  font-size: clamp(2rem, 4vw, 3.4rem) !important;
+  font-weight: 780 !important;
+}
+.universe-overlay .disco-row-header,
+#discoBody .disco-row-header {
+  padding: 30px 4vw 0 !important;
+}
+.universe-overlay .disco-row-title,
+#discoBody .disco-row-title {
+  font-size: 1.12rem !important;
+  font-weight: 760 !important;
+}
+#discoBody .disco-row:first-child .disco-row-title {
+  font-size: 1.35rem !important;
+}
+.universe-overlay .disco-row-scroll,
+#discoBody .disco-row-scroll {
+  gap: 16px !important;
+  padding: 16px 4vw 24px !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+.universe-overlay .disco-card,
+#discoBody .disco-card {
+  width: 166px !important;
+  min-width: 166px !important;
+  height: 248px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  background: #121824 !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.28) !important;
+}
+.universe-overlay .disco-card:hover,
+#discoBody .disco-card:hover {
+  transform: translateY(-6px) !important;
+  border-color: rgba(10,132,255,.5) !important;
+  box-shadow: 0 20px 42px rgba(0,0,0,.48), 0 0 0 1px rgba(10,132,255,.18) !important;
+}
+.universe-overlay .disco-card-info,
+#discoBody .disco-card-info {
+  padding: 14px !important;
+}
+.universe-overlay .disco-card-name,
+#discoBody .disco-card-name {
+  font-size: .82rem !important;
+  font-weight: 750 !important;
+}
+.universe-overlay .disco-card-rating,
+#discoBody .disco-card-rating {
+  display: inline-flex !important;
+  color: #ffd166 !important;
+  font-size: .64rem !important;
+}
+.universe-overlay .disco-card-finder-btn,
+#discoBody .disco-card-finder-btn {
+  right: 10px !important;
+  bottom: 10px !important;
+  opacity: 1 !important;
+  transform: none !important;
+  background: rgba(10,132,255,.92) !important;
+}
+.universe-overlay .disco-row-scroll:has(.disco-card:hover) .disco-card:not(:hover) {
+  opacity: .82 !important;
+  filter: none !important;
+  transform: none !important;
+}
+body.discover-open #mfDock {
+  opacity: .9 !important;
+  transform: translateX(-50%) scale(.9) !important;
+  background: rgba(12,16,25,.9) !important;
+  border-color: rgba(255,255,255,.1) !important;
+}
+body.discover-open #mfDock .dock-btn {
+  min-width: 56px !important;
+}
+@media (max-width: 700px) {
+  .universe-overlay .disco-header {
+    height: 132px !important;
+    padding: 12px 16px !important;
+  }
+  .universe-overlay .disco-nav {
+    top: 132px !important;
+    height: 54px !important;
+    padding: 0 16px !important;
+  }
+  .universe-overlay .disco-hero {
+    min-height: 330px !important;
+    height: 48vh !important;
+  }
+  .universe-overlay .disco-hero-content {
+    left: 16px !important;
+    right: 12% !important;
+    padding: 28px 0 !important;
+  }
+  .universe-overlay .disco-card,
+  #discoBody .disco-card {
+    width: 132px !important;
+    min-width: 132px !important;
+    height: 198px !important;
+  }
+  body.discover-open #mfDock {
+    transform: translateX(-50%) scale(.82) !important;
+  }
+}
