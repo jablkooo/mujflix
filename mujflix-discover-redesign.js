@@ -74,6 +74,39 @@
     });
   }
 
+  function compactGenreFilters() {
+    var nav = document.getElementById('discoNav');
+    if (!nav || nav._mfGenreCompact) return;
+    var labels = Array.prototype.slice.call(nav.querySelectorAll('.disco-nav-label'));
+    var genreLabel = labels.find(function (label) {
+      return label.textContent.trim().toLowerCase() === 'žánr';
+    });
+    if (!genreLabel) return;
+    var genreItems = [];
+    var node = genreLabel.nextElementSibling;
+    while (node && !node.classList.contains('disco-nav-divider') && !node.classList.contains('disco-nav-label')) {
+      if (node.classList.contains('disco-nav-item')) genreItems.push(node);
+      node = node.nextElementSibling;
+    }
+    if (genreItems.length <= 3) return;
+    nav._mfGenreCompact = true;
+    genreItems.slice(3).forEach(function (item) { item.classList.add('mf-genre-hidden'); });
+    var more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'disco-nav-more';
+    more.textContent = 'Více';
+    more.setAttribute('aria-expanded', 'false');
+    more.addEventListener('click', function () {
+      var expanded = nav.classList.toggle('mf-genres-expanded');
+      more.textContent = expanded ? 'Méně' : 'Více';
+      more.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      genreItems.slice(3).forEach(function (item) {
+        item.classList.toggle('mf-genre-hidden', !expanded);
+      });
+    });
+    genreLabel.parentNode.insertBefore(more, genreItems[3]);
+  }
+
   function upgradeHeroBtns() {
     var PLAY = '<svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><polygon points="3,2 14,8 3,14"/></svg>';
     var PLUS = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="13" height="13"><path d="M8 3v10M3 8h10"/></svg>';
@@ -316,7 +349,7 @@
 
   /* ── Orchestrace: jeden debounced běh místo pěti observerů + pollingu ── */
   function runAll() {
-    [upgradeNavIcons, upgradeHeroBtns, upgradeCards, addCardCounts, upgradeHeroImage, addScrollHint]
+    [upgradeNavIcons, compactGenreFilters, upgradeHeroBtns, upgradeCards, addCardCounts, upgradeHeroImage, addScrollHint]
       .forEach(function (fn) {
         try { fn(); } catch (err) { console.warn('[MFDiscover] krok selhal:', fn.name, err); }
       });
