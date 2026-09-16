@@ -1739,6 +1739,180 @@ body { position: relative; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   DISCOVER v9 — quiet, modern chrome
+═══════════════════════════════════════════════════════════════ */
+.universe-overlay .disco-header {
+  height: 78px !important;
+  padding: 0 clamp(18px, 5vw, 72px) !important;
+  gap: clamp(18px, 4vw, 56px) !important;
+}
+.universe-overlay .disco-header-left {
+  min-width: 172px !important;
+}
+.universe-overlay .disco-logo {
+  color: rgba(255,255,255,.32) !important;
+  font-size: .56rem !important;
+  letter-spacing: 3.5px !important;
+}
+.universe-overlay .disco-title {
+  font-size: 1.18rem !important;
+  font-weight: 700 !important;
+}
+.universe-overlay .uni-search-wrap {
+  min-height: 44px !important;
+  max-width: 620px !important;
+  border-radius: 13px !important;
+  background: rgba(255,255,255,.055) !important;
+  box-shadow: none !important;
+}
+.universe-overlay .uni-search-wrap:focus-within {
+  box-shadow: 0 0 0 3px rgba(10,132,255,.12) !important;
+}
+.universe-overlay .disco-header-actions {
+  display: flex !important;
+  align-items: center !important;
+  margin-left: auto !important;
+}
+.universe-overlay .disco-close {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: rgba(255,255,255,.055) !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+  color: rgba(255,255,255,.72) !important;
+  font-size: 1rem !important;
+}
+.universe-overlay .disco-close:hover {
+  background: rgba(255,255,255,.12) !important;
+  color: #fff !important;
+  transform: none !important;
+}
+.universe-overlay .disco-nav {
+  height: 56px !important;
+  top: 78px !important;
+  padding: 0 clamp(18px, 5vw, 72px) !important;
+  background: rgba(8,11,18,.74) !important;
+}
+.universe-overlay .disco-nav-item,
+#discoNav .disco-nav-item {
+  height: 32px !important;
+  padding: 0 14px !important;
+  border-radius: 9px !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  color: rgba(255,255,255,.52) !important;
+  font-size: .68rem !important;
+}
+.universe-overlay .disco-nav-item:hover:not(.active),
+#discoNav .disco-nav-item:hover:not(.active) {
+  background: rgba(255,255,255,.07) !important;
+  color: rgba(255,255,255,.86) !important;
+}
+.universe-overlay .disco-nav-item.active,
+#discoNav .disco-nav-item.active {
+  background: rgba(10,132,255,.16) !important;
+  border-color: rgba(10,132,255,.28) !important;
+  color: #72b8ff !important;
+  box-shadow: none !important;
+}
+.universe-overlay .disco-nav-item.active::after,
+#discoNav .disco-nav-item.active::after {
+  display: none !important;
+}
+.universe-overlay .disco-hero {
+  min-height: 330px !important;
+  height: min(48vh, 430px) !important;
+  max-height: 430px !important;
+}
+.universe-overlay .disco-hero-content {
+  left: clamp(18px, 5vw, 72px) !important;
+  right: 42% !important;
+  padding: 32px 0 !important;
+}
+.universe-overlay .disco-hero-title {
+  font-size: clamp(1.8rem, 3.4vw, 2.8rem) !important;
+  letter-spacing: -.9px !important;
+}
+.universe-overlay .disco-hero-btn.primary {
+  padding: 9px 14px !important;
+  border-radius: 9px !important;
+  box-shadow: none !important;
+}
+.universe-overlay .disco-hero-btn.secondary {
+  padding: 9px 12px !important;
+  background: rgba(255,255,255,.07) !important;
+  border-color: rgba(255,255,255,.1) !important;
+}
+.universe-overlay .disco-row-header,
+#discoBody .disco-row-header {
+  padding: 24px clamp(18px, 5vw, 72px) 0 !important;
+}
+.universe-overlay .disco-row-title,
+#discoBody .disco-row-title,
+#discoBody .disco-row:first-child .disco-row-title {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+}
+.universe-overlay .drt-tag,
+#discoBody .drt-tag {
+  padding: 3px 7px !important;
+  border-radius: 5px !important;
+  letter-spacing: 1.2px !important;
+  font-size: .46rem !important;
+}
+.universe-overlay .disco-row-scroll,
+#discoBody .disco-row-scroll {
+  gap: 13px !important;
+  padding: 13px clamp(18px, 5vw, 72px) 20px !important;
+}
+.universe-overlay .disco-card,
+#discoBody .disco-card {
+  width: 154px !important;
+  min-width: 154px !important;
+  height: 230px !important;
+  border-radius: 13px !important;
+  box-shadow: 0 7px 20px rgba(0,0,0,.22) !important;
+}
+.universe-overlay .disco-card:hover,
+#discoBody .disco-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 15px 30px rgba(0,0,0,.38), 0 0 0 1px rgba(10,132,255,.28) !important;
+}
+.universe-overlay .disco-card-info,
+#discoBody .disco-card-info {
+  padding: 11px !important;
+}
+.universe-overlay .disco-card-name,
+#discoBody .disco-card-name {
+  font-size: .75rem !important;
+}
+.universe-overlay .disco-card-finder-btn,
+#discoBody .disco-card-finder-btn {
+  width: 26px !important;
+  height: 26px !important;
+  right: 8px !important;
+  bottom: 8px !important;
+}
+body.discover-open #mfDock {
+  opacity: .84 !important;
+  transform: translateX(-50%) scale(.84) !important;
+}
+@media (max-width: 700px) {
+  .universe-overlay .disco-header {
+    height: 122px !important;
+    padding: 12px 16px !important;
+  }
+  .universe-overlay .disco-nav {
+    top: 122px !important;
+    padding: 0 16px !important;
+  }
+  .universe-overlay .disco-hero-content {
+    left: 16px !important;
+    right: 12% !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
    SKELETON SHIMMER — animace při načítání karet
 ═══════════════════════════════════════════════════════════════ */
 @keyframes jg-shimmer {
