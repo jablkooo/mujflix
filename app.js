@@ -5259,10 +5259,22 @@ const ProfileGate = {
     const t = _getProfiles();
     e.innerHTML = "", t.forEach(t => {
       const n = document.createElement("div");
-      n.className = "pg-profile-item" + (this._manageMode ? " pg-manage-mode" : ""), n.innerHTML = `\n+            <div class="pg-avatar-wrap">\n+              <div class="pg-avatar" style="--pg-color:${t.color||"#007AFF"};${getActiveProfileId()===t.id?"border-color:"+t.color+";box-shadow:0 0 0 1px "+t.color+",0 8px 40px rgba(0,0,0,0.6);":""}">\n+                ${t.avatar||"🎬"}\n+              </div>\n+              ${this._manageMode ? `<button class="pg-remove-btn" type="button" aria-label="Odebrat profil ${t.name}" onclick="event.stopPropagation(); window.ProfileGate?.removeProfile('${t.id}')">−</button>` : ""}
             </div>
             <div class="pg-name">${t.name}</div>
           `, n.onclick = () => this._manageMode ? void 0 : ProfileGate.selectProfile(t.id), e.appendChild(n)
+      n.dataset.profileId = t.id;
+      n.className = "pg-profile-item" + (this._manageMode ? " pg-manage-mode" : "");
+      n.innerHTML = `
+            <div class="pg-avatar-wrap">
+              <div class="pg-avatar" style="--pg-color:${t.color||"#007AFF"};${getActiveProfileId()===t.id?"border-color:"+t.color+";box-shadow:0 0 0 1px "+t.color+",0 8px 40px rgba(0,0,0,0.6);":""}">
+                ${t.avatar||"🎬"}
+              </div>
+              ${this._manageMode ? `<button class="pg-remove-btn" type="button" aria-label="Odebrat profil ${t.name}" onclick="event.stopPropagation(); window.ProfileGate?.removeProfile('${t.id}')">−</button>` : ""}
+            </div>
+            <div class="pg-name">${t.name}</div>
+          `;
+      n.onclick = () => this._manageMode ? void 0 : ProfileGate.selectProfile(t.id);
+      e.appendChild(n);
     });
     const n = document.createElement("div");
     n.className = "pg-profile-item", n.innerHTML = '\n          <div class="pg-add-btn">＋</div>\n          <div class="pg-name" style="color:rgba(255,255,255,0.35)">Přidat profil</div>\n        ', n.onclick = () => ProfileGate.openCreate(), e.appendChild(n)
@@ -5278,10 +5290,20 @@ const ProfileGate = {
   },
   removeProfile(e) {
     const t = _getProfiles().find(t => t.id === e);
-    if (!t || !confirm(`Opravdu odebrat profil „${t.name}“?`)) return;
-    deleteUser(e);
-    this._manageMode = true;
-    this.renderGate();
+    if (!t) return;
+    const item = document.querySelector(`.pg-profile-item[data-profile-id="${e}"]`);
+    if (item) item.classList.add("pg-removing");
+    setTimeout(() => {
+      const profiles = _getProfiles().filter(profile => profile.id !== e);
+      _saveProfiles(profiles);
+      if (getActiveProfileId() === e) {
+        profiles.length ? setActiveUser(profiles[0].id) : localStorage.removeItem(ACTIVE_PID_KEY);
+        this.renderBadge();
+      }
+      this._manageMode = true;
+      this.renderGate();
+      if (!profiles.length) this.show();
+    }, item ? 220 : 0);
   },
   selectProfile(e) {
     // OPRAVA: robustní select — loguje proč případně selhalo
