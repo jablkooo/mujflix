@@ -2695,7 +2695,7 @@
         class="dock-btn active"
         id="dockHome"
         data-hash="#serialy"
-        onclick="event.preventDefault(); event.stopPropagation(); setDockActive('dockHome'); mfShowSection('serialy'); closeUniverse();"
+        onclick="event.preventDefault(); event.stopImmediatePropagation(); window.mfNavigateHome ? mfNavigateHome() : (setDockActive('dockHome'), mfShowSection('serialy'), closeUniverse())"
         title="Domů"
         aria-label="Domů"
       >
@@ -8129,7 +8129,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.MFSync.init();
 });
     </script>
-    <script src="app.js?v=6" defer></script>
+    <script src="app.js?v=7" defer></script>
 
     <!-- ⚡ IMAGE + SCROLL PATCH -->
     <script id="mf-img-patch">

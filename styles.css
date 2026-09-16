@@ -10444,6 +10444,12 @@ body.grain-off::after {
   will-change: background-position;
 }
 #mfProfileGate:not(.hiding)::before {
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(0, 122, 255, 0.16), transparent 28%),
+    radial-gradient(circle at 82% 78%, rgba(90, 200, 250, 0.1), transparent 25%),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 150% 150%, 140% 140%, 48px 48px, 48px 48px;
   animation: pgGridDrift 26s ease-in-out infinite alternate;
   will-change: transform;
 }
@@ -10452,8 +10458,8 @@ body.grain-off::after {
   100% { background-position: 46% 4%, 76% 96%, 0 0; }
 }
 @keyframes pgGridDrift {
-  0% { transform: translate3d(0, 0, 0); opacity: 0.72; }
-  100% { transform: translate3d(8px, 5px, 0); opacity: 1; }
+  0% { transform: translate3d(0, 0, 0); opacity: 0.78; background-position: 0% 0%, 100% 100%, 0 0, 0 0; }
+  100% { transform: translate3d(8px, 5px, 0); opacity: 1; background-position: 12% 8%, 88% 92%, 8px 5px, 8px 5px; }
 }
 @media (prefers-reduced-motion: reduce) {
   #mfProfileGate:not(.hiding),

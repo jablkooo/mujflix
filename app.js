@@ -3392,6 +3392,7 @@ function autoResizeInput(e) {
     count: 0
   })), aiMsgDay = 0)
 })();
+
 let recog = null,
   _voiceMode = "chat";
 const _SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -11459,3 +11460,19 @@ console.log('[MůjFlix Changelog] ✓ Changelog systém načten');
   });
 
 })();
+
+// Keep the Home dock action reliable even when Discover has layered handlers.
+window.mfNavigateHome = function() {
+  const overlay = document.getElementById("universeOverlay");
+  if (overlay) {
+    overlay.classList.remove("visible", "open");
+    overlay.style.display = "none";
+  }
+  document.body.classList.remove("discover-open", "disco-open");
+  if (typeof window.mfShowSection === "function") window.mfShowSection("serialy");
+  if (typeof window.setDockActive === "function") window.setDockActive("dockHome");
+  window.location.hash = "#serialy";
+  requestAnimationFrame(() => {
+    if (overlay) overlay.style.display = "";
+  });
+};
