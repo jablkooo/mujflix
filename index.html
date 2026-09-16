@@ -2511,6 +2511,7 @@
             <button type="button" class="active" data-avatar-type="movie" onclick="window.ProfileGate?.loadAvatarPicker('movie')">Filmy</button>
             <button type="button" data-avatar-type="tv" onclick="window.ProfileGate?.loadAvatarPicker('tv')">Seriály</button>
           </div>
+          <input class="pc-avatar-search" id="pcAvatarSearch" type="search" placeholder="Hledat film nebo seriál…" oninput="window.ProfileGate?.searchAvatarTitles(this.value)">
           <div class="pc-avatar-grid" id="pcAvatarGrid">
             <div class="pc-avatar-loading">Načítám postavy…</div>
           </div>
@@ -2683,6 +2684,7 @@
         <span class="mf-sync-dot" id="hdrSyncDot"></span>
       </button>
 
+      <div id="mfWelcomeNote" aria-live="polite"></div>
       <!-- Profile badge (will be rendered by JS) -->
     </header>
 
@@ -2709,7 +2711,7 @@
         class="dock-btn"
         id="dockFilmy"
         data-hash="#filmy"
-        onclick="mfShowSection('filmy')"
+        onclick="openDiscover(); setDockActive('dockFilmy');"
         title="Objevovat filmy a seriály"
         aria-label="Objevovat filmy a seriály"
       >
