@@ -434,7 +434,7 @@ async function loadForYouTile() {
       overview: d.overview || "",
       rating: d.vote_average ? d.vote_average.toFixed(1) : null,
       year: (d.first_air_date || d.release_date || "").slice(0, 4)
-    }, e.innerHTML = `\n      <img class="fyi-bg" src="${_forYouSeries.backdrop||_forYouSeries.poster||""}" alt="" onerror="this.style.display='none'">\n      <div class="fyi-gradient"></div>\n      <div class="fyi-badge-wrap">\n        <div class="fyi-badge">✦ Pro tebe</div>\n        ${_forYouSeries.rating?`<div class="fyi-rating">★ ${_forYouSeries.rating}</div>`:""}\n      </div>\n      <div class="fyi-title">${m}</div>\n      <div class="fyi-genre">${a} · ${"tv"===r?"Seriál":"Film"}${_forYouSeries.year?" · "+_forYouSeries.year:""}</div>`
+    }, e.innerHTML = `\n      <img class="fyi-bg" src="${_forYouSeries.backdrop||_forYouSeries.poster||""}" alt="" onerror="this.style.display='none'">\n      <div class="fyi-gradient"></div>\n      <div class="fyi-badge-wrap">\n            <div class="fyi-badge">✦ Doporučení</div>\n        ${_forYouSeries.rating?`<div class="fyi-rating">★ ${_forYouSeries.rating}</div>`:""}\n      </div>\n      <div class="fyi-title">${m}</div>\n      <div class="fyi-genre">${a} · ${"tv"===r?"Seriál":"Film"}${_forYouSeries.year?" · "+_forYouSeries.year:""}</div>`
   } catch (t) {
     renderForYouFallback(e)
   }
@@ -443,9 +443,9 @@ async function loadForYouTile() {
 function renderForYouFallback(e) {
   _forYouSeries = {
     name: "Objevi neco",
-    genre: "Doporuceni",
+    genre: "Doporučení",
     tmdbId: 0
-  }, e.innerHTML = '<div class="fyi-loading"><div style="font-size:2rem;">🎲</div><div class="fyi-loading-text">Pro tebe</div></div>'
+  }, e.innerHTML = '<div class="fyi-loading"><div style="font-size:2rem;">🎲</div><div class="fyi-loading-text">Doporučení</div></div>'
 }
 
 function openForYouSeries() {
@@ -507,7 +507,8 @@ function updatePanelProgress() {
     seen: t,
     pct: n
   } = calcProgress(activeSeries);
-  document.getElementById("panelProgressFill").style.width = n + "%", document.getElementById("panelProgressText").textContent = `${t} / ${e} videno`, "function" == typeof _epRatingRefreshPanel && _epRatingRefreshPanel(activeSeries)
+  const o = findNextEp(activeSeries);
+  document.getElementById("panelProgressFill").style.width = n + "%", document.getElementById("panelProgressText").textContent = `${t} / ${e} videno${o && t ? ` · Další S${o.se} E${o.ep}` : ""}`, "function" == typeof _epRatingRefreshPanel && _epRatingRefreshPanel(activeSeries)
 }
 
 function calcTotalProgress() {
@@ -1032,7 +1033,7 @@ function renderPersonalisedRow(e, t, n) {
   const r = document.createElement("div");
   r.className = "disco-row";
   const l = document.createElement("div");
-  l.className = "disco-row-header", l.innerHTML = `\n        <div class="disco-row-title">\n          ✦ Pro tebe\n          <span class="drt-tag">AI VÝBĚR</span>\n        </div>\n        <div class="disco-row-nav" style="gap:8px;align-items:center;">\n          <button onclick="refreshPersonalisedRow()" style="font-size:0.52rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:${a};background:rgba(0,122,255,0.07);border:1px solid rgba(0,122,255,0.2);border-radius:20px;padding:5px 12px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(0,122,255,0.15)'" onmouseout="this.style.background='rgba(0,122,255,0.07)'">\n            ↻ Nová doporučení\n          </button>\n          <button class="disco-row-nav-btn" onclick="discoScrollRow(this,-1)">\n            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>\n          </button>\n          <button class="disco-row-nav-btn" onclick="discoScrollRow(this,1)">\n            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>\n          </button>\n        </div>`;
+  l.className = "disco-row-header", l.innerHTML = `\n        <div class="disco-row-title">\n            ✦ Doporučení\n          <span class="drt-tag">AI VÝBĚR</span>\n        </div>\n        <div class="disco-row-nav" style="gap:8px;align-items:center;">\n          <button onclick="refreshPersonalisedRow()" style="font-size:0.52rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:${a};background:rgba(0,122,255,0.07);border:1px solid rgba(0,122,255,0.2);border-radius:20px;padding:5px 12px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(0,122,255,0.15)'" onmouseout="this.style.background='rgba(0,122,255,0.07)'">\n            ↻ Nová doporučení\n          </button>\n          <button class="disco-row-nav-btn" onclick="discoScrollRow(this,-1)">\n            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>\n          </button>\n          <button class="disco-row-nav-btn" onclick="discoScrollRow(this,1)">\n            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>\n          </button>\n        </div>`;
   const c = document.createElement("div");
   c.className = "disco-row-scroll", c.id = "personalisedRowScroll", o.slice(0, 24).forEach(({
     item: e,
@@ -1075,7 +1076,7 @@ function refreshPersonalisedRow() {
     t = e?.querySelector(".disco-section");
   if (t) {
     const e = t.querySelector(".disco-row-title");
-    e && e.textContent.includes("Pro tebe") && t.remove()
+    e && e.textContent.includes("Doporučení") && t.remove()
   }
   loadDiscoContent(_discoCurrent.genre, _discoCurrent.type)
 }
@@ -1316,7 +1317,7 @@ async function loadDiscoContent(e, t) {
     const c = t.replace(/'/g, "\\'"),
       d = r.vote_average ? r.vote_average.toFixed(1) : "",
       m = (r.release_date || r.first_air_date || "").slice(0, 4);
-    l.innerHTML = `\n          <div class="disco-hero-badge">\n            <span class="disco-hero-badge-type">${"movie"===e?"🎬 Film":"📺 Seriál"}</span>\n            ${d?`<span class="disco-hero-badge-rating">★ ${d}</span>`:""}\n            ${m?`<span class="disco-hero-badge-year">${m}</span>`:""}\n          </div>\n          <div class="disco-hero-title">${t}</div>\n          <div class="disco-hero-desc">${(r.overview||"Žádný popis není k dispozici.").substring(0,160)}${(r.overview||"").length>160?"…":""}</div>\n          <div class="disco-hero-btns">\n            <button class="disco-hero-btn primary" onclick="event.stopPropagation();if(heroItem.id){window._mfFinderTmdbId=heroItem.id;window._cinYear='${m}';'tv'==='${e}'?openDiscoverTv(heroItem.id,'${c}'):_showCinemaOrFinderChoice(heroItem.id,'${c}','${e}',null);}else{openWithCopy('${c}','${e}','${m}');closeUniverse();}">▶ Přehrát</button>\n            <button class="disco-hero-btn secondary" onclick="event.stopPropagation();shAddToWatchlistByItem({name:'${c}',media_type:'${e}'});showToast('Přidáno do watchlistu 🔖')">＋ Watchlist</button>\n          </div>`, o.append(i, a, s, l), o.onclick = () => {
+    l.innerHTML = `\n          <div class="disco-hero-badge">\n            <span class="disco-hero-badge-type">${"movie"===e?"🎬 Film":"📺 Seriál"}</span>\n            ${d?`<span class="disco-hero-badge-rating">★ ${d}</span>`:""}\n            ${m?`<span class="disco-hero-badge-year">${m}</span>`:""}\n          </div>\n          <div class="disco-hero-title">${t}</div>\n          <div class="disco-hero-desc">${(r.overview||"Žádný popis není k dispozici.").substring(0,160)}${(r.overview||"").length>160?"…":""}</div>\n          <div class="disco-hero-btns">\n            <button class="disco-hero-btn primary" onclick="event.stopPropagation();if(heroItem.id){window._mfFinderTmdbId=heroItem.id;window._cinYear='${m}';'tv'==='${e}'?openDiscoverTv(heroItem.id,'${c}'):_showCinemaOrFinderChoice(heroItem.id,'${c}','${e}',null);}else{openWithCopy('${c}','${e}','${m}');closeUniverse();}    ">↗ Otevřít na externím webu</button>\n                <button class="disco-hero-btn secondary" onclick="event.stopPropagation();shAddToWatchlistByItem({name:'${c}',media_type:'${e}'});showToast('Přidáno do Mého seznamu 🔖')">＋ Můj seznam</button>\n          </div>`, o.append(i, a, s, l), o.onclick = () => {
       r.id ? (window._mfFinderTmdbId = r.id, window._cinYear = (r.release_date || r.first_air_date || "").slice(0, 4) || null, _showCinemaOrFinderChoice(r.id, t, e, t)) : (openWithCopy(t, e, (r.release_date || r.first_air_date || "").slice(0, 4) || null), closeUniverse())
     }, TMDB_KEY && r.id && (o.addEventListener("mouseenter", () => {
       o._t = setTimeout(async () => {
@@ -1513,7 +1514,7 @@ function shAddToWatchlist() {
     name: t,
     type: n ? "movie" : "series",
     poster: e.poster_path ? `https://image.tmdb.org/t/p/w185${e.poster_path}` : ""
-  }), saveWatchlistData(o), showToast("Přidáno do Chci koukat! 🔖"));
+  }), saveWatchlistData(o), showToast("Přidáno do Mého seznamu! 🔖"));
   const a = document.getElementById("shPreviewWlBtn"),
     s = getWatchlist().some(e => e.name === t);
   a && (a.classList.toggle("in-wl", s), a.textContent = s ? "✓ V seznamu" : "🔖 Chci koukat")
@@ -1745,7 +1746,7 @@ function _buildEpCardBase(e, t, n, o, i, a, s) {
     g = o && o.still ? o.still : s,
     f = !i && o && o.still,
     y = document.createElement("div");
-  return y.className = "episode-card" + (i ? " watched" : "") + (a ? " next-ep" : "") + (f ? " spoiler-blur" : ""), y.id = `card-${e}`, y.innerHTML = `\n        <div class="ep-thumb">\n          <img src="${g}" alt="" loading="lazy">\n          ${a?'<div class="ep-next-tag">Další</div>':""}\n          <div class="ep-seen-dot">✓</div>\n          ${f?'<div class="spoiler-label"><span style="font-size:1.4rem">🙈</span><span>Spoiler</span></div>':""}\n          <div class="ep-hover-play">\n            <div class="ep-play-ring">\n              <svg viewBox="0 0 10 12"><polygon points="0,0 10,6 0,12"/></svg>\n            </div>\n          </div>\n        </div>\n        <div class="ep-body">\n          <div class="ep-meta-row">\n            <span class="ep-num">S${t} · E${n}</span>\n            ${u?`<span class="ep-runtime">${u}</span>`:""}\n            ${p?`<span class="ep-rating">★ ${p}</span>`:""}\n          </div>\n          <div class="ep-title">${d}</div>\n          ${m?`<div class="ep-desc">${m}</div>`:""}\n          <div class="ep-actions">\n            <button class="ep-btn-play-hbo">\n              <svg viewBox="0 0 10 12" width="10" height="12"><polygon points="0,0 10,6 0,12" fill="currentColor"/></svg>\n              Pustit\n            </button>\n            <button class="ep-btn-mark" title="${i?"Označit jako neshlédnuté":"Označit jako shlédnuté"}">${i?"✓":"○"}</button>\n          </div>\n        </div>`, y.querySelector(".ep-btn-play-hbo").addEventListener("click", o => {
+  return y.className = "episode-card" + (i ? " watched" : "") + (a ? " next-ep" : "") + (f ? " spoiler-blur" : ""), y.id = `card-${e}`, y.innerHTML = `\n        <div class="ep-thumb">\n          <img src="${g}" alt="" loading="lazy">\n          ${a?'<div class="ep-next-tag">Další</div>':""}\n          <div class="ep-seen-dot">✓</div>\n          ${f?'<div class="spoiler-label"><span style="font-size:1.4rem">🙈</span><span>Spoiler</span></div>':""}\n          <div class="ep-hover-play">\n            <div class="ep-play-ring">\n              <svg viewBox="0 0 10 12"><polygon points="0,0 10,6 0,12"/></svg>\n            </div>\n          </div>\n        </div>\n        <div class="ep-body">\n          <div class="ep-meta-row">\n            <span class="ep-num">S${t} · E${n}</span>\n            ${u?`<span class="ep-runtime">${u}</span>`:""}\n            ${p?`<span class="ep-rating">★ ${p}</span>`:""}\n          </div>\n          <div class="ep-title">${d}</div>\n          ${m?`<div class="ep-desc">${m}</div>`:""}\n          <div class="ep-actions">\n            <button class="ep-btn-play-hbo">\n              <svg viewBox="0 0 10 12" width="10" height="12"><polygon points="0,0 10,6 0,12" fill="currentColor"/></svg>\n                Otevřít epizodu\n            </button>\n            <button class="ep-btn-mark" title="${i?"Označit jako neshlédnuté":"Označit jako shlédnuté"}">${i?"✓":"○"}</button>\n          </div>\n        </div>`, y.querySelector(".ep-btn-play-hbo").addEventListener("click", o => {
     o.stopPropagation(), playWithConfirm(e, t, n, c)
   }), y.querySelector(".ep-hover-play").addEventListener("click", o => {
     o.stopPropagation(), playWithConfirm(e, t, n, c)
@@ -1759,7 +1760,7 @@ function playWithConfirm(e, t, n, o) {
     a = db[activeSeries]?.tmdbId,
     s = `${i} — S${String(t).padStart(2,"0")}E${String(n).padStart(2,"0")}`;
   const _ps = (activeSeries.startsWith('__dtv_') && db[activeSeries]?._svetSlug) ? db[activeSeries]._svetSlug : activeSeries;
-  a ? (window._cinSiteSlug = _ps, _showCinemaOrFinderChoice(a + "/" + t + "/" + n, s, "tv_ep", o), markWatched(e)) : showConfirm("▶", "Pustit epizodu?", s, "▶ Pustit", () => {
+  a ? (window._cinSiteSlug = _ps, _showCinemaOrFinderChoice(a + "/" + t + "/" + n, s, "tv_ep", o), markWatched(e)) : showConfirm("↗", "Otevřít epizodu?", s, "Otevřít na externím webu", () => {
     markWatched(e), window.open(o, "_blank", "noopener,noreferrer")
   })
 }
@@ -1862,7 +1863,7 @@ function shuffleEpisode() {
     const i = `https://svetserialu.to/serial/${_ss}/s${String(t).padStart(2,"0")}e${String(o).padStart(2,"0")}`,
       a = db[activeSeries]?.tmdbId,
       s = `${db[activeSeries].name} — S${String(t).padStart(2,"0")}E${String(o).padStart(2,"0")}`;
-    a ? (markWatched(e), window._cinSiteSlug = _ss, _showCinemaOrFinderChoice(a + "/" + t + "/" + o, s, "tv_ep", i)) : showConfirm("🎲", "Náhodná epizoda", s, "▶ Pustit", () => {
+    a ? (markWatched(e), window._cinSiteSlug = _ss, _showCinemaOrFinderChoice(a + "/" + t + "/" + o, s, "tv_ep", i)) : showConfirm("🎲", "Náhodná epizoda", s, "Otevřít na externím webu", () => {
       markWatched(e), window.open(i, "_blank", "noopener,noreferrer")
     })
   }, 90)
@@ -3673,7 +3674,7 @@ function showFinderResults(e, t, n) {
     const e = new URL(a.url).hostname.replace("www.", ""),
       n = `https://www.google.com/s2/favicons?domain=${e}&sz=32`,
       o = s ? `\n          <button onclick="_cancelFinderCountdown();closeFinderModal();openMovieInCinema('${s}','${(t||"").replace(/'/g,"\\'")}','${r}');" style="flex:1;padding:10px;border-radius:12px;background:linear-gradient(135deg,#007AFF,#5ac8fa);border:none;color:#fff;font-size:0.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">\n            🎬 Kino\n          </button>` : "",
-      i = `\n          <button onclick="_cancelFinderCountdown();window.open('${a.url}','_blank','noopener');closeFinderModal();" style="flex:1;padding:10px;border-radius:12px;background:${s?"rgba(255,255,255,0.09)":"#007AFF"};border:${s?"1px solid rgba(255,255,255,0.12)":"none"};color:#fff;font-size:0.78rem;font-weight:${s?"500":"700"};cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">\n            <svg viewBox="0 0 24 24" width="13" height="13" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg> ${s?"Bombuj / SvetSer.":"Přehrát teď"}\n          </button>`;
+      i = `\n          <button onclick="_cancelFinderCountdown();window.open('${a.url}','_blank','noopener');closeFinderModal();" style="flex:1;padding:10px;border-radius:12px;background:${s?"rgba(255,255,255,0.09)":"#007AFF"};border:${s?"1px solid rgba(255,255,255,0.12)":"none"};color:#fff;font-size:0.78rem;font-weight:${s?"500":"700"};cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">\n            <svg viewBox="0 0 24 24" width="13" height="13" fill="white"><polygon points="5 3 19 12 5 21 5 3"/>      </svg> ${s?"Bombuj / SvetSer.":"Otevřít na externím webu"}\n          </button>`;
     l += `\n          <div id="mfFinderBestResult" style="\n            border-radius:18px;\n            background:linear-gradient(135deg,rgba(0,122,255,0.18) 0%,rgba(0,122,255,0.07) 100%);\n            border:1.5px solid rgba(0,122,255,0.35);\n            padding:18px 18px 14px;\n            margin-bottom:2px;\n            box-shadow:0 8px 32px rgba(0,122,255,0.12),inset 0 1px 0 rgba(0,122,255,0.2);\n          ">\n            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">\n              <img alt="" src="${n}" width="20" height="20" style="border-radius:5px;opacity:0.9;" onerror="this.style.display='none'">\n              <div style="flex:1;min-width:0;">\n                <div style="font-size:0.85rem;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.title||t}</div>\n                <div style="font-size:0.58rem;color:rgba(0,180,255,0.7);margin-top:1px;">${e}</div>\n              </div>\n              <span style="font-size:0.6rem;background:rgba(0,122,255,0.2);color:rgba(100,200,255,0.9);padding:3px 8px;border-radius:20px;font-weight:700;">Nejlepší shoda</span>\n            </div>\n            <div style="display:flex;gap:8px;">\n              ${o}${i}\n            </div>\n          </div>`
   }
   const c = e.filter(e => e !== a);
@@ -7138,7 +7139,7 @@ async function collectionsOpenDetail(e) {
         }
       }
     }));
-  l && m[0]?.backdrop && (l.style.backgroundImage = `url(https://image.tmdb.org/t/p/w780${m[0].backdrop})`), c && (c.innerHTML = m.map((e, t) => `\n        <div class="collections-film-row" onclick="collectionsPlayFilm('${e.title.replace(/'/g,"\\'")}','movie')">\n          <div class="collections-film-num">${e.order}</div>\n          <div class="collections-film-poster">${e.poster?`<img src="${e.poster}" alt="" loading="lazy">`:""}</div>\n          <div class="collections-film-info">\n            <div class="collections-film-title">${e.title}</div>\n            <div class="collections-film-meta">${e.year}</div>\n          </div>\n          ${e.rating?`<div class="collections-film-rating">★ ${e.rating}</div>`:""}\n          <button class="collections-film-play" title="Přehrát" onclick="event.stopPropagation();collectionsPlayFilm('${e.title.replace(/'/g,"\\'")}','movie')">▶</button>\n        </div>\n      `).join(""))
+  l && m[0]?.backdrop && (l.style.backgroundImage = `url(https://image.tmdb.org/t/p/w780${m[0].backdrop})`), c && (c.innerHTML = m.map((e, t) => `\n        <div class="collections-film-row" onclick="collectionsPlayFilm('${e.title.replace(/'/g,"\\'")}','movie')">\n          <div class="collections-film-num">${e.order}</div>\n          <div class="collections-film-poster">${e.poster?`<img src="${e.poster}" alt="" loading="lazy">`:""}</div>\n          <div class="collections-film-info">\n            <div class="collections-film-title">${e.title}</div>\n            <div class="collections-film-meta">${e.year}</div>\n          </div>\n          ${e.rating?`<div class="collections-film-rating">★ ${e.rating}</div>`:""}\n          <button class="collections-film-play" title="  Otevřít na externím webu" onclick="event.stopPropagation();collectionsPlayFilm('${e.title.replace(/'/g,"\\'")}','movie')">▶</button>\n        </div>\n      `).join(""))
 }
 
 function collectionsPlayFilm(e, t) {
@@ -9017,7 +9018,7 @@ setTimerPreset(45), document.addEventListener("keydown", function(e) {
   });
 const _origOpenWatchlist = window.openWatchlist;
 "function" == typeof _origOpenWatchlist && (window.openWatchlist = function(...e) {
-  return setDockActive("dockWatchlist"), _origOpenWatchlist.apply(this, e)
+  return setDockActive("dockProtebe"), _origOpenWatchlist.apply(this, e)
 });
 const _origCloseWatchlist = window.closeWatchlist;
 
@@ -9947,7 +9948,7 @@ window.adminSavePerKey = function(e, t) {
     }, window.addEventListener("hashchange", n), document.addEventListener("DOMContentLoaded", () => setTimeout(n, 900));
     const o = window.setDockActive;
     window.setDockActive = function(e) {
-      o && o(e), ["dockHome", "dockFilmy", "dockProtebe", "dockMore", "dockAI"].forEach(t => {
+      o && o(e), ["dockHome", "dockFilmy", "dockProtebe", "dockProfile", "dockMore"].forEach(t => {
         const n = document.getElementById(t);
         n && (t === e ? n.classList.add("active") : n.classList.remove("active"))
       })
@@ -10728,7 +10729,7 @@ function _cinShowLauncher(e) {
 
 function _cinShowFileWarning(e) {
   let t = document.getElementById("cinemaFileWarn");
-  t || (t = document.createElement("div"), t.id = "cinemaFileWarn", t.style.cssText = "position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;", document.getElementById("cinemaModal").appendChild(t)), t.style.display = "flex", t.innerHTML = `\n      <div style="background:rgba(28,28,30,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:32px 28px;max-width:420px;width:100%;text-align:center;font-family:Inter,sans-serif;">\n        <div style="font-size:2.5rem;margin-bottom:12px;">🔒</div>\n        <div style="font-size:1rem;font-weight:700;color:#fff;margin-bottom:8px;">Chrome blokuje přehrávač</div>\n        <div style="font-size:0.75rem;color:rgba(255,255,255,0.45);line-height:1.6;margin-bottom:24px;">\n          Soubor je otevřen přes <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px;">file://</code> protokol.<br>\n          Chrome z bezpečnostních důvodů blokuje video iframy.<br><br>\n          <strong style="color:rgba(255,255,255,0.7);">Řešení:</strong> Otevři MůjFlix přes lokální server.\n        </div>\n\n        \x3c!-- Možnost 1: Otevřít přímo zdroj --\x3e\n        <button onclick="window.open('${e}','_blank','noopener')" style="width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#007AFF,#5ac8fa);border:none;color:#fff;font-size:0.85rem;font-weight:700;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">\n          <svg viewBox="0 0 24 24" width="15" height="15" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>\n          Přehrát v nové kartě (nejrychlejší)\n        </button>\n\n        \x3c!-- Možnost 2: Instrukce na lokální server --\x3e\n        <button onclick="document.getElementById('cinLocalServerHelp').style.display=document.getElementById('cinLocalServerHelp').style.display==='none'?'block':'none'" style="width:100%;padding:12px;border-radius:14px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:0.78rem;font-weight:600;cursor:pointer;margin-bottom:10px;">\n          🖥️ Jak spustit lokální server?\n        </button>\n        <div id="cinLocalServerHelp" style="display:none;text-align:left;background:rgba(0,0,0,0.4);border-radius:12px;padding:16px;margin-bottom:10px;">\n          <div style="color:rgba(255,255,255,0.8);font-size:0.72rem;line-height:1.8;">\n            <strong style="color:#5ac8fa;">Možnost A — VS Code:</strong><br>\n            Nainstaluj rozšíření <em>Live Server</em> → klikni pravým na soubor → <em>Open with Live Server</em><br><br>\n            <strong style="color:#5ac8fa;">Možnost B — Python:</strong><br>\n            Otevři terminál ve složce se souborem a spusť:<br>\n            <code style="display:block;background:rgba(255,255,255,0.08);padding:8px 12px;border-radius:8px;margin-top:6px;font-size:0.75rem;color:#fff;">python -m http.server 8080</code>\n            <span style="color:rgba(255,255,255,0.4);font-size:0.65rem;">Pak otevři: http://localhost:8080/mujflix.html</span>\n          </div>\n        </div>\n\n        <button onclick="closeCinema()" style="width:100%;padding:10px;border-radius:12px;background:transparent;border:none;color:rgba(255,255,255,0.25);font-size:0.72rem;cursor:pointer;">Zavřít</button>\n      </div>`
+  t || (t = document.createElement("div"), t.id = "cinemaFileWarn", t.style.cssText = "position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;", document.getElementById("cinemaModal").appendChild(t)), t.style.display = "flex", t.innerHTML = `\n      <div style="background:rgba(28,28,30,0.97);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:32px 28px;max-width:420px;width:100%;text-align:center;font-family:Inter,sans-serif;">\n        <div style="font-size:2.5rem;margin-bottom:12px;">🔒</div>\n        <div style="font-size:1rem;font-weight:700;color:#fff;margin-bottom:8px;">Chrome blokuje přehrávač</div>\n        <div style="font-size:0.75rem;color:rgba(255,255,255,0.45);line-height:1.6;margin-bottom:24px;">\n          Soubor je otevřen přes <code style="background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px;">file://</code> protokol.<br>\n          Chrome z bezpečnostních důvodů blokuje video iframy.<br><br>\n          <strong style="color:rgba(255,255,255,0.7);">Řešení:</strong> Otevři MůjFlix přes lokální server.\n        </div>\n\n        \x3c!-- Možnost 1: Otevřít přímo zdroj --\x3e\n        <button onclick="window.open('${e}','_blank','noopener')" style="width:100%;padding:14px;border-radius:14px;background:linear-gradient(135deg,#007AFF,#5ac8fa);border:none;color:#fff;font-size:0.85rem;font-weight:700;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">\n          <svg viewBox="0 0 24 24" width="15" height="15" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>\n            Otevřít na externím webu\n        </button>\n\n        \x3c!-- Možnost 2: Instrukce na lokální server --\x3e\n        <button onclick="document.getElementById('cinLocalServerHelp').style.display=document.getElementById('cinLocalServerHelp').style.display==='none'?'block':'none'" style="width:100%;padding:12px;border-radius:14px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:0.78rem;font-weight:600;cursor:pointer;margin-bottom:10px;">\n          🖥️ Jak spustit lokální server?\n        </button>\n        <div id="cinLocalServerHelp" style="display:none;text-align:left;background:rgba(0,0,0,0.4);border-radius:12px;padding:16px;margin-bottom:10px;">\n          <div style="color:rgba(255,255,255,0.8);font-size:0.72rem;line-height:1.8;">\n            <strong style="color:#5ac8fa;">Možnost A — VS Code:</strong><br>\n            Nainstaluj rozšíření <em>Live Server</em> → klikni pravým na soubor → <em>Open with Live Server</em><br><br>\n            <strong style="color:#5ac8fa;">Možnost B — Python:</strong><br>\n            Otevři terminál ve složce se souborem a spusť:<br>\n            <code style="display:block;background:rgba(255,255,255,0.08);padding:8px 12px;border-radius:8px;margin-top:6px;font-size:0.75rem;color:#fff;">python -m http.server 8080</code>\n            <span style="color:rgba(255,255,255,0.4);font-size:0.65rem;">Pak otevři: http://localhost:8080/mujflix.html</span>\n          </div>\n        </div>\n\n        <button onclick="closeCinema()" style="width:100%;padding:10px;border-radius:12px;background:transparent;border:none;color:rgba(255,255,255,0.25);font-size:0.72rem;cursor:pointer;">Zavřít</button>\n      </div>`
 }
 
 function _cinBuildSourceBar() {
