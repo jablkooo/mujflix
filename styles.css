@@ -10462,6 +10462,39 @@ body.grain-off::after {
   gap: 14px;
   cursor: pointer;
 }
+.pg-avatar-wrap {
+  position: relative;
+}
+.pg-remove-btn {
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  width: 25px;
+  height: 25px;
+  border: 2px solid rgba(8, 9, 15, .92);
+  border-radius: 50%;
+  background: #ff453a;
+  color: #fff;
+  font-size: 1.15rem;
+  line-height: 19px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 69, 58, .35);
+  animation: pgRemoveIn .18s ease both;
+  z-index: 3;
+}
+.pg-remove-btn:hover {
+  background: #ff6258;
+  transform: scale(1.1);
+}
+@keyframes pgRemoveIn {
+  from { opacity: 0; transform: scale(.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+.pg-manage-btn.active {
+  color: #fff;
+  border-color: rgba(10, 132, 255, .45);
+  background: rgba(10, 132, 255, .14);
+}
 .pg-avatar {
   width: 118px;
   height: 118px;

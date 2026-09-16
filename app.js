@@ -5240,11 +5240,12 @@ const ProfileGate = {
   _pinBuffer: "",
   _pinTargetId: null,
   _editingId: null,
+  _manageMode: false,
   _selectedEmoji: PROFILE_EMOJIS[0],
   _selectedColor: PROFILE_COLORS[0],
   show() {
     const e = document.getElementById("mfProfileGate");
-    e && (e.style.display = "flex", e.classList.remove("hiding")), this.renderGate()
+    e && (e.style.display = "flex", e.classList.remove("hiding")), this._manageMode = false, this.renderGate()
   },
   hide() {
     const e = document.getElementById("mfProfileGate");
@@ -5258,10 +5259,29 @@ const ProfileGate = {
     const t = _getProfiles();
     e.innerHTML = "", t.forEach(t => {
       const n = document.createElement("div");
-      n.className = "pg-profile-item", n.innerHTML = `\n            <div class="pg-avatar" style="--pg-color:${t.color||"#007AFF"};${getActiveProfileId()===t.id?"border-color:"+t.color+";box-shadow:0 0 0 1px "+t.color+",0 8px 40px rgba(0,0,0,0.6);":""}">\n              ${t.avatar||"🎬"}\n            </div>\n            <div class="pg-name">${t.name}</div>\n          `, n.onclick = () => ProfileGate.selectProfile(t.id), e.appendChild(n)
+      n.className = "pg-profile-item" + (this._manageMode ? " pg-manage-mode" : ""), n.innerHTML = `\n+            <div class="pg-avatar-wrap">\n+              <div class="pg-avatar" style="--pg-color:${t.color||"#007AFF"};${getActiveProfileId()===t.id?"border-color:"+t.color+";box-shadow:0 0 0 1px "+t.color+",0 8px 40px rgba(0,0,0,0.6);":""}">\n+                ${t.avatar||"🎬"}\n+              </div>\n+              ${this._manageMode ? `<button class="pg-remove-btn" type="button" aria-label="Odebrat profil ${t.name}" onclick="event.stopPropagation(); window.ProfileGate?.removeProfile('${t.id}')">−</button>` : ""}
+            </div>
+            <div class="pg-name">${t.name}</div>
+          `, n.onclick = () => this._manageMode ? void 0 : ProfileGate.selectProfile(t.id), e.appendChild(n)
     });
     const n = document.createElement("div");
     n.className = "pg-profile-item", n.innerHTML = '\n          <div class="pg-add-btn">＋</div>\n          <div class="pg-name" style="color:rgba(255,255,255,0.35)">Přidat profil</div>\n        ', n.onclick = () => ProfileGate.openCreate(), e.appendChild(n)
+    const manage = document.getElementById("profileManageBtn");
+    if (manage) {
+      manage.textContent = this._manageMode ? "Hotovo" : "Upravit";
+      manage.classList.toggle("active", this._manageMode);
+    }
+  },
+  toggleManageMode() {
+    this._manageMode = !this._manageMode;
+    this.renderGate();
+  },
+  removeProfile(e) {
+    const t = _getProfiles().find(t => t.id === e);
+    if (!t || !confirm(`Opravdu odebrat profil „${t.name}“?`)) return;
+    deleteUser(e);
+    this._manageMode = true;
+    this.renderGate();
   },
   selectProfile(e) {
     // OPRAVA: robustní select — loguje proč případně selhalo
