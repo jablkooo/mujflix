@@ -1739,6 +1739,175 @@ body { position: relative; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   DISCOVER v10 — compact editorial layout
+═══════════════════════════════════════════════════════════════ */
+.universe-overlay .disco-header {
+  height: 70px !important;
+  padding: 0 clamp(16px, 3.5vw, 48px) !important;
+  gap: 28px !important;
+}
+.universe-overlay .disco-header-left {
+  min-width: 150px !important;
+}
+.universe-overlay .disco-logo {
+  font-size: .5rem !important;
+  letter-spacing: 2.8px !important;
+}
+.universe-overlay .disco-title {
+  font-size: 1.08rem !important;
+}
+.universe-overlay .uni-search-wrap {
+  min-height: 40px !important;
+  max-width: 520px !important;
+  border-radius: 11px !important;
+}
+.universe-overlay .uni-input {
+  font-size: .78rem !important;
+}
+.universe-overlay .disco-nav {
+  height: 50px !important;
+  top: 70px !important;
+  padding: 0 clamp(16px, 3.5vw, 48px) !important;
+  gap: 4px !important;
+}
+.universe-overlay .disco-nav-item,
+#discoNav .disco-nav-item {
+  height: 30px !important;
+  padding: 0 11px !important;
+  border-radius: 8px !important;
+  font-size: .62rem !important;
+}
+.universe-overlay .disco-hero {
+  min-height: 280px !important;
+  height: min(42vh, 380px) !important;
+  max-height: 380px !important;
+}
+.universe-overlay .disco-hero-content {
+  left: clamp(16px, 3.5vw, 48px) !important;
+  right: 48% !important;
+  padding: 26px 0 !important;
+}
+.universe-overlay .disco-hero-title {
+  font-size: clamp(1.55rem, 3vw, 2.45rem) !important;
+}
+.universe-overlay .disco-hero-desc {
+  font-size: .76rem !important;
+  -webkit-line-clamp: 2 !important;
+}
+.universe-overlay .disco-row-header,
+#discoBody .disco-row-header {
+  padding: 22px clamp(16px, 3.5vw, 48px) 0 !important;
+}
+.universe-overlay .disco-row-title,
+#discoBody .disco-row-title,
+#discoBody .disco-row:first-child .disco-row-title {
+  font-size: .98rem !important;
+  letter-spacing: -.2px !important;
+}
+.universe-overlay .drt-tag,
+#discoBody .drt-tag {
+  color: rgba(114,184,255,.78) !important;
+  background: rgba(10,132,255,.1) !important;
+  border-color: rgba(10,132,255,.2) !important;
+}
+#discoBody button[onclick*="refreshPersonalisedRow"],
+.universe-overlay button[onclick*="refreshPersonalisedRow"] {
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+  border-radius: 9px !important;
+  color: #72b8ff !important;
+  background: rgba(10,132,255,.1) !important;
+  border: 1px solid rgba(10,132,255,.2) !important;
+}
+#discoBody button[onclick*="refreshPersonalisedRow"]::after,
+.universe-overlay button[onclick*="refreshPersonalisedRow"]::after {
+  content: "↻" !important;
+  font-size: .95rem !important;
+}
+.universe-overlay .disco-row-scroll,
+#discoBody .disco-row-scroll {
+  gap: 11px !important;
+  padding: 12px clamp(16px, 3.5vw, 48px) 18px !important;
+}
+.universe-overlay .disco-card,
+#discoBody .disco-card {
+  width: 142px !important;
+  min-width: 142px !important;
+  height: 213px !important;
+  border-radius: 12px !important;
+}
+.universe-overlay .disco-card:hover,
+#discoBody .disco-card:hover {
+  transform: translateY(-3px) !important;
+}
+.universe-overlay .disco-card-info,
+#discoBody .disco-card-info {
+  padding: 10px !important;
+}
+.universe-overlay .disco-card-name,
+#discoBody .disco-card-name {
+  font-size: .7rem !important;
+  line-height: 1.2 !important;
+}
+.universe-overlay .disco-card-meta,
+#discoBody .disco-card-meta {
+  gap: 4px !important;
+}
+.universe-overlay .disco-card-type,
+#discoBody .disco-card-type {
+  font-size: .5rem !important;
+  padding: 2px 5px !important;
+}
+.universe-overlay .disco-card-rating,
+#discoBody .disco-card-rating {
+  font-size: .56rem !important;
+}
+.universe-overlay .disco-card-finder-btn,
+#discoBody .disco-card-finder-btn {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 7px !important;
+}
+.universe-overlay .dr-expand {
+  display: none !important;
+}
+body.discover-open #mfDock {
+  transform: translateX(-50%) scale(.78) !important;
+  opacity: .72 !important;
+}
+@media (max-width: 700px) {
+  .universe-overlay .disco-header {
+    height: 112px !important;
+    gap: 7px !important;
+    padding: 10px 14px !important;
+  }
+  .universe-overlay .disco-header-left {
+    min-width: auto !important;
+  }
+  .universe-overlay .disco-nav {
+    top: 112px !important;
+    height: 48px !important;
+    padding: 0 14px !important;
+  }
+  .universe-overlay .disco-hero {
+    min-height: 280px !important;
+    height: 42vh !important;
+  }
+  .universe-overlay .disco-hero-content {
+    right: 10% !important;
+  }
+  .universe-overlay .disco-card,
+  #discoBody .disco-card {
+    width: 118px !important;
+    min-width: 118px !important;
+    height: 177px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
    DISCOVER v9 — quiet, modern chrome
 ═══════════════════════════════════════════════════════════════ */
 .universe-overlay .disco-header {
@@ -2335,4 +2504,5 @@ body.discover-open #mfDock .dock-btn {
 #dr-btt:hover {
   background: rgba(20,20,30,0.95) !important;
   color: rgba(255,255,255,0.9) !important;
+}
 }
