@@ -10827,66 +10827,100 @@ body.grain-off::after {
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 .pc-box {
-  background: #111115;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 36px 40px;
-  width: min(420px, 95vw);
-  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.8);
+  background: linear-gradient(160deg, rgba(22, 25, 36, .98), rgba(12, 14, 21, .99));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 28px;
+  width: min(460px, 95vw);
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(10, 132, 255, .04);
   max-height: 90vh;
   overflow-y: auto;
 }
+.pc-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.pc-eyebrow {
+  color: rgba(114, 184, 255, .78);
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .4px;
+  margin-bottom: 6px;
+}
+.pc-close {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.58);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.pc-close:hover { background: rgba(255,255,255,.11); color: #fff; }
 .pc-title {
   font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
-  font-size: 1.15rem;
+  font-size: 1.35rem;
   font-weight: 900;
   color: #fff;
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 .pc-subtitle {
-  margin: -16px 0 24px;
-  color: rgba(255,255,255,.42);
-  font-size: .72rem;
+  margin: 8px 0 26px;
+  color: rgba(255,255,255,.52);
+  font-size: .76rem;
   line-height: 1.45;
 }
 .pc-label {
-  font-size: 0.62rem;
+  font-size: 0.74rem;
   font-weight: 700;
-  letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.3);
-  text-transform: uppercase;
-  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.68);
+  margin-bottom: 9px;
+}
+.pc-label-note {
+  color: rgba(255,255,255,.34);
+  font-weight: 500;
+  margin-left: 4px;
+}
+.pc-hint {
+  margin: -4px 0 10px;
+  color: rgba(255,255,255,.34);
+  font-size: .68rem;
 }
 .pc-input {
   width: 100%;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 11px 14px;
+  border-radius: 12px;
+  padding: 13px 14px;
   color: #fff;
   font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
   font-size: 0.88rem;
   outline: 0;
   box-sizing: border-box;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
   transition: border-color 0.2s;
 }
 .pc-input:focus {
   border-color: rgba(0, 122, 255, 0.4);
 }
 .pc-emoji-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-bottom: 18px;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 22px;
 }
 .pc-emoji-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.03);
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   cursor: pointer;
   transition: all 0.15s;
   display: flex;
@@ -10906,7 +10940,7 @@ body.grain-off::after {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
 .pc-color-swatch {
   width: 32px;
@@ -10939,7 +10973,7 @@ body.grain-off::after {
 .pc-pin-row {
   display: flex;
   gap: 8px;
-  margin-bottom: 24px;
+  margin-bottom: 26px;
 }
 .pc-pin-digit {
   width: 48px;
@@ -10947,7 +10981,7 @@ body.grain-off::after {
   text-align: center;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 11px;
   color: #fff;
   font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
   font-size: 1.4rem;
@@ -11013,15 +11047,16 @@ body.grain-off::after {
 .pc-btn-row {
   display: flex;
   gap: 10px;
+  padding-top: 4px;
 }
 .pc-btn-save {
   flex: 1;
   padding: 12px;
-  background: linear-gradient(135deg, #007aff, #b8cc00);
+  background: #0a84ff;
   border: none;
-  border-radius: 8px;
-  color: #000;
-  font-weight: 900;
+  border-radius: 11px;
+  color: #fff;
+  font-weight: 700;
   font-size: 0.85rem;
   cursor: pointer;
   font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
@@ -11035,7 +11070,7 @@ body.grain-off::after {
   padding: 12px 20px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 11px;
   color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
@@ -11045,6 +11080,12 @@ body.grain-off::after {
 .pc-btn-cancel:hover {
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.8);
+}
+@media (max-width: 480px) {
+  .pc-box { padding: 24px 20px; border-radius: 20px; }
+  .pc-emoji-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 7px; }
+  .pc-emoji-btn { font-size: 1.2rem; }
+  .pc-btn-row { position: sticky; bottom: -24px; margin: 0 -20px -24px; padding: 14px 20px; background: rgba(12,14,21,.96); }
 }
 #mfProfileBadge {
   position: fixed;
