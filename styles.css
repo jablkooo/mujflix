@@ -30,7 +30,7 @@
 #mfWelcomeNote {
   position: absolute;
   top: 50%;
-  right: 104px;
+  right: 170px;
   z-index: 12;
   max-width: min(280px, 48vw);
   padding: 8px 13px;
