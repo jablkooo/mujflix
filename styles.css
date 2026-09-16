@@ -11274,6 +11274,52 @@ body.grain-off::after {
   color: rgba(255, 255, 255, 0.28);
   margin-left: 1px;
 }
+#mfProfileBadge {
+  min-width: 72px;
+  min-height: 64px;
+  box-sizing: border-box;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 9px;
+  border-radius: 18px;
+}
+#mfProfileBadge .mpb-avatar {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 1.35rem;
+}
+#mfProfileBadge .mpb-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+#mfProfileBadge .mpb-name {
+  max-width: 74px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .72rem;
+}
+#mfProfileBadge .mpb-arrow { font-size: .55rem; }
+@media (max-width: 520px) {
+  #mfProfileBadge {
+    min-width: 62px;
+    min-height: 58px;
+    right: 10px;
+    padding: 6px 7px;
+    border-radius: 16px;
+  }
+  #mfProfileBadge .mpb-avatar {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+  }
+  #mfProfileBadge .mpb-name { display: none; }
+}
 .trakt-profile-pill {
   display: inline-flex;
   align-items: center;
