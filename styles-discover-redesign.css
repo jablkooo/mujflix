@@ -206,51 +206,6 @@
   cursor: pointer !important;
   padding: 0.25em !important;
 }
-.mf-search-history {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
-  padding: 10px;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 14px;
-  background: rgba(14,14,22,0.985);
-  box-shadow: 0 18px 42px rgba(0,0,0,0.45);
-}
-.mf-search-history:empty {
-  display: none;
-}
-.mf-search-history-title {
-  padding: 4px 8px 7px;
-  color: rgba(255,255,255,0.4);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-}
-.mf-search-history-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-height: 42px;
-  padding: 10px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: rgba(255,255,255,0.78);
-  font: 500 0.76rem/1.2 var(--dr-font);
-  text-align: left;
-  cursor: pointer;
-}
-.mf-search-history-item:hover,
-.mf-search-history-item:focus-visible {
-  background: rgba(255,255,255,0.08);
-  outline: none;
-}
-.mf-search-history-item span {
-  color: rgba(255,255,255,0.35);
-}
 .mf-search-empty {
   min-height: 320px;
   display: flex;

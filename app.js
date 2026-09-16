@@ -9940,7 +9940,8 @@ function openMovieInCinema(e, t, n) {
     siteSlug: window._cinSiteSlug || null
   }, window._cinSiteSlug = null, window._cinYear = null, document.getElementById("cinemaTitle").textContent = s || "Přehrávám…", document.getElementById("cinemaSubtitle").textContent = "tv" === n ? `S${String(o).padStart(2,"0")}E${String(i).padStart(2,"0")}` : "";
   const r = document.getElementById("cinemaModal");
-  r.style.display = "flex", r.style.opacity = "1", document.body.style.overflow = "hidden", _cinBuildSourceBar(), _cinLoadEpPicker();
+  if (!r) return;
+  r.classList.add("open"), r.style.display = "flex", r.style.opacity = "1", document.body.style.overflow = "hidden", _cinBuildSourceBar(), _cinLoadEpPicker();
   const l = TMDB_KEY,
     c = () => {
       if (window.CinAI) {
@@ -10224,7 +10225,7 @@ function closeCinema() {
   const e = document.getElementById("cinemaFrameWrap");
   e && (e.innerHTML = "");
   const t = document.getElementById("cinemaModal");
-  t.style.display = "none", t.style.opacity = "", document.getElementById("cinemaLoader").style.display = "none";
+  t.classList.remove("open"), t.style.display = "none", t.style.opacity = "", document.getElementById("cinemaLoader").style.display = "none";
   const n = document.getElementById("cinemaFileWarn");
   n && (n.style.display = "none"), document.body.style.overflow = ""
 }
