@@ -702,14 +702,11 @@ function renderSearchHistory() {
   const e = document.getElementById("mfSearchHistory");
   if (!e) return;
   const t = getSearchHistory();
-  e.innerHTML = t.length ? `<div class="mf-search-history-title">Poslední hledání</div>${t.map(n => `<button type="button" class="mf-search-history-item" data-query="${escapeHTML(n)}"><span>↗</span>${escapeHTML(n)}</button>`).join("")}<button type="button" class="mf-search-history-clear">Vymazat historii</button>` : "";
+  e.innerHTML = t.length ? `<div class="mf-search-history-title">Poslední hledání</div>${t.map(n => `<button type="button" class="mf-search-history-item" data-query="${escapeHTML(n)}"><span>↗</span>${escapeHTML(n)}</button>`).join("")}` : "";
   e.querySelectorAll(".mf-search-history-item").forEach(n => n.addEventListener("click", () => {
     const o = document.getElementById("searchTitleInput");
     o && (o.value = n.dataset.query || "", onSearchInput(o.value), o.focus());
   }));
-  e.querySelector(".mf-search-history-clear")?.addEventListener("click", () => {
-    safeSetItem(MF_SEARCH_HISTORY_KEY, "[]"), renderSearchHistory();
-  });
 }
 function saveSearchHistory(e) {
   const t = e.trim();

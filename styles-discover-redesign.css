@@ -228,8 +228,7 @@
   letter-spacing: 0.4px;
   text-transform: uppercase;
 }
-.mf-search-history-item,
-.mf-search-history-clear {
+.mf-search-history-item {
   width: 100%;
   display: flex;
   align-items: center;
@@ -251,15 +250,6 @@
 }
 .mf-search-history-item span {
   color: rgba(255,255,255,0.35);
-}
-.mf-search-history-clear {
-  justify-content: center;
-  margin-top: 4px;
-  color: rgba(255,255,255,0.4);
-  font-size: 0.65rem;
-}
-.mf-search-history-clear:hover {
-  color: #4da6ff;
 }
 .mf-search-empty {
   min-height: 320px;
