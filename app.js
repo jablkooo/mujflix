@@ -5331,7 +5331,10 @@ const ProfileGate = {
       void 0 !== aiBrain && aiBrain.reloadForProfile(), "function" == typeof refreshUserContent && refreshUserContent(), "function" == typeof updateWatchlistBadge && updateWatchlistBadge(), "function" == typeof updateWatchlistBtns && updateWatchlistBtns(), "function" == typeof updateLogoProgress && updateLogoProgress(), "function" == typeof updateContinueWidget && updateContinueWidget()
     }, 100);
     const t = _getProfiles().find(t => t.id === e);
-    t && "function" == typeof showToast && showToast("✨ Ahoj, " + t.name + " — pojďme něco najít.", "success")
+    if (t) {
+      const n = document.getElementById("mfWelcomeNote");
+      n && (n.textContent = "Ahoj, " + t.name + " — pojďme něco najít.", n.classList.add("show"), clearTimeout(n._timer), n._timer = setTimeout(() => n.classList.remove("show"), 4200));
+    }
   },
   openPin(e) {
     this._pinBuffer = "", this._pinTargetId = e.id;
@@ -5403,14 +5406,53 @@ const ProfileGate = {
     try {
       const data = await tmdbGet(e === "tv" ? "/trending/tv/week?language=cs" : "/trending/movie/week?language=cs");
       const items = (data?.results || []).filter(t => t.poster_path).slice(0, 12);
-      grid.innerHTML = items.length ? items.map(t => `
-        <button type="button" class="pc-avatar-option${this._selectedAvatar === "https://image.tmdb.org/t/p/w185" + t.poster_path ? " selected" : ""}" onclick="window.ProfileGate?.pickAvatar('${"https://image.tmdb.org/t/p/w185" + t.poster_path}','${String(t.title || t.name || "").replace(/'/g, "\\'")}',this)">
-          <img src="https://image.tmdb.org/t/p/w185${t.poster_path}" alt="${String(t.title || t.name || "").replace(/"/g, "&quot;")}" loading="lazy">
-          <span>${String(t.title || t.name || "").slice(0, 18)}</span>
-        </button>`).join("") : '<div class="pc-avatar-loading">Postavy se nepodařilo načíst.</div>';
+      this._renderAvatarTitles(items, e);
+    } catch (err) {
+      grid.innerHTML = '<div class="pc-avatar-loading">Tituly se nepodařilo načíst.</div>';
+      console.warn("[ProfileGate] Avatar picker", err);
+    }
+  },
+  async searchAvatarTitles(e) {
+    const q = e.trim(), grid = document.getElementById("pcAvatarGrid");
+    if (!grid || !q) return this.loadAvatarPicker(document.querySelector(".pc-avatar-tabs button.active")?.dataset.avatarType || "movie");
+    clearTimeout(this._avatarSearchTimer);
+    this._avatarSearchTimer = setTimeout(() => this._searchAvatarTitles(q), 280);
+  },
+  async _searchAvatarTitles(q) {
+    const grid = document.getElementById("pcAvatarGrid");
+    if (!grid) return;
+    grid.innerHTML = '<div class="pc-avatar-loading">Hledám…</div>';
+    try {
+      const type = document.querySelector(".pc-avatar-tabs button.active")?.dataset.avatarType || "movie";
+      const data = await tmdbGet(`/search/${type}?query=${encodeURIComponent(q)}&language=cs`);
+      this._renderAvatarTitles((data?.results || []).filter(t => t.poster_path).slice(0, 12), type);
+    } catch (err) {
+      grid.innerHTML = '<div class="pc-avatar-loading">Vyhledávání se nepodařilo.</div>';
+    }
+  },
+  _renderAvatarTitles(items, type) {
+    const grid = document.getElementById("pcAvatarGrid");
+    if (!grid) return;
+    grid.innerHTML = items.length ? items.map(t => `
+      <button type="button" class="pc-avatar-option" onclick="window.ProfileGate?.loadAvatarCharacters(${t.id},'${type}')">
+        <img src="https://image.tmdb.org/t/p/w185${t.poster_path}" alt="${String(t.title || t.name || "").replace(/"/g, "&quot;")}" loading="lazy">
+        <span>${String(t.title || t.name || "").slice(0, 18)}</span>
+      </button>`).join("") : '<div class="pc-avatar-loading">Nic jsme nenašli.</div>';
+  },
+  async loadAvatarCharacters(id, type) {
+    const grid = document.getElementById("pcAvatarGrid");
+    if (!grid) return;
+    grid.innerHTML = '<div class="pc-avatar-loading">Načítám postavy…</div>';
+    try {
+      const data = await tmdbGet(`/${type}/${id}/credits?language=cs`);
+      const cast = (data?.cast || []).filter(t => t.profile_path).slice(0, 20);
+      grid.innerHTML = cast.length ? `<button type="button" class="pc-avatar-back" onclick="window.ProfileGate?.loadAvatarPicker('${type}')">← Zpět na tituly</button>` + cast.map(t => `
+        <button type="button" class="pc-avatar-option pc-character-option" onclick="window.ProfileGate?.pickAvatar('https://image.tmdb.org/t/p/w185${t.profile_path}','${String(t.character || t.name || "").replace(/'/g, "\\'")}',this)">
+          <img src="https://image.tmdb.org/t/p/w185${t.profile_path}" alt="${String(t.character || t.name || "").replace(/"/g, "&quot;")}" loading="lazy">
+          <span>${String(t.character || t.name || "").slice(0, 18)}</span>
+        </button>`).join("") : '<div class="pc-avatar-loading">Postavy jsme nenašli.</div>';
     } catch (err) {
       grid.innerHTML = '<div class="pc-avatar-loading">Postavy se nepodařilo načíst.</div>';
-      console.warn("[ProfileGate] Avatar picker", err);
     }
   },
   pickAvatar(e, t, n) {
