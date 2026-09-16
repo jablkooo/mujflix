@@ -9924,6 +9924,7 @@ let _cinState = {
 };
 
 function openMovieInCinema(e, t, n) {
+  if (window.MFCinemaPlayer) return window.MFCinemaPlayer.open(e, t, n);
   let o = 1,
     i = 1,
     a = e;
