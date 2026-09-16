@@ -9938,11 +9938,17 @@ function openMovieInCinema(e, t, n) {
     totalEps: {},
     year: window._cinYear || null,
     siteSlug: window._cinSiteSlug || null
-  }, window._cinSiteSlug = null, window._cinYear = null, document.getElementById("cinemaTitle").textContent = s || "Přehrávám…", document.getElementById("cinemaSubtitle").textContent = "tv" === n ? `S${String(o).padStart(2,"0")}E${String(i).padStart(2,"0")}` : "";
+  }, window._cinSiteSlug = null, window._cinYear = null;
   const r = document.getElementById("cinemaModal");
   if (!r) return;
-  r.classList.add("open"), r.style.display = "flex", r.style.opacity = "1", document.body.style.overflow = "hidden", _cinBuildSourceBar(), _cinLoadEpPicker();
-  const l = TMDB_KEY,
+  r.parentNode !== document.body && document.body.appendChild(r);
+  const l = typeof TMDB_KEY !== "undefined" ? TMDB_KEY : "",
+    titleEl = document.getElementById("cinemaTitle"),
+    subtitleEl = document.getElementById("cinemaSubtitle");
+  titleEl && (titleEl.textContent = s || "Přehrávám…");
+  subtitleEl && (subtitleEl.textContent = "tv" === n ? `S${String(o).padStart(2,"0")}E${String(i).padStart(2,"0")}` : "");
+  r.classList.add("open"), r.style.display = "flex", r.style.visibility = "visible", r.style.opacity = "1", document.body.style.overflow = "hidden", _cinBuildSourceBar(), _cinLoadEpPicker();
+  const
     c = () => {
       if (window.CinAI) {
         const e = document.getElementById("cinemaSourceBar");
@@ -10225,7 +10231,8 @@ function closeCinema() {
   const e = document.getElementById("cinemaFrameWrap");
   e && (e.innerHTML = "");
   const t = document.getElementById("cinemaModal");
-  t.classList.remove("open"), t.style.display = "none", t.style.opacity = "", document.getElementById("cinemaLoader").style.display = "none";
+  t && (t.classList.remove("open"), t.style.display = "none", t.style.visibility = "", t.style.opacity = "");
+  document.getElementById("cinemaLoader").style.display = "none";
   const n = document.getElementById("cinemaFileWarn");
   n && (n.style.display = "none"), document.body.style.overflow = ""
 }

@@ -15348,6 +15348,12 @@ html {
 #cinemaModal {
   contain: strict;
 }
+#cinemaModal.open {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 999999 !important;
+}
 :root {
   --bg: #07090f;
   --bg2: #0c0f1a;
