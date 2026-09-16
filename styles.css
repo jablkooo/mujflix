@@ -19268,6 +19268,79 @@ body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-btn-mark {
     flex-wrap: wrap;
     gap: 8px !important;
   }
+
+  /* Compact, still-readable episode picker for long-running series. */
+  #seriesModal .modal-hero {
+    height: 250px !important;
+  }
+  #seriesModal .modal-hero-content {
+    padding: 18px 30px !important;
+  }
+  #seriesModal .modal-hero-left h2 {
+    font-size: clamp(1.65rem, 3vw, 2.15rem) !important;
+  }
+  #seriesModal .panel-btns {
+    gap: 8px !important;
+  }
+  #seriesModal .panel-btns > button {
+    min-height: 42px !important;
+    padding: 0 16px !important;
+    font-size: .78rem !important;
+  }
+  #seriesModal .episode-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+    padding: 12px 22px 110px !important;
+  }
+  body:not(.tv-mode):not(.appletv-mode) .episode-card {
+    min-height: 138px !important;
+    margin: 0 !important;
+  }
+  body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-thumb {
+    width: 142px !important;
+    min-width: 142px !important;
+  }
+  body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-body {
+    padding: 12px 13px !important;
+  }
+  body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-title {
+    font-size: .9rem !important;
+  }
+  body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-desc {
+    -webkit-line-clamp: 1 !important;
+    max-height: 21px !important;
+  }
+  @media (max-width: 900px) {
+    #seriesModal .episode-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+  @media (max-width: 600px) {
+    #seriesModal .modal-hero {
+      height: 220px !important;
+    }
+    #seriesModal .modal-hero-content {
+      padding: 15px 18px !important;
+      display: block !important;
+    }
+    #seriesModal .panel-btns {
+      margin-top: 12px !important;
+      flex-wrap: wrap !important;
+    }
+    #seriesModal .panel-btns > button {
+      min-height: 36px !important;
+      padding: 0 11px !important;
+      font-size: .7rem !important;
+    }
+    #seriesModal .episode-grid {
+      padding: 10px 12px 100px !important;
+    }
+    body:not(.tv-mode):not(.appletv-mode) .episode-card .ep-thumb {
+      width: 120px !important;
+      min-width: 120px !important;
+    }
+  }
   .ep-view-title {
     order: 3;
     flex-basis: 100%;
