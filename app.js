@@ -4556,7 +4556,7 @@ window.addEventListener("load", () => {
       }), e.addEventListener("error", t, {
         once: !0
       }))
-    }), loadForYouTile(), loadTrending(), setKbMenuFocus(0), initMagnetic(document.getElementById("aiFab"), .3), initMagnetic(document.getElementById("statsFab"), .4), document.querySelectorAll(".ps-tile-wrapper").forEach(e => {
+    }), loadForYouTile(), loadTrending(), setKbMenuFocus(0), initMagnetic(document.getElementById("aiFab"), .3), document.querySelectorAll(".ps-tile-wrapper").forEach(e => {
       e.addEventListener("click", () => playOpen(), {
         passive: !0
       })
@@ -7136,26 +7136,6 @@ const EDIT_STORAGE_KEY = "mf_fab_layout_v2",
     icon: "🤖",
     selector: "#aiFab"
   }, {
-    id: "watchlistFab",
-    name: "Watchlist",
-    icon: "🔖",
-    selector: "#watchlistFab"
-  }, {
-    id: "statsFab",
-    name: "Wrapped",
-    icon: "🎬",
-    selector: "#statsFab"
-  }, {
-    id: "editPremiereFab",
-    name: "Premiéry",
-    icon: "📅",
-    selector: ".premiere-fab"
-  }, {
-    id: "editColFab",
-    name: "Kolekce",
-    icon: "🎞",
-    selector: ".collections-fab"
-  }, {
     id: "voiceModeFab",
     name: "Hlas",
     icon: "🎤",
@@ -7308,7 +7288,7 @@ function toggleEditProp(e, t) {
       break;
     case "label":
       a.label = !1 === a.label;
-      const e = n.querySelector(".mf-fab-label,.premiere-fab-label,.collections-fab-label");
+      const e = n.querySelector(".mf-fab-label");
       e && (e.style.display = !1 === a.label ? "none" : ""), _syncToggle("editToggleLabel", !1 !== a.label);
       break;
     case "magnet":
@@ -7405,7 +7385,7 @@ function _clearFabStyles(e) {
   t.style.width = "", t.style.height = "", t.style.borderRadius = "", t.style.boxShadow = "", t.style.filter = "", t.style.borderColor = "", t.style.backdropFilter = "", t.style.borderWidth = "";
   const n = e.querySelector("svg");
   n && (n.style.color = "");
-  const o = e.querySelector(".mf-fab-label,.premiere-fab-label,.collections-fab-label");
+  const o = e.querySelector(".mf-fab-label");
   o && (o.style.display = "")
 }
 
@@ -7413,7 +7393,7 @@ function _applyColor(e, t, n) {
   t.style.borderColor = n + "55", t.style.boxShadow = `0 4px 20px rgba(0,0,0,0.6), 0 0 18px ${n}22`;
   const o = e.querySelector("svg");
   o && (o.style.color = n);
-  const i = e.querySelector(".mf-fab-label,.premiere-fab-label,.collections-fab-label");
+  const i = e.querySelector(".mf-fab-label");
   i && (i.style.color = n)
 }
 
@@ -7501,7 +7481,7 @@ function _applyStoredProps(e, t) {
   if (!n) return;
   const o = e.querySelector(".mf-fab-icon") || e;
   void 0 !== n.x && (e.style.left = "auto", e.style.right = "auto", e.style.left = n.x + "px"), void 0 !== n.y && (e.style.bottom = "auto", e.style.top = "auto", e.style.bottom = n.y + "px"), n.w && (o.style.width = n.w + "px"), n.h && (o.style.height = n.h + "px"), void 0 !== n.r && (o.style.borderRadius = n.r + "px"), void 0 !== n.opacity && (e.style.opacity = n.opacity / 100), n.color && _applyColor(e, o, n.color), !1 === n.shadow && (o.style.boxShadow = "none"), !1 === n.glow && (o.style.filter = "none"), !1 === n.blur && (o.style.backdropFilter = "none"), !1 === n.border && (o.style.borderWidth = "0"), n.pulse && (e.style.animation = "fabPulse 2s ease-in-out infinite");
-  const i = e.querySelector(".mf-fab-label,.premiere-fab-label,.collections-fab-label");
+  const i = e.querySelector(".mf-fab-label");
   i && !1 === n.label && (i.style.display = "none"), n.hidden ? e.classList.add("fab-hidden-by-user") : e.classList.remove("fab-hidden-by-user")
 }
 
