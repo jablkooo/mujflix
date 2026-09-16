@@ -557,6 +557,30 @@ body.discover-open #mfDock:focus-within {
   transition: all 0.125s !important;
   user-select: none !important;
 }
+.disco-nav-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 13px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,.055);
+  color: rgba(255,255,255,.68);
+  font: inherit;
+  font-size: .7rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+.disco-nav-more:hover,
+.disco-nav-more[aria-expanded="true"] {
+  background: rgba(10,132,255,.16);
+  border-color: rgba(10,132,255,.42);
+  color: #fff;
+}
+#discoNav .mf-genre-hidden { display: none !important; }
+#discoNav.mf-genres-expanded .mf-genre-hidden { display: inline-flex !important; }
 .universe-overlay .disco-nav-item::before { display: none !important; }
 .universe-overlay .disco-nav-item svg,
 #discoNav .disco-nav-item svg {
