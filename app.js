@@ -9916,17 +9916,16 @@ window.adminSavePerKey = function(e, t) {
       const n = document.querySelector(".ps-menu-scene"),
         o = document.querySelector(".key-hint"),
         i = document.getElementById("continueWidget"),
-        a = document.getElementById("mfSectionProtebe"),
-        r = document.querySelector(".mf-home-intro");
-      n && (n.style.display = ""), o && (o.style.display = ""), i && (i.style.display = ""), r && (r.style.display = ""), a && (a.style.display = "none");
+        a = document.getElementById("mfSectionProtebe");
+      n && (n.style.display = ""), o && (o.style.display = ""), i && (i.style.display = ""), a && (a.style.display = "none");
       const s = document.getElementById("mfSectionPlex");
       if (s && (s.style.display = "none"), document.body.classList.remove("mf-section-protebe"), "function" == typeof closeDockOverlays && closeDockOverlays(), "serialy" === t) setDockActive("dockHome"), location.hash = "#serialy";
-      else if ("filmy" === t) n && (n.style.display = "none"), o && (o.style.display = "none"), i && (i.style.display = "none"), r && (r.style.display = "none"), setDockActive("dockFilmy"), location.hash = "#filmy", "function" == typeof openUniverse && (openUniverse(), setTimeout(() => {
+      else if ("filmy" === t) n && (n.style.display = "none"), o && (o.style.display = "none"), i && (i.style.display = "none"), setDockActive("dockFilmy"), location.hash = "#filmy", "function" == typeof openUniverse && (openUniverse(), setTimeout(() => {
         document.querySelectorAll('[data-rtype="movie"], [onclick*="movie"], .disco-filter-btn').forEach(e => {
           (e.textContent.toLowerCase().includes("film") || "movie" === e.dataset.rtype) && e.click()
         })
       }, 350));
-      else if ("protebe" === t) n && (n.style.display = "none"), o && (o.style.display = "none"), i && (i.style.display = "none"), r && (r.style.display = "none"), a && (a.style.display = "block"), document.body.classList.add("mf-section-protebe"), setDockActive("dockProtebe"), location.hash = "#protebe";
+      else if ("protebe" === t) n && (n.style.display = "none"), o && (o.style.display = "none"), i && (i.style.display = "none"), a && (a.style.display = "block"), document.body.classList.add("mf-section-protebe"), setDockActive("dockProtebe"), location.hash = "#protebe";
       else if ("plex" === t) {
         n && (n.style.display = "none"), o && (o.style.display = "none"), i && (i.style.display = "none"), a && (a.style.display = "none");
         const e = document.getElementById("mfSectionPlex");
