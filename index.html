@@ -2695,7 +2695,7 @@
         class="dock-btn active"
         id="dockHome"
         data-hash="#serialy"
-        onclick="setDockActive('dockHome'); mfShowSection('serialy')"
+        onclick="event.preventDefault(); event.stopPropagation(); setDockActive('dockHome'); mfShowSection('serialy'); closeUniverse();"
         title="Domů"
         aria-label="Domů"
       >
