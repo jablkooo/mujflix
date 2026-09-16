@@ -1616,9 +1616,9 @@ function renderSeasons() {
   const n = document.getElementById("seasonCounter");
   n && (n.textContent = showAllSeasons ? "Vsechny" : `${activeSeason} / ${t}`);
   const o = document.getElementById("seasonAllBtn");
-  o && (o.className = "season-all-btn" + (showAllSeasons ? " active" : ""), o.textContent = showAllSeasons ? "✕ Aktuální" : "☰ Vše");
+  o && (o.className = "season-all-btn" + (showAllSeasons ? " active" : ""), o.textContent = showAllSeasons ? "← Jedna sezóna" : "☰ Všechny epizody");
   const i = document.getElementById("epViewSeasonText");
-  i && (i.textContent = showAllSeasons ? "Všechny série" : `Série ${activeSeason}`), renderSeasonSelectView()
+  i && (i.textContent = showAllSeasons ? "Všechny sezóny" : `Sezóna ${activeSeason}`), renderSeasonSelectView()
 }
 
 function renderSeasonSelectView() {
@@ -5623,6 +5623,12 @@ function refreshUserContent() {
     gate.style.opacity = "1";
     gate.classList.remove("hiding");
     ProfileGate.renderGate();
+    // Render once more after the first layout pass so profiles are visible
+    // even when storage-backed profile data finishes initializing late.
+    requestAnimationFrame(() => {
+      const list = document.getElementById("pgProfilesList");
+      if (list && !list.children.length) ProfileGate.renderGate();
+    });
   }
 
   if (document.readyState === "loading") {

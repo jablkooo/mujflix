@@ -56,6 +56,149 @@
   --hh:  70px;
 }
 
+/* Accessible genre picker and clearer filter contrast */
+#discoNav {
+  background: rgba(10, 14, 24, 0.94) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+}
+#discoNav .disco-nav-label {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+}
+#discoNav .disco-nav-item {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: rgba(255, 255, 255, 0.86) !important;
+}
+#discoNav .disco-nav-item:hover:not(.active) {
+  background: rgba(10, 132, 255, 0.2) !important;
+  border-color: rgba(86, 166, 255, 0.6) !important;
+}
+#discoNav .disco-nav-more {
+  min-height: 38px !important;
+  padding: 0 15px !important;
+  background: rgba(10, 132, 255, 0.18) !important;
+  border-color: rgba(86, 166, 255, 0.55) !important;
+  color: #dceeff !important;
+  font-size: .72rem !important;
+}
+#discoNav .disco-nav-more:hover {
+  background: #0a84ff !important;
+  color: #fff !important;
+}
+body.mf-genre-picker-open {
+  overflow: hidden !important;
+}
+.mf-genre-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.mf-genre-picker.is-open {
+  display: flex;
+}
+.mf-genre-picker-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 5, 12, .72);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+}
+.mf-genre-picker-dialog {
+  position: relative;
+  width: min(620px, 100%);
+  max-height: min(680px, calc(100vh - 48px));
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(25, 33, 49, .98), rgba(9, 14, 25, .98));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .5);
+}
+.mf-genre-picker-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+.mf-genre-picker-kicker {
+  display: block;
+  margin-bottom: 5px;
+  color: #62adff;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.mf-genre-picker-dialog h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.45rem;
+}
+.mf-genre-picker-close {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .08);
+  color: rgba(255, 255, 255, .82);
+  font-size: 1.45rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.mf-genre-picker-close:hover {
+  background: rgba(255, 255, 255, .16);
+  color: #fff;
+}
+.mf-genre-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.mf-genre-picker-grid .disco-nav-item {
+  width: 100%;
+  min-height: 48px;
+  justify-content: flex-start;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(255, 255, 255, .13) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, .08) !important;
+  color: rgba(255, 255, 255, .88) !important;
+  font-size: .78rem !important;
+  cursor: pointer;
+}
+.mf-genre-picker-grid .disco-nav-item:hover,
+.mf-genre-picker-grid .disco-nav-item.active {
+  border-color: rgba(86, 166, 255, .75) !important;
+  background: rgba(10, 132, 255, .28) !important;
+  color: #fff !important;
+}
+@media (max-width: 560px) {
+  .mf-genre-picker {
+    align-items: flex-end;
+    padding: 10px;
+  }
+  .mf-genre-picker-dialog {
+    max-height: calc(100vh - 20px);
+    padding: 20px 16px;
+    border-radius: 22px 22px 14px 14px;
+  }
+  .mf-genre-picker-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* ── FONT — Apple system stack z Jellyfin Glass ── */
 .universe-overlay,
 .universe-overlay * {
