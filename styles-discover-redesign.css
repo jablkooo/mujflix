@@ -1295,6 +1295,58 @@ body { position: relative; }
   .universe-overlay .disco-hero-content { right:5% !important; }
   .universe-overlay .disco-row-nav-btn { display:none !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   DISCOVER v11 — clearer filter groups
+═══════════════════════════════════════════════════════════════ */
+.universe-overlay .disco-nav {
+  align-items: center !important;
+  gap: 6px !important;
+}
+.universe-overlay .disco-nav-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 24px !important;
+  margin-right: 2px !important;
+  color: rgba(255,255,255,.35) !important;
+  font-size: .52rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.4px !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+.universe-overlay .disco-nav-divider {
+  width: 1px !important;
+  height: 22px !important;
+  margin: 0 7px !important;
+  background: rgba(255,255,255,.13) !important;
+  flex: 0 0 1px !important;
+}
+.universe-overlay .disco-nav-item[data-type="movie"] {
+  color: #ffb45c !important;
+}
+.universe-overlay .disco-nav-item[data-type="tv"] {
+  color: #7ed8a0 !important;
+}
+.universe-overlay .disco-nav-item[data-type="movie"].active,
+.universe-overlay .disco-nav-item[data-type="tv"].active {
+  color: #fff !important;
+}
+.universe-overlay .disco-nav-item[data-genre]:not([data-genre=""]) {
+  color: rgba(255,255,255,.58) !important;
+}
+.universe-overlay .disco-nav-item[data-genre]:not([data-genre=""]).active {
+  color: #72b8ff !important;
+}
+@media (max-width: 700px) {
+  .universe-overlay .disco-nav-label {
+    font-size: .46rem !important;
+    letter-spacing: 1px !important;
+  }
+  .universe-overlay .disco-nav-divider {
+    margin: 0 4px !important;
+  }
+}
 @media (max-width: 480px) {
   :root { --cw:118px; --ch:177px; --px:12px; --hh:auto; }
   .universe-overlay .disco-header { height:auto !important; padding:max(14px,env(safe-area-inset-top,14px)) 14px 12px !important; flex-wrap:wrap !important; gap:10px !important; }
