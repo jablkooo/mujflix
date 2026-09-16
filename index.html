@@ -2673,7 +2673,7 @@
       <button
         class="mf-header-btn"
         onclick="openSyncModal()"
-        title="Cloud sync"
+        title="Synchronizace zařízení"
         id="hdrSyncBtn"
       >
         <svg viewBox="0 0 24 24">
@@ -2719,33 +2719,34 @@
         <span class="dock-label">Objevovat</span>
       </button>
 
-      <!-- AI — central action -->
+      <!-- Profil — nastavení a další nástroje jsou dostupné uvnitř profilu -->
       <button
-        class="dock-btn dock-ai"
-        id="dockAI"
-        data-hash="#ai"
+        class="dock-btn"
+        id="dockProfile"
+        style="order:4"
+        data-hash="#profil"
         onclick="
-          openAi();
-          setDockActive('dockAI');
+          ProfileGate.show();
+          setDockActive('dockProfile');
         "
-        title="AI asistent"
+        title="Profil"
+        aria-label="Profil"
       >
         <svg viewBox="0 0 24 24" stroke-width="2">
-          <path
-            d="M12 2a7 7 0 0 1 7 7c0 2.5-1.3 4.7-3.2 6L15 21H9l-.8-6A7 7 0 0 1 12 2z"
-          />
-          <circle cx="12" cy="9" r="2.5" fill="currentColor" stroke="none" />
+          <path d="M20 21a8 8 0 0 0-16 0" />
+          <circle cx="12" cy="7" r="4" />
         </svg>
-        <span class="dock-label">AI</span>
+        <span class="dock-label">Profil</span>
       </button>
 
-      <!-- Pro tebe (watchlist + doporučení) -->
+      <!-- Doporučení a Můj seznam -->
       <button
         class="dock-btn"
         id="dockProtebe"
+        style="order:3"
         data-hash="#protebe"
-        onclick="mfShowSection('protebe')"
-        title="Pro tebe"
+        onclick="openWatchlist()"
+        title="Můj seznam"
         aria-label="Můj seznam a doporučení"
       >
         <svg viewBox="0 0 24 24">
@@ -2754,23 +2755,6 @@
           />
         </svg>
         <span class="dock-label">Můj seznam</span>
-      </button>
-
-
-      <!-- Hlas / Voice Cmd -->
-      <button
-        class="dock-btn"
-        id="dockVoice"
-        onclick="openVoiceCmd()"
-        title="Hlasové ovládání (V)"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-          <rect x="9" y="2" width="6" height="12" rx="3" />
-          <path d="M5 10a7 7 0 0 0 14 0" />
-          <line x1="12" y1="20" x2="12" y2="23" />
-          <line x1="8" y1="23" x2="16" y2="23" />
-        </svg>
-        <span class="dock-label">Hlas</span>
       </button>
     </nav>
 
@@ -2878,7 +2862,7 @@
             <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
           </svg>
           <span style="font-size: 0.78rem; font-weight: 500; flex: 1"
-            >Cloud Sync</span
+            >Synchronizace zařízení</span
           >
           <svg
             width="14"
@@ -2998,6 +2982,15 @@
           >
             <polyline points="9 18 15 12 9 6" />
           </svg>
+        </button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1px;margin-top:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden">
+        <button onclick="openAi(); closeDockMore()" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:transparent;border:none;cursor:pointer;width:100%;text-align:left;font-family:-apple-system,sans-serif;color:rgba(255,255,255,.92)">
+          <span aria-hidden="true">✦</span><span style="font-size:.78rem;font-weight:500;flex:1">AI doporučení</span><span aria-hidden="true">›</span>
+        </button>
+        <div style="height:.5px;background:rgba(84,84,88,.4);margin:0 16px"></div>
+        <button onclick="openVoiceCmd(); closeDockMore()" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:transparent;border:none;cursor:pointer;width:100%;text-align:left;font-family:-apple-system,sans-serif;color:rgba(255,255,255,.92)">
+          <span aria-hidden="true">🎤</span><span style="font-size:.78rem;font-weight:500;flex:1">Hlasové ovládání</span><span aria-hidden="true">›</span>
         </button>
       </div>
       <!-- PWA Install -->
@@ -3353,7 +3346,7 @@
                 event.stopPropagation();
                 toggleWatchlistItem('the-simpsons');
               "
-              title="Chci koukat"
+              title="Můj seznam"
             >
               &#x1F516;
             </button>
@@ -3399,7 +3392,7 @@
                 event.stopPropagation();
                 toggleWatchlistItem('family-guy');
               "
-              title="Chci koukat"
+              title="Můj seznam"
             >
               &#x1F516;
             </button>
@@ -3445,7 +3438,7 @@
                 event.stopPropagation();
                 toggleWatchlistItem('south-park');
               "
-              title="Chci koukat"
+              title="Můj seznam"
             >
               &#x1F516;
             </button>
@@ -3491,7 +3484,7 @@
                 event.stopPropagation();
                 toggleWatchlistItem('futurama');
               "
-              title="Chci koukat"
+              title="Můj seznam"
             >
               &#x1F516;
             </button>
@@ -3560,7 +3553,7 @@
           <div class="modal-hero-overlay"></div>
           <div class="modal-hero-content">
             <div class="modal-hero-left">
-              <h2 id="sTitle">Nazev</h2>
+              <h2 id="sTitle">Název</h2>
               <div class="modal-meta-row">
                 <span class="modal-meta-text" id="sInfo"></span>
                 <span id="tmdbBadge" class="tmdb-badge" style="display: none"
@@ -3587,7 +3580,7 @@
                   stroke-linejoin="round"
                 >
                   <polygon points="5 3 19 12 5 21 5 3" /></svg
-                >Pokracovat
+                >Pokračovat
               </button>
               <button class="btn-shuffle" onclick="shuffleEpisode()">
                 <svg
@@ -3602,7 +3595,7 @@
                   <line x1="4" y1="20" x2="21" y2="3" />
                   <polyline points="21 16 21 21 16 21" />
                   <line x1="15" y1="15" x2="21" y2="21" /></svg
-                >Nahodna <span class="kb">R</span>
+                >Náhodná <span class="kb">R</span>
               </button>
               <button
                 class="btn-shuffle"
@@ -3636,7 +3629,7 @@
                 "
                 title="Najít ke sledování na svetserialu.to a dalších"
               >
-                🔍 Přehrát
+                🔍 Otevřít na externím webu
               </button>
             </div>
           </div>
@@ -4253,7 +4246,7 @@
       class="watchlist-fab mf-fab"
       id="watchlistFab"
       onclick="openWatchlist()"
-      title="Chci koukat"
+      title="Můj seznam"
       style="position: fixed"
     >
       <div class="mf-fab-icon">
@@ -4269,7 +4262,7 @@
         </svg>
         <div class="watchlist-fab-badge" id="watchlistFabBadge">0</div>
       </div>
-      <span class="mf-fab-label">Watchlist</span>
+      <span class="mf-fab-label">Můj seznam</span>
     </button>
     <!-- STATS FAB -->
     <button
@@ -4338,13 +4331,14 @@
     <div class="watchlist-overlay" id="watchlistOverlay">
       <div class="watchlist-box">
         <div class="wl-header">
-          <div class="wl-title">Chci <span>koukat</span></div>
+          <div class="wl-title">Můj <span>seznam</span></div>
           <button class="wl-close" onclick="closeWatchlist()">&#x2715;</button>
         </div>
         <div class="wl-list" id="watchlistList">
           <div class="wl-empty" id="watchlistEmpty">
             <div class="wl-empty-icon">&#x1F3AC;</div>
-            <div>Zatim tu nic neni. Pridej filmy nebo serialy!</div>
+            <div>V seznamu zatím nic není. Přidej filmy nebo seriály a najdeš je tu na jednom místě.</div>
+            <button type="button" onclick="closeWatchlist(); mfShowSection('filmy')" style="margin-top:12px;padding:9px 14px;border:1px solid rgba(0,122,255,.35);border-radius:10px;background:rgba(0,122,255,.12);color:#fff;cursor:pointer">Objevovat</button>
           </div>
         </div>
       </div>
@@ -4366,11 +4360,11 @@
           />
           <div class="rating-movie-thumb-overlay"></div>
         </div>
-        <div class="rating-title" id="ratingTitle">Jak se ti libil serial?</div>
+        <div class="rating-title" id="ratingTitle">Jak se ti líbil seriál?</div>
         <div class="rating-subtitle">
-          Tvoje hodnoceni pomaze AI lepe doporucovat
+          Tvoje hodnocení pomůže AI lépe doporučovat
         </div>
-        <div class="rating-label">Ohodnot</div>
+        <div class="rating-label">Ohodnoť</div>
         <div class="rating-buttons">
           <button class="rating-btn loved" onclick="submitRating('loved')">
             <span class="rating-btn-emoji">&#x1F44D;&#x1F44D;</span
@@ -4378,7 +4372,7 @@
           </button>
           <button class="rating-btn liked" onclick="submitRating('liked')">
             <span class="rating-btn-emoji">&#x1F607;</span
-            ><span class="rating-btn-label">Libilo se</span>
+            ><span class="rating-btn-label">Líbilo se</span>
           </button>
           <button class="rating-btn ok" onclick="submitRating('ok')">
             <span class="rating-btn-emoji">&#x1F44D;</span
@@ -4386,10 +4380,10 @@
           </button>
           <button class="rating-btn meh" onclick="submitRating('meh')">
             <span class="rating-btn-emoji">&#x1F44E;</span
-            ><span class="rating-btn-label">Neni to ono</span>
+            ><span class="rating-btn-label">Není to ono</span>
           </button>
         </div>
-        <button class="rating-skip" onclick="closeRating()">Preskocit</button>
+        <button class="rating-skip" onclick="closeRating()">Přeskočit</button>
       </div>
     </div>
     <!-- NEXT EPISODE PROMPT -->
@@ -4410,7 +4404,7 @@
             id="nextEpPlayBtn"
             onclick="nextEpPlay()"
           >
-            ▶ Pustit
+            Otevřít epizodu
           </button>
           <button class="next-ep-dismiss" onclick="nextEpDismiss()">
             Přeskočit
@@ -4423,14 +4417,14 @@
     <div class="confirm-overlay" id="confirmOverlay">
       <div class="confirm-box">
         <div class="confirm-icon" id="confirmIcon">&#x25BA;</div>
-        <div class="confirm-title" id="confirmTitle">Pustit epizodu?</div>
+        <div class="confirm-title" id="confirmTitle">Otevřít epizodu?</div>
         <div class="confirm-sub" id="confirmSub"></div>
         <div class="confirm-btns">
           <button class="confirm-ok" id="confirmOk" onclick="confirmOk()">
-            &#x25BA; Pustit
+            Otevřít na externím webu
           </button>
           <button class="confirm-cancel" onclick="confirmCancel()">
-            Zrusit
+            Zrušit
           </button>
         </div>
       </div>
@@ -4764,7 +4758,7 @@
                 id="ruletaPlayBtn"
                 onclick="ruletaPlay()"
               >
-                ▶ Přehrát
+                ↗ Otevřít na externím webu
               </button>
               <button
                 class="ruleta-again-btn"
@@ -7787,7 +7781,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-          ">Pro tebe</div>
+          ">Doporučení</div>
         </div>
 
         <!-- ══ WATCHLIST — velká karta ══ -->
@@ -7819,7 +7813,7 @@
             font-size: 1.5rem;
           ">🔖</div>
           <div style="flex: 1; min-width: 0;">
-            <div style="font-size: 0.95rem; font-weight: 700; margin-bottom: 2px;">Watchlist</div>
+            <div style="font-size: 0.95rem; font-weight: 700; margin-bottom: 2px;">Můj seznam</div>
             <div style="font-size: 0.65rem; color: rgba(255,255,255,0.38);">Vše co chceš sledovat</div>
           </div>
           <svg viewBox="0 0 24 24" width="15" height="15" stroke="rgba(255,255,255,0.2)" stroke-width="2.5" fill="none" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
@@ -8613,7 +8607,7 @@
             <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
-            Přehrát další epizodu
+            Otevřít další epizodu
           </button>
           <button
             onclick="
