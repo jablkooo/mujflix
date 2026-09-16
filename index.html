@@ -73,6 +73,14 @@
     <link rel="stylesheet" href="styles-apple-tv.css" />
     <link rel="stylesheet" href="styles-glass.css" />
     <link rel="stylesheet" href="styles-discover-redesign.css" />
+    <script>
+      (function () {
+        var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        var lowPower = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+        var reducedData = connection && connection.saveData;
+        if (lowPower || reducedData) document.documentElement.classList.add("mf-low-power");
+      })();
+    </script>
 
     <!-- ⚡ PROFILE GATE GUARD — gate je vždy první, obsah se odemkne až po výběru profilu -->
 
@@ -1511,21 +1519,6 @@
                   🎊 Konfety
                 </button>
                 <button
-                  onclick="adminOpenRuleta()"
-                  style="
-                    padding: 8px 16px;
-                    border-radius: 9px;
-                    background: rgba(255, 255, 255, 0.05);
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    color: rgba(255, 255, 255, 0.6);
-                    font-size: 0.68rem;
-                    font-weight: 700;
-                    cursor: pointer;
-                  "
-                >
-                  🎰 Otevřít ruletu
-                </button>
-                <button
                   onclick="adminForceWrapped()"
                   style="
                     padding: 8px 16px;
@@ -2700,13 +2693,14 @@
         id="dockHome"
         data-hash="#serialy"
         onclick="mfShowSection('serialy')"
-        title="Seriály"
+        title="Domů"
+        aria-label="Domů"
       >
         <svg viewBox="0 0 24 24">
           <rect x="2" y="3" width="20" height="14" rx="2" />
           <path d="M8 21h8M12 17v4" />
         </svg>
-        <span class="dock-label">Seriály</span>
+        <span class="dock-label">Domů</span>
       </button>
 
       <!-- Filmy / Discover -->
@@ -2715,13 +2709,14 @@
         id="dockFilmy"
         data-hash="#filmy"
         onclick="mfShowSection('filmy')"
-        title="Filmy"
+        title="Objevovat filmy a seriály"
+        aria-label="Objevovat filmy a seriály"
       >
         <svg viewBox="0 0 24 24">
           <rect x="2" y="2" width="20" height="20" rx="2.5" />
           <path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 7h5M17 17h5" />
         </svg>
-        <span class="dock-label">Filmy</span>
+        <span class="dock-label">Objevovat</span>
       </button>
 
       <!-- AI — central action -->
@@ -2744,20 +2739,21 @@
         <span class="dock-label">AI</span>
       </button>
 
-      <!-- Pro tebe (ruleta + watchlist) -->
+      <!-- Pro tebe (watchlist + doporučení) -->
       <button
         class="dock-btn"
         id="dockProtebe"
         data-hash="#protebe"
         onclick="mfShowSection('protebe')"
         title="Pro tebe"
+        aria-label="Můj seznam a doporučení"
       >
         <svg viewBox="0 0 24 24">
           <polygon
             points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
           />
         </svg>
-        <span class="dock-label">Pro tebe</span>
+        <span class="dock-label">Můj seznam</span>
       </button>
 
 
@@ -3314,6 +3310,28 @@
       <div class="autosave-dot"></div>
       <span id="autosaveText">Ulozeno</span>
     </div>
+
+    <section class="mf-home-intro" aria-labelledby="mfHomeTitle">
+      <div class="mf-home-intro-copy">
+        <span class="mf-home-kicker">MŮJ FLIX</span>
+        <h1 id="mfHomeTitle">Na co se dnes podíváš?</h1>
+        <p>Pokračuj tam, kde jsi skončil, nebo objev něco nového.</p>
+      </div>
+      <div class="mf-home-actions" aria-label="Rychlé akce">
+        <button class="mf-home-action mf-home-action-primary" type="button" onclick="openUniverse()">
+          <span aria-hidden="true">⌕</span>
+          <span>Hledat</span>
+        </button>
+        <button class="mf-home-action" type="button" onclick="openWatchlist()">
+          <span aria-hidden="true">🔖</span>
+          <span>Můj seznam</span>
+        </button>
+        <button class="mf-home-action" type="button" onclick="mfShowSection('protebe')">
+          <span aria-hidden="true">✦</span>
+          <span>Doporučení</span>
+        </button>
+      </div>
+    </section>
 
     <!-- MAIN MENU -->
     <div class="ps-menu-scene">
@@ -5806,8 +5824,8 @@
       <!-- HEADER — disco-header styl -->
       <div class="disco-header">
         <div class="disco-header-left">
-          <div class="disco-logo">MujFlix</div>
-          <div class="disco-title">Objev<span>ování</span></div>
+          <div class="disco-logo">MůjFlix</div>
+          <div class="disco-title">Objevování</div>
         </div>
         <!-- Search bar uprostřed -->
         <div
@@ -5825,16 +5843,19 @@
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
+          <label class="mf-search-label" for="searchTitleInput">Vyhledávání</label>
           <input
             id="searchTitleInput"
             class="uni-input"
             type="text"
-            placeholder="Hledat film nebo seriál…"
+            placeholder="Hledat film nebo seriál"
+            aria-label="Hledat film nebo seriál"
             onkeydown="handleSearchInputKey(event)"
             oninput="onSearchInput(this.value)"
             autocomplete="off"
             spellcheck="false"
           />
+          <div id="mfSearchHistory" class="mf-search-history" aria-label="Poslední hledání"></div>
           <button
             class="uni-clear-btn"
             id="shClearBtn"
@@ -5887,7 +5908,7 @@
             </svg>
             AI Doporučení
           </button>
-          <button class="disco-close" onclick="closeUniverse()">
+          <button class="disco-close" onclick="closeUniverse()" aria-label="Zavřít vyhledávání" title="Zavřít (Esc)">
             &#x2715;
           </button>
         </div>
@@ -7826,31 +7847,8 @@
           <svg viewBox="0 0 24 24" width="15" height="15" stroke="rgba(255,255,255,0.2)" stroke-width="2.5" fill="none" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
 
-        <!-- ══ 2-slot grid: Ruleta + AI ══ -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-
-          <!-- Ruleta -->
-          <button
-            onclick="openRuleta()"
-            style="
-              padding: 22px 14px 18px;
-              background: rgba(255,107,53,0.07);
-              border: 1px solid rgba(255,107,53,0.15);
-              border-radius: 20px;
-              color: #fff;
-              cursor: pointer;
-              text-align: center;
-              transition: all 0.22s ease;
-              box-shadow: 0 2px 20px rgba(0,0,0,0.2);
-            "
-            onmouseover="this.style.background='rgba(255,107,53,0.14)';this.style.borderColor='rgba(255,107,53,0.28)';this.style.transform='translateY(-2px)'"
-            onmouseout="this.style.background='rgba(255,107,53,0.07)';this.style.borderColor='rgba(255,107,53,0.15)';this.style.transform='translateY(0)'"
-          >
-            <div style="font-size: 2rem; margin-bottom: 10px; line-height: 1;">🎲</div>
-            <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 3px;">Ruleta</div>
-            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.32);">Náhodný výběr</div>
-          </button>
-
+        <!-- AI doporučení -->
+        <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px;">
           <!-- AI doporučení -->
           <button
             onclick="openAi(); setTimeout(() => { const i = document.getElementById('aiInput'); if (i) { i.value = 'Doporuč mi co koukat dnes večer'; if (typeof aiSend === 'function') aiSend(); } }, 400);"
@@ -8741,7 +8739,7 @@
       </div>
     </div>
 
-    <!-- firebase.js inline — vyhne se Cloudflare Access CORS bloku -->
+    <!-- Firebase sync engine inline — vyhne se Cloudflare Access CORS bloku -->
     <script type="module">
 import {
   initializeApp

@@ -14,7 +14,3 @@
 
 /app*.js
   Cache-Control: no-cache, must-revalidate
-
-/firebase.js
-  Cache-Control: no-cache, must-revalidate
-  Access-Control-Allow-Origin: *

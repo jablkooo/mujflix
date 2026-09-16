@@ -624,7 +624,11 @@ let _searchPlatform = "movies",
 
 function openUniverse() {
   const e = document.getElementById("universeOverlay");
-  e.classList.add("open"), requestAnimationFrame(() => requestAnimationFrame(() => e.classList.add("visible"))), kbLayer = "search", pauseBgParticles();
+  e.classList.add("open"), requestAnimationFrame(() => requestAnimationFrame(() => {
+    e.classList.add("visible");
+    const t = document.getElementById("searchTitleInput");
+    t && (renderSearchHistory(), setTimeout(() => t.focus(), 40));
+  })), kbLayer = "search", pauseBgParticles();
   const t = document.getElementById("discoBody");
   t && t.querySelector(".disco-loading") && loadDiscoContent(_discoCurrent.genre, _discoCurrent.type)
 }
@@ -660,7 +664,7 @@ function clearSearch() {
   const e = document.getElementById("searchTitleInput");
   e && (e.value = "", e.focus());
   const t = document.getElementById("shClearBtn");
-  t && (t.style.display = "none"), loadDiscoContent(_discoCurrent.genre, _discoCurrent.type)
+  t && (t.style.display = "none"), renderSearchHistory(), loadDiscoContent(_discoCurrent.genre, _discoCurrent.type)
 }
 
 function discoFilter(e, t, n) {
@@ -678,13 +682,40 @@ function handleSearchInputKey(e) {
   "Escape" !== e.key || closeUniverse()
 }
 
+const MF_SEARCH_HISTORY_KEY = "mf_search_history";
+function getSearchHistory() {
+  const e = safeLS(MF_SEARCH_HISTORY_KEY, "[]");
+  return Array.isArray(e) ? e.filter(t => typeof t === "string" && t.trim()).slice(0, 6) : [];
+}
+function renderSearchHistory() {
+  const e = document.getElementById("mfSearchHistory");
+  if (!e) return;
+  const t = getSearchHistory();
+  e.innerHTML = t.length ? `<div class="mf-search-history-title">Poslední hledání</div>${t.map(n => `<button type="button" class="mf-search-history-item" data-query="${escapeHTML(n)}"><span>↗</span>${escapeHTML(n)}</button>`).join("")}<button type="button" class="mf-search-history-clear">Vymazat historii</button>` : "";
+  e.querySelectorAll(".mf-search-history-item").forEach(n => n.addEventListener("click", () => {
+    const o = document.getElementById("searchTitleInput");
+    o && (o.value = n.dataset.query || "", onSearchInput(o.value), o.focus());
+  }));
+  e.querySelector(".mf-search-history-clear")?.addEventListener("click", () => {
+    safeSetItem(MF_SEARCH_HISTORY_KEY, "[]"), renderSearchHistory();
+  });
+}
+function saveSearchHistory(e) {
+  const t = e.trim();
+  if (!t) return;
+  const n = [t, ...getSearchHistory().filter(o => o.toLowerCase() !== t.toLowerCase())].slice(0, 6);
+  safeSetItem(MF_SEARCH_HISTORY_KEY, JSON.stringify(n));
+}
+
 function onSearchInput(e) {
   const t = document.getElementById("shClearBtn");
-  t && (t.style.display = e ? "flex" : "none"), clearTimeout(_searchDebounce), e.trim() ? _searchDebounce = setTimeout(() => discoSearch(e.trim()), 320) : loadDiscoContent(_discoCurrent.genre, _discoCurrent.type)
+  const n = document.getElementById("mfSearchHistory");
+  t && (t.style.display = e ? "flex" : "none"), n && (n.style.display = e.trim() ? "none" : ""), clearTimeout(_searchDebounce), e.trim() ? _searchDebounce = setTimeout(() => discoSearch(e.trim()), 320) : loadDiscoContent(_discoCurrent.genre, _discoCurrent.type)
 }
 async function discoSearch(e) {
   const t = document.getElementById("discoBody");
   if (t) {
+    saveSearchHistory(e);
     t.innerHTML = '<div class="disco-loading"><div class="disco-spinner"></div><span>Hledám...</span></div>';
     try {
       const [n, o] = await Promise.all([tmdbGet(`/search/movie?query=${encodeURIComponent(e)}&language=cs`), tmdbGet(`/search/tv?query=${encodeURIComponent(e)}&language=cs`)]), i = (n?.results || []).filter(e => e.poster_path).map(e => ({
@@ -694,7 +725,7 @@ async function discoSearch(e) {
         ...e,
         _rowType: "tv"
       }));
-      t.innerHTML = "", i.length && renderDiscoRow(t, `🎬 Filmy — "${e}"`, i.slice(0, 20), "movie"), a.length && renderDiscoRow(t, `📺 Seriály — "${e}"`, a.slice(0, 20), "tv"), i.length || a.length || (t.innerHTML = '<div class="disco-loading">Nic nenalezeno 😔</div>')
+      t.innerHTML = "", i.length && renderDiscoRow(t, `🎬 Filmy (${i.length}) — "${e}"`, i.slice(0, 20), "movie"), a.length && renderDiscoRow(t, `📺 Seriály (${a.length}) — "${e}"`, a.slice(0, 20), "tv"), i.length || a.length || (t.innerHTML = `<div class="mf-search-empty"><div class="mf-search-empty-icon">⌕</div><strong>Nic jsme nenašli</strong><span>Zkus jiný název nebo filtr.</span><button type="button" onclick="clearSearch()">Zobrazit doporučení</button></div>`)
     } catch {
       t.innerHTML = '<div class="disco-loading">Chyba při hledání</div>'
     }
@@ -5512,18 +5543,9 @@ function initSpinDrum() {
 function spinDrum() {}
 
 function _onDrumStop() {}
-const SERIES_DATA = [],
-  roulette = {
-    spin: function() {
-      void 0 !== spinRuleta && spinRuleta()
-    }
-  };
+const SERIES_DATA = [];
 document.addEventListener("keydown", e => {
-  if ("r" !== e.key || e.ctrlKey || e.metaKey) "v" === e.key || "V" === e.key ? speechManager.startListening() : "m" !== e.key && "M" !== e.key || speechManager.stopListening();
-  else {
-    const e = document.getElementById("ruletaOverlay");
-    e && e.classList.contains("open") ? closeRuleta() : openRuleta()
-  }
+  "v" === e.key || "V" === e.key ? speechManager.startListening() : "m" !== e.key && "M" !== e.key || speechManager.stopListening();
 });
 const PROFILES_KEY = "mf_profiles_v2",
   ACTIVE_PID_KEY = "mf_active_pid",
@@ -7182,8 +7204,8 @@ function processVoiceCommand(e) {
     c = e.match(/premiéry|co vychází|what.s on/i);
   e.match(/(?:pusť|otevři|dej)\s+(?:seriál\s+)?(.+)/i);
   if (l) i = () => {
-    closeVoiceCmd(), setTimeout(() => openRuleta && openRuleta(), 400)
-  }, a = "🎲 Spouštím ruletu…";
+    closeVoiceCmd(), setTimeout(() => openSearch?.(), 400)
+  }, a = "🔍 Otevírám vyhledávání…";
   else if (c) i = () => {
     closeVoiceCmd(), setTimeout(() => openPremiereCalendar(), 400)
   }, a = "📅 Otevírám premiéry…";
@@ -8116,8 +8138,8 @@ function vmStopListen() {
 }
 
 function vmHandleCommand(e) {
-  if (document.getElementById("vmStatus").textContent = "✓ Příkaz rozpoznán", e.includes("ruleta") || e.includes("náhodn")) setTimeout(() => {
-    closeVoiceMode(), openRuleta?.()
+  if (document.getElementById("vmStatus").textContent = "✓ Příkaz rozpoznán", e.includes("náhodn")) setTimeout(() => {
+    closeVoiceMode(), openUniverse?.()
   }, 400);
   else if (e.includes("premiér")) setTimeout(() => {
     closeVoiceMode(), openPremiereCalendar?.()
@@ -9582,9 +9604,6 @@ window.adminSavePerKey = function(e, t) {
       "#ai": () => {
         "function" == typeof openAi && openAi(), "function" == typeof setDockActive && setDockActive("dockAI")
       },
-      "#ruleta": () => {
-        "function" == typeof openRuleta && openRuleta(), "function" == typeof setDockActive && setDockActive("dockRuleta")
-      },
       "#sync": () => {
         "function" == typeof openSyncModal && openSyncModal()
       },
@@ -9634,7 +9653,6 @@ window.adminSavePerKey = function(e, t) {
           ["openUniverse", "#discover"],
           ["openWatchlist", "#watchlist"],
           ["openSyncModal", "#sync"],
-          ["openRuleta", "#ruleta"],
           ["openAdmin", "#admin"],
           ["openSettings", "#settings"],
           ["openApikeyOverlay", "#settings"],
@@ -9898,16 +9916,17 @@ window.adminSavePerKey = function(e, t) {
       const n = document.querySelector(".ps-menu-scene"),
         o = document.querySelector(".key-hint"),
         i = document.getElementById("continueWidget"),
-        a = document.getElementById("mfSectionProtebe");
-      n && (n.style.display = ""), o && (o.style.display = ""), i && (i.style.display = ""), a && (a.style.display = "none");
+        a = document.getElementById("mfSectionProtebe"),
+        r = document.querySelector(".mf-home-intro");
+      n && (n.style.display = ""), o && (o.style.display = ""), i && (i.style.display = ""), r && (r.style.display = ""), a && (a.style.display = "none");
       const s = document.getElementById("mfSectionPlex");
       if (s && (s.style.display = "none"), document.body.classList.remove("mf-section-protebe"), "function" == typeof closeDockOverlays && closeDockOverlays(), "serialy" === t) setDockActive("dockHome"), location.hash = "#serialy";
-      else if ("filmy" === t) n && (n.style.display = "none"), o && (o.style.display = "none"), i && (i.style.display = "none"), setDockActive("dockFilmy"), location.hash = "#filmy", "function" == typeof openUniverse && (openUniverse(), setTimeout(() => {
+      else if ("filmy" === t) n && (n.style.display = "none"), o && (o.style.display = "none"), i && (i.style.display = "none"), r && (r.style.display = "none"), setDockActive("dockFilmy"), location.hash = "#filmy", "function" == typeof openUniverse && (openUniverse(), setTimeout(() => {
         document.querySelectorAll('[data-rtype="movie"], [onclick*="movie"], .disco-filter-btn').forEach(e => {
           (e.textContent.toLowerCase().includes("film") || "movie" === e.dataset.rtype) && e.click()
         })
       }, 350));
-      else if ("protebe" === t) n && (n.style.display = "none"), o && (o.style.display = "none"), i && (i.style.display = "none"), a && (a.style.display = "block"), document.body.classList.add("mf-section-protebe"), setDockActive("dockProtebe"), location.hash = "#protebe";
+      else if ("protebe" === t) n && (n.style.display = "none"), o && (o.style.display = "none"), i && (i.style.display = "none"), r && (r.style.display = "none"), a && (a.style.display = "block"), document.body.classList.add("mf-section-protebe"), setDockActive("dockProtebe"), location.hash = "#protebe";
       else if ("plex" === t) {
         n && (n.style.display = "none"), o && (o.style.display = "none"), i && (i.style.display = "none"), a && (a.style.display = "none");
         const e = document.getElementById("mfSectionPlex");
