@@ -481,6 +481,8 @@ body.discover-open #mfDock {
   opacity: 0.55 !important;
   transform: translateX(-50%) scale(0.86) !important;
   bottom: max(10px, env(safe-area-inset-bottom, 10px)) !important;
+  z-index: 2000 !important;
+  pointer-events: auto !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
   transition: opacity 0.2s ease, transform 0.2s ease !important;
 }

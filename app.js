@@ -9548,7 +9548,12 @@ window.adminSavePerKey = function(e, t) {
         a = document.getElementById("mfSectionProtebe");
       n && (n.style.display = ""), o && (o.style.display = ""), i && (i.style.display = ""), a && (a.style.display = "none");
       const s = document.getElementById("mfSectionPlex");
-      if (s && (s.style.display = "none"), document.body.classList.remove("mf-section-protebe"), "function" == typeof closeDockOverlays && closeDockOverlays(), "serialy" === t) setDockActive("dockHome"), location.hash = "#serialy";
+      if (s && (s.style.display = "none"), document.body.classList.remove("mf-section-protebe"), "serialy" === t) {
+        "function" == typeof closeUniverse && closeUniverse();
+        "function" == typeof closeDockOverlays && closeDockOverlays();
+        setDockActive("dockHome");
+        location.hash = "#serialy";
+      }
       else if ("filmy" === t) n && (n.style.display = "none"), o && (o.style.display = "none"), i && (i.style.display = "none"), setDockActive("dockFilmy"), location.hash = "#filmy", "function" == typeof openUniverse && (openUniverse(), setTimeout(() => {
         document.querySelectorAll('[data-rtype="movie"], [onclick*="movie"], .disco-filter-btn').forEach(e => {
           (e.textContent.toLowerCase().includes("film") || "movie" === e.dataset.rtype) && e.click()
