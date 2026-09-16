@@ -5584,7 +5584,26 @@ const ProfileGate = {
       t = document.getElementById("_mfUserBadge");
     t && t.remove();
     let n = document.getElementById("mfProfileBadge");
-    n || (n = document.createElement("div"), n.id = "mfProfileBadge", n.onclick = () => ProfileGate.show(), document.body.appendChild(n)), e ? (n.style.borderColor = (e.color || "#007AFF") + "44", n.innerHTML = `\n+            <div class="mpb-avatar" style="border-color:${e.color||"#007AFF"}88">${/^https?:\\/\\//i.test(e.avatar||"") ? `<img src="${e.avatar}" alt="">` : (e.avatar||"🎬")}</div>\n+            <span class="mpb-name">${e.name}</span>\n+            <span class="mpb-arrow">▼</span>\n+          `) : (n.style.borderColor = "rgba(255,255,255,0.1)", n.innerHTML = '<div class="mpb-avatar">👤</div><span class="mpb-name">Profil</span><span class="mpb-arrow">▼</span>')
+    if (!n) {
+      n = document.createElement("div");
+      n.id = "mfProfileBadge";
+      n.onclick = () => ProfileGate.show();
+      document.body.appendChild(n);
+    }
+    if (e) {
+      const avatar = /^https?:\/\//i.test(e.avatar || "")
+        ? `<img src="${e.avatar}" alt="">`
+        : (e.avatar || "🎬");
+      n.style.borderColor = (e.color || "#007AFF") + "44";
+      n.innerHTML = `
+        <div class="mpb-avatar" style="border-color:${e.color || "#007AFF"}88">${avatar}</div>
+        <span class="mpb-name">${e.name}</span>
+        <span class="mpb-arrow">▼</span>
+      `;
+    } else {
+      n.style.borderColor = "rgba(255,255,255,0.1)";
+      n.innerHTML = '<div class="mpb-avatar">👤</div><span class="mpb-name">Profil</span><span class="mpb-arrow">▼</span>';
+    }
   }
 };
 
