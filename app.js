@@ -5243,6 +5243,7 @@ const ProfileGate = {
   _manageMode: false,
   _selectedEmoji: PROFILE_EMOJIS[0],
   _selectedColor: PROFILE_COLORS[0],
+  _selectedAvatar: PROFILE_EMOJIS[0],
   show() {
     const e = document.getElementById("mfProfileGate");
     e && (e.style.display = "flex", e.classList.remove("hiding")), this._manageMode = false, this.renderGate()
@@ -5259,10 +5260,21 @@ const ProfileGate = {
     const t = _getProfiles();
     e.innerHTML = "", t.forEach(t => {
       const n = document.createElement("div");
-      n.className = "pg-profile-item" + (this._manageMode ? " pg-manage-mode" : ""), n.innerHTML = `\n+            <div class="pg-avatar-wrap">\n+              <div class="pg-avatar" style="--pg-color:${t.color||"#007AFF"};${getActiveProfileId()===t.id?"border-color:"+t.color+";box-shadow:0 0 0 1px "+t.color+",0 8px 40px rgba(0,0,0,0.6);":""}">\n+                ${t.avatar||"🎬"}\n+              </div>\n+              ${this._manageMode ? `<button class="pg-remove-btn" type="button" aria-label="Odebrat profil ${t.name}" onclick="event.stopPropagation(); window.ProfileGate?.removeProfile('${t.id}')">−</button>` : ""}
+      n.dataset.profileId = t.id;
+      n.className = "pg-profile-item" + (this._manageMode ? " pg-manage-mode" : "");
+      const avatar = /^https?:\/\//i.test(t.avatar || "") ?
+        `<img class="pg-avatar-image" src="${t.avatar}" alt="">` : (t.avatar || "🎬");
+      n.innerHTML = `
+            <div class="pg-avatar-wrap">
+              <div class="pg-avatar" style="--pg-color:${t.color||"#007AFF"};${getActiveProfileId()===t.id?"border-color:"+t.color+";box-shadow:0 0 0 1px "+t.color+",0 8px 40px rgba(0,0,0,0.6);":""}">
+                ${avatar}
+              </div>
+              ${this._manageMode ? `<button class="pg-remove-btn" type="button" aria-label="Odebrat profil ${t.name}" onclick="event.stopPropagation(); window.ProfileGate?.removeProfile('${t.id}')">−</button>` : ""}
             </div>
             <div class="pg-name">${t.name}</div>
-          `, n.onclick = () => this._manageMode ? void 0 : ProfileGate.selectProfile(t.id), e.appendChild(n)
+          `;
+      n.onclick = () => this._manageMode ? void 0 : ProfileGate.selectProfile(t.id);
+      e.appendChild(n);
     });
     const n = document.createElement("div");
     n.className = "pg-profile-item", n.innerHTML = '\n          <div class="pg-add-btn">＋</div>\n          <div class="pg-name" style="color:rgba(255,255,255,0.35)">Přidat profil</div>\n        ', n.onclick = () => ProfileGate.openCreate(), e.appendChild(n)
@@ -5278,10 +5290,20 @@ const ProfileGate = {
   },
   removeProfile(e) {
     const t = _getProfiles().find(t => t.id === e);
-    if (!t || !confirm(`Opravdu odebrat profil „${t.name}“?`)) return;
-    deleteUser(e);
-    this._manageMode = true;
-    this.renderGate();
+    if (!t) return;
+    const item = document.querySelector(`.pg-profile-item[data-profile-id="${e}"]`);
+    if (item) item.classList.add("pg-removing");
+    setTimeout(() => {
+      const profiles = _getProfiles().filter(profile => profile.id !== e);
+      _saveProfiles(profiles);
+      if (getActiveProfileId() === e) {
+        profiles.length ? setActiveUser(profiles[0].id) : localStorage.removeItem(ACTIVE_PID_KEY);
+        this.renderBadge();
+      }
+      this._manageMode = true;
+      this.renderGate();
+      if (!profiles.length) this.show();
+    }, item ? 220 : 0);
   },
   selectProfile(e) {
     // OPRAVA: robustní select — loguje proč případně selhalo
@@ -5337,7 +5359,7 @@ const ProfileGate = {
     }, 700)))
   },
   openCreate(e) {
-    this._editingId = e || null, this._selectedEmoji = PROFILE_EMOJIS[0], this._selectedColor = PROFILE_COLORS[0];
+    this._editingId = e || null, this._selectedEmoji = PROFILE_EMOJIS[0], this._selectedColor = PROFILE_COLORS[0], this._selectedAvatar = PROFILE_EMOJIS[0];
     const t = document.getElementById("mfProfileCreate");
     if (!t) return;
     // FIX: Disable pointer-events on gate so it doesn't swallow clicks on the create modal
@@ -5347,10 +5369,14 @@ const ProfileGate = {
     const n = document.getElementById("pcName");
     if (e) {
       const t = _getProfiles().find(t => t.id === e);
-      t && (n.value = t.name, this._selectedEmoji = t.avatar || PROFILE_EMOJIS[0], this._selectedColor = t.color || PROFILE_COLORS[0])
+      t && (n.value = t.name, this._selectedAvatar = t.avatar || PROFILE_EMOJIS[0], this._selectedColor = t.color || PROFILE_COLORS[0])
     } else n.value = "";
-    document.getElementById("pcEmojiGrid").innerHTML = PROFILE_EMOJIS.map(e => `<button class="pc-emoji-btn${e===this._selectedEmoji?" selected":""}" onclick="ProfileGate._pickEmoji('${e}',this)">${e}</button>`).join("");
-    document.getElementById("pcColorRow").innerHTML = PROFILE_COLORS.map(e => `<div class="pc-color-swatch${e===this._selectedColor?" selected":""}" style="background:${e}" onclick="ProfileGate._pickColor('${e}',this)" title="${e}"></div>`).join(""), ["pcPin0", "pcPin1", "pcPin2", "pcPin3"].forEach(e => {
+    const preview = document.getElementById("pcAvatarPreview");
+    preview && (preview.innerHTML = /^https?:\/\//i.test(this._selectedAvatar) ? `<img src="${this._selectedAvatar}" alt="">` : this._selectedAvatar);
+    const picker = document.getElementById("pcAvatarPicker");
+    picker && (picker.hidden = true);
+    this.loadAvatarPicker("movie");
+    ["pcPin0", "pcPin1", "pcPin2", "pcPin3"].forEach(e => {
       const t = document.getElementById(e);
       t && (t.value = "")
     }), t.classList.add("show"), setTimeout(() => n.focus(), 100)
@@ -5364,6 +5390,37 @@ const ProfileGate = {
   },
   _pickEmoji(e, t) {
     this._selectedEmoji = e, document.querySelectorAll(".pc-emoji-btn").forEach(e => e.classList.remove("selected")), t.classList.add("selected")
+  },
+  toggleAvatarPicker() {
+    const e = document.getElementById("pcAvatarPicker");
+    if (e) e.hidden = !e.hidden;
+  },
+  async loadAvatarPicker(e) {
+    const grid = document.getElementById("pcAvatarGrid");
+    if (!grid) return;
+    document.querySelectorAll("[data-avatar-type]").forEach(t => t.classList.toggle("active", t.dataset.avatarType === e));
+    grid.innerHTML = '<div class="pc-avatar-loading">Načítám postavy…</div>';
+    try {
+      const data = await tmdbGet(e === "tv" ? "/trending/tv/week?language=cs" : "/trending/movie/week?language=cs");
+      const items = (data?.results || []).filter(t => t.poster_path).slice(0, 12);
+      grid.innerHTML = items.length ? items.map(t => `
+        <button type="button" class="pc-avatar-option${this._selectedAvatar === "https://image.tmdb.org/t/p/w185" + t.poster_path ? " selected" : ""}" onclick="window.ProfileGate?.pickAvatar('${"https://image.tmdb.org/t/p/w185" + t.poster_path}','${String(t.title || t.name || "").replace(/'/g, "\\'")}',this)">
+          <img src="https://image.tmdb.org/t/p/w185${t.poster_path}" alt="${String(t.title || t.name || "").replace(/"/g, "&quot;")}" loading="lazy">
+          <span>${String(t.title || t.name || "").slice(0, 18)}</span>
+        </button>`).join("") : '<div class="pc-avatar-loading">Postavy se nepodařilo načíst.</div>';
+    } catch (err) {
+      grid.innerHTML = '<div class="pc-avatar-loading">Postavy se nepodařilo načíst.</div>';
+      console.warn("[ProfileGate] Avatar picker", err);
+    }
+  },
+  pickAvatar(e, t, n) {
+    this._selectedAvatar = e;
+    const preview = document.getElementById("pcAvatarPreview");
+    preview && (preview.innerHTML = `<img src="${e}" alt="">`);
+    const label = document.getElementById("pcAvatarPickerLabel");
+    label && (label.textContent = t || "Vybraná postava");
+    document.querySelectorAll(".pc-avatar-option").forEach(e => e.classList.remove("selected"));
+    n && n.classList.add("selected");
   },
   _pickColor(e, t) {
     this._selectedColor = e, document.querySelectorAll(".pc-color-swatch").forEach(e => e.classList.remove("selected")), t.classList.add("selected")
@@ -5385,11 +5442,11 @@ const ProfileGate = {
       o = _getProfiles();
     if (this._editingId) {
       const t = o.findIndex(e => e.id === this._editingId);
-      t >= 0 && (o[t].name = e, o[t].avatar = this._selectedEmoji, o[t].color = this._selectedColor, n && (o[t].pin = n), _saveProfiles(o)), this.closeCreate(), this.renderGate(), this.renderBadge()
+      t >= 0 && (o[t].name = e, o[t].avatar = this._selectedAvatar, n && (o[t].pin = n), _saveProfiles(o)), this.closeCreate(), this.renderGate(), this.renderBadge()
     } else {
       const t = this.createProfile({
         name: e,
-        avatar: this._selectedEmoji,
+        avatar: this._selectedAvatar,
         color: this._selectedColor,
         pin: n
       });
