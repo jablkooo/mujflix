@@ -1474,6 +1474,245 @@ body { position: relative; }
   filter: brightness(1.05) !important;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   DISCOVER v7 — MůjFlix native refresh
+═══════════════════════════════════════════════════════════════ */
+:root {
+  --mf-discover-blue: #0a84ff;
+  --mf-discover-blue-soft: rgba(10,132,255,.16);
+  --mf-discover-line: rgba(255,255,255,.09);
+}
+.universe-overlay {
+  background: radial-gradient(circle at 82% -8%, rgba(10,132,255,.16), transparent 34%), #07090f !important;
+}
+.universe-overlay.open::before {
+  background: linear-gradient(180deg, rgba(10,132,255,.07), transparent 30%, #07090f 92%) !important;
+}
+.universe-overlay .disco-header {
+  height: 76px !important;
+  padding: 0 clamp(16px, 4vw, 54px) !important;
+  gap: clamp(12px, 2.5vw, 32px) !important;
+  background: rgba(7,9,15,.84) !important;
+  border-bottom: 1px solid var(--mf-discover-line) !important;
+  backdrop-filter: blur(22px) saturate(1.35) !important;
+}
+.universe-overlay .disco-header-left {
+  min-width: 152px !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+.universe-overlay .disco-logo {
+  color: var(--mf-discover-blue) !important;
+  font-size: .58rem !important;
+  letter-spacing: 2.2px !important;
+}
+.universe-overlay .disco-title {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -.5px !important;
+}
+.universe-overlay .uni-search-wrap {
+  max-width: 560px !important;
+  min-height: 42px !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,.07) !important;
+}
+.universe-overlay .uni-search-wrap:focus-within {
+  border-color: rgba(10,132,255,.75) !important;
+  box-shadow: 0 0 0 3px rgba(10,132,255,.14) !important;
+}
+.universe-overlay .disco-header > div:last-child { gap: 8px !important; }
+.universe-overlay .disco-header > div:last-child > button:first-child {
+  padding: 9px 13px !important;
+  border-radius: 11px !important;
+  border-color: rgba(10,132,255,.35) !important;
+  background: rgba(10,132,255,.16) !important;
+  color: #72b8ff !important;
+  font-size: .68rem !important;
+}
+.universe-overlay .disco-close {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 11px !important;
+  background: rgba(255,255,255,.07) !important;
+  border: 1px solid var(--mf-discover-line) !important;
+}
+.universe-overlay .disco-nav {
+  height: 58px !important;
+  padding: 0 clamp(16px, 4vw, 54px) !important;
+  gap: 7px !important;
+  background: rgba(7,9,15,.76) !important;
+  border-bottom: 1px solid var(--mf-discover-line) !important;
+  top: 76px !important;
+}
+.universe-overlay .disco-nav-item,
+#discoNav .disco-nav-item {
+  height: 34px !important;
+  margin: 0 !important;
+  padding: 0 13px !important;
+  border: 1px solid var(--mf-discover-line) !important;
+  border-radius: 10px !important;
+  background: rgba(255,255,255,.045) !important;
+  color: rgba(255,255,255,.66) !important;
+  font-size: .68rem !important;
+  font-weight: 650 !important;
+}
+.universe-overlay .disco-nav-item.active,
+#discoNav .disco-nav-item.active {
+  background: var(--mf-discover-blue) !important;
+  border-color: var(--mf-discover-blue) !important;
+  color: #fff !important;
+  box-shadow: 0 5px 18px rgba(10,132,255,.24) !important;
+}
+#discoBody { padding-bottom: 78px !important; }
+.universe-overlay .disco-hero {
+  height: min(54vh, 470px) !important;
+  max-height: 470px !important;
+  min-height: 340px !important;
+}
+.universe-overlay .disco-hero-grad {
+  background: linear-gradient(90deg, rgba(7,9,15,.94) 0%, rgba(7,9,15,.55) 38%, transparent 76%),
+              linear-gradient(0deg, #07090f 0%, transparent 58%) !important;
+}
+.universe-overlay .disco-hero-content {
+  left: clamp(16px, 5vw, 64px) !important;
+  right: 42% !important;
+  padding: 38px 0 !important;
+}
+.universe-overlay .disco-hero-title {
+  font-size: clamp(1.8rem, 4vw, 3.25rem) !important;
+  font-weight: 750 !important;
+  letter-spacing: -1.2px !important;
+}
+.universe-overlay .disco-hero-desc {
+  max-width: 520px !important;
+  font-size: .86rem !important;
+  color: rgba(255,255,255,.68) !important;
+  line-height: 1.55 !important;
+}
+.universe-overlay .disco-hero-btn.primary {
+  padding: 10px 16px !important;
+  border-radius: 11px !important;
+  background: var(--mf-discover-blue) !important;
+  color: #fff !important;
+  font-size: .72rem !important;
+  letter-spacing: .1px !important;
+  text-transform: none !important;
+  box-shadow: 0 8px 24px rgba(10,132,255,.25) !important;
+}
+.universe-overlay .disco-hero-btn.primary:hover {
+  background: #3b9cff !important;
+  transform: translateY(-1px) !important;
+}
+.universe-overlay .disco-hero-btn.secondary {
+  width: auto !important;
+  height: auto !important;
+  padding: 10px 14px !important;
+  border-radius: 11px !important;
+  font-size: .72rem !important;
+}
+.universe-overlay .disco-row-header,
+#discoBody .disco-row-header {
+  padding: 26px clamp(16px, 4vw, 54px) 0 !important;
+  margin-bottom: 0 !important;
+}
+.universe-overlay .disco-row-title,
+#discoBody .disco-row-title {
+  font-size: 1.05rem !important;
+  font-weight: 750 !important;
+  color: rgba(255,255,255,.9) !important;
+}
+.universe-overlay .disco-row-scroll,
+#discoBody .disco-row-scroll {
+  gap: 12px !important;
+  padding: 14px clamp(16px, 4vw, 54px) 20px !important;
+}
+.universe-overlay .disco-card,
+#discoBody .disco-card {
+  width: 148px !important;
+  min-width: 148px !important;
+  height: 222px !important;
+  border-radius: 14px !important;
+  background: #111622 !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.22) !important;
+  transition: transform .2s ease, box-shadow .2s ease !important;
+}
+.universe-overlay .disco-card:hover,
+#discoBody .disco-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 16px 34px rgba(0,0,0,.46), 0 0 0 1px rgba(10,132,255,.3) !important;
+  filter: none !important;
+}
+.universe-overlay .disco-card-img,
+#discoBody .disco-card-img { border-radius: 14px !important; }
+.universe-overlay .disco-card-info,
+#discoBody .disco-card-info { padding: 12px !important; }
+.universe-overlay .disco-card-name,
+#discoBody .disco-card-name {
+  font-size: .78rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+.universe-overlay .disco-card-type,
+#discoBody .disco-card-type {
+  color: rgba(255,255,255,.58) !important;
+  background: rgba(255,255,255,.08) !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  padding: 3px 6px !important;
+  font-size: .56rem !important;
+}
+.universe-overlay .disco-card-finder-btn,
+#discoBody .disco-card-finder-btn {
+  right: 9px !important;
+  bottom: 9px !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 9px !important;
+  background: rgba(10,132,255,.84) !important;
+  opacity: 1 !important;
+}
+.universe-overlay .disco-play-btn,
+#discoBody .disco-play-btn {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  background: var(--mf-discover-blue) !important;
+}
+@media (max-width: 700px) {
+  .universe-overlay .disco-header {
+    height: 126px !important;
+    flex-wrap: wrap !important;
+    padding: 12px 16px !important;
+    gap: 8px !important;
+  }
+  .universe-overlay .disco-header-left { min-width: auto !important; }
+  .universe-overlay .uni-search-wrap {
+    order: 3 !important;
+    flex-basis: 100% !important;
+    max-width: none !important;
+  }
+  .universe-overlay .disco-nav {
+    top: 126px !important;
+    height: 52px !important;
+    padding: 0 16px !important;
+  }
+  .universe-overlay .disco-header > div:last-child > button:first-child {
+    width: 38px !important;
+    padding: 9px !important;
+    font-size: 0 !important;
+  }
+  .universe-overlay .disco-hero {
+    min-height: 350px !important;
+    height: 54vh !important;
+  }
+  .universe-overlay .disco-hero-content {
+    right: 12% !important;
+    padding: 24px 0 !important;
+  }
+  .universe-overlay .disco-hero-desc { display: none !important; }
+}
+
 /* Responsivni — mensi expand na mobilu */
 @media (max-width: 700px) {
   .dr-expand { display: none !important; }
