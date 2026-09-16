@@ -370,6 +370,28 @@
   display: inline-flex !important;
   align-items: center !important;
 }
+/* ═══════════════════════════════════════════════════════════════
+   DISCOVER OPEN — méně rušivé chrome NAD overlay (VŠECHNY velikosti)
+   Profil badge má vyšší z-index než overlay (9500 vs 500), takže by
+   bez tohoto pravidla "prosvítal" nad Objevováním na každé šířce,
+   ne jen na mobilu. Sjednoceno pro desktop i mobil.
+═══════════════════════════════════════════════════════════════ */
+body.discover-open #mfProfileBadge {
+  display: none !important;
+}
+body.discover-open #mfDock {
+  opacity: 0.55 !important;
+  transform: translateX(-50%) scale(0.86) !important;
+  bottom: max(10px, env(safe-area-inset-bottom, 10px)) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+}
+body.discover-open #mfDock:hover,
+body.discover-open #mfDock:focus-within {
+  opacity: 1 !important;
+  transform: translateX(-50%) scale(1) !important;
+}
+
 @media (max-width: 760px) {
   .universe-overlay .disco-header {
     align-items: stretch !important;
@@ -377,15 +399,9 @@
     gap: 10px !important;
   }
 
-  /* Discover keeps the shared MůjFlix chrome, but removes distractions while open. */
-  body.discover-open #mfProfileBadge {
-    display: none !important;
-  }
   body.discover-open #mfDock {
     opacity: 0.72 !important;
     transform: translateX(-50%) scale(0.88) !important;
-    bottom: max(8px, env(safe-area-inset-bottom, 8px)) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
   }
   body.discover-open #mfDock .dock-btn {
     min-width: 58px !important;
@@ -1722,4 +1738,61 @@ body { position: relative; }
   border-radius: 10px !important;
   margin-left: 5px !important;
   vertical-align: middle !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLL HINT (na heru) a BACK-TO-TOP — přesunuto z JS inline stylů
+   do CSS, aby existoval jeden zdroj vzhledu (dřív JS duplikoval
+   hodnoty, které se z části lišily od téhle třídy → nekonzistence).
+═══════════════════════════════════════════════════════════════ */
+.dr-sh {
+  position: absolute !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 10 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 5px !important;
+  color: rgba(255,255,255,0.25) !important;
+  font-size: 0.48rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 2.5px !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  transition: opacity 0.2s ease !important;
+}
+
+#dr-btt {
+  position: fixed !important;
+  bottom: 88px !important;
+  right: 22px !important;
+  z-index: 400 !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  background: rgba(6,6,16,0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 0.5px solid rgba(255,255,255,0.1) !important;
+  color: rgba(255,255,255,0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  opacity: 0 !important;
+  transform: translateY(14px) scale(0.8) !important;
+  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(.34,1.3,.64,1) !important;
+  pointer-events: none !important;
+}
+#dr-btt.dr-visible {
+  opacity: 1 !important;
+  transform: translateY(0) scale(1) !important;
+  pointer-events: auto !important;
+}
+#dr-btt:hover {
+  background: rgba(20,20,30,0.95) !important;
+  color: rgba(255,255,255,0.9) !important;
 }
