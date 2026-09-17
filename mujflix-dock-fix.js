@@ -68,5 +68,31 @@
     }, 950);
   });
 
+  // Sledování režimu Objevování: dock se schovává přes CSS
+  // (body.discover-open), ale tady hlídáme, že se po ZAVŘENÍ
+  // Objevování (ať už přes ✕, Esc, nebo cokoliv jiného, co tu
+  // třídu smaže) lišta spolehlivě vrátí a zvýrazní se "Domů".
+  var wasDiscoverOpen = document.body.classList.contains("discover-open");
+  new MutationObserver(function () {
+    var isDiscoverOpen = document.body.classList.contains("discover-open");
+    if (wasDiscoverOpen && !isDiscoverOpen) {
+      // Právě jsme opustili Objevování → jsme doma.
+      setTimeout(function () {
+        applyActiveDock("dockHome");
+      }, 90);
+    }
+    wasDiscoverOpen = isDiscoverOpen;
+  }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
   console.info("[MůjFlix] ✓ Dock active-state fix načten");
+
+  /* ── Vypnutí onboarding otázky "Co tě baví?" po vytvoření profilu ── */
+  document.addEventListener("DOMContentLoaded", function () {
+    if (window.ProfileGate && typeof window.ProfileGate.openOnboarding === "function") {
+      window.ProfileGate.openOnboarding = function () {
+        // Nic nezobrazuj — otázka na žánry při zakládání profilu je vypnutá.
+      };
+    }
+  });
 })();
+
