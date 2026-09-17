@@ -118,6 +118,7 @@
   /* ── Seznamy zdrojů ───────────────────────────────────────── */
   var MOVIE_SOURCES = [
     { id: "bombuj", label: "Bombuj", build: function (t, y) { return bombujMovieUrl(t, y); } },
+    { id: "bombuj-noyear", label: "Bombuj (bez roku)", build: function (t) { return bombujMovieUrlNoYear(t); } },
     { id: "prehrajto", label: "Prehrajto.cz", build: function (t) { return prehrajtoUrl(t); } },
     { id: "uzila", label: "Uzi.la", build: function (t) { return uziMovieUrl(t); } }
   ];
@@ -244,13 +245,12 @@
       "</div>" +
 
       '<div class="mf-cin-sourcebar">' +
-        '<button type="button" class="mf-cin-src-arrow" id="mfCinSrcPrev" aria-label="Předchozí zdroj">‹</button>' +
         '<div class="mf-cin-src-info">' +
           '<span class="mf-cin-src-label" id="mfCinSrcLabel"></span>' +
           '<span class="mf-cin-src-counter" id="mfCinSrcCounter"></span>' +
         "</div>" +
-        '<button type="button" class="mf-cin-src-arrow" id="mfCinSrcNext" aria-label="Další zdroj">›</button>' +
         '<button type="button" class="mf-cin-switch-btn" id="mfCinSwitchSrc">🔄 Zkusit jiný zdroj</button>' +
+        '<a class="mf-cin-external-btn" id="mfStandaloneCinemaExternal" target="_blank" rel="noopener">🔗 Otevřít v nové kartě</a>' +
       "</div>" +
 
       '<div class="mf-cin-tvbar" id="mfCinTvBar" style="display:none">' +
@@ -266,11 +266,7 @@
         '<div class="mf-cin-epgrid-body" id="mfCinEpGridBody"></div>' +
       "</div>" +
 
-      '<div class="mf-standalone-cinema-frame"><div id="mfStandaloneCinemaFrame"></div></div>' +
-      '<div class="mf-standalone-cinema-actions">' +
-        '<button type="button" id="mfStandaloneCinemaNoYear">Zkusit bez roku</button>' +
-        '<a id="mfStandaloneCinemaExternal" target="_blank" rel="noopener">Otevřít zdroj v nové kartě</a>' +
-      "</div>";
+      '<div class="mf-standalone-cinema-frame"><div id="mfStandaloneCinemaFrame"></div></div>';
     document.body.appendChild(modal);
 
     frame = modal.querySelector("#mfStandaloneCinemaFrame");
@@ -282,11 +278,6 @@
     epGridBody = modal.querySelector("#mfCinEpGridBody");
 
     modal.querySelector("#mfStandaloneCinemaClose").onclick = close;
-    modal.querySelector("#mfStandaloneCinemaNoYear").onclick = function () {
-      if (current && current.type === "movie") loadUrl(bombujMovieUrlNoYear(current.title), "Bombuj");
-    };
-    modal.querySelector("#mfCinSrcPrev").onclick = function () { cycleSource(-1); };
-    modal.querySelector("#mfCinSrcNext").onclick = function () { cycleSource(1); };
     modal.querySelector("#mfCinSwitchSrc").onclick = function () { cycleSource(1); };
     modal.querySelector("#mfCinPrevEp").onclick = function () { stepEpisode(-1); };
     modal.querySelector("#mfCinNextEp").onclick = function () { stepEpisode(1); };
@@ -315,8 +306,6 @@
     sourceLabelNode.textContent = src.label + " (" + (current.sourceIdx + 1) + "/" + total + ")";
     sourceCounterNode.textContent =
       "Vyzkoušeno " + used + " z " + total + (remaining > 0 ? " · zbývá ještě " + remaining : " · vyzkoušeny všechny");
-    modal.querySelector("#mfStandaloneCinemaNoYear").style.display =
-      current.type === "movie" && src.id === "bombuj" && current.year ? "inline-flex" : "none";
   }
 
   /* ── TV navigace (epizody) ────────────────────────────────── */
