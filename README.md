@@ -4,7 +4,7 @@
 
 Projekt kombinuje **prémiový dark-mode design, cinematic UI a jemný glassmorphism** s rychlým frontendem postaveným na Vanilla JavaScriptu a serverless infrastruktuře Cloudflare.
 
-> 🖥️ **Aktuálně optimalizováno pro PC a notebooky.**
+> 🖥️ Aktuálně optimalizováno pro **PC a notebooky**.
 > 📱 Mobilní verze je stále ve vývoji.
 
 ---
@@ -23,21 +23,21 @@ Projekt kombinuje **prémiový dark-mode design, cinematic UI a jemný glassmorp
 * Vlastní přehrávací rozhraní
 * Cinematic fullscreen UI
 * Podpora externích přehrávacích zdrojů
-* Ovládání přizpůsobené desktopovému použití
+* Desktopové ovládání
 
 ### 🎨 Moderní UI
 
 * Dark / Midnight design
 * Glassmorphism
 * Velké filmové postery
-* Jemné gradienty a ambientní efekty
+* Gradienty a ambientní efekty
 * Zaoblené komponenty
 * Floating navigation dock
 * Blue / Purple accent barvy
 
 ### 📺 Legální poskytovatelé
 
-Modul `legal-streaming-providers.js` zobrazuje dostupné oficiální streamovací služby pro jednotlivé tituly.
+`legal-streaming-providers.js` zobrazuje dostupné oficiální streamovací služby pro jednotlivé tituly.
 
 ---
 
@@ -51,7 +51,7 @@ Modul `legal-streaming-providers.js` zobrazuje dostupné oficiální streamovac�
 * **Cloudflare Pages Functions**
 * **Wrangler**
 
-Projekt nepoužívá React, Vue ani jiné těžké frontend frameworky.
+Bez Reactu, Vue nebo jiného velkého frontend frameworku.
 
 ---
 
@@ -90,16 +90,11 @@ mujflix/
 * npm nebo pnpm
 * Git
 
-### Instalace
+### Spuštění
 
 ```bash
 git clone https://github.com/jablkooo/mujflix.git
 cd mujflix
-```
-
-### Spuštění
-
-```bash
 npx wrangler pages dev .
 ```
 
@@ -115,8 +110,6 @@ http://localhost:8788
 
 MůjFlix je připravený pro **Cloudflare Pages**.
 
-Manuální deployment:
-
 ```bash
 npx wrangler pages deploy . --project-name=mujflix
 ```
@@ -127,17 +120,15 @@ Při propojení s GitHubem lze nastavit automatický deployment při pushnutí d
 
 ## 🔐 API klíče
 
-Citlivé údaje nikdy nevkládej přímo do zdrojového kódu.
+Citlivé údaje nejsou ukládány přímo do zdrojového kódu.
 
-Používej Cloudflare Environment Variables nebo lokální:
+Používají se **Environment Variables** v Cloudflare nebo lokální:
 
 ```text
 .dev.vars
 ```
 
-který musí být v `.gitignore`.
-
-Serverless Functions mohou k proměnným přistupovat přes:
+Serverless Functions k nim přistupují přes:
 
 ```javascript
 context.env
@@ -145,24 +136,43 @@ context.env
 
 ---
 
-## 🖥️ Platforma
+## 🖥️ Aktuální platforma
 
-**Aktuální zaměření:**
+MůjFlix je momentálně zaměřený na:
 
-```text
-🖥️ Desktop PC
-💻 Notebook
-```
+* 🖥️ Desktop PC
+* 💻 Notebooky
 
-Mobilní rozhraní je **ve vývoji** a zatím není považováno za plně dokončenou součást projektu.
+Mobilní rozhraní je **ve vývoji** a zatím není považováno za dokončené.
 
 ---
 
-## 🤖 Vývoj
+## 🤖 Vibe Coded
 
-MůjFlix vzniká za použití klasických vývojářských nástrojů a AI asistentů pro návrh, programování, debugging a optimalizaci.
+MůjFlix je **vibe-coded projekt**.
 
-**Developer:** [jablkooo](https://github.com/jablkooo)
+Velká část vývoje vznikla ve spolupráci s AI nástroji — od návrhu UI a architektury přes psaní a úpravu kódu až po debugging a experimentování s novými funkcemi.
+
+Používané nástroje:
+
+* **Claude**
+* **GitHub Copilot**
+* **ChatGPT**
+* **DeepSeek**
+* **Kimi**
+
+AI není pouze použita pro jednotlivé úryvky kódu — byla součástí celého vývojového procesu.
+
+> **Built by a human, coded with AI.**
+
+---
+
+## 👤 Autor
+
+**jablkooo**
+
+GitHub:
+https://github.com/jablkooo
 
 ---
 
@@ -171,5 +181,7 @@ MůjFlix vzniká za použití klasických vývojářských nástrojů a AI asist
 ### 🎬 MůjFlix
 
 **Discover. Explore. Watch.**
+
+*Built by a human, coded with AI.*
 
 </div>
