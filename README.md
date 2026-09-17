@@ -1,137 +1,99 @@
-# MůjFlix
+<div align="center">
 
-Osobní streamovací "hub" — sleduje rozkoukané seriály a filmy, propojuje je s externími
-zdroji (Bombuj, SvetSerialu, Prehrajto.cz, Uzi.la) a nabízí Netflix-like rozhraní
-(Objevování, Cinema mód, profily s PINem, cross-device sync).
+# 🎬 MůjFlix
 
-Nasazeno přes **Cloudflare Pages** (viz `wrangler.toml` a `functions/`).
+**Osobní streamovací hub ve stylu Netflixu — jedno místo pro filmy, seriály a objevování.**
 
----
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=16&pause=1000&color=FFFFFF&center=true&vCenter=true&width=600&lines=Modern+movie+%26+series+discovery;Cinematic+dark+UI;Glassmorphism;Vanilla+JavaScript;No+install+%E2%80%94+runs+in+browser" />
 
-## 🗂 Struktura projektu
+<br>
 
-```
-mujflix/
-├── index.html                      hlavní HTML — všechny modály, dock, PIN, cinema DOM
-├── app.js                          jádro appky (11 000+ řádků) — DB seriálů, watchlist,
-│                                    profily, Objevování, cinema logika, AI panel...
-│
-├── styles.css                      hlavní styly (nejstarší a nejrozsáhlejší vrstva)
-├── styles-premium.css               │
-├── styles-apple-tv.css              │  postupně přidávané vizuální vrstvy —
-├── styles-glass.css                 │  načítají se v tomto pořadí a přebíjí se navzájem
-├── styles-discover-redesign.css     │  (pozor na pořadí při další úpravě!)
-├── mujflix-fixes.css                ★ NAŠE opravná vrstva — načítá se JAKO POSLEDNÍ,
-│                                      má tak vždy poslední slovo
-│
-├── mujflix-img-fix.js              drobné opravy obrázků
-├── legal-streaming-providers.js    seznam legálních VOD platforem
-├── notifications-changelog.js      in-app novinky/changelog panel
-├── mujflix-patch.js                starší drobné opravy
-├── mujflix-url-fix.js              opravy URL pro externí zdroje
-├── mujflix-discover-redesign.js    doplňuje ikony/badge do Objevování
-├── mujflix-cinema-player.js        ★ Cinema mód — přehrávač s více zdroji,
-│                                      navigace epizod, přidání do seznamu
-├── mujflix-dock-fix.js             ★ NAŠE opravná vrstva — spodní lišta, onboarding,
-│                                      personalizace domovských dlaždic, multi-žánry
-│
-├── _headers                        Cloudflare Pages HTTP hlavičky
-├── wrangler.toml                   Cloudflare Pages/Workers konfigurace
-└── functions/api/                  serverless funkce (např. proxy pro TMDB obrázky)
-```
+<img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white"/>
+<img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white"/>
+<img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"/>
+<img src="https://img.shields.io/badge/PWA-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white"/>
+<img src="https://img.shields.io/badge/TMDB-01B4E4?style=for-the-badge&logo=themoviedatabase&logoColor=white"/>
 
-### ⚠️ Kritické pravidlo pořadí scriptů
+<br>
 
-`app.js` se načítá s atributem **`defer`**. Jakýkoliv další `<script>`, který má za úkol
-**přepsat/rozšířit funkci z `app.js`** (typicky naše `mujflix-*-fix.js` soubory), musí mít
-`defer` také — jinak se spustí DŘÍV než `app.js` a `app.js` mu při svém pozdějším
-spuštění vše přepíše zpátky na původní chování. Proto:
+<img src="https://img.shields.io/badge/status-active-brightgreen?style=flat-square"/>
+<img src="https://img.shields.io/badge/version-1.0-blue?style=flat-square"/>
+<img src="https://img.shields.io/badge/license-personal-lightgrey?style=flat-square"/>
+<img src="https://img.shields.io/badge/PRs-welcome-orange?style=flat-square"/>
 
-```html
-<script src="app.js?v=6" defer></script>
-...
-<script src="mujflix-cinema-player.js" defer></script>
-<script src="mujflix-dock-fix.js" defer></script>
-```
-
-Skripty, které jen definují funkce volané POZDĚJI (na klik, na timeout), `defer`
-nutně nepotřebují — ale je to bezpečnější default, ať se tahle chyba už neopakuje.
-
-### 🔄 Cache-busting
-
-`app.js` se natahuje s `?v=6` v URL právě proto, aby si ho prohlížeč/Cloudflare
-nedržel v cache po úpravě. **Ostatní `.js`/`.css` soubory verzovací parametr nemají** —
-po každé úpravě `mujflix-*.js`/`.css` je dobré:
-1. připsat/zvýšit `?v=N` u daného `<script>`/`<link>` tagu v `index.html`, NEBO
-2. tvrdě obnovit stránku (Ctrl+Shift+R / vymazat cache), jinak se změna nemusí projevit.
+</div>
 
 ---
 
-## ✨ Klíčové vlastní úpravy (nad rámec původního kódu)
+## 📖 O projektu
 
-### `mujflix-fixes.css`
-- Spodní lišta (dock): v klidu menší, při hoveru zvětšení (opak původního chování)
-- Dock se v Objevování celý schová (ne jen ztlumí) — `body.discover-open #mfDock`
-- Cinema mód — vzhled source baru, TV navigace, mřížky epizod, tlačítka "Přidat do seznamu"
-- Oprava sync tečky (`.mf-sync-dot`) — správné šedá/zelená/modrá/červená stavy
-- Skrytí 🔖 ikony na domovských dlaždicích
-- Hezčí PIN políčka při zakládání profilu (`.pc-pin-digit`)
+MůjFlix je **osobní streamovací hub** ve stylu Netflixu — jedno místo, kde si spravuješ, co sleduješ, objevuješ nové filmy a seriály, a rovnou je i pustíš přes externí zdroje.
 
-### `mujflix-dock-fix.js`
-- Spolehlivé zvýrazňování aktivní položky v docku (`setDockActive` přepsáno)
-- Synchronizace při zavření Objevování / změně URL hashe
-- Vypnutí onboarding otázky "Co tě baví?" po založení profilu
-- Oprava počtu sezón u seriálů otevřených z Objevování (`epsBySeason` se dřív nedoplňovalo)
-- Personalizace 4 domovských dlaždic podle skutečně sledovaného obsahu
-- Vícenásobný výběr žánrů v Objevování (nezávislé zapínání/vypínání)
-
-### `mujflix-cinema-player.js`
-Kompletně přepsaný samostatný přehrávač (nahrazuje původní `MFCinemaPlayer`):
-- **Zdroje filmů:** Bombuj → Bombuj (bez roku) → Prehrajto.cz → Uzi.la
-- **Zdroje seriálů:** SvetSerialu → Bombuj → Prehrajto.cz → Uzi.la
-- Tlačítko "Nepovedlo se najít? Zkusit jiný zdroj →" s počítadlem vyzkoušených zdrojů
-- Navigace epizod: ⏮ Předchozí / Další ⏭ / 📺 Vybrat epizodu (grid se stavem zhlédnuto) / ⏭⏭ Další seriál
-- "➕ Přidat do seznamu" — propisuje se do Watchlistu a rozsvítí ikonu v docku
-
-### `styles-apple-tv.css` (oprava, ne nový soubor)
-- Chybějící `}` u `.pc-btn-save` rozbíjelo parsování CSS hned za tím (`.pc-pin-digit`)
-- Nesmyslné natvrdo-zelené `.mf-sync-dot` bez ohledu na stav (opraveno v `mujflix-fixes.css`)
+> 💡 **Žádná instalace, žádný build.** Čistě statická webová appka (HTML/CSS/JS), běží přímo v prohlížeči.
 
 ---
 
-## 🌐 Externí zdroje videí — logika URL
+## ✨ Funkce
 
-| Zdroj | Film | Seriál (S/E) |
-|---|---|---|
-| **Bombuj** | `bombuj.si/online-film-{slug}-{rok}` | `serialy.bombuj.si/serial/{slug}-{S}x{EE}` |
-| **SvetSerialu** | — | `svetserialu.to/serial/{slug}/s{SS}e{EE}` |
-| **Prehrajto.cz** | `prehrajto.cz/hledej/{název bez diakritiky, mezery}` | totéž + `" S01E02"` v dotazu |
-| **Uzi.la** | `uzi.la/p/{slug}` | `uzi.la/p/{slug}-s{SS}e{EE}` |
+<table>
+<tr>
+<td width="50%" valign="top">
 
-`{slug}` = název bez diakritiky, malými písmeny, mezery/speciální znaky → pomlčky
-(sdílená funkce `_czSlug` z `app.js`). U Prehrajto.cz zůstávají mezery jako mezery
-(→ `%20` v URL), protože jde o vyhledávací dotaz, ne přímou stránku.
+### 🏠 Domovská obrazovka
+- Přehled seriálů s **progress barem**
+- Odznak **„pokračovat"** ukazuje, kde jsi skončil
+- Dlaždice se automaticky přeskládají podle aktivity
 
-Formáty pro seriály u Prehrajto.cz/Uzi.la jsou **odhad** (weby nemají oficiální API) —
-pokud nesedí, je potřeba upravit `prehrajtoTvUrl()` / `uziTvUrl()` v `mujflix-cinema-player.js`.
+### 🧭 Objevování
+- Procházení podle **žánru, popularity, hodnocení** (TMDB)
+- Filtrování podle **víc žánrů najednou**
+- Fulltextové vyhledávání
+
+### 🎥 Cinema mód
+- Přehrávání přes víc externích zdrojů
+- Automatický fallback při selhání zdroje
+- U seriálů: **Další / Předchozí epizoda**, výběr epizody, skok na další seriál
+- **„Přidat do seznamu"** přímo z přehrávače
+
+</td>
+<td width="50%" valign="top">
+
+### 📋 Můj seznam
+- Ulož si, co chceš zhlédnout později
+- Vše na jednom místě, synchronizováno
+
+### 👤 Profily
+- **Víc profilů** na jednom zařízení (jako Netflix)
+- Volitelné **zamčení PIN kódem**
+
+### 🔄 Cross-device sync
+- Rozkoukanost a seznam mezi zařízeními
+- 🟢 Zelená tečka = synchronizováno
+
+### 🤖 AI asistent
+- Doporučení podle nálady nebo žánru
+- Zná tvoji historii sledování
+
+### 🎙️ Hlasový mód
+- Ovládání hlasem: *„otevři Simpsonovi"*, *„chci něco vtipného"*
+
+</td>
+</tr>
+</table>
 
 ---
 
-## 🚀 Nasazení
+## 🚀 Spuštění
 
-Projekt běží na **Cloudflare Pages**. Push do `main` větve na GitHubu spustí automatický
-deploy (pokud je Pages projekt napojený na repo).
+MůjFlix je **čistě statická webová appka** — žádný build krok, žádné závislosti.
 
-Lokální test bez Cloudflare CLI: stačí servírovat složku libovolným statickým serverem
-(`python3 -m http.server`, `npx serve`, …) — appka je čistě statická (HTML/CSS/JS),
-kromě `functions/api/` (Cloudflare Pages Functions, běží jen po nasazení).
+### 🌐 Nasazená verze
 
----
+Nejjednodušší způsob — otevřít nasazenou verzi v prohlížeči. Pokud je projekt napojený na **Cloudflare Pages**, běží na tvé `.pages.dev` doméně nebo vlastní doméně.
 
-## 🐛 Known issues / co ještě ověřit
+### 💻 Lokální spuštění
 
-- Formáty URL pro Prehrajto.cz/Uzi.la u seriálů jsou nepotvrzený odhad
-- Personalizace domovských dlaždic řadí podle počtu zhlédnutých epizod — ne podle
-  data posledního zhlédnutí (mohlo by se přesnějc, kdyby appka ukládala timestamp)
-- CSS má napříč soubory hodně duplicitních/přebíjejících se pravidel (historický dluh) —
-  při jakékoliv další vizuální úpravě ověřit finální chování v prohlížeči, ne jen v kódu
+```bash
+git clone https://github.com/jablkooo/mujflix.git
+cd mujflix
+python3 -m http.server 8000
