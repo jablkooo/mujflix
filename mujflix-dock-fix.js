@@ -94,5 +94,46 @@
       };
     }
   });
+
+  /* ── Oprava: seriály otevřené z Objevování ukazovaly jen 1 sezónu ──
+   * openDiscoverTv() správně naplní db[slug] daty o všech epizodách
+   * a sezónách z TMDB, ale nezapíše počty do epsBySeason[slug] —
+   * což je tabulka, ze které si totalSeasons()/epsInSeason() (a tedy
+   * i výběr sezóny v modálu seriálu) berou, kolik sezón/epizod má
+   * zobrazit. Bez ní appka spadne na výchozích "1 sezóna / 10 epizod".
+   * Dopočítáme to tady z klíčů, co už db[slug] obsahuje.
+   */
+  if (typeof window.openDiscoverTv === "function") {
+    var _origOpenDiscoverTv = window.openDiscoverTv;
+    window.openDiscoverTv = function (tmdbId, title) {
+      var result = _origOpenDiscoverTv(tmdbId, title);
+      Promise.resolve(result).then(function () {
+        try {
+          var slug = "__dtv_" + tmdbId;
+          if (typeof db === "undefined" || !db[slug] || typeof epsBySeason === "undefined") return;
+          var rec = db[slug];
+          var prefix = slug + "-S";
+          var counts = {};
+          Object.keys(rec).forEach(function (k) {
+            if (k.indexOf(prefix) !== 0) return;
+            var m = k.match(/-S(\d+)-E(\d+)$/);
+            if (!m) return;
+            var s = parseInt(m[1], 10), e = parseInt(m[2], 10);
+            counts[s] = Math.max(counts[s] || 0, e);
+          });
+          var maxSeason = 0;
+          Object.keys(counts).forEach(function (s) { if (+s > maxSeason) maxSeason = +s; });
+          if (maxSeason > 0) {
+            var arr = [];
+            for (var s = 1; s <= maxSeason; s++) arr.push(counts[s] || 1);
+            epsBySeason[slug] = arr;
+          }
+        } catch (e) {
+          console.warn("[MůjFlix fix] epsBySeason patch selhal", e);
+        }
+      });
+      return result;
+    };
+  }
 })();
 
