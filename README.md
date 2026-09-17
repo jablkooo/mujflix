@@ -1,11 +1,87 @@
 # 🎬 MůjFlix
 
-**MůjFlix** je moderní webová aplikace pro objevování, vyhledávání a organizaci filmů a seriálů.
+> **Moderní filmový a seriálový discovery hub pro PC a notebooky.**
 
-Projekt kombinuje **prémiový dark-mode design, cinematic UI a jemný glassmorphism** s rychlým frontendem postaveným na Vanilla JavaScriptu a serverless infrastruktuře Cloudflare.
+MůjFlix je webová aplikace pro **objevování, vyhledávání a organizaci filmů a seriálů**.
 
-> 🖥️ Aktuálně optimalizováno pro **PC a notebooky**.
-> 📱 Mobilní verze je stále ve vývoji.
+Projekt kombinuje **moderní dark-mode, cinematic UI, jemný glassmorphism a prémiovou streaming estetiku** s rychlým frontendem postaveným na Vanilla JavaScriptu a serverless infrastruktuře Cloudflare.
+
+🖥️ **PC / Notebook:** ✅
+📱 **Mobil:** 🚧 Ve vývoji
+
+---
+
+## 📖 Obsah
+
+* [🎬 O MůjFlixu](#-o-můjflixu)
+* [⚡ Jak spustit](#-jak-spustit)
+* [✨ Funkce](#-funkce)
+* [🏗️ Technologie](#️-technologie)
+* [📁 Struktura projektu](#-struktura-projektu)
+* [🚀 Deployment](#-deployment)
+* [🔐 API klíče](#-api-klíče)
+* [🤖 Vibe Coded](#-vibe-coded)
+* [👤 Autor](#-autor)
+
+---
+
+## 🎬 O MůjFlixu
+
+MůjFlix je navržen jako moderní desktopové rozhraní pro objevování filmů a seriálů.
+
+### 🎨 Design
+
+* 🌑 Deep Dark / Midnight background
+* 🧊 Glassmorphism
+* 🎞️ Velké filmové postery
+* ✨ Ambientní gradienty
+* 🔵 Blue / Purple accent barvy
+* 🫧 Floating navigation dock
+* 🎬 Cinematic streaming UI
+* 🖥️ Optimalizováno pro velké obrazovky
+
+Design je inspirován moderními streaming platformami, ale MůjFlix používá vlastní UI a komponenty.
+
+> 📱 **Mobilní verze je stále ve vývoji a zatím není kompletně dokončená.**
+
+---
+
+## ⚡ Jak spustit
+
+### 📋 Požadavky
+
+Před spuštěním potřebuješ:
+
+* [Node.js](https://nodejs.org/)
+* npm nebo pnpm
+* Git
+
+Doporučená verze Node.js: **18+**
+
+### 1. 📥 Naklonování projektu
+
+```bash
+git clone https://github.com/jablkooo/mujflix.git
+cd mujflix
+```
+
+### 2. 📦 Spuštění vývojového serveru
+
+MůjFlix používá Cloudflare Wrangler pro lokální simulaci Cloudflare Pages:
+
+```bash
+npx wrangler pages dev .
+```
+
+### 3. 🌐 Otevření aplikace
+
+Po spuštění otevři:
+
+```text
+http://localhost:8788
+```
+
+Aplikace by měla být dostupná v prohlížeči.
 
 ---
 
@@ -13,52 +89,100 @@ Projekt kombinuje **prémiový dark-mode design, cinematic UI a jemný glassmorp
 
 ### 🔎 Discover & Search
 
-* Vyhledávání filmů, seriálů a herců přes TMDB
-* Populární a doporučený obsah
-* Žánry a filtrování
-* Detailní informace o titulech
+MůjFlix využívá **TMDB** pro vyhledávání a objevování obsahu.
+
+* 🎬 Filmy
+* 📺 Seriály
+* 👤 Herci
+* 🏷️ Žánry
+* 🔥 Populární obsah
+* ⭐ Hodnocení
+* 🔍 Vyhledávání
+* 🎯 Filtrování
+
+---
 
 ### 🎬 Cinema Player
 
-* Vlastní přehrávací rozhraní
-* Cinematic fullscreen UI
+Vlastní přehrávací rozhraní navržené pro desktopové sledování.
+
+* Cinematic UI
+* Fullscreen režim
+* Vlastní ovládací prvky
 * Podpora externích přehrávacích zdrojů
-* Desktopové ovládání
+* Přizpůsobení desktopovému prostředí
 
-### 🎨 Moderní UI
-
-* Dark / Midnight design
-* Glassmorphism
-* Velké filmové postery
-* Gradienty a ambientní efekty
-* Zaoblené komponenty
-* Floating navigation dock
-* Blue / Purple accent barvy
+---
 
 ### 📺 Legální poskytovatelé
 
-`legal-streaming-providers.js` zobrazuje dostupné oficiální streamovací služby pro jednotlivé tituly.
+Modul:
+
+```text
+legal-streaming-providers.js
+```
+
+zobrazuje dostupné **oficiální streamovací služby** pro jednotlivé tituly.
+
+Například:
+
+* Netflix
+* HBO Max
+* Disney+
+* Apple TV+
+* Prime Video
+* další dostupní poskytovatelé
+
+---
+
+### 🖼️ TMDB Image Proxy
+
+MůjFlix používá Cloudflare Function jako proxy pro TMDB obrázky:
+
+```text
+/functions/api/tmdb-img/[[catchall]].js
+```
+
+Proxy pomáhá s:
+
+* načítáním posterů
+* načítáním backdropů
+* cachováním
+* komunikací mezi frontendem a externími zdroji
 
 ---
 
 ## 🏗️ Technologie
 
-* **HTML5**
-* **CSS3**
-* **Vanilla JavaScript (ES6+)**
-* **TMDB API**
-* **Cloudflare Pages**
-* **Cloudflare Pages Functions**
-* **Wrangler**
+MůjFlix je záměrně vytvořen bez velkého frontend frameworku.
 
-Bez Reactu, Vue nebo jiného velkého frontend frameworku.
+| Technologie          | Použití                    |
+| -------------------- | -------------------------- |
+| HTML5                | Struktura aplikace         |
+| CSS3                 | Design, animace a layout   |
+| Vanilla JavaScript   | Aplikační logika           |
+| TMDB API             | Filmová databáze           |
+| Cloudflare Pages     | Hosting                    |
+| Cloudflare Functions | Serverless funkce          |
+| Wrangler             | Lokální vývoj a deployment |
+
+### Frontend
+
+```text
+HTML5
+CSS3
+Vanilla JavaScript ES6+
+```
+
+Projekt nepoužívá React, Vue ani podobný frontend framework.
 
 ---
 
-## 📁 Struktura
+## 📁 Struktura projektu
 
 ```text
 mujflix/
+│
 ├── functions/
 │   └── api/
 │       └── tmdb-img/
@@ -66,6 +190,7 @@ mujflix/
 │
 ├── app.js
 ├── index.html
+│
 ├── legal-streaming-providers.js
 ├── mujflix-cinema-player.js
 ├── mujflix-discover-redesign.js
@@ -77,32 +202,32 @@ mujflix/
 ├── styles-glass.css
 ├── styles-premium.css
 ├── mujflix-fixes.css
+│
 └── wrangler.toml
 ```
 
----
+### Hlavní soubory
 
-## ⚡ Lokální vývoj
+**`app.js`**
+Hlavní aplikační logika a práce se stavem aplikace.
 
-### Požadavky
+**`mujflix-cinema-player.js`**
+Cinema Player a jeho UI.
 
-* Node.js 18+
-* npm nebo pnpm
-* Git
+**`mujflix-discover-redesign.js`**
+Discover rozhraní a vyhledávání.
 
-### Spuštění
+**`legal-streaming-providers.js`**
+Informace o dostupných legálních poskytovatelích.
 
-```bash
-git clone https://github.com/jablkooo/mujflix.git
-cd mujflix
-npx wrangler pages dev .
-```
+**`mujflix-dock-fix.js`**
+Opravy a animace floating navigation docku.
 
-Aplikace bude dostupná na:
+**`notifications-changelog.js`**
+Systém interních notifikací a informací o novinkách.
 
-```text
-http://localhost:8788
-```
+**`functions/api/tmdb-img/[[catchall]].js`**
+Cloudflare serverless proxy pro TMDB obrázky.
 
 ---
 
@@ -110,40 +235,57 @@ http://localhost:8788
 
 MůjFlix je připravený pro **Cloudflare Pages**.
 
+### Manuální deployment
+
 ```bash
 npx wrangler pages deploy . --project-name=mujflix
 ```
 
-Při propojení s GitHubem lze nastavit automatický deployment při pushnutí do `main`.
+### GitHub → Cloudflare
+
+Po propojení GitHub repozitáře s Cloudflare Pages lze nastavit automatický deployment.
+
+```text
+git push
+   ↓
+GitHub
+   ↓
+Cloudflare Pages
+   ↓
+Nová verze MůjFlixu
+```
 
 ---
 
 ## 🔐 API klíče
 
-Citlivé údaje nejsou ukládány přímo do zdrojového kódu.
+Citlivé údaje **nikdy nevkládej přímo do zdrojového kódu**.
 
-Používají se **Environment Variables** v Cloudflare nebo lokální:
+Používej Cloudflare Environment Variables nebo lokální:
 
 ```text
 .dev.vars
 ```
 
-Serverless Functions k nim přistupují přes:
+Lokální `.dev.vars` by měl být uvedený v `.gitignore`.
+
+Serverless Functions mohou k environment variables přistupovat například přes:
 
 ```javascript
 context.env
 ```
 
----
+### ❌ Nedělej
 
-## 🖥️ Aktuální platforma
+```javascript
+const TMDB_API_KEY = "tajny-klic";
+```
 
-MůjFlix je momentálně zaměřený na:
+### ✅ Používej
 
-* 🖥️ Desktop PC
-* 💻 Notebooky
-
-Mobilní rozhraní je **ve vývoji** a zatím není považováno za dokončené.
+```javascript
+const TMDB_API_KEY = context.env.TMDB_API_KEY;
+```
 
 ---
 
@@ -151,19 +293,37 @@ Mobilní rozhraní je **ve vývoji** a zatím není považováno za dokončené.
 
 MůjFlix je **vibe-coded projekt**.
 
-Velká část vývoje vznikla ve spolupráci s AI nástroji — od návrhu UI a architektury přes psaní a úpravu kódu až po debugging a experimentování s novými funkcemi.
+Celý projekt vznikal ve spolupráci s AI nástroji — od návrhu UI a psaní kódu až po debugging, refactoring a experimentování s novými funkcemi.
 
-Používané nástroje:
+### Použité AI nástroje
 
-* **Claude**
-* **GitHub Copilot**
-* **ChatGPT**
-* **DeepSeek**
-* **Kimi**
+* 🤖 **Claude**
+* 🐙 **GitHub Copilot**
+* 💬 **ChatGPT**
+* 🧠 **DeepSeek**
+* 🌐 **Kimi**
 
-AI není pouze použita pro jednotlivé úryvky kódu — byla součástí celého vývojového procesu.
+AI byla součástí prakticky celého vývojového procesu.
 
 > **Built by a human, coded with AI.**
+
+---
+
+## 🖥️ Aktuální stav
+
+### Desktop
+
+**PC / Notebook**
+
+🟢 Aktivně vyvíjeno
+
+### Mobil
+
+**Telefon / Tablet**
+
+🟡 Ve vývoji
+
+Mobilní rozhraní zatím není považováno za kompletně dokončené.
 
 ---
 
@@ -172,13 +332,14 @@ AI není pouze použita pro jednotlivé úryvky kódu — byla součástí celé
 **jablkooo**
 
 GitHub:
+
 https://github.com/jablkooo
 
 ---
 
 <div align="center">
 
-### 🎬 MůjFlix
+## 🎬 MůjFlix
 
 **Discover. Explore. Watch.**
 
