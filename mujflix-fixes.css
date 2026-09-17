@@ -50,6 +50,28 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
+   Dock v režimu Objevování — má úplně ZMIZET (ne jen ztlumit).
+   Původní pravidla ve styles-discover-redesign.css jen snižují
+   opacity na .55 a nechávají pointer-events: auto, takže lišta
+   zůstává neviditelně/matoucně klikatelná přes celou obrazovku.
+   Tady ji schováme úplně a zablokujeme jí kliky — zpátky domů se
+   jde přes ✕ / Esc, což už funguje (volá closeUniverse()).
+   Selektory jsou schválně identické s originálem (stejná specificita,
+   tenhle soubor se načítá jako poslední → vyhrává), včetně varianty
+   pro :hover / :focus-within, aby lišta nevyskočila zpět, když na ni
+   uživatel omylem najede myší dole na obrazovce.
+   ══════════════════════════════════════════════════════════════ */
+body.discover-open #mfDock,
+body.discover-open #mfDock:hover,
+body.discover-open #mfDock:focus-within {
+  opacity: 0 !important;
+  transform: translateX(-50%) translateY(40px) scale(0.8) !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
    Cinema Player v2 — zdroje, TV navigace, výběr epizody
    ══════════════════════════════════════════════════════════════ */
 
