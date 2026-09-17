@@ -84,19 +84,6 @@ body.discover-open #mfDock:focus-within {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   flex-wrap: wrap;
 }
-.mf-cin-src-arrow {
-  width: 30px;
-  height: 30px;
-  flex: none;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
-  font-size: 1.1rem;
-  line-height: 1;
-  cursor: pointer;
-}
-.mf-cin-src-arrow:hover { background: rgba(10, 132, 255, 0.22); border-color: rgba(10, 132, 255, 0.4); }
 .mf-cin-src-info {
   display: flex;
   flex-direction: column;
@@ -119,6 +106,21 @@ body.discover-open #mfDock:focus-within {
   white-space: nowrap;
 }
 .mf-cin-switch-btn:hover { background: rgba(10, 132, 255, 0.3); }
+
+.mf-cin-external-btn {
+  flex: none;
+  padding: 7px 13px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.mf-cin-external-btn:hover { background: rgba(255, 255, 255, 0.15); }
 
 .mf-cin-tvbar {
   display: flex;
