@@ -1,0 +1,209 @@
+/* ══════════════════════════════════════════════════════════════
+   MůjFlix — Fixes patch (dock hover/size + active state)
+   Načteno jako POSLEDNÍ stylesheet → vyhrává nad staršími pravidly.
+   Selektor #mfDock .dock-btn má vyšší specificitu (ID) než staré
+   .dock-btn / .dock-btn:hover / .dock-btn.active pravidla, takže
+   tady definované chování je vždy finální, bez ohledu na pořadí
+   v ostatních CSS souborech.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Výchozí stav — mírně zmenšeno */
+#mfDock .dock-btn {
+  transform: scale(0.92) !important;
+  transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.18s ease, color 0.18s ease !important;
+  will-change: transform !important;
+}
+
+/* Aktivní položka — normální velikost v klidu (ne zmenšená) */
+#mfDock .dock-btn.active {
+  transform: scale(1) !important;
+}
+
+/* Hover — ZVĚTŠENÍ (opak původního chování) */
+#mfDock .dock-btn:hover {
+  transform: scale(1.14) translateY(-3px) !important;
+}
+#mfDock .dock-btn.active:hover {
+  transform: scale(1.16) translateY(-3px) !important;
+}
+
+/* Klik — jemné stisknutí */
+#mfDock .dock-btn:active {
+  transform: scale(0.86) !important;
+  transition: transform 80ms ease !important;
+}
+
+/* Ikony a popisek uvnitř — necháváme přirozeně škálovat s rodičem,
+   takže žádné vlastní protichůdné transformace na SVG */
+#mfDock .dock-btn svg {
+  transition: none !important;
+  transform: none !important;
+}
+
+/* AI tlačítko v docku má jiné rozměry — hover chování stejné, jen jemnější škála */
+#mfDock .dock-btn.dock-ai {
+  transform: scale(0.95) !important;
+}
+#mfDock .dock-btn.dock-ai:hover {
+  transform: scale(1.08) translateY(-2px) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Cinema Player v2 — zdroje, TV navigace, výběr epizody
+   ══════════════════════════════════════════════════════════════ */
+
+.mf-cin-sourcebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(14, 16, 22, 0.96);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-wrap: wrap;
+}
+.mf-cin-src-arrow {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.mf-cin-src-arrow:hover { background: rgba(10, 132, 255, 0.22); border-color: rgba(10, 132, 255, 0.4); }
+.mf-cin-src-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  flex: 1 1 auto;
+}
+.mf-cin-src-label { font-size: 0.82rem; font-weight: 600; color: #fff; }
+.mf-cin-src-counter { font-size: 0.68rem; color: rgba(255, 255, 255, 0.45); margin-top: 1px; }
+.mf-cin-switch-btn {
+  flex: none;
+  padding: 7px 13px;
+  border-radius: 10px;
+  border: 1px solid rgba(10, 132, 255, 0.4);
+  background: rgba(10, 132, 255, 0.16);
+  color: #7cc0ff;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.mf-cin-switch-btn:hover { background: rgba(10, 132, 255, 0.3); }
+
+.mf-cin-tvbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: rgba(10, 11, 16, 0.94);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  flex-wrap: wrap;
+}
+.mf-cin-ep-btn {
+  padding: 7px 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.mf-cin-ep-btn:hover { background: rgba(255, 255, 255, 0.14); }
+.mf-cin-ep-btn.mf-cin-next-series {
+  margin-left: auto;
+  border-color: rgba(48, 170, 255, 0.4);
+  background: rgba(48, 170, 255, 0.14);
+  color: #7cc0ff;
+}
+.mf-cin-ep-btn.mf-cin-next-series:hover { background: rgba(48, 170, 255, 0.26); }
+.mf-cin-ep-current {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+.mf-cin-epgrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 42vh;
+  overflow-y: auto;
+  padding: 12px 16px;
+  background: rgba(8, 9, 13, 0.98);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.mf-cin-epgrid-seasons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.mf-cin-season-chip {
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.75);
+  font: inherit;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+.mf-cin-season-chip.active {
+  background: rgba(10, 132, 255, 0.28);
+  border-color: rgba(10, 132, 255, 0.55);
+  color: #fff;
+  font-weight: 700;
+}
+.mf-cin-epgrid-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 7px;
+}
+.mf-cin-ep-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  font: inherit;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+.mf-cin-ep-chip:hover { background: rgba(255, 255, 255, 0.12); }
+.mf-cin-ep-chip.watched {
+  border-color: rgba(48, 209, 88, 0.4);
+  background: rgba(48, 209, 88, 0.1);
+  color: rgba(140, 235, 165, 0.9);
+}
+.mf-cin-ep-chip.current {
+  border-color: rgba(10, 132, 255, 0.65);
+  background: rgba(10, 132, 255, 0.24);
+  color: #fff;
+  font-weight: 700;
+}
+.mf-cin-ep-chip-num { font-weight: 700; }
+.mf-cin-ep-chip-mark { font-size: 0.78rem; color: #30d158; }
+
+@media (max-width: 560px) {
+  .mf-cin-sourcebar { padding: 8px 10px; }
+  .mf-cin-switch-btn { font-size: 0.68rem; padding: 6px 10px; }
+  .mf-cin-tvbar { padding: 8px 10px; gap: 6px; }
+  .mf-cin-ep-btn { font-size: 0.66rem; padding: 6px 9px; }
+  .mf-cin-ep-btn.mf-cin-next-series { margin-left: 0; }
+  .mf-cin-epgrid { padding: 10px; }
+}
