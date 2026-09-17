@@ -86,6 +86,138 @@
 
   console.info("[MůjFlix] ✓ Dock active-state fix načten");
 
+  /* ── Umožnit výběr více žánrů v Objevování najednou ──
+   * Původní discoFilter() při každém kliku smazal aktivní stav
+   * VŠECH položek (typ i žánry) a zapnul jen tu jednu klikutou —
+   * takže šlo vybrat vždy jen 1 žánr. Tady žánry (druhý parametr
+   * neprázdný) přepínáme nezávisle na sobě (toggle), zatímco
+   * volby typu (Vše/Filmy/Seriály, druhý parametr prázdný) se
+   * chovají jako dřív — jsou vždy jen jedna aktivní a reset i
+   * vybraných žánrů, aby šlo snadno začít znovu od "Vše".
+   */
+  window._mfActiveGenres = window._mfActiveGenres || [];
+  if (typeof window.discoFilter === "function" && !window.discoFilter._mfMultiGenre) {
+    var _origDiscoFilter = window.discoFilter;
+    var mfMultiDiscoFilter = function (el, genre, type) {
+      if (!genre) {
+        // Tlačítko typu (Vše/Filmy/Seriály) — reset žánrů, chování jako dřív.
+        window._mfActiveGenres = [];
+        document.querySelectorAll(".disco-nav-item[onclick*=\"discoFilter\"]").forEach(function (item) {
+          if (item !== el) item.classList.remove("active");
+        });
+        return _origDiscoFilter(el, genre, type);
+      }
+      // Tlačítko žánru — nezávislé přepínání (toggle).
+      var idx = window._mfActiveGenres.indexOf(genre);
+      if (idx >= 0) {
+        window._mfActiveGenres.splice(idx, 1);
+        el.classList.remove("active");
+      } else {
+        window._mfActiveGenres.push(genre);
+        el.classList.add("active");
+      }
+      // Žánrový výběr ruší aktivní "Vše/Filmy/Seriály" tlačítka (jiná osa filtru).
+      document.querySelectorAll(".disco-nav-item[onclick*=\"discoFilter(this, '', \"]").forEach(function (item) {
+        item.classList.remove("active");
+      });
+      var combinedGenre = window._mfActiveGenres.join("|");
+      try { _discoCurrent = { genre: combinedGenre, type: type }; } catch (e) {}
+      var searchInput = document.getElementById("searchTitleInput");
+      if (searchInput) searchInput.value = "";
+      var clearBtn = document.getElementById("shClearBtn");
+      if (clearBtn) clearBtn.style.display = "none";
+      if (typeof loadDiscoContent === "function") loadDiscoContent(combinedGenre || "", type);
+    };
+    mfMultiDiscoFilter._mfMultiGenre = true;
+    window.discoFilter = mfMultiDiscoFilter;
+  }
+
+  /* ── Domovské dlaždice (Simpsons/Griffinovi/South Park/Futurama)
+   * podle toho, co člověk doopravdy sleduje ──
+   * Standardně jsou 4 natvrdo dané. Tady je přeskládáme podle
+   * skutečně odkoukaných epizod (z db katalogu) — kdo nic nekoukal,
+   * tomu zůstanou výchozí 4 tituly.
+   */
+  function personalizeHomeTiles() {
+    try {
+      if (typeof db === "undefined" || typeof calcProgress !== "function") return;
+      var wrappers = Array.prototype.slice.call(document.querySelectorAll("#mainMenu .ps-tile-wrapper[data-slug]"));
+      if (!wrappers.length) return;
+      var defaultOrder = wrappers.map(function (w) { return w.dataset.slug; });
+
+      var ranked = Object.keys(db)
+        .filter(function (slug) { return slug.indexOf("__dtv_") !== 0; })
+        .map(function (slug) {
+          var p = calcProgress(slug);
+          return { slug: slug, seen: p.seen };
+        })
+        .filter(function (r) { return r.seen > 0; })
+        .sort(function (a, b) { return b.seen - a.seen; });
+
+      if (!ranked.length) return; // nikdo zatím nic nesledoval → necháme výchozí 4
+
+      var chosen = ranked.slice(0, wrappers.length).map(function (r) { return r.slug; });
+      defaultOrder.forEach(function (slug) {
+        if (chosen.length >= wrappers.length) return;
+        if (chosen.indexOf(slug) === -1) chosen.push(slug);
+      });
+
+      wrappers.forEach(function (wrapper, idx) {
+        var newSlug = chosen[idx];
+        var oldSlug = wrapper.dataset.slug;
+        if (!newSlug || newSlug === oldSlug) return;
+        var entry = db[newSlug];
+        if (!entry) return;
+
+        wrapper.dataset.slug = newSlug;
+        wrapper.onclick = function () { if (typeof openSeries === "function") openSeries(newSlug); };
+        wrapper.setAttribute("title", entry.name || newSlug);
+
+        var img = wrapper.querySelector(".tile-bg");
+        if (img) {
+          img.id = "tile-bg-" + newSlug;
+          img.alt = entry.name || newSlug;
+          var poster = entry.poster || entry._poster || entry._backdrop;
+          if (poster) {
+            img.src = /^https?:/.test(poster) ? poster : "https://image.tmdb.org/t/p/w500" + poster;
+            img.classList.remove("loaded");
+          }
+        }
+        var prog = wrapper.querySelector(".tile-progress-fill");
+        if (prog) prog.id = "prog-" + newSlug;
+
+        var badge = wrapper.querySelector(".tile-continue-badge");
+        if (badge) {
+          badge.id = "cont-" + newSlug;
+          var badgeText = badge.querySelector(".tcb-text");
+          if (badgeText) badgeText.id = "cont-text-" + newSlug;
+        }
+
+        var wlBtn = wrapper.querySelector(".tile-watchlist-btn");
+        if (wlBtn) {
+          wlBtn.id = "wlbtn-" + newSlug;
+          wlBtn.onclick = function (event) {
+            event.stopPropagation();
+            if (typeof toggleWatchlistItem === "function") toggleWatchlistItem(newSlug);
+          };
+        }
+      });
+
+      chosen.forEach(function (slug) {
+        if (typeof updateTileProgress === "function") updateTileProgress(slug);
+        if (typeof updateContinueBadge === "function") updateContinueBadge(slug);
+      });
+      if (typeof updateWatchlistBtns === "function") updateWatchlistBtns();
+      if (typeof initTileEffects === "function") initTileEffects();
+    } catch (err) {
+      console.warn("[MůjFlix fix] personalizeHomeTiles selhalo", err);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(personalizeHomeTiles, 300);
+  });
+
   /* ── Vypnutí onboarding otázky "Co tě baví?" po vytvoření profilu ── */
   document.addEventListener("DOMContentLoaded", function () {
     if (window.ProfileGate && typeof window.ProfileGate.openOnboarding === "function") {
@@ -136,4 +268,3 @@
     };
   }
 })();
-
