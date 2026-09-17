@@ -122,6 +122,26 @@ body.discover-open #mfDock:focus-within {
 }
 .mf-cin-external-btn:hover { background: rgba(255, 255, 255, 0.15); }
 
+.mf-cin-watchlist-btn {
+  flex: none;
+  padding: 7px 13px;
+  border-radius: 10px;
+  border: 1px solid rgba(48, 209, 88, 0.35);
+  background: rgba(48, 209, 88, 0.12);
+  color: #8cebb0;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.mf-cin-watchlist-btn:hover { background: rgba(48, 209, 88, 0.22); }
+.mf-cin-watchlist-btn.in-list {
+  background: rgba(48, 209, 88, 0.28);
+  border-color: rgba(48, 209, 88, 0.6);
+  color: #fff;
+}
+
 .mf-cin-tvbar {
   display: flex;
   align-items: center;
@@ -272,4 +292,48 @@ body.discover-open #mfDock:focus-within {
 }
 .pc-hint {
   text-align: center !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Oprava: styles-apple-tv.css měl .mf-sync-dot natvrdo na zeleno
+   (background:#30d158 !important) BEZ ohledu na .online/.syncing/
+   .error stav — tečka tak svítila zeleně pořád, i když sync byl
+   neaktivní/offline. Tady vracíme správné stavové barvy.
+   ══════════════════════════════════════════════════════════════ */
+.mf-sync-dot {
+  background: rgba(255, 255, 255, 0.22) !important;
+  box-shadow: none !important;
+}
+.mf-sync-dot.online {
+  background: #30d158 !important;
+  box-shadow: 0 0 6px rgba(48, 209, 88, 0.7) !important;
+}
+.mf-sync-dot.syncing {
+  background: #0a84ff !important;
+  box-shadow: 0 0 6px rgba(10, 132, 255, 0.6) !important;
+  animation: dotBlink 0.8s infinite !important;
+}
+.mf-sync-dot.error {
+  background: #ff453a !important;
+  box-shadow: 0 0 6px rgba(255, 69, 58, 0.6) !important;
+}
+
+/* ── Skrytí "tiket" ikony (🔖 přidat do seznamu) na domovských dlaždicích ── */
+#mainMenu .ps-tile-wrapper .tile-watchlist-btn {
+  display: none !important;
+}
+
+/* ── Pulz na "Můj seznam" v docku, když se něco přidá z cinema modu ── */
+#mfDock .dock-btn.mf-dock-pulse {
+  animation: mf-dock-pulse-anim 0.9s ease !important;
+}
+@keyframes mf-dock-pulse-anim {
+  0% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0.55); }
+  60% { box-shadow: 0 0 0 12px rgba(48, 209, 88, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(48, 209, 88, 0); }
+}
+#mfDock .dock-btn.mf-dock-pulse svg {
+  stroke: #30d158 !important;
+  fill: #30d158 !important;
+  transition: none !important;
 }
