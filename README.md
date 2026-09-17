@@ -34,6 +34,8 @@ MůjFlix je **osobní streamovací hub** ve stylu Netflixu — jedno místo, kde
 > 💡 **Žádná instalace, žádný build.** Čistě statická webová appka (HTML/CSS/JS), běží přímo v prohlížeči.
 >
 > 🐛 **Pozor — ještě to má mouchy!** Není to 100% doladěné. Občas něco blbne, něco se nenačte, něco se rozbije. Ale s bráchou na tom makáme a postupně **všechno doladíme**. Ber to tak, že je to **živý projekt ve vývoji** — ne hotový produkt. 👍
+>
+> 📱 **Mobilní verze je teprve v plenkách!** 🚧 Na telefonu to zatím není zdaleka tak vyladěné jako na desktopu. Pracujeme na tom, ale chce to čas. **Pro nejlepší zážitek doporučujeme zatím používat desktop.** 🖥️
 
 ---
 
@@ -43,10 +45,34 @@ Tenhle projekt **NENÍ finální verze**. Je to **work-in-progress**, který po�
 
 - 🐛 **Bugy a mouchy** — občas se něco rozbije, občas něco nefunguje jak má
 - 🚧 **Nedotažené detaily** — UI, UX a funkce se ještě ladí
+- 📱 **Mobilní verze ve vývoji** — na telefonu je to teprve v plenkách, pracujeme na tom
 - 🔧 **Postupný vývoj** — s bráchou to pomalu ale jistě vylepšujeme
 - 💬 **Zpětná vazba vítána** — když najdeš bug, klidně napiš
 
 **Slibujeme:** budeme se snažit to co nejvíc doladit, aby to fungovalo tak, jak má. 🫡
+
+> 🖥️ **Tip:** Prozatím doporučujeme používat **desktop verzi** — mobilní zážitek ještě není tam, kde bychom chtěli.
+
+---
+
+## 📸 Screenshoty
+
+<div align="center">
+
+### 🏠 Hlavní stránka
+<img src="SCREENSHOT_3_URL" width="90%" alt="MůjFlix - Hlavní stránka s doporučeními"/>
+
+<br><br>
+
+### 🎬 Detail seriálu + výběr sezóny
+<img src="SCREENSHOT_1_URL" width="90%" alt="MůjFlix - Detail seriálu"/>
+
+<br><br>
+
+### 🎥 Cinema mód s výběrem zdroje
+<img src="SCREENSHOT_2_URL" width="90%" alt="MůjFlix - Cinema mód"/>
+
+</div>
 
 ---
 
@@ -107,6 +133,7 @@ Tenhle projekt **NENÍ finální verze**. Je to **work-in-progress**, který po�
 | **Bez instalace** | ✅ PWA | ❌ App | ❌ App | ❌ App |
 | **Vlastní profily** | ✅ Neomezeně | ⚠️ Limit | ⚠️ Limit | ⚠️ Limit |
 | **Mouchy a bugy** | 🐛 Občas 😅 | 🟢 Ne | 🟢 Ne | 🟢 Ne |
+| **Mobilní verze** | 🚧 Ve vývoji | 🟢 Hotová | 🟢 Hotová | 🟢 Hotová |
 
 **Prostě koukáš — zadarmo, bez omezení.**
 
@@ -134,28 +161,14 @@ Pak otevři 👉 **http://localhost:8000**
 
 | Prohlížeč | Desktop | Mobil |
 |-----------|:-------:|:-----:|
-| Chrome    |    ✅   |   ✅  |
-| Safari    |    ✅   |   ✅  |
-| Firefox   |    ✅   |   ✅  |
-| Edge      |    ✅   |   ✅  |
+| Chrome    |    ✅   |   🚧  |
+| Safari    |    ✅   |   🚧  |
+| Firefox   |    ✅   |   🚧  |
+| Edge      |    ✅   |   🚧  |
 
-> 📱 Appku jde přes **„Přidat na plochu"** nainstalovat jako **PWA** — ikonka jako klasická appka, spouští se na plné obrazovce.
-
----
-
-## 📸 Screenshoty
-
-<div align="center">
-
-> 🖼️ *Sem přidej screenshoty — ideálně 2–3 obrázky (Home, Cinema mód, AI asistent).*
+> 🖥️ **Desktop** = plně funkční &nbsp;•&nbsp; 📱 **Mobil** = ve vývoji 🚧
 >
-> ```
-> ![Home](./screenshots/home.png)
-> ![Cinema](./screenshots/cinema.png)
-> ![AI](./screenshots/ai.png)
-> ```
-
-</div>
+> 📱 Appku jde přes **„Přidat na plochu"** nainstalovat jako **PWA** — ikonka jako klasická appka, spouští se na plné obrazovce. *(Ale pozor — mobilní verze je zatím v plenkách.)*
 
 ---
 
@@ -185,6 +198,7 @@ Pak otevři 👉 **http://localhost:8000**
 - [x] Cross-device sync
 - [x] AI asistent
 - [ ] Vyladit bugy a mouchy 🐛
+- [ ] **Vyladit mobilní verzi** 📱
 - [ ] Offline režim (service worker cache)
 - [ ] Sdílení seznamu s přáteli
 - [ ] Statistiky sledování (kolik hodin, top žánry)
@@ -248,7 +262,7 @@ Projekt je primárně osobní, ale **PR a nápady jsou vítány**. Pokud chceš 
 
 <br>
 
-**Vytvořeno s ❤️ námi dvěma a spoustou AI.** 🤖✨
+**Vytvořeno s náma a spoustou AI.** 🤖✨
 
 Bez AI by to nebylo tam, kde to je. Díky, ChatGPT, Claude a spol.!
 
@@ -268,6 +282,6 @@ Architektura, souborová struktura a poznámky k údržbě jsou v **[`DEVELOPMEN
 
 **🎬 MůjFlix** — *your movies, your rules. For free.*
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=13&pause=2000&color=FFFFFF&center=true&vCenter=true&width=400&lines=Still+in+work...;Buggy+but+getting+better.;Made+by+us+%2B+a+lot+of+AI.;%24+exit" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=13&pause=2000&color=FFFFFF&center=true&vCenter=true&width=400&lines=Still+in+work...;Mobile+version+WIP+%F0%9F%93%B1;Buggy+but+getting+better.;Made+by+us+%2B+a+lot+of+AI.;%24+exit" />
 
 </div>
