@@ -6,7 +6,7 @@ MůjFlix je webová aplikace pro **objevování, vyhledávání a organizaci fil
 
 Projekt kombinuje **moderní dark-mode, cinematic UI, jemný glassmorphism a prémiovou streaming estetiku** s rychlým frontendem postaveným na Vanilla JavaScriptu a serverless infrastruktuře Cloudflare.
 
-🖥️ **PC / Notebook:** ✅
+🖥️ **PC / Notebook:** ✅  
 📱 **Mobil:** 🚧 Ve vývoji
 
 ---
@@ -48,15 +48,25 @@ Design je inspirován moderními streaming platformami, ale MůjFlix používá 
 
 ## ⚡ Jak spustit
 
+### 🌐 Online verze
+
+MůjFlix je dostupný přímo přes Cloudflare Pages:
+
+👉 **https://mujflix.pages.dev/**
+
+Není potřeba nic instalovat — stačí otevřít odkaz v prohlížeči.
+
+### 💻 Lokální spuštění
+
+Pokud chceš projekt spustit lokálně:
+
 ### 📋 Požadavky
 
 Před spuštěním potřebuješ:
 
-* [Node.js](https://nodejs.org/)
+* [Node.js](https://nodejs.org/) 18+
 * npm nebo pnpm
 * Git
-
-Doporučená verze Node.js: **18+**
 
 ### 1. 📥 Naklonování projektu
 
@@ -66,8 +76,6 @@ cd mujflix
 ```
 
 ### 2. 📦 Spuštění vývojového serveru
-
-MůjFlix používá Cloudflare Wrangler pro lokální simulaci Cloudflare Pages:
 
 ```bash
 npx wrangler pages dev .
@@ -208,25 +216,25 @@ mujflix/
 
 ### Hlavní soubory
 
-**`app.js`**
+**`app.js`**  
 Hlavní aplikační logika a práce se stavem aplikace.
 
-**`mujflix-cinema-player.js`**
+**`mujflix-cinema-player.js`**  
 Cinema Player a jeho UI.
 
-**`mujflix-discover-redesign.js`**
+**`mujflix-discover-redesign.js`**  
 Discover rozhraní a vyhledávání.
 
-**`legal-streaming-providers.js`**
+**`legal-streaming-providers.js`**  
 Informace o dostupných legálních poskytovatelích.
 
-**`mujflix-dock-fix.js`**
+**`mujflix-dock-fix.js`**  
 Opravy a animace floating navigation docku.
 
-**`notifications-changelog.js`**
+**`notifications-changelog.js`**  
 Systém interních notifikací a informací o novinkách.
 
-**`functions/api/tmdb-img/[[catchall]].js`**
+**`functions/api/tmdb-img/[[catchall]].js`**  
 Cloudflare serverless proxy pro TMDB obrázky.
 
 ---
@@ -333,7 +341,7 @@ Mobilní rozhraní zatím není považováno za kompletně dokončené.
 
 GitHub:
 
-https://github.com/jablkooo
+https://github.com/jablkooo/mujflix
 
 ---
 
