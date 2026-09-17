@@ -74,8 +74,6 @@ MůjFlix je **osobní streamovací hub** ve stylu Netflixu — jedno místo, kde
 - Doporučení podle nálady nebo žánru
 - Zná tvoji historii sledování
 
-### 🎙️ Hlasový mód
-- Ovládání hlasem: *„otevři Simpsonovi"*, *„chci něco vtipného"*
 
 </td>
 </tr>
