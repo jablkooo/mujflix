@@ -60,17 +60,17 @@ Tenhle projekt **NENÍ finální verze**. Je to **work-in-progress**, který po�
 <div align="center">
 
 ### 🏠 Hlavní stránka
-<img src="./objevovani.jpg" width="90%" alt="MůjFlix - Hlavní stránka s doporučeními"/>
+<img src="./screenshots/objevovani.jpg" width="90%" alt="MůjFlix - Hlavní stránka s doporučeními"/>
 
 <br><br>
 
 ### 🎬 Detail seriálu + výběr sezóny
-<img src="./detail.jpg" width="90%" alt="MůjFlix - Detail seriálu"/>
+<img src="./screenshots/detail.jpg" width="90%" alt="MůjFlix - Detail seriálu"/>
 
 <br><br>
 
 ### 🎥 Cinema mód s výběrem zdroje
-<img src="./cinema.jpg" width="90%" alt="MůjFlix - Cinema mód"/>
+<img src="./screenshots/cinema.jpg" width="90%" alt="MůjFlix - Cinema mód"/>
 
 </div>
 
