@@ -1,3 +1,0 @@
-name = "mujflix"
-compatibility_date = "2023-12-01"
-# Spust: wrangler secret put TMDB_KEY
