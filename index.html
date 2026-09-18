@@ -7755,10 +7755,29 @@
       /* ═══════════ FORCE HOMEPAGE ═══════════ */
       function forceHome(opts) {
         try {
-          var cin = document.getElementById('cinemaModal');
-          var cinOpen = cin && cin.classList.contains('open') &&
-            getComputedStyle(cin).display !== 'none';
-          if (cinOpen && !(opts && opts.force)) {
+          // OPRAVA: forceHome() se volá i automaticky několikrát po startu
+          // appky (50 ms až 5 s po načtení) a dřív bezpodmínečně zavírala
+          // VŠECHNY overlaye (Objevování, Můj seznam, detail seriálu, …) —
+          // i ten, co uživatel zrovna sám otevřel klikem během té doby.
+          // Efekt: klik na "Objevovat"/"Můj seznam" krátce po startu appky
+          // vypadal, že "nic neudělá", protože se okno hned zase zabouchlo.
+          // Teď kontrolujeme, jestli je otevřený JAKÝKOLI overlay (ne jen
+          // cinema) a pokud ano, forceHome (bez explicitního force:true)
+          // ho nechá být — automatické volání po startu nemá přebíjet
+          // reálnou akci uživatele.
+          var OPEN_OVERLAY_IDS = [
+            'cinemaModal', 'universeOverlay', 'watchlistOverlay', 'seriesModal',
+            'premiereOverlay', 'collectionsOverlay', 'moodOverlay',
+            'genreEditorOverlay', 'traktOverlay', 'customizeOverlay',
+            'voiceCmdOverlay', 'wrappedOverlay', 'adminPanel',
+            'adminLoginModal', 'aiFullscreen', 'aiApikeyOverlay', 'dockMoreSheet'
+          ];
+          var anyOverlayOpen = OPEN_OVERLAY_IDS.some(function (id) {
+            var el = document.getElementById(id);
+            return el && el.classList.contains('open') &&
+              getComputedStyle(el).display !== 'none';
+          });
+          if (anyOverlayOpen && !(opts && opts.force)) {
             return;
           }
 
@@ -7790,7 +7809,18 @@
           overlaysToClose.forEach(function(id) {
             var el = document.getElementById(id);
             if (el) {
-              el.style.setProperty('display', 'none', 'important');
+              // OPRAVA: dřív se tu navíc dávalo
+              //   el.style.setProperty('display', 'none', 'important')
+              // — inline !important, který zůstane na elementu navždy
+              // (dokud ho něco explicitně nesmaže). Funkce pro otevření
+              // overlaye (openUniverse, openWatchlist, …) ale jen přidávají
+              // CSS třídy "open"/"visible" a inline styl nikdy nemažou —
+              // takže jakmile forceHome() proběhne jednou (a běží
+              // automaticky hned po startu appky), overlay zůstane
+              // "otrávený" a NEJDE HO UŽ NIKDY OTEVŘÍT, i když se třídy
+              // správně přidají. Odebrání tříd samo o sobě stačí — bez
+              // třídy "open" element skryje základní (ne-!important)
+              // "display:none" ve stylesheetu.
               el.style.removeProperty('pointer-events');
               el.classList.remove('active', 'open', 'visible', 'show');
             }
@@ -9335,13 +9365,23 @@ document.addEventListener('DOMContentLoaded', () => {
     </script>
     <!-- dočasně vypnuto: /api/tmdb-img na Pages neexistuje, obrázky bereme přímo z TMDB -->
     <!-- <script src="mujflix-img-fix.js"></script> -->
-    <script src="legal-streaming-providers.js"></script>
-    <script src="notifications-changelog.js"></script>
-    <script src="mujflix-patch.js"></script>
+    <!-- ⚠️ defer je tu záměrně: tyhle patch skripty přepisují/obalují
+         funkce z app.js (window.setDockActive, window.openMovieInCinema,
+         window.openNotifPanel, window.openDiscoverTv, …). app.js má
+         "defer", takže bez "defer" i tady by se tyto patch skripty
+         spustily DŘÍV než app.js (protože běžný script tag bez "defer"
+         se spustí hned při parsování, defer teprve po dokončení parsování) — pak
+         buď zachytí `undefined` místo originální funkce, nebo je app.js
+         vzápětí přepíše zpátky na svou (neopravenou) verzi. S "defer" se
+         spustí ve stejném pořadí, v jakém jsou zapsané tady, ale až PO
+         app.js, takže jejich opravy/wrappery skutečně zůstanou platit. -->
+    <script src="legal-streaming-providers.js" defer></script>
+    <script src="notifications-changelog.js" defer></script>
+    <script src="mujflix-patch.js" defer></script>
     <!-- <script src="mujflix-url-fix.js"></script> -->
-    <script src="mujflix-discover-redesign.js"></script>
-    <script src="mujflix-cinema-player.js"></script>
-    <script src="mujflix-dock-fix.js"></script>
+    <script src="mujflix-discover-redesign.js" defer></script>
+    <script src="mujflix-cinema-player.js" defer></script>
+    <script src="mujflix-dock-fix.js" defer></script>
 
   
   <script>
