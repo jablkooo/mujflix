@@ -1,0 +1,18 @@
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(self), geolocation=()
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+
+/*.html
+  Cache-Control: no-store
+
+/styles*.css
+  Cache-Control: no-store
+
+/styles-premium.css
+  Cache-Control: no-store
+
+/app*.js
+  Cache-Control: no-cache, must-revalidate
