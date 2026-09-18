@@ -7366,6 +7366,41 @@
       .mfh-card * {
         pointer-events: none;
       }
+
+      /* ─── CINEMA MODAL – vždy klikatelný ─── */
+      #cinemaModal {
+        pointer-events: auto !important;
+      }
+      #cinemaModal[style*="display: flex"],
+      #cinemaModal[style*="display:flex"],
+      #cinemaModal[style*="display: block"] {
+        pointer-events: auto !important;
+      }
+      #cinemaModal * {
+        pointer-events: auto;
+      }
+      #cinemaTopBar,
+      #cinemaTopBar * {
+        pointer-events: auto !important;
+      }
+      #cinemaLoader {
+        pointer-events: none !important;
+      }
+
+      /* ESC hint na zavření */
+      #cinemaModal::before {
+        content: 'ESC pro zavření';
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        font-size: 11px;
+        color: rgba(255,255,255,0.3);
+        padding: 6px 12px;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        z-index: 100000;
+        pointer-events: none;
+      }
     </style>
 
     <script id="mfh-script">
@@ -7613,6 +7648,14 @@
         btn.textContent = isIn ? '+ Můj seznam' : '✓ V seznamu';
         btn.style.background = isIn ? '' : 'rgba(0,122,255,0.15)';
       };
+      function mfhUnlockCinema() {
+        var cinema = document.getElementById('cinemaModal');
+        if (!cinema) return;
+        cinema.style.removeProperty('pointer-events');
+        cinema.style.setProperty('pointer-events', 'auto', 'important');
+        cinema.style.setProperty('z-index', '99999', 'important');
+      }
+
       window.mfhOpenCard = function (title, tmdbId, mediaType) {
         console.log('[mfh] Otevřít kartu:', title, tmdbId, mediaType);
 
@@ -7650,11 +7693,13 @@
         if (typeof openMovieInCinema === 'function' && tmdbId) {
           console.log('[mfh] Otevírám cinema:', tmdbId, title, cinType);
           openMovieInCinema(tmdbId, title, cinType);
+          mfhUnlockCinema();
           return;
         }
         if (typeof openMovieInCinema === 'function') {
           console.log('[mfh] Otevírám cinema podle názvu:', title);
           openMovieInCinema(title, title, cinType);
+          mfhUnlockCinema();
           return;
         }
         if (typeof openCinema === 'function') {
@@ -7697,8 +7742,15 @@
       }
 
       /* ═══════════ FORCE HOMEPAGE ═══════════ */
-      function forceHome() {
+      function forceHome(opts) {
         try {
+          var cin = document.getElementById('cinemaModal');
+          var cinOpen = cin && cin.classList.contains('open') &&
+            getComputedStyle(cin).display !== 'none';
+          if (cinOpen && !(opts && opts.force)) {
+            return;
+          }
+
           // Klasický na <html> i <body>
           document.documentElement.classList.add('mfh-home-on');
           document.body.classList.add('mfh-home-on');
@@ -7728,7 +7780,7 @@
             var el = document.getElementById(id);
             if (el) {
               el.style.setProperty('display', 'none', 'important');
-              el.style.setProperty('pointer-events', 'none', 'important');
+              el.style.removeProperty('pointer-events');
               el.classList.remove('active', 'open', 'visible', 'show');
             }
           });
@@ -7807,7 +7859,7 @@
           e.preventDefault();
           e.stopPropagation();
           if (typeof setDockActive === 'function') setDockActive('dockHome');
-          forceHome();
+          forceHome({ force: true });
           if (typeof closeUniverse === 'function') closeUniverse();
           if (typeof closeWatchlist === 'function') closeWatchlist();
         };
@@ -7897,6 +7949,82 @@
       window.addEventListener('load', function () {
         setTimeout(forceHome, 300);
         setTimeout(forceHome, 1500);
+      });
+
+      /* ═══════════ ZÁCHRANA – pokud cinema zůstane prázdný ═══════════ */
+      (function setupCinemaRescue() {
+        var warned = false;
+        function attach() {
+          var cinema = document.getElementById('cinemaModal');
+          if (!cinema || cinema._mfhRescue) return;
+          cinema._mfhRescue = true;
+
+          var mo = new MutationObserver(function () {
+            var isOpen = getComputedStyle(cinema).display !== 'none';
+            if (!isOpen) {
+              warned = false;
+              var old = document.getElementById('mfhCinemaEmptyMsg');
+              if (old) old.remove();
+              return;
+            }
+            mfhUnlockCinema();
+            setTimeout(function () {
+              if (getComputedStyle(cinema).display === 'none') return;
+              var wrap = document.getElementById('cinemaFrameWrap');
+              if (!wrap) return;
+              var iframe = wrap.querySelector('iframe');
+              if (!iframe || !iframe.src || iframe.src === 'about:blank') {
+                if (warned) return;
+                warned = true;
+                if (document.getElementById('mfhCinemaEmptyMsg')) return;
+                var msg = document.createElement('div');
+                msg.id = 'mfhCinemaEmptyMsg';
+                msg.style.cssText =
+                  'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);' +
+                  'background:rgba(20,20,30,0.95);padding:24px 32px;border-radius:16px;' +
+                  'color:#fff;font-family:-apple-system,Inter,sans-serif;text-align:center;' +
+                  'z-index:999999;border:1px solid rgba(255,255,255,0.1);max-width:400px;';
+                msg.innerHTML =
+                  '<div style="font-size:1.5rem;margin-bottom:8px;">⚠️</div>' +
+                  '<div style="font-weight:700;margin-bottom:8px;">Zdroj nenalezen</div>' +
+                  '<div style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-bottom:16px;">' +
+                  'Zkus jiný zdroj nebo zavři přehrávač.</div>' +
+                  '<button type="button" id="mfhCinemaEmptyClose" ' +
+                  'style="padding:10px 20px;background:#007aff;border:none;border-radius:10px;' +
+                  'color:#fff;font-weight:700;cursor:pointer;">Zavřít</button>';
+                document.body.appendChild(msg);
+                var btn = document.getElementById('mfhCinemaEmptyClose');
+                if (btn) {
+                  btn.onclick = function () {
+                    msg.remove();
+                    if (typeof closeCinema === 'function') closeCinema();
+                    else cinema.style.display = 'none';
+                  };
+                }
+              }
+            }, 8000);
+          });
+
+          mo.observe(cinema, { attributes: true, attributeFilter: ['style', 'class'] });
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', attach);
+        } else {
+          attach();
+        }
+        window.addEventListener('load', attach);
+      })();
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        var cinema = document.getElementById('cinemaModal');
+        if (cinema && getComputedStyle(cinema).display !== 'none') {
+          var emptyMsg = document.getElementById('mfhCinemaEmptyMsg');
+          if (emptyMsg) emptyMsg.remove();
+          if (typeof closeCinema === 'function') closeCinema();
+          else cinema.style.display = 'none';
+        }
       });
     })();
     </script>
