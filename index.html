@@ -7273,6 +7273,51 @@
         .mfh-card { flex: 0 0 150px; }
         .mfh-card-img { height: 92px; }
       }
+
+      /* ═══ SKELETON LOADING ANIMATION ═══ */
+      .mfh-skeleton {
+        position: relative;
+        overflow: hidden;
+        background: #1c1c22;
+        border-radius: 12px;
+      }
+
+      .mfh-skeleton::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.06) 50%,
+          transparent 100%
+        );
+        animation: mfh-shimmer 1.5s infinite;
+      }
+
+      @keyframes mfh-shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+      }
+
+      .mfh-cont-image .mfh-skeleton {
+        width: 100%;
+        height: 100%;
+        min-height: 200px;
+        border-radius: 0;
+      }
+
+      .mfh-card-img.mfh-skeleton {
+        width: 100%;
+        height: 120px;
+        border-radius: 0;
+      }
+
+      @media (max-width: 720px) {
+        .mfh-card-img.mfh-skeleton {
+          height: 92px;
+        }
+      }
     </style>
 
     <script id="mfh-script">
@@ -7339,9 +7384,64 @@
         return 'Jakube';
       }
 
+      /* ═══════════ TMDB API NASTAVENÍ ═══════════ */
+      var TMDB_BASE = 'https://api.themoviedb.org/3';
+      var TMDB_IMG = 'https://image.tmdb.org/t/p';
+      var _tmdbPromise = null;
+
+      function getTmdbKey() {
+        return localStorage.getItem('mf_tmdb_key') ||
+          (typeof TMDB_KEY !== 'undefined' ? TMDB_KEY : '') ||
+          window.TMDB_KEY || '';
+      }
+
+      /* ═══════════ NAČTENÍ DAT Z TMDB ═══════════ */
+      function fetchTmdbData() {
+        if (_tmdbPromise) return _tmdbPromise;
+        var TMDB_API_KEY = getTmdbKey();
+        if (!TMDB_API_KEY || TMDB_API_KEY === 'YOUR_TMDB_API_KEY') {
+          console.warn('[mfh] TMDB API klíč není nastaven');
+          return Promise.resolve(null);
+        }
+
+        _tmdbPromise = Promise.all([
+          fetch(TMDB_BASE + '/trending/all/week?api_key=' + encodeURIComponent(TMDB_API_KEY) + '&language=cs-CZ'),
+          fetch(TMDB_BASE + '/tv/popular?api_key=' + encodeURIComponent(TMDB_API_KEY) + '&language=cs-CZ&page=1'),
+          fetch(TMDB_BASE + '/movie/popular?api_key=' + encodeURIComponent(TMDB_API_KEY) + '&language=cs-CZ&page=1')
+        ]).then(function (resList) {
+          return Promise.all(resList.map(function (r) { return r.json(); }));
+        }).then(function (parsed) {
+          var trending = parsed[0];
+          var tv = parsed[1];
+          var movies = parsed[2];
+          return {
+            trending: (trending.results || []).slice(0, 10),
+            tv: (tv.results || []).slice(0, 10),
+            movies: (movies.results || []).slice(0, 10)
+          };
+        }).catch(function (e) {
+          console.warn('[mfh] TMDB fetch error:', e);
+          _tmdbPromise = null;
+          return null;
+        });
+        return _tmdbPromise;
+      }
+
+      function getPosterUrl(path, size) {
+        if (!path) return null;
+        return TMDB_IMG + '/' + (size || 'w300') + path;
+      }
+
+      function getBackdropUrl(path, size) {
+        if (!path) return null;
+        return TMDB_IMG + '/' + (size || 'w780') + path;
+      }
+
+      /* ═══════════ RENDER KARTY "POKRAČOVAT VE SLEDOVÁNÍ" ═══════════ */
       function renderContinue(item) {
         var card = document.getElementById('mfhContinueCard');
         if (!card) return;
+
         card.innerHTML =
           '<div class="mfh-cont-info">' +
             '<div class="mfh-cont-eyebrow">Pokračovat ve sledování</div>' +
@@ -7355,17 +7455,36 @@
             '</div>' +
           '</div>' +
           '<div class="mfh-cont-image">' +
-            '<img src="' + esc(item.image) + '" alt="' + esc(item.title) + '" loading="lazy">' +
+            '<img src="' + esc(item.image) + '" alt="' + esc(item.title) + '" ' +
+              'loading="lazy" class="mfh-poster-img mfh-skeleton">' +
           '</div>';
+
+        var img = card.querySelector('.mfh-poster-img');
+        if (img) {
+          img.addEventListener('load', function () {
+            img.classList.remove('mfh-skeleton');
+          });
+          img.addEventListener('error', function () {
+            img.classList.remove('mfh-skeleton');
+            img.style.display = 'none';
+            if (img.parentElement) img.parentElement.classList.add('mfh-skeleton');
+          });
+        }
       }
 
+      /* ═══════════ RENDER KARUSELU ═══════════ */
       function renderCarousel(id, items) {
         var el = document.getElementById(id);
         if (!el) return;
+
         el.innerHTML = items.map(function (it) {
+          var src = it.image ? esc(it.image) : '';
           return (
             '<div class="mfh-card" onclick="mfhOpenCard(\'' + esc(it.title) + '\')">' +
-              '<img class="mfh-card-img" src="' + esc(it.image) + '" alt="' + esc(it.title) + '" loading="lazy">' +
+              '<img class="mfh-card-img mfh-skeleton" ' +
+                'src="' + src + '" ' +
+                'alt="' + esc(it.title) + '" ' +
+                'loading="lazy">' +
               '<div class="mfh-card-body">' +
                 '<p class="mfh-card-title">' + esc(it.title) + '</p>' +
                 (it.ep ? '<p class="mfh-card-ep">' + esc(it.ep) + '</p>' : '') +
@@ -7373,19 +7492,61 @@
             '</div>'
           );
         }).join('');
+
+        el.querySelectorAll('.mfh-card-img').forEach(function (img) {
+          img.addEventListener('load', function () {
+            img.classList.remove('mfh-skeleton');
+          });
+          img.addEventListener('error', function () {
+            img.classList.remove('mfh-skeleton');
+            img.style.opacity = '0.3';
+          });
+        });
       }
 
+      /* ═══════════ RENDER HOME PAGE S REÁLNÝMI DATY Z TMDB ═══════════ */
       function renderHomepage() {
         try {
           renderContinue(DATA.continueWatching);
-          renderCarousel('mfhRecent', DATA.recentlyWatched);
-          renderCarousel('mfhForYou', DATA.forYou);
-          renderCarousel('mfhMyList', DATA.myList);
           var nameEl = document.getElementById('mfhUserName');
           if (nameEl) nameEl.textContent = getUserName();
         } catch (e) {
-          console.warn('[mfh] render error:', e);
+          console.warn('[mfh] renderHomepage error:', e);
         }
+
+        fetchTmdbData().then(function (tmdb) {
+          if (tmdb) {
+            renderCarousel('mfhRecent', tmdb.trending.map(function (item) {
+              return {
+                title: item.title || item.name || 'Neznámé',
+                image: getPosterUrl(item.poster_path, 'w300')
+              };
+            }));
+            renderCarousel('mfhForYou', tmdb.tv.map(function (item) {
+              return {
+                title: item.name || 'Neznámé',
+                image: getPosterUrl(item.poster_path, 'w300'),
+                ep: item.first_air_date ? item.first_air_date.substring(0, 4) : ''
+              };
+            }));
+            renderCarousel('mfhMyList', tmdb.movies.map(function (item) {
+              return {
+                title: item.title || 'Neznámé',
+                image: getPosterUrl(item.poster_path, 'w300'),
+                ep: item.release_date ? item.release_date.substring(0, 4) : ''
+              };
+            }));
+          } else {
+            renderCarousel('mfhRecent', DATA.recentlyWatched);
+            renderCarousel('mfhForYou', DATA.forYou);
+            renderCarousel('mfhMyList', DATA.myList);
+          }
+        }).catch(function (e) {
+          console.warn('[mfh] renderHomepage error:', e);
+          renderCarousel('mfhRecent', DATA.recentlyWatched);
+          renderCarousel('mfhForYou', DATA.forYou);
+          renderCarousel('mfhMyList', DATA.myList);
+        });
       }
 
       window.mfhResume = function () {
