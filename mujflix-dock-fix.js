@@ -34,6 +34,7 @@
   function idForHash(hash) {
     var h = (hash || "").toLowerCase();
     if (h.indexOf("#filmy") === 0) return "dockFilmy";
+    if (h.indexOf("#discover") === 0) return "dockFilmy";
     if (h.indexOf("#protebe") === 0 || h.indexOf("#watchlist") === 0) return "dockProtebe";
     if (h.indexOf("#profil") === 0) return "dockProfile";
     return "dockHome";
