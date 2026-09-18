@@ -7443,6 +7443,7 @@
         ]
       };
       window.MFH_DATA = DATA;
+      var _lastContinue = DATA.continueWatching;
 
       function esc(s) {
         return String(s == null ? '' : s)
@@ -7525,6 +7526,8 @@
         var card = document.getElementById('mfhContinueCard');
         if (!card) return;
 
+        _lastContinue = item || null;
+
         card.innerHTML =
           '<div class="mfh-cont-info">' +
             '<div class="mfh-cont-eyebrow">Pokračovat ve sledování</div>' +
@@ -7539,18 +7542,14 @@
           '</div>' +
           '<div class="mfh-cont-image">' +
             '<img src="' + esc(item.image) + '" alt="' + esc(item.title) + '" ' +
-              'loading="lazy" class="mfh-poster-img mfh-skeleton">' +
+              'loading="lazy" class="mfh-poster-img mfh-skeleton" ' +
+              'onerror="this.onerror=null;this.style.display=\'none\';if(this.parentElement)this.parentElement.classList.add(\'mfh-skeleton\');">' +
           '</div>';
 
         var img = card.querySelector('.mfh-poster-img');
         if (img) {
           img.addEventListener('load', function () {
             img.classList.remove('mfh-skeleton');
-          });
-          img.addEventListener('error', function () {
-            img.classList.remove('mfh-skeleton');
-            img.style.display = 'none';
-            if (img.parentElement) img.parentElement.classList.add('mfh-skeleton');
           });
         }
       }
@@ -7592,7 +7591,6 @@
       /* ═══════════ RENDER HOME PAGE S REÁLNÝMI DATY Z TMDB ═══════════ */
       function renderHomepage() {
         try {
-          renderContinue(DATA.continueWatching);
           var nameEl = document.getElementById('mfhUserName');
           if (nameEl) nameEl.textContent = getUserName();
         } catch (e) {
@@ -7600,7 +7598,22 @@
         }
 
         fetchTmdbData().then(function (tmdb) {
-          if (tmdb) {
+          if (tmdb && tmdb.trending && tmdb.trending.length) {
+            var first = tmdb.trending[0];
+            var firstTitle = first.title || first.name || 'Neznámé';
+            var firstBackdrop = getBackdropUrl(first.backdrop_path, 'w780') ||
+                                getPosterUrl(first.poster_path, 'w500');
+            renderContinue({
+              title: firstTitle,
+              episode: first.title ? 'Film' : 'S1 E1',
+              timeLeft: '25 min',
+              description: first.overview || 'Pokračujte tam, kde jste skončili.',
+              progress: 65,
+              image: firstBackdrop,
+              tmdbId: first.id,
+              mediaType: first.media_type || (first.title ? 'movie' : 'tv')
+            });
+
             renderCarousel('mfhRecent', tmdb.trending.map(function (item) {
               return {
                 title: item.title || item.name || 'Neznámé',
@@ -7609,6 +7622,7 @@
                 mediaType: item.media_type || (item.title ? 'movie' : 'tv')
               };
             }));
+
             renderCarousel('mfhForYou', tmdb.tv.map(function (item) {
               return {
                 title: item.name || 'Neznámé',
@@ -7618,6 +7632,7 @@
                 mediaType: 'tv'
               };
             }));
+
             renderCarousel('mfhMyList', tmdb.movies.map(function (item) {
               return {
                 title: item.title || 'Neznámé',
@@ -7628,12 +7643,14 @@
               };
             }));
           } else {
+            renderContinue(DATA.continueWatching);
             renderCarousel('mfhRecent', DATA.recentlyWatched);
             renderCarousel('mfhForYou', DATA.forYou);
             renderCarousel('mfhMyList', DATA.myList);
           }
         }).catch(function (e) {
-          console.warn('[mfh] renderHomepage error:', e);
+          console.warn('[mfh] renderHomepage fallback:', e);
+          renderContinue(DATA.continueWatching);
           renderCarousel('mfhRecent', DATA.recentlyWatched);
           renderCarousel('mfhForYou', DATA.forYou);
           renderCarousel('mfhMyList', DATA.myList);
@@ -7641,6 +7658,11 @@
       }
 
       window.mfhResume = function () {
+        var item = _lastContinue || DATA.continueWatching;
+        if (item && item.tmdbId) {
+          mfhOpenCard(item.title, item.tmdbId, item.mediaType || 'movie');
+          return;
+        }
         if (typeof openSeries === 'function') openSeries('the-simpsons');
       };
       window.mfhToggleList = function (btn) {
@@ -7656,62 +7678,167 @@
         cinema.style.setProperty('z-index', '99999', 'important');
       }
 
+      /* ═══════════ CINEMA PLAYER — přímý vidsrc embed ═══════════ */
+      var _cinemaState = {
+        tmdbId: null,
+        type: 'movie',
+        season: 1,
+        episode: 1,
+        sources: [],
+        currentSource: 0
+      };
+
+      function mfhBuildSources(tmdbId, type, season, episode) {
+        var s = season || 1;
+        var e = episode || 1;
+        if (type === 'tv') {
+          return [
+            { name: 'vidsrc.to',  url: 'https://vidsrc.to/embed/tv/' + tmdbId + '/' + s + '/' + e },
+            { name: 'vidsrc.xyz', url: 'https://vidsrc.xyz/embed/tv?tmdb=' + tmdbId + '&season=' + s + '&episode=' + e },
+            { name: 'vidsrc.me',  url: 'https://vidsrc.me/embed/tv?tmdb=' + tmdbId + '&season=' + s + '&episode=' + e },
+            { name: '2embed',     url: 'https://www.2embed.cc/embedtv/' + tmdbId + '&s=' + s + '&e=' + e }
+          ];
+        }
+        return [
+          { name: 'vidsrc.to',  url: 'https://vidsrc.to/embed/movie/' + tmdbId },
+          { name: 'vidsrc.xyz', url: 'https://vidsrc.xyz/embed/movie?tmdb=' + tmdbId },
+          { name: 'vidsrc.me',  url: 'https://vidsrc.me/embed/movie?tmdb=' + tmdbId },
+          { name: '2embed',     url: 'https://www.2embed.cc/embed/' + tmdbId }
+        ];
+      }
+
+      function mfhSetCinemaIframe(url) {
+        var wrap = document.getElementById('cinemaFrameWrap');
+        if (!wrap) return;
+
+        var loader = document.getElementById('cinemaLoader');
+        if (loader) {
+          loader.style.display = 'flex';
+          loader.style.setProperty('display', 'flex', 'important');
+        }
+
+        wrap.innerHTML =
+          '<iframe src="' + url + '" ' +
+          'style="width:100%;height:100%;border:0;flex:1;display:block;" ' +
+          'allowfullscreen ' +
+          'allow="autoplay; encrypted-media; picture-in-picture; fullscreen" ' +
+          'referrerpolicy="no-referrer"></iframe>';
+
+        var iframe = wrap.querySelector('iframe');
+        if (iframe) {
+          iframe.addEventListener('load', function () {
+            setTimeout(function () {
+              if (loader) {
+                loader.style.display = 'none';
+                loader.style.setProperty('display', 'none', 'important');
+              }
+            }, 600);
+          });
+          setTimeout(function () {
+            if (loader) {
+              loader.style.display = 'none';
+              loader.style.setProperty('display', 'none', 'important');
+            }
+          }, 3000);
+        }
+      }
+
+      window.mfhSwitchSource = function (idx) {
+        var s = _cinemaState.sources[idx];
+        if (!s) return;
+        _cinemaState.currentSource = idx;
+
+        var bar = document.getElementById('cinemaSourceBar');
+        if (bar) {
+          bar.querySelectorAll('button').forEach(function (b, i) {
+            var isActive = (i === idx);
+            b.style.borderColor = isActive ? 'rgba(0,122,255,0.5)' : 'rgba(255,255,255,0.15)';
+            b.style.background = isActive ? 'rgba(0,122,255,0.2)' : 'rgba(255,255,255,0.05)';
+            b.style.color = isActive ? '#fff' : 'rgba(255,255,255,0.7)';
+          });
+        }
+        mfhSetCinemaIframe(s.url);
+      };
+
+      function mfhCloseCinema() {
+        var cinema = document.getElementById('cinemaModal');
+        if (cinema) {
+          cinema.style.setProperty('display', 'none', 'important');
+          cinema.classList.remove('open');
+        }
+        var wrap = document.getElementById('cinemaFrameWrap');
+        if (wrap) wrap.innerHTML = '';
+        var loader = document.getElementById('cinemaLoader');
+        if (loader) loader.style.setProperty('display', 'none', 'important');
+        var emptyMsg = document.getElementById('mfhCinemaEmptyMsg');
+        if (emptyMsg) emptyMsg.remove();
+      }
+      window.mfhCloseCinema = mfhCloseCinema;
+
       window.mfhOpenCard = function (title, tmdbId, mediaType) {
         console.log('[mfh] Otevřít kartu:', title, tmdbId, mediaType);
 
-        // 1. Zkus najít slug v db
-        if (typeof db !== 'undefined' && db) {
-          var titleLower = String(title || '').toLowerCase();
-
-          // Přesná shoda
-          for (var slug in db) {
-            if (db[slug] && db[slug].name &&
-                db[slug].name.toLowerCase() === titleLower) {
-              if (typeof openSeries === 'function') {
-                console.log('[mfh] Otevírám sérii:', slug);
-                openSeries(slug);
-                return;
-              }
-            }
-          }
-
-          // Částečná shoda
-          for (var slug2 in db) {
-            if (db[slug2] && db[slug2].name &&
-                db[slug2].name.toLowerCase().indexOf(titleLower) !== -1) {
-              if (typeof openSeries === 'function') {
-                console.log('[mfh] Otevírám sérii (partial):', slug2);
-                openSeries(slug2);
-                return;
-              }
-            }
-          }
-        }
-
-        // 2. Vestavěný cinema player z app.js (openCinema neexistuje)
         var cinType = (mediaType === 'tv' || mediaType === 'tv_ep') ? 'tv' : 'movie';
-        if (typeof openMovieInCinema === 'function' && tmdbId) {
-          console.log('[mfh] Otevírám cinema:', tmdbId, title, cinType);
-          openMovieInCinema(tmdbId, title, cinType);
-          mfhUnlockCinema();
-          return;
-        }
-        if (typeof openMovieInCinema === 'function') {
-          console.log('[mfh] Otevírám cinema podle názvu:', title);
-          openMovieInCinema(title, title, cinType);
-          mfhUnlockCinema();
-          return;
-        }
-        if (typeof openCinema === 'function') {
-          console.log('[mfh] Otevírám cinema pro:', title);
-          try { openCinema(title); return; } catch (e) {}
-          try { openCinema({ title: title }); return; } catch (e2) {}
+        var cinema = document.getElementById('cinemaModal');
+        if (!cinema) return;
+
+        _cinemaState.tmdbId = tmdbId || null;
+        _cinemaState.type = cinType;
+        _cinemaState.season = 1;
+        _cinemaState.episode = 1;
+        _cinemaState.currentSource = 0;
+
+        var titleEl = document.getElementById('cinemaTitle');
+        if (titleEl) titleEl.textContent = title || 'Přehrávač';
+        var subEl = document.getElementById('cinemaSubtitle');
+        if (subEl) {
+          subEl.textContent = cinType === 'tv'
+            ? ('S' + String(_cinemaState.season).padStart(2, '0') +
+               ' · E' + String(_cinemaState.episode).padStart(2, '0'))
+            : 'Film';
         }
 
-        // 3. Fallback - toast
-        console.warn('[mfh] Nenašel jsem slug pro:', title);
-        if (typeof showToast === 'function') {
-          showToast('⚠ ' + title, 'info');
+        var epPicker = document.getElementById('cinemaEpPicker');
+        if (epPicker) epPicker.style.display = 'none';
+
+        cinema.style.setProperty('display', 'flex', 'important');
+        cinema.style.setProperty('pointer-events', 'auto', 'important');
+        cinema.classList.add('open');
+        mfhUnlockCinema();
+
+        if (tmdbId) {
+          _cinemaState.sources = mfhBuildSources(tmdbId, cinType, 1, 1);
+
+          var sourceBar = document.getElementById('cinemaSourceBar');
+          if (sourceBar) {
+            sourceBar.innerHTML = _cinemaState.sources.map(function (s, i) {
+              return '<button type="button" data-idx="' + i + '" ' +
+                'style="padding:7px 14px;border-radius:9px;' +
+                'border:1px solid ' + (i === 0 ? 'rgba(0,122,255,0.5)' : 'rgba(255,255,255,0.15)') + ';' +
+                'background:' + (i === 0 ? 'rgba(0,122,255,0.2)' : 'rgba(255,255,255,0.05)') + ';' +
+                'color:#fff;font-size:0.72rem;font-weight:600;cursor:pointer;' +
+                'font-family:-apple-system,Inter,sans-serif;margin:0 2px;" ' +
+                'onclick="mfhSwitchSource(' + i + ')">' + s.name + '</button>';
+            }).join('');
+          }
+
+          mfhSetCinemaIframe(_cinemaState.sources[0].url);
+        } else {
+          var wrap = document.getElementById('cinemaFrameWrap');
+          if (wrap) {
+            wrap.innerHTML =
+              '<div style="color:#fff;text-align:center;padding:80px 20px;font-family:-apple-system,Inter,sans-serif;">' +
+                '<div style="font-size:3rem;margin-bottom:16px;">⚠️</div>' +
+                '<div style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">Zdroj nenalezen</div>' +
+                '<div style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:20px;">' +
+                  'Pro "' + esc(title || 'neznámé') + '" nebyl nalezen TMDB ID.</div>' +
+                '<button type="button" onclick="mfhCloseCinema()" ' +
+                  'style="padding:10px 22px;border-radius:10px;background:#007aff;border:none;' +
+                  'color:#fff;font-weight:700;cursor:pointer;font-family:inherit;">Zavřít</button>' +
+              '</div>';
+          }
+          var loader = document.getElementById('cinemaLoader');
+          if (loader) loader.style.setProperty('display', 'none', 'important');
         }
       };
 
@@ -7997,7 +8124,8 @@
                 if (btn) {
                   btn.onclick = function () {
                     msg.remove();
-                    if (typeof closeCinema === 'function') closeCinema();
+                    if (typeof mfhCloseCinema === 'function') mfhCloseCinema();
+                    else if (typeof closeCinema === 'function') closeCinema();
                     else cinema.style.display = 'none';
                   };
                 }
@@ -8022,7 +8150,8 @@
         if (cinema && getComputedStyle(cinema).display !== 'none') {
           var emptyMsg = document.getElementById('mfhCinemaEmptyMsg');
           if (emptyMsg) emptyMsg.remove();
-          if (typeof closeCinema === 'function') closeCinema();
+          if (typeof mfhCloseCinema === 'function') mfhCloseCinema();
+          else if (typeof closeCinema === 'function') closeCinema();
           else cinema.style.display = 'none';
         }
       });
@@ -8587,7 +8716,7 @@
 
         <!-- Pravá: zavřít -->
         <button
-          onclick="closeCinema()"
+          onclick="(window.mfhCloseCinema||closeCinema)()"
           title="Zavřít (Esc)"
           style="
             background: rgba(255, 255, 255, 0.08);
