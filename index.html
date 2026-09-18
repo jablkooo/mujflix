@@ -7319,11 +7319,25 @@
         }
       }
 
-      /* Dock vždy nad homepage */
+      /* Dock vždy nad homepage i nad zaseknutými overlayi */
       #mfDock, .mf-dock {
-        z-index: 9000 !important;
+        z-index: 10000 !important;
         display: flex !important;
         position: fixed !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transform: none !important;
+      }
+      html.mfh-home-on body.modal-open #mfDock,
+      html.mfh-home-on body.modal-open .mf-dock,
+      body.mfh-home-on.modal-open #mfDock,
+      body.mfh-home-on.modal-open .mf-dock {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        transform: none !important;
+        display: flex !important;
       }
 
       /* ─── HOVER EFEKT NA KARTÁCH ─── */
@@ -7672,6 +7686,11 @@
           '}' +
           'html:not(.mfh-home-on) #mfSectionHome {' +
             'display: none !important;' +
+          '}' +
+          'html.mfh-home-on #mfDock, html.mfh-home-on .mf-dock,' +
+          'body.mfh-home-on #mfDock, body.mfh-home-on .mf-dock {' +
+            'display:flex!important;visibility:visible!important;opacity:1!important;' +
+            'pointer-events:auto!important;z-index:10000!important;transform:none!important;' +
           '}';
         document.head.appendChild(css);
         console.log('[mfh] Hard CSS injected');
@@ -7684,11 +7703,12 @@
           document.documentElement.classList.add('mfh-home-on');
           document.body.classList.add('mfh-home-on');
 
-          // 🔥 ZAVŘI VŠECHNY OVERLAYE
+          // 🔥 ZAVŘI VŠECHNY OVERLAYE (včetně cinema, které jinak žere kliky)
           var overlaysToClose = [
             'universeOverlay',
             'watchlistOverlay',
             'seriesModal',
+            'cinemaModal',
             'premiereOverlay',
             'collectionsOverlay',
             'moodOverlay',
@@ -7699,15 +7719,22 @@
             'wrappedOverlay',
             'screensaver',
             'adminPanel',
-            'adminLoginModal'
+            'adminLoginModal',
+            'aiFullscreen',
+            'aiApikeyOverlay',
+            'dockMoreSheet'
           ];
           overlaysToClose.forEach(function(id) {
             var el = document.getElementById(id);
             if (el) {
               el.style.setProperty('display', 'none', 'important');
+              el.style.setProperty('pointer-events', 'none', 'important');
               el.classList.remove('active', 'open', 'visible', 'show');
             }
           });
+          document.body.classList.remove('modal-open');
+          document.documentElement.classList.remove('modal-open');
+          document.body.style.overflow = '';
 
           // Inline !important backup na tile menu
           document.querySelectorAll('.ps-menu-scene, #mainMenu').forEach(function (m) {
@@ -7720,11 +7747,21 @@
             if (el) el.style.display = 'none';
           });
 
-          // Ukaž homepage
+          // Ukaž homepage + dock (klikatelné)
           var home = document.getElementById('mfSectionHome');
           if (home) {
             home.style.setProperty('display', 'block', 'important');
             home.style.setProperty('z-index', '50', 'important');
+            home.style.setProperty('pointer-events', 'auto', 'important');
+          }
+          var dock = document.getElementById('mfDock');
+          if (dock) {
+            dock.style.setProperty('display', 'flex', 'important');
+            dock.style.setProperty('visibility', 'visible', 'important');
+            dock.style.setProperty('opacity', '1', 'important');
+            dock.style.setProperty('z-index', '10000', 'important');
+            dock.style.setProperty('pointer-events', 'auto', 'important');
+            dock.style.setProperty('transform', 'none', 'important');
           }
 
           // Naplň daty
