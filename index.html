@@ -7121,7 +7121,7 @@
       #mfSectionHome {
         position: fixed;
         inset: 0;
-        z-index: 9999;
+        z-index: 50;
         background: #0b0b0b;
         overflow-y: auto;
         overflow-x: hidden;
@@ -7318,6 +7318,13 @@
           height: 92px;
         }
       }
+
+      /* Dock vždy nad homepage */
+      #mfDock, .mf-dock {
+        z-index: 9000 !important;
+        display: flex !important;
+        position: fixed !important;
+      }
     </style>
 
     <script id="mfh-script">
@@ -7479,8 +7486,10 @@
 
         el.innerHTML = items.map(function (it) {
           var src = it.image ? esc(it.image) : '';
+          var tmdbId = it.tmdbId ? String(it.tmdbId) : '';
+          var mediaType = it.mediaType ? String(it.mediaType) : '';
           return (
-            '<div class="mfh-card" onclick="mfhOpenCard(\'' + esc(it.title) + '\')">' +
+            '<div class="mfh-card" onclick="mfhOpenCard(\'' + esc(it.title) + '\',\'' + esc(tmdbId) + '\',\'' + esc(mediaType) + '\')">' +
               '<img class="mfh-card-img mfh-skeleton" ' +
                 'src="' + src + '" ' +
                 'alt="' + esc(it.title) + '" ' +
@@ -7519,21 +7528,27 @@
             renderCarousel('mfhRecent', tmdb.trending.map(function (item) {
               return {
                 title: item.title || item.name || 'Neznámé',
-                image: getPosterUrl(item.poster_path, 'w300')
+                image: getPosterUrl(item.poster_path, 'w300'),
+                tmdbId: item.id,
+                mediaType: item.media_type || (item.title ? 'movie' : 'tv')
               };
             }));
             renderCarousel('mfhForYou', tmdb.tv.map(function (item) {
               return {
                 title: item.name || 'Neznámé',
                 image: getPosterUrl(item.poster_path, 'w300'),
-                ep: item.first_air_date ? item.first_air_date.substring(0, 4) : ''
+                ep: item.first_air_date ? item.first_air_date.substring(0, 4) : '',
+                tmdbId: item.id,
+                mediaType: 'tv'
               };
             }));
             renderCarousel('mfhMyList', tmdb.movies.map(function (item) {
               return {
                 title: item.title || 'Neznámé',
                 image: getPosterUrl(item.poster_path, 'w300'),
-                ep: item.release_date ? item.release_date.substring(0, 4) : ''
+                ep: item.release_date ? item.release_date.substring(0, 4) : '',
+                tmdbId: item.id,
+                mediaType: 'movie'
               };
             }));
           } else {
@@ -7557,8 +7572,71 @@
         btn.textContent = isIn ? '+ Můj seznam' : '✓ V seznamu';
         btn.style.background = isIn ? '' : 'rgba(0,122,255,0.15)';
       };
-      window.mfhOpenCard = function (title) {
-        console.log('[mfh] Otevřít kartu:', title);
+      window.mfhOpenCard = function (title, tmdbId, mediaType) {
+        console.log('[mfh] Otevřít kartu:', title, tmdbId, mediaType);
+
+        function hideHomeForPlayer() {
+          if (typeof hideHome === 'function') hideHome();
+          var home = document.getElementById('mfSectionHome');
+          if (home) home.style.setProperty('display', 'none', 'important');
+        }
+
+        function openCinemaByTmdb(id, name, type) {
+          if (!id) return false;
+          var cinType = type === 'tv' || type === 'tv_ep' ? 'tv' : 'movie';
+          hideHomeForPlayer();
+          if (typeof openMovieInCinema === 'function') {
+            openMovieInCinema(id, name, cinType);
+            return true;
+          }
+          if (window.MFCinemaPlayer && typeof window.MFCinemaPlayer.open === 'function') {
+            window.MFCinemaPlayer.open(id, name, cinType);
+            return true;
+          }
+          return false;
+        }
+
+        // 1. Zkus najít slug podle title v db objektu
+        if (typeof db !== 'undefined' && db) {
+          for (var slug in db) {
+            if (db[slug] && db[slug].name &&
+                db[slug].name.toLowerCase() === title.toLowerCase()) {
+              if (typeof openSeries === 'function') {
+                hideHomeForPlayer();
+                openSeries(slug);
+                return;
+              }
+            }
+          }
+          // Fallback - částečná shoda
+          for (var slug2 in db) {
+            if (db[slug2] && db[slug2].name &&
+                db[slug2].name.toLowerCase().indexOf(title.toLowerCase()) !== -1) {
+              if (typeof openSeries === 'function') {
+                hideHomeForPlayer();
+                openSeries(slug2);
+                return;
+              }
+            }
+          }
+        }
+
+        // 2. TMDB karta → cinema přehrávač
+        if (openCinemaByTmdb(tmdbId, title, mediaType)) return;
+
+        // 3. Pokud nenajdeme v db, otevři cinema přímo
+        if (typeof mfhOpenCinemaByTitle === 'function') {
+          hideHomeForPlayer();
+          mfhOpenCinemaByTitle(title);
+        } else if (typeof openSeries === 'function' && title === 'Simpsonovi') {
+          hideHomeForPlayer();
+          openSeries('the-simpsons');
+        } else {
+          console.warn('[mfh] Nenašel jsem slug pro:', title);
+          if (typeof showToast === 'function') {
+            showToast('⚠ ' + title + ' – nenalezeno v DB', 'error');
+          }
+        }
       };
 
       /* ═══════════ INJECT CSS DO <head> — nepřepsatelné ═══════════ */
@@ -7629,7 +7707,7 @@
           var home = document.getElementById('mfSectionHome');
           if (home) {
             home.style.setProperty('display', 'block', 'important');
-            home.style.setProperty('z-index', '9999', 'important');
+            home.style.setProperty('z-index', '50', 'important');
           }
 
           // Naplň daty
