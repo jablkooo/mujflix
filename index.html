@@ -7121,7 +7121,7 @@
       #mfSectionHome {
         position: fixed;
         inset: 0;
-        z-index: 90;
+        z-index: 9999;
         background: #0b0b0b;
         overflow-y: auto;
         overflow-x: hidden;
@@ -7428,7 +7428,32 @@
           document.documentElement.classList.add('mfh-home-on');
           document.body.classList.add('mfh-home-on');
 
-          // Inline !important backup
+          // 🔥 ZAVŘI VŠECHNY OVERLAYE
+          var overlaysToClose = [
+            'universeOverlay',
+            'watchlistOverlay',
+            'seriesModal',
+            'premiereOverlay',
+            'collectionsOverlay',
+            'moodOverlay',
+            'genreEditorOverlay',
+            'traktOverlay',
+            'customizeOverlay',
+            'voiceCmdOverlay',
+            'wrappedOverlay',
+            'screensaver',
+            'adminPanel',
+            'adminLoginModal'
+          ];
+          overlaysToClose.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) {
+              el.style.setProperty('display', 'none', 'important');
+              el.classList.remove('active', 'open', 'visible', 'show');
+            }
+          });
+
+          // Inline !important backup na tile menu
           document.querySelectorAll('.ps-menu-scene, #mainMenu').forEach(function (m) {
             m.style.setProperty('display', 'none', 'important');
           });
@@ -7443,6 +7468,7 @@
           var home = document.getElementById('mfSectionHome');
           if (home) {
             home.style.setProperty('display', 'block', 'important');
+            home.style.setProperty('z-index', '9999', 'important');
           }
 
           // Naplň daty
@@ -8871,7 +8897,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       })();
     </script>
-    <script src="mujflix-img-fix.js"></script>
+    <!-- dočasně vypnuto: /api/tmdb-img na Pages neexistuje, obrázky bereme přímo z TMDB -->
+    <!-- <script src="mujflix-img-fix.js"></script> -->
     <script src="legal-streaming-providers.js"></script>
     <script src="notifications-changelog.js"></script>
     <script src="mujflix-patch.js"></script>
