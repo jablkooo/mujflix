@@ -7325,6 +7325,33 @@
         display: flex !important;
         position: fixed !important;
       }
+
+      /* ─── HOVER EFEKT NA KARTÁCH ─── */
+      .mfh-card {
+        transition: transform 0.25s cubic-bezier(0.16,1,0.3,1),
+                    box-shadow 0.25s cubic-bezier(0.16,1,0.3,1),
+                    border-color 0.25s ease !important;
+        will-change: transform;
+        pointer-events: auto;
+        cursor: pointer;
+      }
+
+      .mfh-card:hover {
+        transform: translateY(-6px) scale(1.05) !important;
+        border-color: rgba(255,255,255,0.25) !important;
+        box-shadow: 0 20px 44px rgba(0,0,0,0.7),
+                    0 0 0 1px rgba(255,255,255,0.1) !important;
+        z-index: 10;
+      }
+
+      .mfh-card:active {
+        transform: translateY(-2px) scale(1.02) !important;
+      }
+
+      /* Hover přes celou kartu */
+      .mfh-card * {
+        pointer-events: none;
+      }
     </style>
 
     <script id="mfh-script">
@@ -7575,45 +7602,28 @@
       window.mfhOpenCard = function (title, tmdbId, mediaType) {
         console.log('[mfh] Otevřít kartu:', title, tmdbId, mediaType);
 
-        function hideHomeForPlayer() {
-          if (typeof hideHome === 'function') hideHome();
-          var home = document.getElementById('mfSectionHome');
-          if (home) home.style.setProperty('display', 'none', 'important');
-        }
-
-        function openCinemaByTmdb(id, name, type) {
-          if (!id) return false;
-          var cinType = type === 'tv' || type === 'tv_ep' ? 'tv' : 'movie';
-          hideHomeForPlayer();
-          if (typeof openMovieInCinema === 'function') {
-            openMovieInCinema(id, name, cinType);
-            return true;
-          }
-          if (window.MFCinemaPlayer && typeof window.MFCinemaPlayer.open === 'function') {
-            window.MFCinemaPlayer.open(id, name, cinType);
-            return true;
-          }
-          return false;
-        }
-
-        // 1. Zkus najít slug podle title v db objektu
+        // 1. Zkus najít slug v db
         if (typeof db !== 'undefined' && db) {
+          var titleLower = String(title || '').toLowerCase();
+
+          // Přesná shoda
           for (var slug in db) {
             if (db[slug] && db[slug].name &&
-                db[slug].name.toLowerCase() === title.toLowerCase()) {
+                db[slug].name.toLowerCase() === titleLower) {
               if (typeof openSeries === 'function') {
-                hideHomeForPlayer();
+                console.log('[mfh] Otevírám sérii:', slug);
                 openSeries(slug);
                 return;
               }
             }
           }
-          // Fallback - částečná shoda
+
+          // Částečná shoda
           for (var slug2 in db) {
             if (db[slug2] && db[slug2].name &&
-                db[slug2].name.toLowerCase().indexOf(title.toLowerCase()) !== -1) {
+                db[slug2].name.toLowerCase().indexOf(titleLower) !== -1) {
               if (typeof openSeries === 'function') {
-                hideHomeForPlayer();
+                console.log('[mfh] Otevírám sérii (partial):', slug2);
                 openSeries(slug2);
                 return;
               }
@@ -7621,21 +7631,28 @@
           }
         }
 
-        // 2. TMDB karta → cinema přehrávač
-        if (openCinemaByTmdb(tmdbId, title, mediaType)) return;
+        // 2. Vestavěný cinema player z app.js (openCinema neexistuje)
+        var cinType = (mediaType === 'tv' || mediaType === 'tv_ep') ? 'tv' : 'movie';
+        if (typeof openMovieInCinema === 'function' && tmdbId) {
+          console.log('[mfh] Otevírám cinema:', tmdbId, title, cinType);
+          openMovieInCinema(tmdbId, title, cinType);
+          return;
+        }
+        if (typeof openMovieInCinema === 'function') {
+          console.log('[mfh] Otevírám cinema podle názvu:', title);
+          openMovieInCinema(title, title, cinType);
+          return;
+        }
+        if (typeof openCinema === 'function') {
+          console.log('[mfh] Otevírám cinema pro:', title);
+          try { openCinema(title); return; } catch (e) {}
+          try { openCinema({ title: title }); return; } catch (e2) {}
+        }
 
-        // 3. Pokud nenajdeme v db, otevři cinema přímo
-        if (typeof mfhOpenCinemaByTitle === 'function') {
-          hideHomeForPlayer();
-          mfhOpenCinemaByTitle(title);
-        } else if (typeof openSeries === 'function' && title === 'Simpsonovi') {
-          hideHomeForPlayer();
-          openSeries('the-simpsons');
-        } else {
-          console.warn('[mfh] Nenašel jsem slug pro:', title);
-          if (typeof showToast === 'function') {
-            showToast('⚠ ' + title + ' – nenalezeno v DB', 'error');
-          }
+        // 3. Fallback - toast
+        console.warn('[mfh] Nenašel jsem slug pro:', title);
+        if (typeof showToast === 'function') {
+          showToast('⚠ ' + title, 'info');
         }
       };
 
@@ -9141,9 +9158,9 @@ document.addEventListener('DOMContentLoaded', () => {
     <script src="legal-streaming-providers.js"></script>
     <script src="notifications-changelog.js"></script>
     <script src="mujflix-patch.js"></script>
-    <script src="mujflix-url-fix.js"></script>
+    <!-- <script src="mujflix-url-fix.js"></script> -->
     <script src="mujflix-discover-redesign.js"></script>
-    <script src="mujflix-cinema-player.js"></script>
+    <!-- <script src="mujflix-cinema-player.js"></script> -->
     <script src="mujflix-dock-fix.js"></script>
 
   
