@@ -50,6 +50,54 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
+   SJEDNOCENÝ VZHLED DOCKU (jedna finální vrstva)
+   Barvy/pozadí/velikosti ikon pro .dock-btn jsou jinak rozeseté
+   po 6 CSS souborech (styles.css, premium, apple-tv, glass,
+   discover-redesign) — každý s vlastními !important pravidly.
+   Výsledek je náhodná směs vlastností podle toho, které pravidlo
+   zrovna "vyhraje". Tady je to sjednocené na jedno čisté, konzistentní
+   chování; tenhle soubor je poslední v pořadí, takže platí vždy.
+   ══════════════════════════════════════════════════════════════ */
+#mfDock .dock-btn {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  min-width: 58px !important;
+  padding: 8px 10px !important;
+  border-radius: 18px !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+#mfDock .dock-btn svg {
+  width: 22px !important;
+  height: 22px !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  stroke-width: 1.8px !important;
+}
+#mfDock .dock-btn .dock-label {
+  font-size: 0.62rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  color: currentColor !important;
+}
+#mfDock .dock-btn:hover {
+  color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+}
+#mfDock .dock-btn.active {
+  color: var(--accent, #0a84ff) !important;
+  background: rgba(10, 132, 255, 0.16) !important;
+  background: color-mix(in srgb, var(--accent, #0a84ff) 16%, transparent) !important;
+}
+#mfDock .dock-btn.active:hover {
+  background: rgba(10, 132, 255, 0.22) !important;
+  background: color-mix(in srgb, var(--accent, #0a84ff) 22%, transparent) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
    Dock v režimu Objevování — má úplně ZMIZET (ne jen ztlumit).
    Původní pravidla ve styles-discover-redesign.css jen snižují
    opacity na .55 a nechávají pointer-events: auto, takže lišta
