@@ -7448,8 +7448,19 @@
           .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
       }
 
-      function getUserName() {
+            function getUserName() {
         try {
+          // Zkus nejdřív skutečný profilový systém MůjFlixu
+          var pid = localStorage.getItem('mf_active_pid');
+          if (pid) {
+            var profiles = [];
+            try { profiles = JSON.parse(localStorage.getItem('mf_profiles_v2') || '[]'); } catch(e) {}
+            if (Array.isArray(profiles)) {
+              var p = profiles.find(function(x){ return x && x.id === pid; });
+              if (p && p.name) return String(p.name).split(' ')[0];
+            }
+          }
+          // Fallback: staré klíče (kdyby existovaly)
           var keys = ['mf_active_profile','mf_profile_name','mf_current_profile'];
           for (var i = 0; i < keys.length; i++) {
             var v = localStorage.getItem(keys[i]);
@@ -7462,7 +7473,7 @@
             }
           }
         } catch (e) {}
-        return 'Jakube';
+        return 'kamarád';
       }
 
       /* ═══════════ TMDB API NASTAVENÍ ═══════════ */
@@ -7471,7 +7482,8 @@
       var _tmdbPromise = null;
 
       function getTmdbKey() {
-        return localStorage.getItem('mf_tmdb_key') ||
+   return localStorage.getItem('mf_tmdb_key') ||
+          window.TMDB_KEY_DEFAULT ||
           (typeof TMDB_KEY !== 'undefined' ? TMDB_KEY : '') ||
           window.TMDB_KEY || '';
       }
