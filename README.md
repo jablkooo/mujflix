@@ -1,4 +1,4 @@
-[README.md](https://github.com/user-attachments/files/32391587/README.md)
+[README.md](https://github.com/user-attachments/files/32415545/README.md)
 <div align="center">
 
 # 🎬 MůjFlix
@@ -37,6 +37,18 @@ MůjFlix je **osobní streamovací hub** ve stylu Netflixu — jedno místo, kde
 > 🐛 **Pozor — ještě to má mouchy!** Není to 100% doladěné. Občas něco blbne, něco se nenačte, něco se rozbije. Ale s bráchou na tom makáme a postupně **všechno doladíme**. Ber to tak, že je to **živý projekt ve vývoji** — ne hotový produkt. 👍
 >
 > 📱 **Mobilní verze je teprve v plenkách!** 🚧 Na telefonu to zatím není zdaleka tak vyladěné jako na desktopu. Pracujeme na tom, ale chce to čas. **Pro nejlepší zážitek doporučujeme zatím používat desktop.** 🖥️
+
+---
+
+## 🩹 Poslední opravy
+
+- 🧭 **Dock** (Objevovat / Můj seznam / Profil) — nereagoval kvůli špatnému pořadí načítání scriptů; teď funguje spolehlivě hned od prvního kliknutí
+- 🔒 **PIN obrazovka** — byla neviditelná (schovaná za obrazovkou výběru profilu kvůli špatnému z-indexu), teď se zobrazuje správně
+- 👤 **Výběr profilu** — nový, sjednocený vzhled (kruhové avatary s barevným prstencem), smazané duplicitní tlačítko "Přidat profil"
+- 🎨 **Dock a celkový vzhled** — sjednocené barvy/styly (dřív se přes sebe rvalo víc CSS souborů najednou)
+- 🐌 **Sekání appky** — omezeno zbytečné opakované přepočítávání layoutu hned po startu appky
+- 🧹 **Úklid kódu** — smazané nepoužívané soubory a stovky mrtvých CSS pravidel ze starších verzí appky
+- 🔑 **API klíč** — přesunutý do `config.js` (mimo git, viz sekce Spuštění níže), do repozitáře jde jen vzor
 
 ---
 
@@ -153,10 +165,23 @@ Nejjednodušší způsob — otevřít nasazenou verzi v prohlížeči. Pokud je
 ```bash
 git clone https://github.com/jablkooo/mujflix.git
 cd mujflix
+cp config.example.js config.js
+```
+
+Pak do `config.js` vlož svůj vlastní **TMDB API klíč** (zdarma na
+[themoviedb.org/settings/api](https://www.themoviedb.org/settings/api)) —
+bez něj se nenačtou obrázky ani popisky filmů/seriálů. `config.js` je v
+`.gitignore`, takže zůstane jen u tebe a nikdy se nenahraje na GitHub.
+
+```bash
 python3 -m http.server 8000
 ```
 
 Pak otevři 👉 **http://localhost:8000**
+
+Stejný krok (zkopírovat `config.example.js` → `config.js` a vyplnit klíč)
+udělej i při nasazení na hosting (Cloudflare Pages atd.) — `config.js`
+nahraj ručně/mimo git spolu s ostatními soubory.
 
 ### ✅ Podporované prohlížeče
 
