@@ -76,16 +76,6 @@ body {
   background: var(--jg-bg) !important;
 }
 
-.pg-container {
-  background: rgba(30,40,54,0.7) !important;
-  border-radius: var(--jg-r-xl) !important;
-  border: 0px solid var(--jg-border) !important;
-  backdrop-filter: var(--jg-blur-sm) !important;
-  -webkit-backdrop-filter: var(--jg-blur-sm) !important;
-  box-shadow: var(--jg-shadow) !important;
-  padding: 2em !important;
-}
-
 .pg-title {
   font-weight: 800 !important;
   color: white !important;
@@ -112,28 +102,13 @@ body {
 /* ═══════════════════════════════════════════════════════════════
    HLAVNÍ STRÁNKA — BACKGROUND
 ═══════════════════════════════════════════════════════════════ */
-.app-bg,
-#appBg,
-.background-container {
-  background: var(--jg-bg) !important;
-}
 
 /* Hero backdrop — backgroundContainer.withBackdrop portovany */
-.hero-backdrop,
-.home-backdrop,
-#heroBg,
-.backdrop-img {
-  opacity: 0.9 !important;
-  background: linear-gradient(0deg, var(--jg-bg), 45%, rgba(17,24,39,0.25)) !important;
-}
 
 /* ═══════════════════════════════════════════════════════════════
    HEADER / TOP BAR — skinHeader-blurred portovany
 ═══════════════════════════════════════════════════════════════ */
-.app-header,
-.main-header,
-#mfHeader,
-.top-bar {
+#mfHeader {
   background: linear-gradient(180deg, rgba(30,40,54,0.95) 30%, 55%, transparent 90%) !important;
   backdrop-filter: var(--jg-blur-md) !important;
   -webkit-backdrop-filter: var(--jg-blur-md) !important;
@@ -157,8 +132,7 @@ body {
    DOCK — appfooter portovany
 ═══════════════════════════════════════════════════════════════ */
 #mfDock,
-.dock,
-.bottom-nav {
+.dock {
   background: rgba(10,10,10,0.92) !important;
   border-top: 0px solid var(--jg-border-d) !important;
   backdrop-filter: var(--jg-blur-lg) !important;
@@ -191,15 +165,9 @@ body {
   font-weight: 500 !important;
 }
 
-.dock-sep {
-  background: var(--jg-border-d) !important;
-}
-
 /* ═══════════════════════════════════════════════════════════════
    SEARCH BAR
 ═══════════════════════════════════════════════════════════════ */
-.search-bar,
-.search-input,
 .uni-input,
 input[type="search"],
 input[type="text"] {
@@ -212,7 +180,6 @@ input[type="text"] {
   transition: border-color 0.2s !important;
 }
 
-.search-input:focus,
 .uni-input:focus,
 input[type="search"]:focus,
 input[type="text"]:focus {
@@ -220,7 +187,6 @@ input[type="text"]:focus {
   outline: none !important;
 }
 
-.search-input::placeholder,
 .uni-input::placeholder {
   color: var(--jg-dim) !important;
 }
@@ -231,8 +197,6 @@ input[type="text"]:focus {
 
 /* Série karty, film karty atd. */
 .series-card,
-.movie-card,
-.content-card,
 .ep-card,
 [class*="-card"]:not([class*="disco-card"]):not(.disco-card *):not(#dr-popup *) {
   background: var(--jg-surface) !important;
@@ -254,7 +218,6 @@ input[type="text"]:focus {
    SERIES MODAL — detailPage portovany
 ═══════════════════════════════════════════════════════════════ */
 #seriesModal,
-.series-modal,
 .modal-overlay {
   background: var(--jg-bg) !important;
 }
@@ -286,8 +249,7 @@ input[type="text"]:focus {
 }
 
 #seriesModal .modal-hero-content h2,
-#seriesModal .modal-title,
-.modal-title {
+#seriesModal .modal-title {
   font-weight: 200 !important; /* nameContainer h1 font-weight:200 */
   color: white !important;
   letter-spacing: -1px !important;
@@ -311,7 +273,6 @@ input[type="text"]:focus {
 /* Tlačítka v modalu — detailButton portovany */
 .btn-continue,
 .btn-shuffle,
-.modal-btn,
 .btn-primary {
   background: var(--jg-active) !important;
   color: #000000 !important;
@@ -325,15 +286,13 @@ input[type="text"]:focus {
 
 .btn-continue:hover,
 .btn-shuffle:hover,
-.modal-btn:hover,
 .btn-primary:hover {
   background: white !important;
   transform: scale(1.02) !important;
 }
 
 /* Secondary btns */
-.btn-secondary,
-.btn-outline {
+.btn-secondary {
   color: var(--jg-text) !important;
   background: rgba(255,255,255,0.05) !important;
   border: 1px solid rgba(255,255,255,0.1) !important;
@@ -341,8 +300,7 @@ input[type="text"]:focus {
   transition: all 0.125s !important;
 }
 
-.btn-secondary:hover,
-.btn-outline:hover {
+.btn-secondary:hover {
   background: white !important;
   color: black !important;
 }
@@ -372,7 +330,6 @@ input[type="text"]:focus {
   overflow: hidden !important;
 }
 
-.ep-progress-inner,
 .progress-bar-fill,
 [class*="progress-fill"] {
   background: var(--jg-active) !important;
@@ -381,8 +338,7 @@ input[type="text"]:focus {
 
 /* Season pills — emby-tab-button portovany */
 .modal-sc-pills .nav-btn,
-.season-pill,
-.tab-btn {
+.season-pill {
   background: var(--jg-dark-a) !important;
   border-radius: var(--jg-r-lg) !important;
   color: var(--jg-text) !important;
@@ -411,13 +367,11 @@ input[type="text"]:focus {
 /* ═══════════════════════════════════════════════════════════════
    CINEMA MODAL
 ═══════════════════════════════════════════════════════════════ */
-#cinemaModal,
-.cinema-modal {
+#cinemaModal {
   background: var(--jg-bg) !important;
 }
 
-#cinemaTopBar,
-.cinema-top-bar {
+#cinemaTopBar {
   background: linear-gradient(180deg, rgba(30,40,54,0.95) 30%, transparent 90%) !important;
   backdrop-filter: var(--jg-blur-md) !important;
   -webkit-backdrop-filter: var(--jg-blur-md) !important;
@@ -425,7 +379,6 @@ input[type="text"]:focus {
 }
 
 /* Cinema source buttons */
-.cinema-source-btn,
 [class*="source-btn"] {
   background: var(--jg-sel-a) !important;
   border: 0px solid var(--jg-border) !important;
@@ -435,7 +388,6 @@ input[type="text"]:focus {
   backdrop-filter: var(--jg-blur-sm) !important;
 }
 
-.cinema-source-btn:hover,
 [class*="source-btn"]:hover {
   background: var(--jg-active-a) !important;
   border-color: var(--jg-border) !important;
@@ -449,8 +401,6 @@ input[type="text"]:focus {
 }
 
 /* Glass panel — dialog portovany */
-.glass-panel,
-.glass-card,
 [class*="glass"] {
   background: rgba(10,10,10,0.92) !important;
   border: 0px solid var(--jg-border) !important;
@@ -480,34 +430,19 @@ input[type="text"]:focus {
    WATCHLIST / RATING OVERLAY — dialog portovany
 ═══════════════════════════════════════════════════════════════ */
 #watchlistOverlay,
-#ratingOverlay,
-.wl-modal,
-.overlay-modal {
+#ratingOverlay {
   background: var(--jg-bg) !important;
-}
-
-.wl-content,
-.rating-content,
-.overlay-content {
-  background: rgba(30,40,54,0.85) !important;
-  border: 0px solid var(--jg-border) !important;
-  border-radius: var(--jg-r-lg) !important;
-  backdrop-filter: var(--jg-blur-sm) !important;
-  box-shadow: var(--jg-shadow) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
    SETTINGS / ADMIN — dialog portovany
 ═══════════════════════════════════════════════════════════════ */
 .admin-body,
-.settings-body,
 .customize-body {
   background: var(--jg-bg) !important;
 }
 
-.settings-card,
-.admin-card,
-.settings-section {
+.admin-card {
   background: var(--jg-sel-a) !important;
   border: 0px solid var(--jg-border-d) !important;
   border-radius: var(--jg-r-lg) !important;
@@ -537,15 +472,12 @@ textarea:focus {
 /* ═══════════════════════════════════════════════════════════════
    LIST ITEMS — listItem portovany
 ═══════════════════════════════════════════════════════════════ */
-.list-item,
-.ep-list-item,
 [class*="list-item"] {
   border-radius: 0.7em !important;
   transition: background 0.125s !important;
   color: var(--jg-text) !important;
 }
 
-.list-item:hover,
 [class*="list-item"]:hover {
   background: rgba(255,255,255,0.125) !important;
   backdrop-filter: var(--jg-blur-lg) !important;
@@ -554,10 +486,7 @@ textarea:focus {
 /* ═══════════════════════════════════════════════════════════════
    GENRE / FILTER CHIPS — emby-tab-button portovany
 ═══════════════════════════════════════════════════════════════ */
-.genre-chip,
-.filter-chip,
-.category-chip,
-[class*="-chip"]:not(#dr-popup *) {
+.filter-chip {
   background: var(--jg-dark-a) !important;
   border-radius: var(--jg-r-lg) !important;
   color: var(--jg-text) !important;
@@ -590,8 +519,6 @@ button:not([class*="dock"]):not([class*="disco"]):not(#dr-popup *):not(.pg-profi
 }
 
 /* ── Icon buttons ── */
-.icon-btn,
-.paper-btn,
 [class*="icon-btn"] {
   color: var(--jg-text) !important;
   background: transparent !important;
@@ -599,7 +526,6 @@ button:not([class*="dock"]):not([class*="disco"]):not(#dr-popup *):not(.pg-profi
   transition: all 0.125s !important;
 }
 
-.icon-btn:hover,
 [class*="icon-btn"]:hover {
   background: rgba(255,255,255,0.05) !important;
   color: white !important;
@@ -608,7 +534,6 @@ button:not([class*="dock"]):not([class*="disco"]):not(#dr-popup *):not(.pg-profi
 /* ═══════════════════════════════════════════════════════════════
    STARRATING / HODNOCENÍ
 ═══════════════════════════════════════════════════════════════ */
-.star-icon,
 .star,
 [class*="star"] {
   /* starIcon — gradient text */
