@@ -158,6 +158,7 @@ body::before, body::after { display: none !important; }
   border: none !important;
   transition: color 0.2s var(--tv-ease), background 0.2s var(--tv-ease) !important;
   cursor: pointer !important;
+}
 .dock-btn svg { width: 24px !important; height: 24px !important; stroke-width: 1.7px !important; transition: transform 0.25s var(--tv-ease-spring) !important; }
 .dock-btn:hover { color: var(--tv-text) !important; background: rgba(255,255,255,0.05) !important; }
 .dock-btn:hover svg { transform: translateY(-2px) !important; }
@@ -165,19 +166,7 @@ body::before, body::after { display: none !important; }
 .dock-btn.active svg { transform: translateY(-2px) !important; }
 
 .dock-label { font-family: var(--tv-font) !important; font-size: 11px !important; font-weight: 600 !important; letter-spacing: 0.2px !important; }
-
-.dock-ai { color: rgba(255,255,255,0.45) !important; position: relative !important; }
-.dock-ai::before {
-  content: '' !important;
-  position: absolute !important;
-  inset: -1px !important;
-  border-radius: 15px !important;
-  background: linear-gradient(135deg, rgba(10,132,255,0.12), rgba(10,132,255,0.04)) !important;
-  border: 1px solid rgba(10,132,255,0.18) !important;
-}
-.dock-ai:hover, .dock-ai.active { color: var(--tv-blue) !important; background: transparent !important; }
-
-.dock-active-dot { background: var(--tv-blue) !important; box-shadow: 0 0 6px var(--tv-blue) !important; width: 4px !important; height: 4px !important; border-radius: 50% !important; }
+.dock-ai.active { color: var(--tv-blue) !important; background: transparent !important; }
 .dock-badge { background: #ff375f !important; box-shadow: 0 0 8px rgba(255,55,95,0.6) !important; border-radius: 50% !important; width: 8px !important; height: 8px !important; }
 
 /* ───────────────────────────────────────────────────────────────
@@ -190,6 +179,13 @@ body::before, body::after { display: none !important; }
   align-items: center !important;
   justify-content: center !important;
   gap: 12px !important;
+}
+/* OPRAVA: display:flex !important výše platí, dokud gate nedostane
+   třídu "hiding" (tu přidává ProfileGate.hide() při zavírání) — jinak
+   by JS nikdy nemohl gate opravdu skrýt (display:none), protože
+   !important z vnějšího CSS vždycky přebije obyčejný inline styl. */
+#mfProfileGate.hiding {
+  display: none !important;
 }
 
 .pg-logo { font-family: var(--tv-font) !important; font-size: 36px !important; font-weight: 900 !important; letter-spacing: -2px !important; color: var(--tv-text) !important; filter: none !important; margin-bottom: 4px !important; }
@@ -351,10 +347,7 @@ body::before, body::after { display: none !important; }
 /* ───────────────────────────────────────────────────────────────
    SECTION TITLES
 ─────────────────────────────────────────────────────────────── */
-.disco-section-label,
-.sh-section-label,
-.disco-row-title,
-.ps-section-label {
+.disco-row-title {
   font-family: var(--tv-font) !important;
   font-size: 22px !important;
   font-weight: 800 !important;
@@ -363,15 +356,11 @@ body::before, body::after { display: none !important; }
   padding: 0 var(--tv-px) !important;
   margin-bottom: 16px !important;
 }
-.disco-see-all, .sh-see-all { font-family: var(--tv-font) !important; font-size: 14px !important; font-weight: 600 !important; color: var(--tv-blue) !important; opacity: 0.85 !important; }
-.disco-see-all:hover, .sh-see-all:hover { opacity: 1 !important; }
 
 /* ───────────────────────────────────────────────────────────────
    FYI HERO
 ─────────────────────────────────────────────────────────────── */
-.fyi-container { height: 55vh !important; min-height: 380px !important; margin-bottom: 52px !important; }
 .fyi-gradient { background: linear-gradient(to top, var(--tv-bg) 0%, rgba(3,3,7,0.55) 45%, rgba(3,3,7,0.1) 100%) !important; }
-.fyi-content { padding: 0 var(--tv-px) 48px !important; }
 
 .fyi-badge { font-family: var(--tv-font) !important; font-size: 13px !important; font-weight: 700 !important; padding: 6px 14px !important; border-radius: 20px !important; background: var(--tv-blue) !important; color: #fff !important; letter-spacing: 0.3px !important; }
 
@@ -388,7 +377,7 @@ body::before, body::after { display: none !important; }
 
 .fyi-genre { font-family: var(--tv-font) !important; font-size: 18px !important; font-weight: 400 !important; color: var(--tv-text-sub) !important; margin-bottom: 24px !important; }
 
-.fyi-btn, .disco-hero-btn {
+.disco-hero-btn {
   font-family: var(--tv-font) !important;
   font-size: 18px !important;
   font-weight: 700 !important;
@@ -406,18 +395,6 @@ body::before, body::after { display: none !important; }
   backdrop-filter: blur(36px) saturate(1.5) !important;
   -webkit-backdrop-filter: blur(36px) saturate(1.5) !important;
 }
-
-.universe-content {
-  background: var(--tv-surface) !important;
-  border: 1px solid var(--tv-border-hi) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 40px 120px rgba(0,0,0,0.9) !important;
-  padding: 36px !important;
-  max-width: min(800px, 88vw) !important;
-}
-
-.universe-title { font-family: var(--tv-font) !important; font-size: 36px !important; font-weight: 900 !important; letter-spacing: -1px !important; color: var(--tv-text) !important; }
-.universe-overview { font-family: var(--tv-font) !important; font-size: 18px !important; line-height: 1.65 !important; color: var(--tv-text-sub) !important; }
 
 /* ───────────────────────────────────────────────────────────────
    MOOD BOX
@@ -519,7 +496,6 @@ body::before, body::after { display: none !important; }
   }
   html, body { font-size: 28px !important; }
   .mf-header-logo { font-size: 40px !important; }
-  .disco-section-label, .sh-section-label { font-size: 34px !important; }
   .fyi-title { font-size: 100px !important; }
   .pg-avatar { width: 180px !important; height: 180px !important; font-size: 80px !important; border-radius: 36px !important; }
   .pg-logo { font-size: 56px !important; }
@@ -550,10 +526,6 @@ body::before, body::after { display: none !important; }
   border-color: rgba(10,132,255,0.25) !important;
 }
 .ep-card.watched { border-color: rgba(10,132,255,0.18) !important; }
-.ep-watched-dot { background: var(--tv-blue) !important; box-shadow: 0 0 6px var(--tv-blue) !important; }
-.ep-number { font-family: var(--tv-font) !important; font-weight: 700 !important; color: var(--tv-blue) !important; font-size: 14px !important; }
-.ep-card-title { font-family: var(--tv-font) !important; font-size: 16px !important; font-weight: 600 !important; color: var(--tv-text) !important; }
-.ep-card-desc { font-family: var(--tv-font) !important; font-size: 14px !important; color: var(--tv-text-sub) !important; line-height: 1.5 !important; }
 
 /* Season pills */
 .season-pill {
@@ -567,6 +539,7 @@ body::before, body::after { display: none !important; }
   color: var(--tv-text-sub) !important;
   transition: all 0.2s var(--tv-ease) !important;
   cursor: pointer !important;
+}
 .season-pill:hover { color: var(--tv-text) !important; border-color: var(--tv-border-hi) !important; }
 .season-pill.active {
   background: var(--tv-blue) !important;
@@ -582,13 +555,6 @@ body::before, body::after { display: none !important; }
   background: rgba(0,0,0,0.82) !important;
   backdrop-filter: blur(36px) saturate(1.5) !important;
   -webkit-backdrop-filter: blur(36px) saturate(1.5) !important;
-}
-.modal-panel, .modal-box {
-  background: var(--tv-surface) !important;
-  border: 1px solid var(--tv-border-hi) !important;
-  border-radius: 22px !important;
-  box-shadow: 0 40px 120px rgba(0,0,0,0.95) !important;
-  animation: tv-rise 0.3s var(--tv-ease) both !important;
 }
 #sTitle {
   font-family: var(--tv-font) !important;
@@ -616,6 +582,7 @@ body::before, body::after { display: none !important; }
   padding: 12px 22px !important;
   transition: all 0.2s var(--tv-ease) !important;
   cursor: pointer !important;
+}
 
 /* ───────────────────────────────────────────────────────────────
    DISCOVERY OVERLAY (Universe)
@@ -727,6 +694,7 @@ body::before, body::after { display: none !important; }
   padding: 8px 16px !important;
   transition: all 0.17s !important;
   cursor: pointer !important;
+}
 .ai-quick-btn:hover { background: var(--tv-blue-dim) !important; border-color: rgba(10,132,255,0.3) !important; color: var(--tv-blue) !important; }
 
 /* Zprávy */
@@ -839,6 +807,7 @@ body::before, body::after { display: none !important; }
   padding: 16px !important;
   transition: all 0.2s var(--tv-ease-spring) !important;
   cursor: pointer !important;
+}
 .rating-btn:hover { transform: scale(1.08) translateY(-3px) !important; }
 .rating-btn.loved.selected, .rating-btn.loved:hover { background: var(--tv-blue-dim) !important; border-color: rgba(10,132,255,0.5) !important; }
 .rating-btn.liked.selected, .rating-btn.liked:hover { background: rgba(48,209,88,0.1) !important; border-color: rgba(48,209,88,0.4) !important; }
@@ -850,47 +819,8 @@ body::before, body::after { display: none !important; }
 /* ───────────────────────────────────────────────────────────────
    TIMER FAB + PANEL
 ─────────────────────────────────────────────────────────────── */
-.timer-fab {
-  background: var(--tv-surface) !important;
-  border: 1px solid var(--tv-border-hi) !important;
-  border-radius: 18px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6) !important;
-  transition: all 0.2s var(--tv-ease) !important;
-  cursor: pointer !important;
-.timer-fab:hover { background: var(--tv-blue-dim) !important; border-color: rgba(10,132,255,0.35) !important; color: var(--tv-blue) !important; }
 .timer-fab.active { background: var(--tv-blue-dim) !important; border-color: rgba(10,132,255,0.45) !important; color: var(--tv-blue) !important; box-shadow: 0 0 24px rgba(10,132,255,0.2), 0 4px 20px rgba(0,0,0,0.6) !important; }
-.timer-fab-label { color: var(--tv-blue) !important; font-family: var(--tv-font) !important; font-weight: 700 !important; font-size: 14px !important; }
-
-.timer-panel {
-  background: var(--tv-surface) !important;
-  border: 1px solid var(--tv-border-hi) !important;
-  border-radius: 22px !important;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.9) !important;
-  animation: tv-rise 0.28s var(--tv-ease) both !important;
-  padding: 28px !important;
-}
-.timer-panel-title { font-family: var(--tv-font) !important; font-weight: 800 !important; letter-spacing: -0.4px !important; font-size: 20px !important; }
-.timer-display {
-  color: var(--tv-blue) !important;
-  text-shadow: 0 0 28px rgba(10,132,255,0.35) !important;
-  font-family: var(--tv-font) !important;
-  font-weight: 300 !important;
-  letter-spacing: -2px !important;
-  font-size: 56px !important;
-}
 .timer-preset-btn { border-radius: 12px !important; font-family: var(--tv-font) !important; font-weight: 600 !important; font-size: 16px !important; transition: all 0.15s !important; cursor: pointer !important; padding: 10px 18px !important; }
-.timer-start-btn {
-  background: var(--tv-blue) !important;
-  border-radius: 14px !important;
-  font-family: var(--tv-font) !important;
-  font-weight: 700 !important;
-  font-size: 18px !important;
-  box-shadow: 0 8px 24px rgba(10,132,255,0.4) !important;
-  border: none !important;
-  transition: all 0.18s !important;
-  color: #fff !important;
-  cursor: pointer !important;
-.timer-start-btn:hover { box-shadow: 0 12px 32px rgba(10,132,255,0.55) !important; transform: translateY(-2px) !important; }
 
 /* ───────────────────────────────────────────────────────────────
    SYNC BADGE + MODAL
@@ -904,7 +834,6 @@ body::before, body::after { display: none !important; }
   border-radius: 20px !important;
   padding: 6px 14px !important;
 }
-.sync-title { font-family: var(--tv-font) !important; font-weight: 900 !important; letter-spacing: -0.5px !important; font-size: 24px !important; }
 .sync-btn {
   background: var(--tv-blue) !important;
   font-family: var(--tv-font) !important;
@@ -916,6 +845,7 @@ body::before, body::after { display: none !important; }
   color: #fff !important;
   transition: all 0.18s !important;
   cursor: pointer !important;
+}
 .sync-btn:hover { box-shadow: 0 10px 28px rgba(10,132,255,0.55) !important; transform: translateY(-1px) !important; }
 .sync-code-input {
   font-family: var(--tv-font) !important;
@@ -933,8 +863,6 @@ body::before, body::after { display: none !important; }
    NOTIF PANEL
 ─────────────────────────────────────────────────────────────── */
 .notif-panel-title { font-family: var(--tv-font) !important; font-weight: 800 !important; letter-spacing: -0.4px !important; font-size: 20px !important; }
-.notif-item { border-bottom: 1px solid var(--tv-border) !important; transition: background 0.15s !important; padding: 14px !important; }
-.notif-item:hover { background: var(--tv-blue-dim) !important; }
 .notif-bell-badge { background: #ff375f !important; box-shadow: 0 0 8px rgba(255,55,95,0.6) !important; }
 
 /* ───────────────────────────────────────────────────────────────
@@ -954,17 +882,14 @@ body::before, body::after { display: none !important; }
 /* ───────────────────────────────────────────────────────────────
    CONTINUE WATCHING WIDGET
 ─────────────────────────────────────────────────────────────── */
-.continue-widget, #continueWidget {
+#continueWidget {
   background: var(--tv-surface) !important;
   border: 1px solid var(--tv-border-hi) !important;
   border-radius: 18px !important;
   padding: 20px !important;
   box-shadow: none !important;
 }
-.continue-title { font-family: var(--tv-font) !important; font-size: 20px !important; font-weight: 800 !important; letter-spacing: -0.4px !important; color: var(--tv-text) !important; }
-.continue-item { font-family: var(--tv-font) !important; font-size: 16px !important; border-radius: 12px !important; padding: 12px !important; transition: background 0.18s !important; cursor: pointer !important; }
-.ep-progress-bar, .continue-progress { height: 3px !important; border-radius: 2px !important; background: var(--tv-elevated) !important; }
-.ep-progress-fill, .continue-progress-fill { background: var(--tv-blue) !important; }
+.ep-progress-bar { height: 3px !important; border-radius: 2px !important; background: var(--tv-elevated) !important; }
 
 /* ───────────────────────────────────────────────────────────────
    PROFILE CREATE MODAL
@@ -1019,18 +944,7 @@ body::before, body::after { display: none !important; }
 /* ───────────────────────────────────────────────────────────────
    CHANGELOG MODAL
 ─────────────────────────────────────────────────────────────── */
-#changelogModal > div {
-  background: var(--tv-surface) !important;
-  border: 1px solid var(--tv-border-hi) !important;
-  border-radius: 24px !important;
-  box-shadow: 0 40px 120px rgba(0,0,0,0.95) !important;
-  max-width: min(540px, 90vw) !important;
-}
-#changelogModal div[style*="border-bottom"] {
-  border-bottom: 1px solid var(--tv-border) !important;
-}
-#changelogModal div[style*="font-size: 1.15rem"],
-#changelogModal [style*="font-weight: 900"] {
+#changelogModal div[style*="font-size: 1.15rem"] {
   font-family: var(--tv-font) !important;
   font-size: 22px !important;
   font-weight: 900 !important;
@@ -1038,24 +952,6 @@ body::before, body::after { display: none !important; }
   color: var(--tv-text) !important;
 }
 #clModalSubtitle { font-family: var(--tv-font) !important; font-size: 14px !important; color: var(--tv-text-muted) !important; }
-#changelogModal button[onclick="closeChangelog()"] {
-  background: var(--tv-blue) !important;
-  border: none !important;
-  font-family: var(--tv-font) !important;
-  font-weight: 700 !important;
-  font-size: 18px !important;
-  border-radius: 14px !important;
-  color: #fff !important;
-  cursor: pointer !important;
-}
-#changelogModal button[style*="border-radius: 50%"] {
-  background: var(--tv-elevated) !important;
-  border: 1px solid var(--tv-border-hi) !important;
-  color: var(--tv-text-sub) !important;
-  border-radius: 50% !important;
-  width: 36px !important;
-  height: 36px !important;
-}
 
 /* ───────────────────────────────────────────────────────────────
    DOCK MORE SHEET
@@ -1080,6 +976,7 @@ body::before, body::after { display: none !important; }
   border-radius: 18px !important;
   transition: background 0.18s, border-color 0.18s, transform 0.18s var(--tv-ease-spring) !important;
   cursor: pointer !important;
+}
 #dockMoreSheet button[style*="flex-direction: column"]:hover {
   background: var(--tv-blue-dim) !important;
   border-color: rgba(10,132,255,0.3) !important;
@@ -1099,6 +996,7 @@ body::before, body::after { display: none !important; }
 button {
   font-family: var(--tv-font) !important;
   cursor: pointer !important;
+}
 input, textarea, select {
   font-family: var(--tv-font) !important;
 }
@@ -1215,17 +1113,6 @@ input, textarea, select {
 /* ───────────────────────────────────────────────────────────────
    CHANGELOG NOTIF ITEMS
 ─────────────────────────────────────────────────────────────── */
-.mf-changelog-item {
-  padding-left: 14px !important;
-  border-radius: 0 10px 10px 0 !important;
-  margin-bottom: 4px !important;
-  transition: background 0.15s !important;
-}
-.mf-changelog-item:hover { background: rgba(10,132,255,0.1) !important; }
-
-#mfChangelogBadge {
-  animation: changelog-pulse 2s ease-in-out infinite !important;
-}
 @keyframes changelog-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(10,132,255,0.6); }
   50%       { box-shadow: 0 0 0 5px rgba(10,132,255,0); }
