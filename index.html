@@ -7063,7 +7063,7 @@
         <!-- Uvítací sekce -->
         <section class="mfh-welcome">
           <h1 class="mfh-greeting">
-            Ahoj, <span id="mfhUserName">Jakube</span> 👋
+            Ahoj, <span id="mfhUserName">kamarád</span> 👋
           </h1>
           <p class="mfh-sub">Co si dnes pustíš?</p>
         </section>
@@ -7447,6 +7447,35 @@
           .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
           .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
       }
+            /**
+       * Převede české křestní jméno do 5. pádu (vokativ).
+       * jirka → jirko, Jakub → Jakube, Petr → Petře, Tomáš → Tomáši, ...
+       */
+      function toVocative(name) {
+        if (!name || typeof name !== 'string') return name || '';
+        var n = name.trim();
+        if (!n) return n;
+        var first = n.split(' ')[0];
+        if (!first) return n;
+        var lower = first.toLowerCase();
+
+        if (/a$/.test(lower)) return first.slice(0, -1) + 'o';
+        if (/[eéiíoóuúůyý]$/.test(lower)) return first;
+        if (lower.endsWith('ek') && first.length > 2) return first.slice(0, -2) + 'ku';
+        if (lower.endsWith('ch')) return first + 'u';
+
+        var last = lower.slice(-1);
+        if (/[kgh]$/.test(lower)) return first + 'u';
+        if (last === 'r') return first + 'ře';
+        if (last === 'l') return first + 'e';
+        if (/[jščžřc]$/.test(lower)) return first + 'i';
+        if (last === 'ď') return first.slice(0, -1) + 'di';
+        if (last === 'ť') return first.slice(0, -1) + 'ti';
+        if (last === 'ň') return first.slice(0, -1) + 'ni';
+        if (/[mnbpszvdft]$/.test(lower)) return first + 'e';
+        return first + 'e';
+      }
+
 
             function getUserName() {
         try {
@@ -7457,7 +7486,7 @@
             try { profiles = JSON.parse(localStorage.getItem('mf_profiles_v2') || '[]'); } catch(e) {}
             if (Array.isArray(profiles)) {
               var p = profiles.find(function(x){ return x && x.id === pid; });
-              if (p && p.name) return String(p.name).split(' ')[0];
+              if (p && p.name) return toVocative(String(p.name).split(' ')[0]);
             }
           }
           // Fallback: staré klíče (kdyby existovaly)
@@ -7467,9 +7496,9 @@
             if (!v) continue;
             try {
               var o = JSON.parse(v);
-              if (o && o.name) return String(o.name).split(' ')[0];
+              if (o && o.name) return toVocative(String(o.name).split(' ')[0]);
             } catch (e) {
-              if (typeof v === 'string' && v.length < 40) return v.split(' ')[0];
+              if (typeof v === 'string' && v.length < 40) return toVocative(v.split(' ')[0]);
             }
           }
         } catch (e) {}
