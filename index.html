@@ -8055,6 +8055,66 @@
         setTimeout(forceHome, 300);
         setTimeout(forceHome, 1500);
       });
+            /* ═══════════ PATCH: Dynamická sekce Pokračovat / Vybráno ═══════════ */
+      (function _mfhContinuePatch() {
+        if (window._mfhContinuePatched) return;
+        window._mfhContinuePatched = true;
+
+        function hasAnythingInProgress() {
+          try {
+            var pid = localStorage.getItem('mf_active_pid');
+            var suffix = pid ? '_' + pid : '';
+            var watched = JSON.parse(localStorage.getItem('mf_watched' + suffix) || '{}');
+            if (watched && Object.keys(watched).length > 0) return true;
+            var partial = JSON.parse(localStorage.getItem('mf_partial_watched' + suffix) || '{}');
+            if (partial && Object.keys(partial).length > 0) return true;
+            var wl = JSON.parse(localStorage.getItem('mf_watchlist' + suffix) || '[]');
+            if (Array.isArray(wl) && wl.length > 0) return true;
+          } catch (e) {}
+          return false;
+        }
+
+        function updateContinueSection() {
+          var section = document.getElementById('mfhContinue');
+          var card = document.getElementById('mfhContinueCard');
+          if (!section || !card) return;
+
+          var hasProgress = hasAnythingInProgress();
+          var h2 = section.querySelector('.mfh-h2');
+          var eyebrow = card.querySelector('.mfh-cont-eyebrow');
+          var meta = card.querySelector('.mfh-cont-meta');
+          var btn = card.querySelector('.mfh-btn-primary');
+          var bar = card.querySelector('.mfh-cont-bar');
+
+          if (hasProgress) {
+            if (h2) h2.textContent = 'Pokračovat ve sledování';
+            if (eyebrow) eyebrow.textContent = 'Pokračovat ve sledování';
+            if (btn) btn.innerHTML = '▶ Pokračovat';
+            if (bar) bar.style.display = '';
+          } else {
+            if (h2) h2.textContent = '✨ Vybráno pro tebe';
+            if (eyebrow) eyebrow.textContent = '✨ Tip na dnešní večer';
+            if (meta) meta.textContent = 'Doporučeno podle trendů';
+            if (btn) btn.innerHTML = '▶ Přehrát';
+            if (bar) bar.style.display = 'none';
+          }
+        }
+
+        var attempts = 0;
+        var waiter = setInterval(function () {
+          attempts++;
+          var card = document.getElementById('mfhContinueCard');
+          if (card) {
+            updateContinueSection();
+            var mo = new MutationObserver(updateContinueSection);
+            mo.observe(card, { childList: true, subtree: false });
+            clearInterval(waiter);
+          }
+          if (attempts > 300) clearInterval(waiter);
+        }, 100);
+
+        console.log('[mfh] Continue patch aktivní');
+      })();
 
       /* ═══════════ ZÁCHRANA – pokud cinema zůstane prázdný ═══════════ */
       (function setupCinemaRescue() {
