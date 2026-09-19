@@ -1,4 +1,0 @@
-name = "mujflix"
-compatibility_date = "2023-12-01"
-# API klíč (TMDB) se řeší přes config.js, ne přes wrangler secret —
-# viz config.example.js a README pro nastavení.
