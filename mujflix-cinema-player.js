@@ -114,13 +114,22 @@
       ? "https://uzi.la/p/" + s + "-s" + pad2(season) + "e" + pad2(episode)
       : "https://uzi.la/?s=" + encodeURIComponent(title || "");
   }
+  
+  function uziMovieUrlWithYear(title, year) {
+    var s = daslug(title);
+    if (!s) return "https://uzi.la/?s=" + encodeURIComponent(title || "");
+    return year
+      ? "https://uzi.la/p/" + s + "-" + encodeURIComponent(year)
+      : "https://uzi.la/p/" + s;
+  }
 
   /* ── Seznamy zdrojů ───────────────────────────────────────── */
   var MOVIE_SOURCES = [
     { id: "bombuj", label: "Bombuj", build: function (t, y) { return bombujMovieUrl(t, y); } },
     { id: "bombuj-noyear", label: "Bombuj (bez roku)", build: function (t) { return bombujMovieUrlNoYear(t); } },
     { id: "prehrajto", label: "Prehrajto.cz", build: function (t) { return prehrajtoUrl(t); } },
-    { id: "uzila", label: "Uzi.la", build: function (t) { return uziMovieUrl(t); } }
+        { id: "uzila", label: "Uzi.la (s rokem)", build: function (t, y) { return uziMovieUrlWithYear(t, y); } },
+    { id: "uzila-noyear", label: "Uzi.la (bez roku)", build: function (t) { return uziMovieUrl(t); } }
   ];
 
   var TV_SOURCES = [
