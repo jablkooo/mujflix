@@ -590,9 +590,6 @@
       <div class="pg-title">Kdo se dívá?</div>
       <div class="pg-subtitle">Vyber profil a pusť si svůj večer.</div>
       <div class="pg-profiles" id="pgProfilesList"></div>
-      <button class="pg-manage-btn" onclick="window.ProfileGate?.openCreate()">
-        + Přidat profil
-      </button>
 
       <button
         id="profileManageBtn"
@@ -7754,6 +7751,20 @@
 
       /* ═══════════ FORCE HOMEPAGE ═══════════ */
       function forceHome(opts) {
+        // VÝKON: forceHome() se volá automaticky ~12× během prvních pár
+        // vteřin po startu appky (boot schedule + window.load + reakce na
+        // zmizení profile gate + storage event) a pokaždé dělá netriviální
+        // práci (zavírá 18 elementů, přestavuje homepage, stahuje z TMDB).
+        // Naměřeno: 14 volání za 6,5 s. Reálná potřeba je spustit to jen
+        // tehdy, když se od posledního běhu něco skutečně mohlo změnit —
+        // ne pokaždé znovu během pár desítek ms. Throttle na 400 ms kolo
+        // (kromě force:true, tam se má spustit vždy hned – používá ho jen
+        // klik na "Domů").
+        var now = Date.now();
+        if (!(opts && opts.force) && now - (forceHome._lastRun || 0) < 400) {
+          return;
+        }
+        forceHome._lastRun = now;
         try {
           // OPRAVA: forceHome() se volá i automaticky několikrát po startu
           // appky (50 ms až 5 s po načtení) a dřív bezpodmínečně zavírala
@@ -7936,7 +7947,7 @@
               home.style.setProperty('display', 'block', 'important');
             }
           }
-        }, 200); // 5× za sekundu
+        }, 500); // VÝKON: 2× za sekundu místo 5× — pořád dost rychlé na "safety net", ale běží to navždy, tak ať to neškube CPU zbytečně
 
         // Po startu několikrát forceHome
         [50, 150, 300, 600, 1000, 1500, 2000, 3000, 5000].forEach(function (t) {
@@ -7944,13 +7955,25 @@
         });
 
         // MutationObserver na celý document
+        // VÝKON: tenhle observer sleduje ÚPLNĚ CELÝ dokument (childList +
+        // subtree + attributes), takže ho spustí i drobné věci jako hover
+        // efekt nebo GSAP animace kdekoli v appce — naměřeno 267 spuštění
+        // za 6,5 s, z toho hodně dělalo querySelectorAll + getComputedStyle
+        // (vynucený přepočet stylů). Teď se skutečná kontrola provede
+        // nejvýš jednou za animační snímek (requestAnimationFrame), i když
+        // MutationObserver nahlásí mutace vícekrát v rychlém sledu.
         if (document.documentElement) {
-          var mo = new MutationObserver(function () {
-            if (!document.documentElement.classList.contains('mfh-home-on')) return;
-            document.querySelectorAll('.ps-menu-scene').forEach(function (m) {
-              if (getComputedStyle(m).display !== 'none') {
-                m.style.setProperty('display', 'none', 'important');
-              }
+          var mfhDocMoRaf = null;
+          var mo = new MutationObserver(function (muts) {
+            if (mfhDocMoRaf) return;
+            mfhDocMoRaf = requestAnimationFrame(function () {
+              mfhDocMoRaf = null;
+              if (!document.documentElement.classList.contains('mfh-home-on')) return;
+              document.querySelectorAll('.ps-menu-scene').forEach(function (m) {
+                if (getComputedStyle(m).display !== 'none') {
+                  m.style.setProperty('display', 'none', 'important');
+                }
+              });
             });
           });
           mo.observe(document.documentElement, {
@@ -9153,6 +9176,8 @@ document.addEventListener('DOMContentLoaded', () => {
   window.MFSync.init();
 });
     </script>
+    <!-- config.js drží API klíče a je v .gitignore (viz config.example.js) -->
+    <script src="config.js"></script>
     <script src="app.js?v=6" defer></script>
 
     <!-- ⚡ IMAGE + SCROLL PATCH -->
@@ -9363,8 +9388,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       })();
     </script>
-    <!-- dočasně vypnuto: /api/tmdb-img na Pages neexistuje, obrázky bereme přímo z TMDB -->
-    <!-- <script src="mujflix-img-fix.js"></script> -->
     <!-- ⚠️ defer je tu záměrně: tyhle patch skripty přepisují/obalují
          funkce z app.js (window.setDockActive, window.openMovieInCinema,
          window.openNotifPanel, window.openDiscoverTv, …). app.js má
@@ -9378,7 +9401,6 @@ document.addEventListener('DOMContentLoaded', () => {
     <script src="legal-streaming-providers.js" defer></script>
     <script src="notifications-changelog.js" defer></script>
     <script src="mujflix-patch.js" defer></script>
-    <!-- <script src="mujflix-url-fix.js"></script> -->
     <script src="mujflix-discover-redesign.js" defer></script>
     <script src="mujflix-cinema-player.js" defer></script>
     <script src="mujflix-dock-fix.js" defer></script>
