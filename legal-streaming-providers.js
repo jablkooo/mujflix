@@ -157,7 +157,7 @@
   // ══ FETCH WATCH PROVIDERS FROM TMDB ══
   async function fetchWatchProviders(tmdbId, type) {
     const endpoint = type === 'movie' ? 'movie' : 'tv';
-    const url = `https://api.themoviedb.org/3/${endpoint}/${tmdbId}/watch/providers?api_key=${window.TMDB_KEY || '36a429855b5872e5db851b6e04db81f0'}`;
+    const url = `https://api.themoviedb.org/3/${endpoint}/${tmdbId}/watch/providers?api_key=${window.TMDB_KEY || window.TMDB_KEY_DEFAULT || ''}`;
 
     try {
       const resp = await fetch(url);
