@@ -117,7 +117,7 @@ if (window.MF_DEBUG) {
   console.log("[MF] Browser:", window.MF_BROWSER);
 }
 
-const TMDB_KEY = "36a429855b5872e5db851b6e04db81f0",
+const TMDB_KEY = window.TMDB_KEY_DEFAULT || "",
   TMDB = "https://api.themoviedb.org/3",
   IMG = "https://image.tmdb.org/t/p/w400",
   IMG_S = "https://image.tmdb.org/t/p/w185",
