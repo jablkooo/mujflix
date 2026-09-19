@@ -7637,7 +7637,7 @@
 
         fetchTmdbData().then(function (tmdb) {
           if (tmdb && tmdb.trending && tmdb.trending.length) {
-            var first = tmdb.trending[0];
+            var first = tmdb.trending[Math.floor(Math.random() * Math.min(10, tmdb.trending.length))];
             var firstTitle = first.title || first.name || 'Neznámé';
             var firstBackdrop = getBackdropUrl(first.backdrop_path, 'w780') ||
                                 getPosterUrl(first.poster_path, 'w500');
