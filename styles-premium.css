@@ -227,14 +227,10 @@ body::after { display: none !important; }
 .dock-btn.active { color: var(--accent) !important; background: rgba(124,111,239,0.1) !important; }
 .dock-btn:active { transform: scale(0.83) !important; transition-duration: 50ms !important; }
 .dock-label { font-family: var(--font-ui) !important; font-weight: 500 !important; font-size: 0.575rem !important; letter-spacing: -0.1px !important; }
-.dock-active-dot { background: var(--accent) !important; box-shadow: 0 0 8px rgba(124,111,239,0.7) !important; }
 .dock-badge { background: var(--accent-warm) !important; box-shadow: 0 0 8px rgba(240,98,146,0.55) !important; }
 
 /* AI dock button — special treatment */
-.dock-ai {
-  color: rgba(255,255,255,0.5) !important;
-}
-.dock-ai.active, .dock-ai:hover {
+.dock-ai.active {
   color: var(--accent2) !important;
   background: rgba(56,200,240,0.1) !important;
 }
@@ -388,13 +384,6 @@ body::after { display: none !important; }
 .disco-card-glow {
   display: none !important;
 }
-.disco-section-label, .sh-section-label {
-  font-family: var(--font-ui) !important; font-weight: 700 !important; letter-spacing: -0.4px !important;
-}
-.disco-see-all, .sh-see-all {
-  font-family: var(--font-ui) !important; font-weight: 500 !important;
-  color: var(--accent) !important; font-size: 0.76rem !important;
-}
 
 /* ────────────────────────────────────────────────────────────────
    § 9 · SHOW HERO CARDS  (.sh-card)
@@ -426,8 +415,6 @@ body::after { display: none !important; }
   border-color: rgba(124,111,239,0.14) !important;
 }
 .ep-card.watched { border-color: rgba(124,111,239,0.16) !important; }
-.ep-watched-dot { background: var(--accent) !important; box-shadow: 0 0 6px rgba(124,111,239,0.55) !important; }
-.ep-number { font-family: var(--font-mono) !important; font-weight: 500 !important; color: var(--accent) !important; }
 
 /* Season pills */
 .season-pill { font-family: var(--font-ui) !important; font-weight: 600 !important; border-radius: 12px !important; transition: all 0.15s ease !important; }
@@ -440,13 +427,6 @@ body::after { display: none !important; }
   backdrop-filter: blur(34px) saturate(1.9) !important;
   -webkit-backdrop-filter: blur(34px) saturate(1.9) !important;
   background: rgba(0,0,0,0.76) !important;
-}
-.modal-panel, .modal-box {
-  background: rgba(9,9,16,0.99) !important;
-  border: 1px solid rgba(255,255,255,0.065) !important;
-  border-radius: var(--radius-lg) !important;
-  box-shadow: var(--shadow-xl) !important;
-  animation: mf-scale-in 0.28s var(--ease-spring) both !important;
 }
 #sTitle { font-family: var(--font-ui) !important; font-weight: 800 !important; letter-spacing: -0.6px !important; }
 .panel-progress-fill { background: linear-gradient(90deg, var(--accent), var(--accent2)) !important; }
@@ -874,40 +854,13 @@ body::after { display: none !important; }
 /* ────────────────────────────────────────────────────────────────
    § 20 · TIMER FAB + PANEL
 ──────────────────────────────────────────────────────────────── */
-.timer-fab {
-  background: rgba(11,11,20,0.92) !important; border: 1px solid rgba(255,255,255,0.075) !important;
-  border-radius: 18px !important; box-shadow: var(--shadow) !important;
-  transition: background 0.17s ease, border-color 0.17s ease, box-shadow 0.17s ease !important;
-}
-.timer-fab:hover { background: rgba(124,111,239,0.11) !important; border-color: rgba(124,111,239,0.3) !important; color: var(--accent) !important; }
 .timer-fab.active {
   background: rgba(124,111,239,0.14) !important; border-color: rgba(124,111,239,0.4) !important;
   color: var(--accent) !important;
   box-shadow: 0 0 28px rgba(124,111,239,0.2), var(--shadow) !important;
 }
-.timer-fab-label { color: var(--accent) !important; font-family: var(--font-mono) !important; font-weight: 500 !important; }
-.timer-progress-ring { border-color: rgba(124,111,239,0.26) !important; }
-.timer-panel {
-  background: rgba(9,9,18,0.99) !important; border: 1px solid rgba(255,255,255,0.058) !important;
-  border-radius: var(--radius-lg) !important; box-shadow: var(--shadow-xl) !important;
-  animation: mf-scale-in 0.26s var(--ease-spring) both !important;
-}
-.timer-panel-title { font-family: var(--font-ui) !important; font-weight: 700 !important; letter-spacing: -0.3px !important; }
-.timer-display {
-  color: var(--accent) !important;
-  text-shadow: 0 0 32px rgba(124,111,239,0.38) !important;
-  font-family: var(--font-mono) !important; font-weight: 400 !important;
-  letter-spacing: -1px !important; font-size: 2.8rem !important;
-}
 .timer-preset-btn { border-radius: 12px !important; font-family: var(--font-ui) !important; font-weight: 500 !important; transition: all 0.14s ease !important; }
 .timer-preset-btn.active, .timer-preset-btn:hover { background: rgba(124,111,239,0.11) !important; border-color: rgba(124,111,239,0.28) !important; color: var(--accent) !important; }
-.timer-start-btn {
-  background: linear-gradient(135deg, var(--accent), #9b8ffc) !important;
-  border-radius: 14px !important; font-family: var(--font-ui) !important; font-weight: 700 !important;
-  box-shadow: 0 8px 24px rgba(124,111,239,0.36) !important;
-  transition: all 0.17s ease !important; border: none !important;
-}
-.timer-start-btn:hover { box-shadow: 0 12px 32px rgba(124,111,239,0.52) !important; transform: translateY(-1px) !important; }
 
 /* ────────────────────────────────────────────────────────────────
    § 21 · SYNC BADGE + MODAL
@@ -922,7 +875,6 @@ body::after { display: none !important; }
   border-radius: var(--radius-lg) !important; box-shadow: var(--shadow-xl) !important;
   animation: mf-scale-in 0.28s var(--ease-spring) both !important;
 }
-.sync-title { font-family: var(--font-ui) !important; font-weight: 800 !important; letter-spacing: -0.5px !important; }
 .sync-btn {
   background: linear-gradient(135deg, var(--accent), #9b8ffc) !important;
   font-family: var(--font-ui) !important; font-weight: 700 !important; border-radius: 14px !important;
@@ -953,8 +905,6 @@ body::after { display: none !important; }
   animation: mf-scale-in 0.26s var(--ease-spring) both !important;
 }
 .notif-panel-title { font-family: var(--font-ui) !important; font-weight: 700 !important; letter-spacing: -0.3px !important; }
-.notif-item { border-bottom: 1px solid rgba(255,255,255,0.038) !important; transition: background 0.14s ease !important; }
-.notif-item:hover { background: rgba(124,111,239,0.048) !important; }
 
 /* ────────────────────────────────────────────────────────────────
    § 23 · ADMIN PANEL — full redesign
@@ -1071,7 +1021,7 @@ body::after { display: none !important; }
 }
 
 /* ── Tab tlačítka ── */
-.adm-tab, .adm-tab-btn {
+.adm-tab {
   font-family: var(--font-ui) !important;
   font-weight: 700 !important;
   font-size: 0.68rem !important;
@@ -1109,16 +1059,6 @@ body::after { display: none !important; }
 }
 
 /* ── Section title (uvnitř tab obsahu) ── */
-.adm-section-title {
-  font-family: var(--font-ui) !important;
-  font-weight: 800 !important;
-  font-size: 0.72rem !important;
-  letter-spacing: 0.2px !important;
-  color: rgba(255,255,255,0.5) !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1.4px !important;
-  margin-bottom: 12px !important;
-}
 
 /* ── Obsah plocha (bílý inner box) ── */
 #adminTab_profiles > div,
@@ -1838,63 +1778,12 @@ input:focus, textarea:focus {
 ──────────────────────────────────────────────────────────────── */
 
 /* ── Label ── */
-.admin-label {
-  font-family: var(--font-ui) !important;
-  font-weight: 700 !important;
-  font-size: 0.62rem !important;
-  letter-spacing: 0.5px !important;
-  color: rgba(255,255,255,0.38) !important;
-  text-transform: uppercase !important;
-  margin-bottom: 6px !important;
-  display: block !important;
-}
 
 /* ── Select dropdown ── */
-.admin-select {
-  font-family: var(--font-ui) !important;
-  font-size: 0.74rem !important;
-  background: rgba(255,255,255,0.036) !important;
-  border: 1px solid rgba(255,255,255,0.07) !important;
-  border-radius: 11px !important;
-  color: var(--text) !important;
-  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
-  outline: none !important;
-  cursor: pointer !important;
-}
-.admin-select:focus {
-  border-color: rgba(124,111,239,0.42) !important;
-  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
-}
-.admin-select option {
-  background: #0b0b14 !important;
-  color: rgba(255,255,255,0.85) !important;
-}
 
 /* ── Textarea ── */
-.admin-textarea {
-  font-family: var(--font-ui) !important;
-  font-size: 0.74rem !important;
-  background: rgba(255,255,255,0.036) !important;
-  border: 1px solid rgba(255,255,255,0.07) !important;
-  border-radius: 13px !important;
-  color: var(--text) !important;
-  resize: vertical !important;
-  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
-  outline: none !important;
-  line-height: 1.6 !important;
-}
-.admin-textarea:focus {
-  border-color: rgba(124,111,239,0.42) !important;
-  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
-}
-.admin-textarea::placeholder { color: rgba(255,255,255,0.22) !important; }
 
 /* ── Divider ── */
-.admin-divider {
-  border: none !important;
-  border-top: 1px solid rgba(255,255,255,0.048) !important;
-  margin: 18px 0 !important;
-}
 
 /* ── Card wrapper (obecný) ── */
 .admin-card {
@@ -1914,7 +1803,6 @@ input:focus, textarea:focus {
 }
 
 /* ── Content tab (#adminTab_content) ── */
-#adminTab_content { font-family: var(--font-ui) !important; }
 
 /* Vyhledávací pole obsahu */
 #adminContentSearch {
@@ -1933,476 +1821,68 @@ input:focus, textarea:focus {
 #adminContentSearch::placeholder { color: rgba(255,255,255,0.22) !important; }
 
 /* Content list items */
-#adminContentList > div,
-.admin-content-row {
-  border-bottom: 1px solid rgba(255,255,255,0.038) !important;
-  transition: background 0.14s ease !important;
-}
-#adminContentList > div:hover,
-.admin-content-row:hover { background: rgba(124,111,239,0.04) !important; }
-#adminContentList > div:last-child,
-.admin-content-row:last-child { border-bottom: none !important; }
 
 /* Content thumbnail */
-.admin-content-thumb {
-  border-radius: 8px !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  object-fit: cover !important;
-}
 
 /* Content title */
-.admin-content-title {
-  font-family: var(--font-ui) !important;
-  font-weight: 700 !important;
-  font-size: 0.76rem !important;
-  color: rgba(255,255,255,0.88) !important;
-}
 
 /* Content meta (rok, žánr, …) */
-.admin-content-meta {
-  font-family: var(--font-ui) !important;
-  font-size: 0.58rem !important;
-  color: rgba(255,255,255,0.3) !important;
-}
 
 /* ── Movies tab (#adminTab_movies) ── */
-#adminTab_movies { font-family: var(--font-ui) !important; }
-
-#adminMovieSearch {
-  font-family: var(--font-ui) !important;
-  background: rgba(255,255,255,0.036) !important;
-  border: 1px solid rgba(255,255,255,0.07) !important;
-  border-radius: 13px !important;
-  color: var(--text) !important;
-  outline: none !important;
-  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
-}
-#adminMovieSearch:focus {
-  border-color: rgba(124,111,239,0.42) !important;
-  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
-}
-#adminMovieSearch::placeholder { color: rgba(255,255,255,0.22) !important; }
-
-#adminMoviesList > div,
-.admin-movie-row {
-  border-bottom: 1px solid rgba(255,255,255,0.038) !important;
-  transition: background 0.14s ease !important;
-}
-#adminMoviesList > div:hover,
-.admin-movie-row:hover { background: rgba(124,111,239,0.04) !important; }
 
 /* TMDB výsledky */
-.admin-tmdb-result {
-  background: rgba(255,255,255,0.022) !important;
-  border: 1px solid rgba(255,255,255,0.052) !important;
-  border-radius: 13px !important;
-  transition: all 0.16s ease !important;
-  cursor: pointer !important;
-}
-.admin-tmdb-result:hover {
-  background: rgba(124,111,239,0.07) !important;
-  border-color: rgba(124,111,239,0.28) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.35) !important;
-}
-.admin-tmdb-result img { border-radius: 8px !important; }
-.admin-tmdb-title {
-  font-family: var(--font-ui) !important;
-  font-weight: 700 !important;
-  font-size: 0.74rem !important;
-}
-.admin-tmdb-year,
-.admin-tmdb-meta {
-  font-family: var(--font-ui) !important;
-  font-size: 0.56rem !important;
-  color: rgba(255,255,255,0.3) !important;
-}
-.admin-tmdb-overview {
-  font-family: var(--font-ui) !important;
-  font-size: 0.62rem !important;
-  color: rgba(255,255,255,0.45) !important;
-  line-height: 1.5 !important;
-}
 
 /* Import progress bar */
-.admin-import-bar {
-  background: rgba(255,255,255,0.055) !important;
-  border-radius: 4px !important;
-  overflow: hidden !important;
-}
-.admin-import-bar-fill {
-  background: linear-gradient(90deg, var(--accent), var(--accent2)) !important;
-  border-radius: 4px !important;
-  transition: width 0.4s var(--ease-out) !important;
-  box-shadow: 0 0 10px rgba(124,111,239,0.45) !important;
-}
 
 /* ── Series tab rozšíření ── */
-#adminTab_series { font-family: var(--font-ui) !important; }
 
 /* Sezóny/epizody collapsible */
-.admin-season-block {
-  background: rgba(255,255,255,0.018) !important;
-  border: 1px solid rgba(255,255,255,0.048) !important;
-  border-radius: 14px !important;
-  overflow: hidden !important;
-}
-.admin-season-header {
-  background: rgba(255,255,255,0.024) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.042) !important;
-  cursor: pointer !important;
-  transition: background 0.15s ease !important;
-}
-.admin-season-header:hover { background: rgba(124,111,239,0.06) !important; }
-.admin-season-title {
-  font-family: var(--font-ui) !important;
-  font-weight: 800 !important;
-  font-size: 0.72rem !important;
-  letter-spacing: -0.1px !important;
-}
-.admin-season-badge {
-  font-family: var(--font-mono) !important;
-  font-size: 0.56rem !important;
-  background: rgba(124,111,239,0.1) !important;
-  border: 1px solid rgba(124,111,239,0.22) !important;
-  border-radius: 8px !important;
-  color: var(--accent) !important;
-  padding: 2px 8px !important;
-}
 
 /* Epizody řádky */
-.admin-episode-row {
-  border-bottom: 1px solid rgba(255,255,255,0.032) !important;
-  transition: background 0.13s ease !important;
-}
-.admin-episode-row:hover { background: rgba(124,111,239,0.04) !important; }
-.admin-episode-row:last-child { border-bottom: none !important; }
-.admin-episode-num {
-  font-family: var(--font-mono) !important;
-  font-size: 0.58rem !important;
-  color: rgba(255,255,255,0.28) !important;
-  min-width: 26px !important;
-}
-.admin-episode-title {
-  font-family: var(--font-ui) !important;
-  font-weight: 600 !important;
-  font-size: 0.7rem !important;
-  color: rgba(255,255,255,0.8) !important;
-}
-.admin-episode-meta {
-  font-family: var(--font-ui) !important;
-  font-size: 0.55rem !important;
-  color: rgba(255,255,255,0.28) !important;
-}
 
 /* ── Analytics tab (#adminTab_analytics) ── */
-#adminTab_analytics { font-family: var(--font-ui) !important; }
-
-.admin-chart-wrap {
-  background: rgba(255,255,255,0.018) !important;
-  border: 1px solid rgba(255,255,255,0.048) !important;
-  border-radius: 16px !important;
-}
-.admin-chart-title {
-  font-family: var(--font-ui) !important;
-  font-weight: 800 !important;
-  font-size: 0.72rem !important;
-  letter-spacing: -0.1px !important;
-  color: rgba(255,255,255,0.75) !important;
-}
-.admin-chart-sub {
-  font-family: var(--font-ui) !important;
-  font-size: 0.56rem !important;
-  color: rgba(255,255,255,0.25) !important;
-}
 
 /* Mini stat chips (analytics) */
-.admin-mini-chip {
-  font-family: var(--font-ui) !important;
-  font-weight: 700 !important;
-  font-size: 0.58rem !important;
-  border-radius: 8px !important;
-  padding: 3px 9px !important;
-  background: rgba(255,255,255,0.04) !important;
-  border: 1px solid rgba(255,255,255,0.07) !important;
-  color: rgba(255,255,255,0.42) !important;
-}
 .admin-mini-chip.up   { background: rgba(46,204,113,0.08) !important; border-color: rgba(46,204,113,0.18) !important; color: #5ee898 !important; }
 .admin-mini-chip.down { background: rgba(240,98,146,0.08) !important; border-color: rgba(240,98,146,0.18) !important; color: var(--accent-warm) !important; }
 
 /* Rank list (top filmy) */
-.admin-rank-row {
-  border-bottom: 1px solid rgba(255,255,255,0.036) !important;
-  transition: background 0.13s ease !important;
-}
-.admin-rank-row:hover { background: rgba(124,111,239,0.04) !important; }
-.admin-rank-num {
-  font-family: var(--font-mono) !important;
-  font-weight: 600 !important;
-  font-size: 0.64rem !important;
-  color: rgba(255,255,255,0.22) !important;
-  min-width: 22px !important;
-}
-.admin-rank-name {
-  font-family: var(--font-ui) !important;
-  font-weight: 600 !important;
-  font-size: 0.7rem !important;
-}
-.admin-rank-val {
-  font-family: var(--font-mono) !important;
-  font-size: 0.62rem !important;
-  color: var(--accent) !important;
-}
 
 /* ── Firebase / Sync tab (#adminTab_firebase) ── */
-#adminTab_firebase { font-family: var(--font-ui) !important; }
-
-.admin-firebase-status {
-  background: rgba(255,255,255,0.022) !important;
-  border: 1px solid rgba(255,255,255,0.052) !important;
-  border-radius: 14px !important;
-}
-.admin-firebase-dot {
-  width: 8px !important;
-  height: 8px !important;
-  border-radius: 50% !important;
-  flex-shrink: 0 !important;
-}
 .admin-firebase-dot.online  { background: #5ee898 !important; box-shadow: 0 0 8px rgba(94,232,152,0.6) !important; }
 .admin-firebase-dot.offline { background: rgba(255,255,255,0.2) !important; }
 .admin-firebase-dot.error   { background: var(--accent-warm) !important; box-shadow: 0 0 8px rgba(240,98,146,0.55) !important; }
 
-#adminFirebaseKey,
-#adminFirebaseDb,
-#adminFirebaseProject {
-  font-family: var(--font-mono) !important;
-  font-size: 0.7rem !important;
-  background: rgba(255,255,255,0.036) !important;
-  border: 1px solid rgba(255,255,255,0.07) !important;
-  border-radius: 11px !important;
-  color: var(--text) !important;
-  outline: none !important;
-  transition: border-color 0.17s ease, box-shadow 0.17s ease !important;
-}
-#adminFirebaseKey:focus,
-#adminFirebaseDb:focus,
-#adminFirebaseProject:focus {
-  border-color: rgba(124,111,239,0.42) !important;
-  box-shadow: 0 0 0 3px rgba(124,111,239,0.09) !important;
-}
-
 /* ── Subscribers / Users tab (#adminTab_subscribers) ── */
-#adminTab_subscribers { font-family: var(--font-ui) !important; }
-
-.admin-user-row {
-  border-bottom: 1px solid rgba(255,255,255,0.038) !important;
-  transition: background 0.14s ease !important;
-}
-.admin-user-row:hover { background: rgba(124,111,239,0.04) !important; }
-.admin-user-avatar {
-  border-radius: 10px !important;
-  border: 1px solid rgba(255,255,255,0.07) !important;
-  background: rgba(124,111,239,0.08) !important;
-  font-family: var(--font-ui) !important;
-  font-weight: 700 !important;
-  font-size: 0.72rem !important;
-  color: var(--accent) !important;
-}
-.admin-user-name {
-  font-family: var(--font-ui) !important;
-  font-weight: 700 !important;
-  font-size: 0.72rem !important;
-}
-.admin-user-sub {
-  font-family: var(--font-ui) !important;
-  font-size: 0.56rem !important;
-  color: rgba(255,255,255,0.28) !important;
-}
-.admin-user-last {
-  font-family: var(--font-mono) !important;
-  font-size: 0.56rem !important;
-  color: rgba(255,255,255,0.22) !important;
-}
 
 /* Tier badges */
-.admin-tier-badge {
-  font-family: var(--font-ui) !important;
-  font-weight: 800 !important;
-  font-size: 0.5rem !important;
-  letter-spacing: 0.8px !important;
-  text-transform: uppercase !important;
-  border-radius: 6px !important;
-  padding: 2px 7px !important;
-}
 .admin-tier-badge.free    { background: rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.38) !important; border: 1px solid rgba(255,255,255,0.1) !important; }
 .admin-tier-badge.premium { background: rgba(124,111,239,0.12) !important; color: var(--accent) !important; border: 1px solid rgba(124,111,239,0.26) !important; }
 .admin-tier-badge.family  { background: rgba(56,200,240,0.1) !important; color: var(--accent2) !important; border: 1px solid rgba(56,200,240,0.22) !important; }
 .admin-tier-badge.admin   { background: rgba(255,179,71,0.1) !important; color: var(--accent-amber) !important; border: 1px solid rgba(255,179,71,0.24) !important; }
 
 /* ── Admin modal (editace obsahu) ── */
-.admin-modal-overlay {
-  background: rgba(0,0,0,0.82) !important;
-  backdrop-filter: blur(22px) saturate(1.8) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(1.8) !important;
-}
-.admin-modal-box {
-  background: rgba(9,9,18,0.99) !important;
-  border: 1px solid rgba(255,255,255,0.065) !important;
-  border-radius: var(--radius-lg) !important;
-  box-shadow: var(--shadow-xl) !important;
-  animation: mf-scale-in 0.26s var(--ease-spring) both !important;
-  max-width: 560px !important;
-  width: 100% !important;
-}
-.admin-modal-header {
-  border-bottom: 1px solid rgba(255,255,255,0.052) !important;
-  padding: 18px 20px !important;
-}
-.admin-modal-title {
-  font-family: var(--font-ui) !important;
-  font-weight: 900 !important;
-  font-size: 0.95rem !important;
-  letter-spacing: -0.3px !important;
-}
-.admin-modal-body { padding: 20px !important; }
-.admin-modal-footer {
-  border-top: 1px solid rgba(255,255,255,0.048) !important;
-  padding: 14px 20px !important;
-  gap: 10px !important;
-}
 
 /* Inline edit cell */
-.admin-edit-cell {
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  border-radius: 8px !important;
-  font-family: var(--font-ui) !important;
-  font-size: 0.7rem !important;
-  color: var(--text) !important;
-  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease !important;
-  outline: none !important;
-  padding: 3px 8px !important;
-}
-.admin-edit-cell:hover {
-  background: rgba(255,255,255,0.04) !important;
-  border-color: rgba(255,255,255,0.1) !important;
-}
-.admin-edit-cell:focus {
-  background: rgba(124,111,239,0.06) !important;
-  border-color: rgba(124,111,239,0.38) !important;
-  box-shadow: 0 0 0 3px rgba(124,111,239,0.08) !important;
-}
 
 /* ── Notification / broadcast banner (admin) ── */
-.admin-broadcast-preview {
-  background: rgba(124,111,239,0.07) !important;
-  border: 1px solid rgba(124,111,239,0.2) !important;
-  border-radius: 13px !important;
-  font-family: var(--font-ui) !important;
-  font-size: 0.72rem !important;
-  line-height: 1.5 !important;
-  color: rgba(255,255,255,0.72) !important;
-}
-.admin-broadcast-type-row { gap: 8px !important; }
-.admin-broadcast-type-btn {
-  font-family: var(--font-ui) !important;
-  font-weight: 700 !important;
-  font-size: 0.64rem !important;
-  border-radius: 10px !important;
-  padding: 7px 14px !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  background: rgba(255,255,255,0.04) !important;
-  color: rgba(255,255,255,0.42) !important;
-  cursor: pointer !important;
-  transition: all 0.15s ease !important;
-}
-.admin-broadcast-type-btn.active,
-.admin-broadcast-type-btn:hover {
+.admin-broadcast-type-btn.active {
   background: rgba(124,111,239,0.12) !important;
   border-color: rgba(124,111,239,0.3) !important;
   color: var(--accent) !important;
 }
 
 /* ── Danger zone sekce ── */
-.admin-danger-zone {
-  background: rgba(240,98,146,0.04) !important;
-  border: 1px solid rgba(240,98,146,0.18) !important;
-  border-radius: 16px !important;
-}
-.admin-danger-zone-title {
-  font-family: var(--font-ui) !important;
-  font-weight: 900 !important;
-  font-size: 0.7rem !important;
-  letter-spacing: 1.2px !important;
-  text-transform: uppercase !important;
-  color: rgba(240,98,146,0.7) !important;
-}
 
 /* ── Empty state (žádný obsah) ── */
-.admin-empty {
-  font-family: var(--font-ui) !important;
-  color: rgba(255,255,255,0.22) !important;
-  font-size: 0.74rem !important;
-  text-align: center !important;
-  padding: 32px 16px !important;
-}
-.admin-empty-icon {
-  font-size: 2rem !important;
-  margin-bottom: 10px !important;
-  opacity: 0.4 !important;
-}
 
 /* ── Skeleton loadery ── */
-.admin-skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.028) 25%,
-    rgba(124,111,239,0.055) 50%,
-    rgba(255,255,255,0.028) 75%
-  ) !important;
-  background-size: 200% 100% !important;
-  animation: mf-shimmer 1.9s ease-in-out infinite !important;
-  border-radius: 8px !important;
-}
-.admin-skeleton.line-sm { height: 10px !important; }
-.admin-skeleton.line-md { height: 14px !important; }
-.admin-skeleton.line-lg { height: 20px !important; }
 .admin-skeleton.avatar  { width: 38px !important; height: 38px !important; border-radius: 10px !important; }
 .admin-skeleton.thumb   { width: 52px !important; height: 74px !important; border-radius: 8px !important; }
 
 /* ── Confirm dialog ── */
-.admin-confirm-box {
-  background: rgba(9,9,18,0.99) !important;
-  border: 1px solid rgba(255,255,255,0.065) !important;
-  border-radius: 20px !important;
-  box-shadow: var(--shadow-xl) !important;
-  animation: mf-scale-in 0.22s var(--ease-spring) both !important;
-}
-.admin-confirm-title {
-  font-family: var(--font-ui) !important;
-  font-weight: 900 !important;
-  font-size: 0.9rem !important;
-  letter-spacing: -0.2px !important;
-}
-.admin-confirm-body {
-  font-family: var(--font-ui) !important;
-  font-size: 0.72rem !important;
-  color: rgba(255,255,255,0.42) !important;
-  line-height: 1.55 !important;
-}
 
 /* ── Progress kroky (import wizard) ── */
-.admin-step-row { gap: 8px !important; }
-.admin-step {
-  font-family: var(--font-ui) !important;
-  font-weight: 700 !important;
-  font-size: 0.6rem !important;
-  border-radius: 8px !important;
-  padding: 4px 12px !important;
-  border: 1px solid rgba(255,255,255,0.07) !important;
-  background: rgba(255,255,255,0.032) !important;
-  color: rgba(255,255,255,0.28) !important;
-}
 .admin-step.active {
   background: rgba(124,111,239,0.12) !important;
   border-color: rgba(124,111,239,0.3) !important;
@@ -2415,36 +1895,8 @@ input:focus, textarea:focus {
 }
 
 /* ── Tooltip (admin) ── */
-.admin-tooltip {
-  font-family: var(--font-ui) !important;
-  font-size: 0.62rem !important;
-  background: rgba(9,9,18,0.98) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  border-radius: 9px !important;
-  color: rgba(255,255,255,0.75) !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.6) !important;
-  backdrop-filter: blur(18px) !important;
-  pointer-events: none !important;
-  white-space: nowrap !important;
-  z-index: 9999 !important;
-}
 
 /* ── JSON / raw data viewer ── */
-.admin-json-viewer {
-  font-family: var(--font-mono) !important;
-  font-size: 0.62rem !important;
-  background: rgba(0,0,0,0.48) !important;
-  border: 1px solid rgba(255,255,255,0.055) !important;
-  border-radius: 12px !important;
-  color: rgba(255,255,255,0.55) !important;
-  line-height: 1.75 !important;
-  overflow: auto !important;
-}
-.admin-json-key    { color: rgba(124,111,239,0.85) !important; }
-.admin-json-string { color: rgba(94,232,152,0.82) !important; }
-.admin-json-number { color: rgba(56,200,240,0.85) !important; }
-.admin-json-bool   { color: rgba(255,179,71,0.85) !important; }
-.admin-json-null   { color: rgba(255,255,255,0.22) !important; }
 
 /* ────────────────────────────────────────────────────────────────
    § 29 · OPRAVY — Timer FAB schování + Discover klikatelnost
@@ -2481,12 +1933,10 @@ body.disco-open .timer-panel {
  * OPRAVA 3: Snížit z-index timeru pod overlay (z-index:500)
  * když není body.disco-open → neblokuje nic za normálu
  */
-#timerFab,
-button.timer-fab {
+#timerFab {
   z-index: 490 !important;
 }
-#timerPanel,
-.timer-panel {
+#timerPanel {
   z-index: 491 !important;
 }
 
