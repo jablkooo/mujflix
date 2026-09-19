@@ -1,6 +1,7 @@
 {
   "name": "mujflix",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "build": "echo \"const CONFIG = { API_KEY: '$TMDB_API_KEY' };\" > config.js"
   }
