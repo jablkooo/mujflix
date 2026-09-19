@@ -1206,8 +1206,8 @@ async function loadDiscoContent(e, t) {
   const n = document.getElementById("discoBody");
   if (!n) return;
   n.innerHTML = '<div class="disco-loading"><div class="disco-spinner"></div><span>Načítám...</span></div>';
-  const o = Math.floor(5 * Math.random()) + 1,
-    i = Math.floor(3 * Math.random()) + 1;
+  const o = Math.floor(15 * Math.random()) + 1,
+      i = Math.floor(10 * Math.random()) + 1;
   let a = [];
   if (TMDB_KEY) try {
     if (e) {
