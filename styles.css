@@ -13941,19 +13941,24 @@ html {
 .mf-standalone-cinema-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 18px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 10px 14px;
   background: rgba(18,18,24,.96);
   border-bottom: 1px solid rgba(255,255,255,.1);
 }
-.mf-standalone-cinema-top strong { display: block; font-size: 1rem; }
-.mf-standalone-cinema-top span { display: block; margin-top: 3px; color: rgba(255,255,255,.45); font-size: .68rem; }
+.mf-standalone-cinema-top strong { font-size: 0.92rem; font-weight: 600; white-space: nowrap; }
+.mf-standalone-cinema-top > span#mfStandaloneCinemaSource { color: rgba(255,255,255,.45); font-size: .68rem; }
 #mfStandaloneCinemaClose {
-  width: 36px; height: 36px; border: 0; border-radius: 50%;
-  background: rgba(255,255,255,.1); color: #fff; font-size: 1.5rem; cursor: pointer;
+  width: 32px; height: 32px; border: 0; border-radius: 50%;
+  background: rgba(255,255,255,.1); color: #fff; font-size: 1.3rem; cursor: pointer;
+  margin-left: auto; flex: none;
 }
 .mf-standalone-cinema-frame { flex: 1; min-height: 0; }
+@media (max-width: 700px) {
+  .mf-standalone-cinema-top { padding: 8px 10px; gap: 6px 8px; }
+  .mf-standalone-cinema-top strong { font-size: 0.8rem; }
+}
 #mfStandaloneCinemaFrame, #mfStandaloneCinemaFrame iframe { width: 100%; height: 100%; border: 0; }
 #mfStandaloneCinemaFrame {
   position: relative;
@@ -21462,47 +21467,34 @@ h2.title,
 
 /* ═══════════════════════════════════════════════════════════════
    VÝSLEDKY VYHLEDÁVÁNÍ — mřížka místo vodorovného scrollu
-   Cíl: řádky vytvořené discoSearch() (poznat podle .disco-search-query
-   v nadpisu) mají zobrazit více karet na šířku najednou. Normální
-   žánrové řádky v Objevovat (bez .disco-search-query) zůstávají
+   Cíl: řádky vytvořené discoSearch() dostanou třídu .disco-search-section
+   (přidáno přímo přes JS, ne přes :has() kvůli kompatibilitě) a tady
+   se jim přepne .disco-row-scroll na wrapping grid. Normální žánrové
+   řádky v Objevovat (bez téhle třídy) zůstávají beze změny jako
    vodorovný scroll.
-   ═══════════════════════════════════════════════════════════════ */
-.disco-section:has(.disco-search-query) .disco-row-scroll {
+═══════════════════════════════════════════════════════════════ */
+.disco-search-section .disco-row-scroll {
   display: grid !important;
-  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-  gap: 16px !important;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
   overflow: visible !important;
-  padding: 4px 0 18px !important;
+  padding: 4px 16px 16px !important;
 }
-.disco-section:has(.disco-search-query) .disco-row-header {
-  padding: 0 !important;
-}
-.disco-section:has(.disco-search-query) .disco-card {
+.disco-search-section .disco-card {
   width: 100% !important;
   min-width: 0 !important;
 }
-.disco-section:has(.disco-search-query) .disco-card-inner,
-.disco-section:has(.disco-search-query) .disco-card-img {
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 2 / 3 !important;
-}
-.disco-section:has(.disco-search-query) .disco-row-nav {
+.disco-search-section .disco-row-nav {
   display: none !important;
 }
-@media (max-width: 1200px) {
-  .disco-section:has(.disco-search-query) .disco-row-scroll {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  }
-}
-@media (max-width: 900px) {
-  .disco-section:has(.disco-search-query) .disco-row-scroll {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+@media (max-width: 480px) {
+  .disco-search-section .disco-row-scroll {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
     gap: 12px !important;
   }
 }
-@media (max-width: 640px) {
-  .disco-section:has(.disco-search-query) .disco-row-scroll {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
+
+/* Historie vyhledávání vypnuta na přání uživatele — trvale skrytá
+   i kdyby JS nastavil style.display jinak (viz app.js renderSearchHistory) */
+#mfSearchHistory {
+  display: none !important;
 }
