@@ -257,18 +257,23 @@
     modal.id = "mfStandaloneCinema";
     modal.innerHTML =
       '<div class="mf-standalone-cinema-top">' +
-        '<div><strong id="mfStandaloneCinemaTitle"></strong><span id="mfStandaloneCinemaSource"></span></div>' +
-        '<button type="button" id="mfStandaloneCinemaClose" aria-label="Zavřít">×</button>' +
-      "</div>" +
+        '<strong id="mfStandaloneCinemaTitle"></strong>' +
+        '<span id="mfStandaloneCinemaSource"></span>' +
+        '<span class="mf-cin-src-label" id="mfCinSrcLabel"></span>' +
+        '<span class="mf-cin-src-counter" id="mfCinSrcCounter"></span>' +
 
-      '<div class="mf-cin-sourcebar">' +
-        '<div class="mf-cin-src-info">' +
-          '<span class="mf-cin-src-label" id="mfCinSrcLabel"></span>' +
-          '<span class="mf-cin-src-counter" id="mfCinSrcCounter"></span>' +
+        '<div class="mf-cin-tvbar" id="mfCinTvBar" style="display:none">' +
+          '<button type="button" class="mf-cin-ep-btn" id="mfCinPrevEp">⏮ Předchozí epizoda</button>' +
+          '<span class="mf-cin-ep-current" id="mfCinEpCurrent"></span>' +
+          '<button type="button" class="mf-cin-ep-btn" id="mfCinNextEp">Další epizoda ⏭</button>' +
+          '<button type="button" class="mf-cin-ep-btn mf-cin-ep-pick" id="mfCinPickEp">📺 Vybrat epizodu</button>' +
+          '<button type="button" class="mf-cin-ep-btn mf-cin-next-series" id="mfCinNextSeries">⏭⏭ Další seriál</button>' +
         "</div>" +
+
         '<button type="button" class="mf-cin-adtip-btn" id="mfCinAdTipBtn" aria-label="Zdroj může zobrazovat reklamy">⚠️</button>' +
         '<button type="button" class="mf-cin-switch-btn" id="mfCinSwitchSrc">🔄 Zkusit jiný zdroj</button>' +
         '<a class="mf-cin-external-btn" id="mfStandaloneCinemaExternal" target="_blank" rel="noopener">🔗 Otevřít v nové kartě</a>' +
+        '<button type="button" id="mfStandaloneCinemaClose" aria-label="Zavřít">×</button>' +
       "</div>" +
 
       '<div class="mf-cin-adtip-pop" id="mfCinAdTip" style="display:none">' +
@@ -278,23 +283,13 @@
         '</span>' +
       "</div>" +
 
-      '<div class="mf-cin-tvbar" id="mfCinTvBar" style="display:none">' +
-        '<button type="button" class="mf-cin-ep-btn" id="mfCinPrevEp">⏮ Předchozí epizoda</button>' +
-        '<span class="mf-cin-ep-current" id="mfCinEpCurrent"></span>' +
-        '<button type="button" class="mf-cin-ep-btn" id="mfCinNextEp">Další epizoda ⏭</button>' +
-        '<button type="button" class="mf-cin-ep-btn mf-cin-ep-pick" id="mfCinPickEp">📺 Vybrat epizodu</button>' +
-        '<button type="button" class="mf-cin-ep-btn mf-cin-next-series" id="mfCinNextSeries">⏭⏭ Další seriál</button>' +
-      "</div>" +
-
       '<div class="mf-cin-epgrid" id="mfCinEpGrid" style="display:none">' +
         '<div class="mf-cin-epgrid-seasons" id="mfCinEpGridSeasons"></div>' +
         '<div class="mf-cin-epgrid-body" id="mfCinEpGridBody"></div>' +
       "</div>" +
 
       '<div class="mf-standalone-cinema-frame"><div id="mfStandaloneCinemaFrame"></div></div>';
-    var host = document.getElementById("mfdPlayerHost");
-    var useIntegratedHost = !!window._mfIntegratedPlayer;
-    (useIntegratedHost && host ? host : document.body).appendChild(modal);
+    document.body.appendChild(modal);
 
     frame = modal.querySelector("#mfStandaloneCinemaFrame");
     titleNode = modal.querySelector("#mfStandaloneCinemaTitle");
@@ -509,12 +504,6 @@
   /* ── Veřejné API ──────────────────────────────────────────── */
   function open(tmdbId, title, type, extra) {
     ensureModal();
-    var host = document.getElementById("mfdPlayerHost");
-    if (window._mfIntegratedPlayer) {
-      if (host && modal.parentElement !== host) host.appendChild(modal);
-    } else if (modal.parentElement === host) {
-      document.body.appendChild(modal);
-    }
     var rawId = String(tmdbId || "");
     var parts = rawId.split("/");
     var isEpisode = type === "tv_ep" || parts.length === 3;
@@ -544,9 +533,7 @@
 
     titleNode.textContent = current.title || "Cinema Mode";
     modal.classList.add("open");
-    if (!modal.parentElement || modal.parentElement.id !== "mfdPlayerHost") {
-      document.body.style.overflow = "hidden";
-    }
+    document.body.style.overflow = "hidden";
 
     renderCurrent();
     if (current.type === "tv") ensureEpCounts(function () {});
@@ -557,12 +544,7 @@
     modal.classList.remove("open");
     frame.innerHTML = "";
     if (epGridPanel) epGridPanel.style.display = "none";
-    if (modal.parentElement && modal.parentElement.id === "mfdPlayerHost") {
-      window._mfIntegratedPlayer = false;
-    }
-    if (!modal.parentElement || modal.parentElement.id !== "mfdPlayerHost") {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = "";
   }
 
   window.MFCinemaPlayer = { open: open, close: close };
