@@ -292,7 +292,9 @@
       "</div>" +
 
       '<div class="mf-standalone-cinema-frame"><div id="mfStandaloneCinemaFrame"></div></div>';
-    document.body.appendChild(modal);
+    var host = document.getElementById("mfdPlayerHost");
+    var useIntegratedHost = !!window._mfIntegratedPlayer;
+    (useIntegratedHost && host ? host : document.body).appendChild(modal);
 
     frame = modal.querySelector("#mfStandaloneCinemaFrame");
     titleNode = modal.querySelector("#mfStandaloneCinemaTitle");
@@ -507,6 +509,12 @@
   /* ── Veřejné API ──────────────────────────────────────────── */
   function open(tmdbId, title, type, extra) {
     ensureModal();
+    var host = document.getElementById("mfdPlayerHost");
+    if (window._mfIntegratedPlayer) {
+      if (host && modal.parentElement !== host) host.appendChild(modal);
+    } else if (modal.parentElement === host) {
+      document.body.appendChild(modal);
+    }
     var rawId = String(tmdbId || "");
     var parts = rawId.split("/");
     var isEpisode = type === "tv_ep" || parts.length === 3;
@@ -536,7 +544,9 @@
 
     titleNode.textContent = current.title || "Cinema Mode";
     modal.classList.add("open");
-    document.body.style.overflow = "hidden";
+    if (!modal.parentElement || modal.parentElement.id !== "mfdPlayerHost") {
+      document.body.style.overflow = "hidden";
+    }
 
     renderCurrent();
     if (current.type === "tv") ensureEpCounts(function () {});
@@ -547,7 +557,12 @@
     modal.classList.remove("open");
     frame.innerHTML = "";
     if (epGridPanel) epGridPanel.style.display = "none";
-    document.body.style.overflow = "";
+    if (modal.parentElement && modal.parentElement.id === "mfdPlayerHost") {
+      window._mfIntegratedPlayer = false;
+    }
+    if (!modal.parentElement || modal.parentElement.id !== "mfdPlayerHost") {
+      document.body.style.overflow = "";
+    }
   }
 
   window.MFCinemaPlayer = { open: open, close: close };

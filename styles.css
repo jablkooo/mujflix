@@ -21463,32 +21463,46 @@ h2.title,
 /* ═══════════════════════════════════════════════════════════════
    VÝSLEDKY VYHLEDÁVÁNÍ — mřížka místo vodorovného scrollu
    Cíl: řádky vytvořené discoSearch() (poznat podle .disco-search-query
-   v nadpisu) mají zobrazit víc karet na šířku najednou, ne jen 2-3
-   s nutností scrollovat. Normální žánrové řádky v Objevovat (bez
-   .disco-search-query) zůstávají beze změny jako vodorovný scroll.
-═══════════════════════════════════════════════════════════════ */
+   v nadpisu) mají zobrazit více karet na šířku najednou. Normální
+   žánrové řádky v Objevovat (bez .disco-search-query) zůstávají
+   vodorovný scroll.
+   ═══════════════════════════════════════════════════════════════ */
 .disco-section:has(.disco-search-query) .disco-row-scroll {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 16px !important;
   overflow: visible !important;
-  padding: 4px 16px 16px !important;
+  padding: 4px 0 18px !important;
+}
+.disco-section:has(.disco-search-query) .disco-row-header {
+  padding: 0 !important;
 }
 .disco-section:has(.disco-search-query) .disco-card {
   width: 100% !important;
   min-width: 0 !important;
 }
+.disco-section:has(.disco-search-query) .disco-card-inner,
+.disco-section:has(.disco-search-query) .disco-card-img {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 2 / 3 !important;
+}
 .disco-section:has(.disco-search-query) .disco-row-nav {
   display: none !important;
 }
-@media (max-width: 480px) {
+@media (max-width: 1200px) {
   .disco-section:has(.disco-search-query) .disco-row-scroll {
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 900px) {
+  .disco-section:has(.disco-search-query) .disco-row-scroll {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 12px !important;
   }
 }
-
-/* Historie vyhledávání vypnuta na přání uživatele — trvale skrytá
-   i kdyby JS nastavil style.display jinak (viz app.js renderSearchHistory) */
-#mfSearchHistory {
-  display: none !important;
+@media (max-width: 640px) {
+  .disco-section:has(.disco-search-query) .disco-row-scroll {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
 }

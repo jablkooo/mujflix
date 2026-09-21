@@ -586,10 +586,10 @@ function openUniverse() {
   document.body.classList.add("discover-open"), e.classList.add("open"), requestAnimationFrame(() => requestAnimationFrame(() => {
     e.classList.add("visible");
     const t = document.getElementById("searchTitleInput");
-    t && (renderSearchHistory(), setTimeout(() => t.focus(), 40));
+    t && setTimeout(() => t.focus(), 40);
   })), kbLayer = "search", pauseBgParticles();
-  const t = document.getElementById("discoBody");
-  t && t.querySelector(".disco-loading") && loadDiscoContent(_discoCurrent.genre, _discoCurrent.type)
+  const t = document.getElementById("discoResultsContainer");
+  t && !t.children.length && loadDiscoContent(_discoCurrent.genre, _discoCurrent.type)
 }
 
 function openSearch() {
@@ -602,7 +602,7 @@ function openDiscover() {
 
 function closeUniverse() {
   const e = document.getElementById("universeOverlay");
-  document.body.classList.remove("discover-open"), e.classList.remove("visible"), setTimeout(() => {
+  document.body.classList.remove("discover-open"), e.classList.remove("visible"), typeof window.MFCinemaPlayer?.close === "function" && window.MFCinemaPlayer.close(), setTimeout(() => {
     e.classList.remove("open")
   }, 350), kbLayer = "menu", resumeBgParticles();
   const t = document.getElementById("searchTitleInput");
@@ -623,7 +623,7 @@ function clearSearch() {
   const e = document.getElementById("searchTitleInput");
   e && (e.value = "", e.focus());
   const t = document.getElementById("shClearBtn");
-  t && (t.style.display = "none"), renderSearchHistory(), loadDiscoContent(_discoCurrent.genre, _discoCurrent.type)
+  t && (t.style.display = "none"), loadDiscoContent(_discoCurrent.genre, _discoCurrent.type)
 }
 
 function discoFilter(e, t, n) {
@@ -641,27 +641,13 @@ function handleSearchInputKey(e) {
   "Escape" !== e.key || closeUniverse()
 }
 
-const MF_SEARCH_HISTORY_KEY = "mf_search_history";
-function getSearchHistory() {
-  const e = safeLS(MF_SEARCH_HISTORY_KEY, "[]");
-  return Array.isArray(e) ? e.filter(t => typeof t === "string" && t.trim()).slice(0, 6) : [];
-}
-function renderSearchHistory() {
-  /* no-op — historie vyhledávání vypnuta na přání uživatele */
-}
-function saveSearchHistory(e) {
-  /* no-op — historie vyhledávání vypnuta na přání uživatele, nic se neukládá */
-}
-
 function onSearchInput(e) {
   const t = document.getElementById("shClearBtn");
-  const n = document.getElementById("mfSearchHistory");
-  t && (t.style.display = e ? "flex" : "none"), n && (n.style.display = e.trim() ? "none" : ""), clearTimeout(_searchDebounce), e.trim() ? _searchDebounce = setTimeout(() => discoSearch(e.trim()), 320) : loadDiscoContent(_discoCurrent.genre, _discoCurrent.type)
+  t && (t.style.display = e ? "flex" : "none"), clearTimeout(_searchDebounce), e.trim() ? _searchDebounce = setTimeout(() => discoSearch(e.trim()), 320) : loadDiscoContent(_discoCurrent.genre, _discoCurrent.type)
 }
 async function discoSearch(e) {
-  const t = document.getElementById("discoBody");
+  const t = document.getElementById("discoResultsContainer") || document.getElementById("discoBody");
   if (t) {
-    saveSearchHistory(e);
     t.innerHTML = '<div class="disco-loading"><div class="disco-spinner"></div><span>Hledám...</span></div>';
     try {
       const [n, o] = await Promise.all([tmdbGet(`/search/movie?query=${encodeURIComponent(e)}&language=cs`), tmdbGet(`/search/tv?query=${encodeURIComponent(e)}&language=cs`)]), i = (n?.results || []).filter(e => e.poster_path).map(e => ({
@@ -997,7 +983,7 @@ function renderPersonalisedRow(e, t, n) {
     g.className = "disco-card ai-match-card", g.style.position = "relative";
     const f = p ? `\n          <div class="ai-match-badge" style="\n            position:absolute;top:8px;left:8px;z-index:15;\n            background:linear-gradient(135deg,rgba(10,132,255,0.92),rgba(0,90,200,0.88));\n            color:#fff;font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;font-size:0.48rem;font-weight:900;\n            letter-spacing:0.5px;padding:3px 7px;border-radius:6px;\n            box-shadow:0 0 0 1px rgba(10,132,255,0.35),0 2px 8px rgba(0,0,0,0.45);\n            animation:none;\n            pointer-events:none;\n          ">${t}% Shoda</div>` : "";
     if (g.innerHTML = `\n          ${f}\n          <img class="disco-card-img" src="${m}" alt="" loading="lazy">\n          <div class="disco-card-overlay"></div>\n          <div class="disco-play-btn"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></div>\n          <div class="disco-card-finder-btn" title="Najít kde sledovat" onclick="event.stopPropagation();verifyAndOpen('${l.replace(/'/g,"'")}','${u}','${(e.release_date||e.first_air_date||"").slice(0,4)}')">\n            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>\n          </div>\n          <div class="disco-card-glow"></div>\n          <div class="disco-card-info">\n            <div class="disco-card-name">${r}</div>\n            ${o?`<div style="font-size:0.42rem;color:${a}cc;margin-bottom:4px;font-weight:700;letter-spacing:0.3px;line-height:1.3;">💡 ${o}</div>`:""}\n            <div class="disco-card-meta">\n              <span class="disco-card-type">${"movie"===u?"🎬 Film":"📺 Seriál"}</span>\n              ${d?`<span class="disco-card-rating">★ ${d}</span>`:""}\n            </div>\n          </div>`, g.onclick = () => {
-        e.id && (aiBrain.boostGenreIds(e.genre_ids || [], .05), aiBrain.recordTmdbSeen(e.id)), e.id ? (window._mfFinderTmdbId = e.id, window._cinYear = (e.release_date || e.first_air_date || "").slice(0, 4) || null, "tv" === u ? openDiscoverTv(e.id, r) : _showCinemaOrFinderChoice(e.id, r, u, null)) : (closeUniverse(), window._mfFinderTmdbId = null, openWithCopy(l, u, (e.release_date || e.first_air_date || "").slice(0, 4) || null))
+        e.id && (aiBrain.boostGenreIds(e.genre_ids || [], .05), aiBrain.recordTmdbSeen(e.id)), e.id ? (window._mfFinderTmdbId = e.id, window._cinYear = (e.release_date || e.first_air_date || "").slice(0, 4) || null, "tv" === u ? openIntegratedCinema(e.id, r, u) : _showCinemaOrFinderChoice(e.id, r, u, null)) : (closeUniverse(), window._mfFinderTmdbId = null, openWithCopy(l, u, (e.release_date || e.first_air_date || "").slice(0, 4) || null))
       }, TMDB_KEY && e.id) {
       const t = document.createElement("div");
       t.style.cssText = "position:absolute;inset:0;z-index:8;pointer-events:none;border-radius:20px;overflow:hidden;opacity:0;background:#000;transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1);", g.appendChild(t), g.addEventListener("mouseenter", () => {
@@ -1017,7 +1003,7 @@ function renderPersonalisedRow(e, t, n) {
 }
 
 function refreshPersonalisedRow() {
-  const e = document.getElementById("discoBody"),
+  const e = document.getElementById("discoResultsContainer"),
     t = e?.querySelector(".disco-section");
   if (t) {
     const e = t.querySelector(".disco-row-title");
@@ -1106,7 +1092,7 @@ function renderDiscoRow(e, t, n, o) {
       c = e._rowType || o,
       d = document.createElement("div");
     if (d.className = "disco-card", d.innerHTML = `<img class="disco-card-img" src="${l}" alt="" loading="lazy">\n          <div class="disco-card-overlay"></div>\n          <div class="disco-play-btn"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg></div>\n          <div class="disco-card-finder-btn" title="Najít kde sledovat" onclick="event.stopPropagation();verifyAndOpen('${a.replace(/'/g,"\\'")}','${c}','${(e.release_date||e.first_air_date||"").slice(0,4)}')">\n            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>\n          </div>\n          <div class="disco-card-glow"></div>\n          <div class="disco-card-info">\n            <div class="disco-card-name">${i}</div>\n            <div class="disco-card-meta">\n              <span class="disco-card-type">${"movie"===c?"🎬 Film":"📺 Seriál"}</span>\n              ${s?`<span class="disco-card-rating">★ ${s}</span>`:""}\n            </div>\n          </div>`, d.onclick = () => {
-        e.id ? (window._mfFinderTmdbId = e.id, window._cinYear = (e.release_date || e.first_air_date || "").slice(0, 4) || null, "tv" === c ? openDiscoverTv(e.id, i) : _showCinemaOrFinderChoice(e.id, i, c, null)) : (closeUniverse(), window._mfFinderTmdbId = null, openWithCopy(a, c, (e.release_date || e.first_air_date || "").slice(0, 4) || null))
+        e.id ? (window._mfFinderTmdbId = e.id, window._cinYear = (e.release_date || e.first_air_date || "").slice(0, 4) || null, "tv" === c ? openIntegratedCinema(e.id, i, c) : _showCinemaOrFinderChoice(e.id, i, c, null)) : (closeUniverse(), window._mfFinderTmdbId = null, openWithCopy(a, c, (e.release_date || e.first_air_date || "").slice(0, 4) || null))
       }, TMDB_KEY && e.id) {
       const t = document.createElement("div");
       t.style.cssText = "position:absolute;inset:0;z-index:8;pointer-events:none;border-radius:20px;overflow:hidden;opacity:0;background:#000;transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1);", d.style.position = "relative", d.appendChild(t), d.addEventListener("mouseenter", () => {
@@ -1142,8 +1128,9 @@ async function tmdbRow(e) {
 }
 async function loadDiscoContent(e, t) {
   const n = document.getElementById("discoBody");
-  if (!n) return;
-  n.innerHTML = '<div class="disco-loading"><div class="disco-spinner"></div><span>Načítám...</span></div>';
+  const target = document.getElementById("discoResultsContainer") || n;
+  if (!target) return;
+  target.innerHTML = '<div class="disco-loading"><div class="disco-spinner"></div><span>Načítám...</span></div>';
   const o = Math.floor(15 * Math.random()) + 1,
       i = Math.floor(10 * Math.random()) + 1;
   let a = [];
@@ -1235,14 +1222,14 @@ async function loadDiscoContent(e, t) {
   } catch (e) {
     console.warn("Disco load error:", e)
   }
-  if (n.innerHTML = "", !e && a.length > 0) {
+  if (target.innerHTML = "", !e && a.length > 0) {
     const e = a.flatMap(e => e.items.map(t => ({
         ...t,
         _rowType: e.rowType
       }))),
       t = new Set,
       o = e.filter(e => !(!e.id || t.has(e.id)) && (t.add(e.id), !0));
-    o.length > 0 && renderPersonalisedRow(n, o, "all")
+    o.length > 0 && renderPersonalisedRow(target, o, "all")
   }
   const s = [...a[0]?.items || [], ...a[1]?.items || []].filter(e => e.backdrop_path),
     r = s[Math.floor(Math.random() * Math.min(12, s.length))];
@@ -1262,7 +1249,7 @@ async function loadDiscoContent(e, t) {
     const c = t.replace(/'/g, "\\'"),
       d = r.vote_average ? r.vote_average.toFixed(1) : "",
       m = (r.release_date || r.first_air_date || "").slice(0, 4);
-    l.innerHTML = `\n          <div class="disco-hero-badge">\n            <span class="disco-hero-badge-type">${"movie"===e?"🎬 Film":"📺 Seriál"}</span>\n            ${d?`<span class="disco-hero-badge-rating">★ ${d}</span>`:""}\n            ${m?`<span class="disco-hero-badge-year">${m}</span>`:""}\n          </div>\n          <div class="disco-hero-title">${t}</div>\n          <div class="disco-hero-desc">${(r.overview||"Žádný popis není k dispozici.").substring(0,160)}${(r.overview||"").length>160?"…":""}</div>\n          <div class="disco-hero-btns">\n            <button class="disco-hero-btn primary" onclick="event.stopPropagation();if(heroItem.id){window._mfFinderTmdbId=heroItem.id;window._cinYear='${m}';'tv'==='${e}'?openDiscoverTv(heroItem.id,'${c}'):_showCinemaOrFinderChoice(heroItem.id,'${c}','${e}',null);}else{openWithCopy('${c}','${e}','${m}');closeUniverse();}    ">↗ Otevřít na externím webu</button>\n                <button class="disco-hero-btn secondary" onclick="event.stopPropagation();shAddToWatchlistByItem({name:'${c}',media_type:'${e}'});showToast('Přidáno do Mého seznamu 🔖')">＋ Můj seznam</button>\n          </div>`, o.append(i, a, s, l), o.onclick = () => {
+    l.innerHTML = `\n          <div class="disco-hero-badge">\n            <span class="disco-hero-badge-type">${"movie"===e?"🎬 Film":"📺 Seriál"}</span>\n            ${d?`<span class="disco-hero-badge-rating">★ ${d}</span>`:""}\n            ${m?`<span class="disco-hero-badge-year">${m}</span>`:""}\n          </div>\n          <div class="disco-hero-title">${t}</div>\n          <div class="disco-hero-desc">${(r.overview||"Žádný popis není k dispozici.").substring(0,160)}${(r.overview||"").length>160?"…":""}</div>\n          <div class="disco-hero-btns">\n            <button class="disco-hero-btn primary" onclick="event.stopPropagation();if(heroItem.id){window._mfFinderTmdbId=heroItem.id;window._cinYear='${m}';'tv'==='${e}'?openIntegratedCinema(heroItem.id,'${c}','tv'):_showCinemaOrFinderChoice(heroItem.id,'${c}','${e}',null);}else{openWithCopy('${c}','${e}','${m}');closeUniverse();}    ">↗ Otevřít na externím webu</button>\n                <button class="disco-hero-btn secondary" onclick="event.stopPropagation();shAddToWatchlistByItem({name:'${c}',media_type:'${e}'});showToast('Přidáno do Mého seznamu 🔖')">＋ Můj seznam</button>\n          </div>`, o.append(i, a, s, l), o.onclick = () => {
       r.id ? (window._mfFinderTmdbId = r.id, window._cinYear = (r.release_date || r.first_air_date || "").slice(0, 4) || null, _showCinemaOrFinderChoice(r.id, t, e, t)) : (openWithCopy(t, e, (r.release_date || r.first_air_date || "").slice(0, 4) || null), closeUniverse())
     }, TMDB_KEY && r.id && (o.addEventListener("mouseenter", () => {
       o._t = setTimeout(async () => {
@@ -1274,9 +1261,9 @@ async function loadDiscoContent(e, t) {
       clearTimeout(o._t), a.style.opacity = "0", i.style.opacity = "1", setTimeout(() => {
         a.innerHTML = ""
       }, 800)
-    })), n.appendChild(o)
+    })), target.appendChild(o)
   }
-  a.filter(e => e.items.length).forEach(e => renderDiscoRow(n, e.label, e.items, e.rowType)), a.filter(e => e.items.length).length || 0 !== n.querySelectorAll(".disco-section").length || n.insertAdjacentHTML("beforeend", '<div class="disco-loading" style="padding:60px;text-align:center"><div style="font-size:2.5rem;margin-bottom:16px">😕</div><div style="font-size:0.9rem;color:rgba(255,255,255,0.5)">Žádný obsah se nepodařilo načíst.<br>Zkontroluj připojení k internetu.</div></div>')
+  a.filter(e => e.items.length).forEach(e => renderDiscoRow(target, e.label, e.items, e.rowType)), a.filter(e => e.items.length).length || 0 !== target.querySelectorAll(".disco-section").length || target.insertAdjacentHTML("beforeend", '<div class="disco-loading" style="padding:60px;text-align:center"><div style="font-size:2.5rem;margin-bottom:16px">😕</div><div style="font-size:0.9rem;color:rgba(255,255,255,0.5)">Žádný obsah se nepodařilo načíst.<br>Zkontroluj připojení k internetu.</div></div>')
 }
 
 function shAddToWatchlistByItem(e) {
@@ -1370,7 +1357,31 @@ async function openShItem(e) {
   window._mfFinderTmdbId = null, openWithCopy(i, t, (e.release_date || e.first_air_date || "").slice(0, 4) || null), closeUniverse()
 }
 
+function openIntegratedCinema(e, t, n) {
+  const host = document.getElementById("mfdPlayerHost");
+  if (!host || typeof window.MFCinemaPlayer?.open !== "function") {
+    openMovieInCinema(e, t, n);
+    return;
+  }
+  window._mfIntegratedPlayer = true;
+  try {
+    window.MFCinemaPlayer.open(e, t, n);
+  } catch (error) {
+    console.warn("[Cinema] Integrated open failed:", error);
+    openMovieInCinema(e, t, n);
+    return;
+  }
+  const player = document.getElementById("mfStandaloneCinema");
+  if (player && player.parentElement !== host) host.appendChild(player);
+  document.body.style.overflow = "";
+  player?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function _showCinemaOrFinderChoice(e, t, n, o) {
+  if (n === "tv" || n === "tv_ep") {
+    openIntegratedCinema(e, t, n);
+    return;
+  }
   const i = document.getElementById("mfCinemaChoiceModal");
   i && i.remove();
   try {
@@ -9806,6 +9817,7 @@ let _cinState = {
 };
 
 function openMovieInCinema(e, t, n) {
+  window._mfIntegratedPlayer = false;
   if (window.MFCinemaPlayer) return window.MFCinemaPlayer.open(e, t, n);
   let o = 1,
     i = 1,
@@ -10297,7 +10309,7 @@ document.addEventListener("keydown", function(e) {
         })
       }, 0)
     });
-    const l = document.getElementById("discoBody");
+    const l = document.getElementById("discoResultsContainer") || document.getElementById("discoBody");
     if (l) {
       new MutationObserver(e => {
         e.forEach(e => {
@@ -10320,7 +10332,7 @@ document.addEventListener("keydown", function(e) {
         })
       }).observe(l, {
         childList: !0,
-        subtree: !1
+        subtree: !0
       })
     }
     const c = new MutationObserver(e => {
@@ -10350,7 +10362,7 @@ document.addEventListener("keydown", function(e) {
     });
     const u = window.loadDiscoContent;
     "function" != typeof u || u._mfPatched || (u._mfPatched = !0, window.loadDiscoContent = function(e, t) {
-      const n = document.getElementById("discoBody");
+      const n = document.getElementById("discoResultsContainer") || document.getElementById("discoBody");
       n && (n.style.opacity = "0.4", n.style.transition = "opacity 0.15s ease", n.querySelector("[data-mf-skeleton]") || (n.insertBefore(MFSkeleton.buildDiscoSkeleton(10), n.firstChild), n.insertBefore(MFSkeleton.buildDiscoSkeleton(10), n.firstChild)));
       const o = u.apply(this, arguments),
         i = () => {
@@ -10440,7 +10452,7 @@ document.addEventListener("keydown", function(e) {
     }
 
     function i() {
-      return [...document.querySelectorAll("#discoBody .disco-row-scroll")].filter(e => e.querySelectorAll(".disco-card").length > 0)
+      return [...document.querySelectorAll("#discoResultsContainer .disco-row-scroll")].filter(e => e.querySelectorAll(".disco-card").length > 0)
     }
 
     function a(e) {
@@ -10565,7 +10577,7 @@ document.addEventListener("keydown", function(e) {
     });
     const p = window.loadDiscoContent;
     "function" != typeof p || p._dFxPatched || (window.loadDiscoContent = async function() {
-      const e = document.getElementById("discoBody");
+      const e = document.getElementById("discoResultsContainer") || document.getElementById("discoBody");
       let n;
       e && (e.innerHTML = "", m(e)), window.MFProgress && MFProgress.start();
       try {

@@ -1,7 +1,6 @@
 /* ══════════════════════════════════════════════════════════════
    MůjFlix — Fixes patch (dock hover/size + active state)
-   Načteno jako PŘEDPOSLEDNÍ stylesheet (po něm jde ještě
-   mobile.css, který má poslední slovo na mobilu).
+   Poslední stylesheet; mobilní pravidla jsou sloučena níže.
    Selektor #mfDock .dock-btn má vyšší specificitu (ID) než staré
    .dock-btn / .dock-btn:hover / .dock-btn.active pravidla, takže
    tady definované chování vyhrává nad staršími soubory.
@@ -74,7 +73,7 @@
     0 2px 10px rgba(0, 0, 0, 0.4) !important;
 }
 /* Na domovské obrazovce (html.mfh-home-on) a jen mimo mobil (nad 640px,
-   viz mobile.css breakpoint) ať dock sedí vpravo nahoře místo
+   viz mobilní pravidla níže) ať dock sedí vpravo nahoře místo
    dole na střed — přesně tam, kde dřív byl skrytý odznak profilu. */
 @media (min-width: 641px) {
   html.mfh-home-on #mfDock {
@@ -657,15 +656,12 @@ body.discover-open #mfDock:focus-within {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   Níže: bývalý mobile.css (sloučeno sem, viz index.html link tagy)
+   Níže: mobilní pravidla sloučená do tohoto souboru
    ══════════════════════════════════════════════════════════════ */
 /* ══════════════════════════════════════════════════════════════
-   MůjFlix — mobile.css
+   MůjFlix — mobilní úpravy
    ──────────────────────────────────────────────────────────────
-   Doplňkové úpravy jen pro menší obrazovky (telefony). Necháno
-   jako samostatný soubor a načtený jako úplně poslední <link>,
-   takže bezpečně vyhraje nad vším ostatním, ale nezasahuje do
-   desktopové verze (vše je v @media max-width: 640px).
+   Doplňkové úpravy jen pro menší obrazovky (telefony).
    ══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 640px) {
@@ -716,5 +712,204 @@ body.discover-open #mfDock:focus-within {
   .mfh-row {
     -webkit-mask-image: linear-gradient(to right, #000 94%, transparent 100%) !important;
     mask-image: linear-gradient(to right, #000 94%, transparent 100%) !important;
+  }
+}
+
+.universe-overlay {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  background: #050507 !important;
+}
+.mfd-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: max(22px, env(safe-area-inset-top, 22px)) 48px 18px;
+  flex: 0 0 auto;
+  background: rgba(6, 6, 9, 0.94);
+  backdrop-filter: blur(44px) saturate(1.8);
+  -webkit-backdrop-filter: blur(44px) saturate(1.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.mfd-brand {
+  flex: 0 0 auto;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+.mfd-brand span {
+  color: var(--accent);
+}
+.mfd-search-wrap {
+  flex: 1 1 auto;
+  max-width: 720px;
+}
+.mfd-close {
+  margin-left: auto;
+}
+.mfd-body {
+  flex: 0 0 auto;
+  width: 100%;
+  overflow: visible;
+  padding: 32px 48px 64px;
+}
+.mfd-hero-title {
+  margin: 0;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+.mfd-hero-sub {
+  margin: 10px 0 28px;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 1rem;
+}
+.mfd-results-container {
+  min-height: 180px;
+}
+@media (max-width: 900px) {
+  .mfd-header,
+  .mfd-body {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+@media (max-width: 640px) {
+  .mfd-header {
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 16px;
+  }
+  .mfd-brand {
+    font-size: 1.15rem;
+  }
+  .mfd-search-wrap {
+    flex-basis: calc(100% - 48px);
+    max-width: none;
+    order: 3;
+  }
+  .mfd-close {
+    margin-left: auto;
+  }
+  .mfd-body {
+    padding: 24px 16px 48px;
+  }
+}
+.mfd-player-host {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 56px;
+}
+#universeOverlay #mfStandaloneCinema {
+  position: static;
+  inset: auto;
+  z-index: 10;
+  display: none;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0;
+  scroll-margin-top: 90px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 22px;
+  background: #090b12;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+#universeOverlay #mfStandaloneCinema.open {
+  display: flex;
+}
+#universeOverlay .mf-standalone-cinema-top {
+  padding: 18px 22px;
+  background: rgba(15, 17, 26, 0.98);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+#universeOverlay .mf-standalone-cinema-top strong {
+  color: #fff;
+  font-size: 1.15rem;
+}
+#universeOverlay .mf-standalone-cinema-top span {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.78rem;
+}
+#universeOverlay #mfStandaloneCinemaClose {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.07);
+}
+#universeOverlay .mf-cin-sourcebar {
+  padding: 14px 22px;
+  background: rgba(11, 13, 21, 0.98);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+#universeOverlay .mf-cin-sourcebar button,
+#universeOverlay .mf-cin-sourcebar a {
+  min-height: 38px;
+  border-radius: 10px;
+}
+#universeOverlay .mf-cin-switch-btn {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+#universeOverlay .mf-cin-external-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+#universeOverlay .mf-cin-tvbar {
+  padding: 12px 22px;
+  background: rgba(8, 10, 17, 0.98);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+#universeOverlay .mf-cin-ep-current {
+  min-width: 92px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  background: rgba(10, 132, 255, 0.16);
+  border: 1px solid rgba(10, 132, 255, 0.34);
+  color: #fff;
+}
+#universeOverlay .mf-cin-epgrid {
+  padding: 18px 22px;
+  background: rgba(8, 10, 17, 0.98);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+#universeOverlay .mf-standalone-cinema-frame {
+  flex: 0 0 auto;
+  height: clamp(320px, 52vh, 620px);
+  min-height: 320px;
+}
+@media (max-width: 640px) {
+  .mfd-player-host {
+    padding: 0 12px 40px;
+  }
+  #universeOverlay .mf-standalone-cinema-top,
+  #universeOverlay .mf-cin-sourcebar,
+  #universeOverlay .mf-cin-tvbar,
+  #universeOverlay .mf-cin-epgrid {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  #universeOverlay .mf-cin-tvbar {
+    flex-wrap: wrap;
+  }
+  #universeOverlay .mf-cin-ep-current {
+    order: -1;
+    flex-basis: 100%;
+    text-align: center;
+  }
+  #universeOverlay .mf-standalone-cinema-frame {
+    height: 320px;
   }
 }
