@@ -1,0 +1,525 @@
+# 📄 CLEANUP-TASK.txt — v2 (kompletní, s novými nálezy + průběh)
+
+Prošel jsem znovu všechny soubory a **našel jsem dalších ~15 kategorií mrtvého kódu**, které v v1 nebyly. Přidávám skupiny **H–L**. Zkopíruj celý soubor, přepiš ten starý.
+
+```
+════════════════════════════════════════════════════════════════════
+ MŮJFLIX — CLEANUP TASK FILE v2 (KOMPLETNÍ)
+ Zadání pro Claude: najdi a bezpečně odstraň mrtvý kód
+════════════════════════════════════════════════════════════════════
+
+ KONTEXT PROJEKTU:
+ • Uživatel používá POUZE TMDB API přes Cloudflare proxy.
+ • V kódu JSOU hardcoded klíče _MF_GEM_KEY a _MF_JINA_KEY — SMAZAT
+   a REVOKOVAT.
+ • Statická appka (HTML/CSS/JS), Cloudflare Pages.
+ • Profilový systém, aiBrain (lokální algoritmus), mood picker,
+   cinema player = KLÍČOVÉ, NEMAZAT.
+ • AI chat, finder, admin API klíče = na odstřel.
+
+════════════════════════════════════════════════════════════════════
+ ⚠️  PRAVIDLA PRO CLAUDE
+════════════════════════════════════════════════════════════════════
+
+1) NIKDY nemaž bez verifikace (grep ve všech *.html *.js *.css +
+   dynamické přístupy: window[x], getElementById, querySelector,
+   [data-*], classList.contains).
+2) NIKDY nemaž víc než jednu skupinu za jeden commit.
+3) Po každé skupině spusť appku, proklikej, zkontroluj konzoli.
+4) Pokud máš pochybnost, NEODSTRAŇUJ. Napiš uživateli.
+5) Dodrž pořadí A → L (od nejbezpečnějšího).
+6) Pokud appka po smazání nefunguje, vrať přes git checkout.
+7) Commit po každé skupině: cleanup: skupina X — popis
+8) Tento soubor NIKDY nemaž.
+
+════════════════════════════════════════════════════════════════════
+ PRIORITA 0 — BEZPEČNOST (udělat PŘED vším ostatním)
+════════════════════════════════════════════════════════════════════
+
+[x] P0-a) REVOKOVAT Gemini klíč na https://aistudio.google.com/apikey
+[x] P0-b) REVOKOVAT Jina klíč na https://jina.ai
+[x] P0-c) V app.js smazat konstanty _MF_GEM_KEY a _MF_JINA_KEY
+[x] P0-d) Upravit getGeminiKey() a getJinaKey() na pouhé
+         localStorage.getItem(...) || ""
+
+(Podrobněji v Skupině G1 níže.)
+
+════════════════════════════════════════════════════════════════════
+ SKUPINA A — SCREENSAVER + INTRO
+════════════════════════════════════════════════════════════════════
+
+[x] A1) HTML — smazat <div class="screensaver" id="screensaver">...</div>
+[x] A2) JS — smazat prázdné funkce: resetSsTimer, showScreensaver,
+         hideScreensaver, updateSsClock + blok ["mousemove",...].forEach
+[x] A3) JS — smazat intro: playIntro, gsap_fallback, startIntroCanvas,
+         stopIntroCanvas, playIntroAudio, proměnná _introRaf
+[x] A4) CSS — .screensaver, .ss-*, #mflix-intro, .intro-*, #intro*
+         (ale POZOR na @keyframes pulseHint — viz E6)
+         → pulseHint keyframe zachován (používá se i jinde)
+
+════════════════════════════════════════════════════════════════════
+ SKUPINA B — VOICE MODE + TIMER + EDIT MODE
+════════════════════════════════════════════════════════════════════
+
+[ ] B1) HTML: voiceModeFab, voiceModeOverlay, speechMicBtn
+[ ] B2) JS: SpeechManager class, const speechManager, V/M keydown
+[ ] B3) HTML: editModeTrigger, snapLineH, snapLineV, editOverlay,
+         editTopbar, editFabTray
+[ ] B4) JS: celý edit engine od EDIT_STORAGE_KEY po _pulseStyle blok
+[ ] B5) JS: voice mode funkce — _vmListening, _vmRecog, openVoiceMode,
+         closeVoiceMode, vmToggleListen, vmStartListen, vmStopListen,
+         vmHandleCommand
+         ⚠️ NEMAZAT openVoiceCmd, closeVoiceCmd, startVoiceRecognition
+            (#voiceCmdOverlay je AKTIVNÍ!)
+[ ] B6) JS: timer — _timerInterval, _timerRemaining, _timerTotal,
+         _timerPanelOpen, _selectedPreset, toggleTimerPanel,
+         setTimerPreset, updateTimerDisplay, startTimer, stopTimer,
+         timerFinished + volání setTimerPreset(45) na konci app.js
+[ ] B7) CSS: .voice-mode-*, .vm-*, .speech-mic-btn, .edit-*, .timer-*,
+         .stats-fab, .watchlist-fab, .premiere-fab, .collections-fab
+         (a odpovídající @keyframes: vmOrbPulse, vmRingBreath, micPulse)
+
+════════════════════════════════════════════════════════════════════
+ SKUPINA C — SKRYTÉ ELEMENTY
+════════════════════════════════════════════════════════════════════
+
+[x] C1) #syncStatusBadge — HTML smazáno (index.html). MFSync._updateStatus
+         už měla `if (!badge) return` — bez změny. _syncDockBadges()
+         syncStatusBadge vůbec neřešila (zadání bylo nepřesné).
+         CSS ponecháno pro L7 (12× #syncStatusBadge napříč styles.css).
+[!] C2) Floating .notif-bell — OVĚŘENO ŽIVÉ, NEMAZAT. Existuje jen
+         JEDEN .notif-bell element, aktivně používaný app.js
+         (openNotifPanel) i ui-patches.js (_updateBell badge).
+         Žádná kolize/duplikace nenalezena — předpoklad zadání
+         byl mylný.
+[!] C3) .logo-progress — OVĚŘENO NEBEZPEČNÉ SMAZAT, NEMAZÁNO.
+         Element je viditelný ve výchozím stavu (skrytý jen na
+         homepage), takže není trvale mrtvý. Navíc updateLogoProgress()
+         nemá null-guard a volá se z ~6 míst — smazání HTML bez úpravy
+         funkce by appku rozbilo (TypeError). Ponecháno beze změny.
+[x] C4) Duplikátní .logo — NESMAZÁNO (potvrzeno: skrytá admin zkratka).
+[x] C5) #mfSectionFilmy — NESMAZÁNO (hash routing, potvrzeno).
+[!] C6) #mfProfileBadge — OVĚŘENO, PŘEDPOKLAD ZADÁNÍ BYL CHYBNÝ.
+         Element sice není ve statickém HTML, ale ProfileGate.renderBadge()
+         ho AKTIVNĚ vytváří přes JS a připojuje do <body> při každé
+         aktivaci profilu. CSS "display:none!important" v patches.css
+         NENÍ mrtvý úklidový zbytek — je to aktivní přepínač, který
+         schovává duplicitní UI (komentář v kódu to potvrzuje). Smazání
+         CSS by odhalilo duplicitní plovoucí badge = vizuální regrese.
+         PONECHÁNO BEZE ZMĚNY.
+[!] C7) #mfWelcomeNote — OVĚŘENO ŽIVÉ, NEMAZAT. Plně zapojená "Ahoj,
+         Jméno" welcome notifikace po přepnutí profilu (activateProfile,
+         app.js), s reálnou CSS animací (.show třída). Předpoklad
+         zadání byl mylný.
+
+════════════════════════════════════════════════════════════════════
+ SKUPINA D — LEGACY ADMIN SYSTÉMY
+════════════════════════════════════════════════════════════════════
+
+Aktivní je #adminLoginModal + #adminPanel (System A).
+
+[ ] D1) System C — #adminOverlayLegacy (mrtvý, HTML hidden)
+[ ] D2) System D — #adminPinGate + #adminTriggerBtn (mrtvý)
+[ ] D3) System B — #adminOverlay + #adminFab (mrtvý)
+         U každé JS funkce: grep, zda ji nevolá System A. Pokud ano,
+         NECHAT funkci, smazat jen HTML+CSS.
+[ ] D4) System A — #adminPanel + #adminLoginModal: NECHAT.
+[ ] D5) #adminProfileApiModal — závisí na Skupině G
+
+════════════════════════════════════════════════════════════════════
+ SKUPINA E — KONFLIKTY A DUPLICITY
+════════════════════════════════════════════════════════════════════
+
+[ ] E1) window.openApikeyOverlay — PŘEPSÁN (viz G3)
+[ ] E2) Duplicitní Firebase UI — #mfFbModal vs MFSettings.open
+[ ] E3) loadDiscoContent — PATCHED 3× — NEMAZAT
+[ ] E4) openUniverse — PATCHED 3× — NEMAZAT
+[ ] E5) Duplicitní keydown Escape — NEDĚLAT (riziko)
+[ ] E6) Duplicitní CSS selektory — opatrně, jedna po druhé
+
+════════════════════════════════════════════════════════════════════
+ SKUPINA F — MRTVÉ JS FUNKCE (obecné)
+════════════════════════════════════════════════════════════════════
+
+[ ] F1) User Manager legacy: createUser, updateUser, updateUserPrefs,
+         updateUserFeature, addToUserHistory, deleteUser, _getUserDB,
+         _saveUserDB, _renderUserBadge, openUserPanel, closeUserPanel
+         ⚠️ refreshUserContent(), _getProfiles(), _saveProfiles() NEMAZAT
+[ ] F2) Popular/trending: loadTrending, switchPopular, loadPopular
+         (element #popularSection NEEXISTUJE)
+[ ] F4) Testovací admin: adminTestToast, adminTestConfetti,
+         adminForceWrapped — ověřit grep v #adminPanel
+[ ] F5) aiBrain scoring funkce — NEMAZAT (používá Objevovat)
+[ ] F6) Plex sekce (window.plexInit a spol.) — ověřit grep "plex"
+         v index.html. Pokud jen prázdný #mfSectionPlex, SMAZAT IIFE.
+[ ] F7) AI chat a Finder funkce — viz Skupina G
+
+════════════════════════════════════════════════════════════════════
+ 🆕 SKUPINA H — LEGACY SYNC (JSONBin) — NOVÉ!
+════════════════════════════════════════════════════════════════════
+
+DŮVOD: Před Firebase sync měl projekt JSONBin sync. Zbytky jsou
+v kódu, ale nikde se nepoužívají (v HTML není #syncKeyInput).
+
+[x] H1) Konstanty
+    → SMAZÁNO: JSONBIN_KEY (nikdy se nepoužívala, ani interně —
+      syncUpload/syncDownload četly klíč přes getSyncKey() z
+      localStorage) i JSONBIN_URL.
+
+[x] H2) Funkce pro JSONBin sync
+    → SMAZÁNO: syncUpload, syncDownload, getSyncKey, saveSyncKey,
+              generateSyncCode, showSyncCodeResult
+    → Ověřeno: 0 externích volajících u všech (žádný onclick,
+      žádné window. přiřazení, žádné jiné JS volání).
+
+[x] H3) Sync overlaye
+    → SMAZÁNO: openSyncOverlay(), closeSyncOverlay()
+    → Ověřeno: traktDisconnect() JE NEVOLÁ (volá closeTraktOverlay,
+      jinou funkci) — předpoklad zadání byl mylný, ale závěr
+      (bezpečné smazat) platí, protože obě měly jen interní
+      volající uvnitř vlastního JSONBin bloku.
+    → V HTML #syncOverlay nikdy neexistoval — potvrzeno.
+
+[x] H4) Staré kódy v esc handleru
+    → SMAZÁNO: segment
+      document.getElementById("syncOverlay")?.classList.contains("open") ? void closeSyncOverlay() :
+      vystřižen ze středu ternárního řetězce, zbytek řetězce
+      ověřen jako syntakticky validní (node --check OK).
+
+════════════════════════════════════════════════════════════════════
+ 🆕 SKUPINA I — STUB FUNKCE A PRÁZDNÉ DEKLARACE — NOVÉ!
+════════════════════════════════════════════════════════════════════
+
+DŮVOD: V kódu je mnoho prázdných funkcí, které se možná volají
+z HTML přes onclick, ale nic nedělají. Mohou být pozůstatky
+starých systémů.
+
+[x] I1) Prázdné stub funkce — SMAZÁNO:
+      uniSetGenre, setShGenre, setShFocus, uniLoadMore (funkce;
+      HTML div #uniLoadMore zůstal — patří do L11 orphan HTML)
+    → setShType — OVĚŘENO: měla 1 volání, ale jen uvnitř setPlatform(),
+      která sama neměla ŽÁDNÉHO volajícího. Smazány OBĚ společně
+      (setShType i setPlatform) po ověření grepem (žádný onclick,
+      žádné window.setPlatform).
+
+[x] I2) Duplikát showShSkeletons
+    → Prázdná definice function showShSkeletons() {} SMAZÁNA.
+      Funkční window.showShSkeletons = function() {...} PONECHÁNA
+      beze změny (i když ani ta nemá žádného volajícího — kandidát
+      pro budoucí skupinu F, mimo rozsah I).
+
+[ ] I3) Prázdné handlery v jiných souborech — nekontrolováno
+[ ] I4) _loadEditLayout / _saveEditLayout — čeká na skupinu B
+
+════════════════════════════════════════════════════════════════════
+ 🆕 SKUPINA J — aiBrain MRTVÉ METODY — NOVÉ! [x] HOTOVO
+════════════════════════════════════════════════════════════════════
+
+DŮVOD: aiBrain (třída AIBrain) má mnoho metod, ale ne všechny
+se volají.
+
+[x] J1) Ověřeno grepem pro každou metodu:
+    → boostGenres          — ŽIVÁ (mood picker), NECHÁNO
+    → boostGenresFromTmdb  — ŽIVÁ, NECHÁNO
+    → boostGenreIds        — ŽIVÁ (renderDiscoRow + jinde), NECHÁNO
+    → penalizeGenreIds     — SMAZÁNO (volaná jen z mrtvé recordRating)
+    → recordRating         — SMAZÁNO (0 volajících kdekoliv)
+    → recordWatch          — ŽIVÁ (markWatched), NECHÁNO
+    → recordTmdbSeen       — ŽIVÁ (renderDiscoRow), NECHÁNO
+    → applyDecay           — NECHÁNO, přidán TODO komentář
+      (zvážit volání při activateProfile())
+    → recordWatchTime      — ŽIVÁ (openSeries), NECHÁNO
+    → getFavTime           — SMAZÁNO (0 volajících)
+    → getTopGenres         — ŽIVÁ (přímé volání + interně
+      z bývalé getSummary), NECHÁNO, ověřeno že smazání getSummary
+      ji nijak neovlivnilo
+    → getSummary           — SMAZÁNO (0 volajících)
+
+  🔍 DŮLEŽITÝ NÁLEZ (designová díra, ne jen mrtvý kód):
+  Appka má DVA oddělené rating systémy:
+    1) Aktivní: #epRatingOverlay, 1-5 hvězdiček (getEpRating/
+       saveEpRating/openEpRating) — ukládá do vlastního localStorage
+       klíče, VŮBEC nevolá aiBrain.
+    2) Mrtvý (teď smazaný): aiBrain.recordRating(slug, "loved"/
+       "liked"/"meh"/"disliked", genres) — starší kategorický systém,
+       na který nic neukazovalo.
+  → Hvězdičkové hodnocení epizod tedy REÁLNĚ NEOVLIVŇUJE doporučení
+    v Objevovat, i když by uživatel čekal, že ano.
+  → Viz sekce "BUDOUCÍ PRÁCE" na konci souboru.
+
+════════════════════════════════════════════════════════════════════
+ 🆕 SKUPINA K — CONTINUE WATCHING WIDGET (DUPLIKÁT) — NOVÉ! [x] HOTOVO
+════════════════════════════════════════════════════════════════════
+
+DŮVOD: V app.js je "continue watching" widget s elementy
+#continueWidget, #cwTitle, #cwEp, #cwThumbImg, ale tyto elementy
+NEJSOU v index.html. V homepage je místo toho modernější
+"mfhContinue" sekce.
+
+[x] K1) Ověřeno grepem — #continueWidget, #cwTitle, #cwEp,
+      #cwThumbImg NEJSOU v index.html. Potvrzeno.
+
+[x] K2) Řešení (upraveno oproti doslovnému zadání, po diskuzi):
+    → updateContinueWidget() už měla vlastní guard
+      (if (!e) return na 1. řádku) — byla fakticky no-op.
+      Zjednodušena na skutečný no-op, KOMENTÁŘ ponechán.
+      Všech 10 volání (6 nechráněných + 4 s typeof guardem,
+      včetně firebase-sync.js) PONECHÁNO beze změny — nulové
+      riziko zásahu do citlivých flow (sync, zálohy, Trakt).
+    → handleContinueClick() — SMAZÁNA CELÁ (0 volajících).
+    → _cwSlug, _cwNext — SMAZÁNY (používané jen uvnitř těch
+      dvou funkcí).
+
+[ ] K3) CSS bloky — NESMAZÁNO, poznamenáno pro L7:
+      styles.css:1384 .continue-widget.visible
+      styles.css:16474, 20641  #continueWidget
+
+════════════════════════════════════════════════════════════════════
+ 🆕 SKUPINA L — OSTATNÍ DROBNOSTI — NOVÉ!
+════════════════════════════════════════════════════════════════════
+
+[x] L1) playClick s argumenty (nesmyslné)
+    → OPRAVENO: obě volání playClick(300,.1,.04) a
+      playClick(380+65*e,.07,.045) nahrazena playClick() bez
+      argumentů. Nebyl to pád appky (JS argumenty navíc jen
+      ignoruje), jen kosmetický nesoulad — nulová změna chování,
+      jen čistší kód.
+
+[ ] L2) Duplicitní Trakt funkce
+    → app.js má DVĚ sady:
+      A) traktGetToken() / traktGetRefresh()      ← vrací string
+      B) getTraktToken() / saveTraktToken() /
+         clearTraktToken()                         ← vrací JSON
+    → Grep na každou, zjistit, která se reálně používá.
+    → Smazat nepoužívanou sadu.
+    → ⚠️ POZOR: getTraktTokenKey() je používaná oběma, NEMAZAT.
+
+[ ] L3) getTraktTokenKey vs mf_trakt_client_id
+    → V app.js je:
+      traktGetClientId() / traktSaveClientId()
+    → A taky: localStorage.getItem("mf_trakt_client_id")
+    → Dvě sady pro stejnou věc. Sjednotit nebo smazat jednu.
+
+[x] L4) MF_BROWSER konstanty
+    → SMAZÁNO: celý window.MF_BROWSER objekt + jeho debug
+      console.log. Ověřeno grepem: 0 použití kterékoliv vlastnosti
+      (isFirefox, isChrome, isSafari, hasSpeechRecognition,
+      hasSpeechSynthesis, hasCrypto) kdekoliv v kódu.
+
+[ ] L5) MF_DEBUG flag a debug logy
+    → app.js: window.MF_DEBUG = false
+    → V celém kódu: if (window.MF_DEBUG) console.log(...)
+    → Pro produkci: NECHAT (debug flag), ale v JS buildu
+      minimalizovat.
+    → Alternativa: smazat všechny debug logy (optimalizace).
+
+[!] L6) _prevSetDockActive v ui-patches.js
+    → OVĚŘENO ŽIVÉ, NEMAZAT. Je to monkey-patch řetězení —
+      uchovává původní window.setDockActive (definovanou v
+      app.js:8267) a volá obě verze. Komentář v kódu to
+      přímo vysvětluje. Load-bearing, ne mrtvý kód.
+
+[ ] L7) Orphan CSS pravidla
+    → Spustit Chrome DevTools → Coverage
+    → Zjistit, které CSS soubory mají méně než 30% využití
+    → Postupně projít a smazat nepoužité bloky.
+    → ČEKAJÍ: #syncStatusBadge (12×, ze skupiny C1),
+      .continue-widget.visible / #continueWidget (3×, ze
+      skupiny K3)
+
+[ ] L8) package.json — "build" skript
+    → package.json obsahuje:
+      "build": "echo \"const CONFIG = { API_KEY: '$TMDB_API_KEY' };\" > config.js"
+    → Ale config.example.js má:
+      window.TMDB_KEY_DEFAULT = "..."
+    → Nekonzistence! "build" skript generuje jinou strukturu
+      než config.example.js.
+    → OPRAVA: sjednotit. Pokud používáš jen Cloudflare proxy a
+      config.js už nepotřebuješ, SMAZAT celý package.json
+      (nebo alespoň "build" skript).
+
+[ ] L9) config.example.js — možná úplně smazat
+    → Pokud TMDB_KEY_DEFAULT v app.js není potřeba (používáš
+      Cloudflare proxy), pak config.example.js může být smazaný
+      i s instrukcemi v README.
+    → Viz Skupina G7 pro detaily.
+
+[x] L10) Duplikátní getGeminiKey / _MF_GEM_KEY fallback
+    → HOTOVO v rámci P0 — getGeminiKey()/getJinaKey() teď vrací
+      jen localStorage.getItem(...) || "", žádný fallback na
+      _MF_GEM_KEY/_MF_JINA_KEY nezůstal (ověřeno grepem).
+
+[ ] L11) Orphan HTML v index.html
+    → Projít HTML a hledat elementy, na které nic neodkazuje:
+      - id bez jakéhokoli grep v JS/CSS
+      - class bez jakéhokoli CSS pravidla
+    → ZNÁMÝ KANDIDÁT (ze skupiny I): <div id="uniLoadMore"
+      style="display:none"> — funkce uniLoadMore() smazána,
+      ale tenhle HTML div zůstal, nic ho nečte.
+    → Skript (Linux/Mac):
+      grep -oP 'id="\K[^"]+' index.html | sort -u | while read id; do
+        count=$(grep -c "\"$id\"\|'$id'\|#$id" *.js *.css 2>/dev/null | awk -F: '{s+=$2} END {print s}')
+        [ "$count" -eq 0 ] && echo "ORPHAN ID: $id"
+      done
+
+[ ] L12) Changelog v ui-patches.js — závislost
+    → ui-patches.js obsahuje kompletní changelog systém, ale
+      NEPOUŽÍVÁ se (v HTML není #notifPanel s changelog body
+      naplněným ui-patches.js verzí).
+    → ⚠️ POZOR: Musíš zkontrolovat, jestli app.js (notif panel)
+      NENÍ nahrazen ui-patches verzí. Viz:
+      - app.js: openNotifPanel(), renderNotifPanel() (prázdné)
+      - ui-patches.js: _injectPanel(), _renderPanel() (funkční)
+    → Pokud changelog reálně používáš (viz #changelogModal v HTML),
+      ui-patches NECHAT.
+    → Pokud ne, smazat celou sekci changelog z ui-patches.js
+      (a app.js #changelogModal).
+    → POZNÁMKA ze skupiny C2: #notifBell je ověřeně živý a
+      používaný oběma soubory zároveň (ui-patches._updateBell
+      nastavuje badge, app.js otevírá panel) — takže "duplikát"
+      zmíněný výše v L12 vyžaduje ověření, ne slepé smazání.
+
+════════════════════════════════════════════════════════════════════
+ 🆕 BUDOUCÍ PRÁCE (nálezy z cleanupu, nejsou to bugy k opravě teď)
+════════════════════════════════════════════════════════════════════
+
+[ ] BUDOUCÍ) Propojit epizodní hodnocení (epRatingOverlay)
+    s aiBrain, aby hvězdičky reálně ovlivňovaly doporučení.
+    Buď obnovit recordRating, nebo napsat novou metodu
+    (např. recordEpisodeRating(slug, stars, genres)).
+    Viz skupina J — smazáno jako mrtvé, ale koncept
+    je hodnotný.
+
+════════════════════════════════════════════════════════════════════
+ 🆕 UI ZMĚNY MIMO CLEANUP (na přání uživatele, mezi skupinami H a J)
+════════════════════════════════════════════════════════════════════
+
+[x] Vyhledávání — mřížka místo vodorovného scrollu
+    → styles.css: nové pravidlo cílené na .disco-search-query
+      (přítomné jen ve výsledcích z discoSearch()), přepíná
+      .disco-row-scroll na CSS grid s auto-fill sloupci.
+      Normální žánrové řádky v Objevovat beze změny.
+
+[x] Historie vyhledávání — vypnuta
+    → app.js: renderSearchHistory() a saveSearchHistory() zjednodušeny
+      na no-op (stejný vzorec jako updateContinueWidget ve skupině K).
+      Nic se už neukládá ani nezobrazuje. #mfSearchHistory navíc
+      natvrdo skryto přes CSS (display:none!important) pro jistotu,
+      kdyby JS jinde nastavoval style.display.
+    → getSearchHistory() ponechána (nemá už volajícího, ale
+      neškodí — čte jen starý localStorage klíč).
+
+[x] Cinema — blokování popup reklam ze zdrojů (Bombuj, SvetSerialu...)
+    → cinema.js: <iframe> teď má sandbox="allow-scripts allow-same-origin
+      allow-presentation" — BEZ allow-popups a allow-top-navigation,
+      takže embedded zdroj nemůže otevírat popupy ani přesměrovat
+      celou stránku. Žádná data se nestahují (žádný filtr list).
+    → Přidán malý zavíratelný tip pod source barem s odkazy na
+      uBlock Origin (Firefox: addons.mozilla.org, Chrome: uBlock
+      Origin Lite z Chrome Web Store — ověřeno webovým vyhledáváním,
+      že je to aktuálně správný/živý odkaz). Zavření se pamatuje
+      v localStorage (mf_cin_adtip_dismissed), nikoho to nebude
+      otravovat opakovaně.
+    → patches.css: styl pro .mf-cin-adtip přidán vedle existujícího
+      .mf-cin-sourcebar stylu.
+
+
+
+[ ] Appka se načte bez chyb (konzole)
+[ ] Přihlášení profilu funguje
+[ ] Domů (homepage) s karusely
+[ ] Objevovat (universeOverlay) — karty klikatelné
+[ ] Můj seznam (watchlist)
+[ ] Detail seriálu (seriesModal)
+[ ] Cinema mód
+[ ] Admin panel (Ctrl+Shift+A)
+[ ] Changelog notifikace
+[ ] Vzhled vypadá stejně
+[ ] Dock reaguje na kliky
+
+════════════════════════════════════════════════════════════════════
+ DOPORUČENÉ POŘADÍ PRÁCE
+════════════════════════════════════════════════════════════════════
+
+ P0  (bezpečnost)     — 10 min, KRITICKÉ                    [x] HOTOVO
+ A   (screensaver)    — 10 min, nulové riziko                [x] HOTOVO
+ C1-C2, C7 (badges)   — 15 min, nízké riziko                 [x] HOTOVO*
+ I   (stub funkce)    — 30 min, nízké riziko    ← NOVÉ        [x] HOTOVO
+ K   (continue w.)    — 20 min, nízké riziko    ← NOVÉ        [x] HOTOVO
+ B   (voice/timer)    — 45 min, střední riziko
+ D1-D3 (legacy adm)   — 1 h,   střední riziko
+ F   (mrtvé JS)       — 1 h,   střední riziko
+ H   (JSONBin)        — 30 min, střední riziko  ← NOVÉ       ← DALŠÍ
+ J   (aiBrain met.)   — 30 min, nízké riziko    ← NOVÉ        [x] HOTOVO
+ L1-L8 (drobnosti)    — 1 h,   střední riziko   ← NOVÉ
+ G2-G8 (AI rozhod.)   — 1-2 h, dle uživatele
+ E1   (openApikey)    — závislé na G3
+ E2-E6 (konflikty)    — 2 h,   VYSOKÉ riziko
+ B7 + D + CSS úklid   — 2 h,   VYSOKÉ riziko
+
+ * C1 hotovo, C2/C3/C6/C7 ověřeny jako živé/rizikové → ponechány
+   beze změny (viz skupina C výše pro detaily)
+
+════════════════════════════════════════════════════════════════════
+ RYCHLÉ GREPY
+════════════════════════════════════════════════════════════════════
+
+# AI klíče
+grep -rn "getGeminiKey\|getJinaKey\|_MF_GEM_KEY\|_MF_JINA_KEY" *.js *.html
+
+# openApikeyOverlay
+grep -rn "openApikeyOverlay" *.js *.html
+
+# aiApikeyOverlay
+grep -rn "aiApikeyOverlay\|keyPanelGemini\|aiGeminiKeyInput" *.js *.html
+
+# AI chat
+grep -rn "openAiPanel\|aiSend\|aiQuick" *.js *.html
+
+# Přímé TMDB volání
+grep -rn "api.themoviedb.org" *.js *.html
+
+# Cloudflare proxy
+grep -rn "MF_PROXY" *.js *.html
+
+# JSONBin (legacy)
+grep -rn "JSONBIN\|jsonbin\|syncUpload\|syncDownload" *.js *.html
+
+# Continue widget (duplikát)
+grep -rn "continueWidget\|cwTitle\|cwEp\|cwThumbImg" *.js *.html
+
+# aiBrain metody
+grep -n "applyDecay\|getFavTime\|getSummary\|penalizeGenreIds" app.js
+
+# Stub funkce
+grep -n "function setShType\|function uniSetGenre\|function setShGenre\|function showShSkeletons\|function uniLoadMore" app.js
+
+# Duplicitní Trakt funkce
+grep -n "function getTraktToken\|function traktGetToken\|function saveTraktToken\|function clearTraktToken" app.js
+
+# Orphan HTML elementy
+grep -oP 'id="\K[^"]+' index.html | sort -u | while read id; do
+  count=$(grep -c "\"$id\"\|'$id'\|#$id" *.js *.css 2>/dev/null | awk -F: '{s+=$2} END {print s}')
+  [ "$count" -eq 0 ] && echo "ORPHAN ID: $id"
+done
+
+════════════════════════════════════════════════════════════════════
+ PROVEDENO
+════════════════════════════════════════════════════════════════════
+
+☑ P0   — datum: ____ , klíče revokovány: potvrď u Google/Jina
+☑ A    — datum: ____
+☑ C1-C2,C7 — datum: ____  (C1 smazáno, C2/C3/C6/C7 ověřeny živé/rizikové)
+☑ I    — datum: ____
+☑ K    — datum: ____
+□ B    — datum: ____
+□ D1-D3 — datum: ____
+□ F    — datum: ____
+☑ H    — datum: ____
+☑ J    — datum: ____
+□ L1-L8 — datum: ____
+□ G2-G8 — datum: ____
+□ E1   — datum: ____
+□ E2-E6 — datum: ____
+□ B7 + CSS — datum: ____
+```
