@@ -699,3 +699,12 @@ body.discover-open #mfDock:focus-within {
     mask-image: linear-gradient(to right, #000 94%, transparent 100%) !important;
   }
 }
+
+/* Pojistka — dock v Objevovat schovaný i kdyby něco jiného kolidovalo
+   (viz #mfDock pravidla výše i v styles.css). Umístěno úplně na konec
+   patches.css, který se načítá jako poslední soubor. */
+html body.discover-open #mfDock {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
