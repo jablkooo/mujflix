@@ -21466,31 +21466,53 @@ h2.title,
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   VÝSLEDKY VYHLEDÁVÁNÍ — mřížka místo vodorovného scrollu
-   Cíl: řádky vytvořené discoSearch() dostanou třídu .disco-search-section
-   (přidáno přímo přes JS, ne přes :has() kvůli kompatibilitě) a tady
-   se jim přepne .disco-row-scroll na wrapping grid. Normální žánrové
-   řádky v Objevovat (bez téhle třídy) zůstávají beze změny jako
-   vodorovný scroll.
+   OBJEVOVAT — mřížka místo vodorovného scrollu (VŠECHNY řádky)
+   Původně jen výsledky vyhledávání, teď rozšířeno na celé Objevovat
+   na přání uživatele — žádné vodorovné scrollování, jen dolů.
+   Každá žánrová sekce (.disco-section) má nadpis nahoře a pod ním
+   kartičky v mřížce, která se sama přizpůsobí šířce obrazovky.
+   .disco-section je jen v Discover overlay (#discoBody), homepage
+   používá jiné třídy (.ps-tile-wrapper), takže tohle homepage
+   neovlivní.
 ═══════════════════════════════════════════════════════════════ */
-.disco-search-section .disco-row-scroll {
+.disco-section .disco-row-scroll {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
   overflow: visible !important;
   padding: 4px 16px 16px !important;
 }
-.disco-search-section .disco-card {
+.disco-section .disco-card {
   width: 100% !important;
   min-width: 0 !important;
 }
-.disco-search-section .disco-row-nav {
+.disco-section .disco-row-nav {
   display: none !important;
 }
 @media (max-width: 480px) {
-  .disco-search-section .disco-row-scroll {
+  .disco-section .disco-row-scroll {
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
     gap: 12px !important;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   POSTERY V OBJEVOVAT — správný TMDB poměr stran (2:3)
+   V souboru je desítky let nastřádaných přepisů .disco-card /
+   .disco-card-img s pevnými px rozměry (154×231 apod.), které se
+   na různých místech rozcházejí. Tohle je poslední/vyhrávající
+   pravidlo — používá aspect-ratio místo pevné výšky, takže obrázek
+   vždy sedí na skutečný poměr stran TMDB posteru bez oříznutí
+   nebo deformace, ať je karta jakkoli široká.
+═══════════════════════════════════════════════════════════════ */
+.disco-card {
+  aspect-ratio: 2 / 3 !important;
+  height: auto !important;
+}
+.disco-card-img {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: 2 / 3 !important;
+  object-fit: cover !important;
 }
 
 /* Historie vyhledávání vypnuta na přání uživatele — trvale skrytá
