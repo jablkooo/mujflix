@@ -708,3 +708,400 @@ html body.discover-open #mfDock {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   OBJEVOVÁNÍ — REDESIGN VE STYLU APPLE TV+
+   Cílí přímo na skutečně vykreslené třídy (.disco-*, .mfd-header a
+   jeho děti), ne na mrtvý placeholder markup uvnitř #discoBody, který
+   se při načtení stejně celý přepíše JS renderem (viz loadDiscoContent).
+   Selektory jsou schválně předsazené #universeOverlay, aby měly vyšší
+   specifitu než starší !important pravidla vpletená jinde v projektu
+   (styles.css, inline <style id="mf-disco-override">, runtime
+   vkládaný <style id="mf-disco-fx">) — vyhrají bez ohledu na pořadí
+   načtení.
+   ═══════════════════════════════════════════════════════════════════ */
+
+#universeOverlay {
+  --atv-font: "Inter", -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  --atv-bg: #000000;
+  --atv-text: #f5f5f7;
+  --atv-text-2: rgba(245, 245, 247, 0.62);
+  --atv-text-3: rgba(245, 245, 247, 0.38);
+  --atv-line: rgba(255, 255, 255, 0.1);
+  --atv-line-soft: rgba(255, 255, 255, 0.06);
+  --atv-surface: rgba(255, 255, 255, 0.06);
+  --atv-surface-hover: rgba(255, 255, 255, 0.1);
+  --atv-blue: var(--accent, #2997ff);
+  --atv-radius-card: 16px;
+  --atv-radius-pill: 980px;
+  --atv-ease: cubic-bezier(0.28, 0.11, 0.32, 1);
+}
+
+#universeOverlay.universe-overlay {
+  background: var(--atv-bg) !important;
+  font-family: var(--atv-font) !important;
+}
+
+/* ── HEADER — čistý, klidný, prosklený ── */
+#universeOverlay .mfd-header,
+#universeOverlay .disco-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 20px !important;
+  padding: max(20px, env(safe-area-inset-top, 20px)) 5vw 16px !important;
+  background: rgba(0, 0, 0, 0.72) !important;
+  backdrop-filter: blur(30px) saturate(1.6) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(1.6) !important;
+  border-bottom: 1px solid var(--atv-line-soft) !important;
+  box-shadow: none !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 30 !important;
+}
+
+#universeOverlay .mfd-brand {
+  font-family: var(--atv-font) !important;
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.3px !important;
+  color: var(--atv-text) !important;
+  flex-shrink: 0 !important;
+}
+
+#universeOverlay .mfd-brand span,
+#universeOverlay .disco-title span {
+  color: var(--atv-blue) !important;
+}
+
+#universeOverlay .mfd-hero-title.mfd-brand-hidden { display: none !important; }
+
+/* ── VYHLEDÁVÁNÍ — jemná skleněná pilulka ── */
+#universeOverlay .uni-search-wrap,
+#universeOverlay .mfd-search-wrap {
+  flex: 1 1 auto !important;
+  max-width: 440px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  background: var(--atv-surface) !important;
+  border: 1px solid var(--atv-line) !important;
+  border-radius: var(--atv-radius-pill) !important;
+  padding: 10px 16px !important;
+  transition: background 0.2s var(--atv-ease), border-color 0.2s var(--atv-ease) !important;
+}
+
+#universeOverlay .uni-search-wrap:focus-within {
+  background: var(--atv-surface-hover) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+#universeOverlay .uni-search-icon {
+  width: 16px !important;
+  height: 16px !important;
+  color: var(--atv-text-3) !important;
+  flex-shrink: 0 !important;
+}
+
+#universeOverlay .uni-input {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: var(--atv-text) !important;
+  font-family: var(--atv-font) !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  width: 100% !important;
+}
+
+#universeOverlay .uni-input::placeholder {
+  color: var(--atv-text-3) !important;
+}
+
+#universeOverlay .uni-clear-btn {
+  color: var(--atv-text-3) !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+#universeOverlay .mfd-close,
+#universeOverlay .disco-close {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: var(--atv-surface) !important;
+  border: 1px solid var(--atv-line) !important;
+  color: var(--atv-text-2) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s var(--atv-ease) !important;
+  flex-shrink: 0 !important;
+}
+
+#universeOverlay .mfd-close:hover,
+#universeOverlay .disco-close:hover {
+  background: var(--atv-surface-hover) !important;
+  color: var(--atv-text) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+}
+
+/* ── ŽÁNROVÉ PILULKY ── */
+#universeOverlay .disco-nav {
+  padding: 14px 5vw 6px !important;
+  gap: 8px !important;
+}
+
+#universeOverlay .disco-nav-item {
+  font-family: var(--atv-font) !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  padding: 8px 18px !important;
+  border-radius: var(--atv-radius-pill) !important;
+  background: var(--atv-surface) !important;
+  border: 1px solid var(--atv-line) !important;
+  color: var(--atv-text-2) !important;
+}
+
+#universeOverlay .disco-nav-item:hover {
+  background: var(--atv-surface-hover) !important;
+  color: var(--atv-text) !important;
+  border-color: rgba(255, 255, 255, 0.24) !important;
+}
+
+#universeOverlay .disco-nav-item.active,
+#universeOverlay .disco-nav-item.mf-chip-optimistic {
+  background: var(--atv-text) !important;
+  color: #000 !important;
+  border-color: var(--atv-text) !important;
+  font-weight: 700 !important;
+}
+
+/* ── HERO BANER — velký editorialní vzhled ── */
+#universeOverlay .disco-hero {
+  height: min(64vh, 620px) !important;
+  margin-bottom: 56px !important;
+  border-radius: 0 !important;
+}
+
+#universeOverlay .disco-hero-grad {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.55) 72%, #000 100%),
+    linear-gradient(90deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0.05) 100%) !important;
+}
+
+#universeOverlay .disco-hero-content {
+  padding: 0 5vw 64px !important;
+  max-width: 620px !important;
+}
+
+#universeOverlay .disco-hero-badge {
+  gap: 10px !important;
+  margin-bottom: 18px !important;
+}
+
+#universeOverlay .disco-hero-badge-type,
+#universeOverlay .disco-hero-badge-rating,
+#universeOverlay .disco-hero-badge-year {
+  font-family: var(--atv-font) !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.4px !important;
+  text-transform: uppercase !important;
+  color: var(--atv-text-2) !important;
+}
+
+#universeOverlay .disco-hero-title {
+  font-family: var(--atv-font) !important;
+  font-size: clamp(2.4rem, 4.6vw, 4rem) !important;
+  font-weight: 800 !important;
+  letter-spacing: -1.5px !important;
+  line-height: 1.02 !important;
+  color: var(--atv-text) !important;
+  margin-bottom: 16px !important;
+}
+
+#universeOverlay .disco-hero-desc {
+  font-family: var(--atv-font) !important;
+  font-size: 0.98rem !important;
+  font-weight: 400 !important;
+  color: var(--atv-text-2) !important;
+  line-height: 1.5 !important;
+  max-width: 480px !important;
+}
+
+#universeOverlay .disco-hero-btns {
+  gap: 12px !important;
+  margin-top: 28px !important;
+}
+
+#universeOverlay .disco-hero-btn {
+  font-family: var(--atv-font) !important;
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+  padding: 13px 26px !important;
+  border-radius: var(--atv-radius-pill) !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  transition: transform 0.18s var(--atv-ease), opacity 0.18s var(--atv-ease), background 0.18s var(--atv-ease) !important;
+}
+
+#universeOverlay .disco-hero-btn.primary {
+  background: var(--atv-text) !important;
+  color: #000 !important;
+  box-shadow: none !important;
+}
+
+#universeOverlay .disco-hero-btn.primary:hover {
+  background: #fff !important;
+  transform: scale(1.03) !important;
+  box-shadow: none !important;
+}
+
+#universeOverlay .disco-hero-btn.secondary {
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: var(--atv-text) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+#universeOverlay .disco-hero-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+  transform: scale(1.03) !important;
+}
+
+/* ── ŘÁDKY / SEKCE ── */
+#universeOverlay .disco-section { padding-bottom: 44px !important; }
+
+#universeOverlay .disco-row-header {
+  padding: 0 5vw 16px !important;
+  align-items: baseline !important;
+}
+
+#universeOverlay .disco-row-title {
+  font-family: var(--atv-font) !important;
+  font-size: 1.3rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.6px !important;
+  color: var(--atv-text) !important;
+}
+
+#universeOverlay .disco-row-nav-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: var(--atv-surface) !important;
+  border: 1px solid var(--atv-line) !important;
+  color: var(--atv-text-2) !important;
+}
+
+#universeOverlay .disco-row-nav-btn:hover {
+  background: var(--atv-surface-hover) !important;
+  color: var(--atv-text) !important;
+}
+
+#universeOverlay .disco-row-scroll {
+  gap: 16px !important;
+  padding: 4px 5vw 16px !important;
+  scroll-padding-left: 5vw !important;
+}
+
+/* ── KARTY — poster napřed, chrom minimální ── */
+#universeOverlay .disco-card {
+  width: 190px !important;
+  min-width: 190px !important;
+  border-radius: var(--atv-radius-card) !important;
+  background: var(--atv-surface) !important;
+  border: none !important;
+  box-shadow: none !important;
+  transition: transform 0.35s var(--atv-ease), box-shadow 0.35s var(--atv-ease) !important;
+}
+
+#universeOverlay .disco-card:hover {
+  transform: translateY(-6px) scale(1.045) !important;
+  box-shadow: 0 20px 46px rgba(0, 0, 0, 0.6) !important;
+  border-color: transparent !important;
+  z-index: 5 !important;
+}
+
+#universeOverlay .disco-card-inner,
+#universeOverlay .disco-card-img {
+  border-radius: var(--atv-radius-card) !important;
+}
+
+#universeOverlay .disco-card-overlay {
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%) !important;
+  border-radius: var(--atv-radius-card) !important;
+}
+
+#universeOverlay .disco-card-info {
+  padding: 12px 14px 14px !important;
+}
+
+#universeOverlay .disco-card-name {
+  font-family: var(--atv-font) !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.2px !important;
+  color: var(--atv-text) !important;
+}
+
+#universeOverlay .disco-card-meta { gap: 8px !important; margin-top: 4px !important; }
+
+#universeOverlay .disco-card-type {
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: var(--atv-text-2) !important;
+  border-radius: 5px !important;
+}
+
+#universeOverlay .disco-card-rating {
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  color: #f5c94d !important;
+}
+
+#universeOverlay .disco-card-glow { display: none !important; }
+
+#universeOverlay .disco-play-btn {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #000 !important;
+  box-shadow: none !important;
+}
+
+#universeOverlay .disco-card-finder-btn {
+  background: rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  color: var(--atv-text) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+/* ── LOADING ── */
+#universeOverlay .disco-loading {
+  color: var(--atv-text-3) !important;
+  font-family: var(--atv-font) !important;
+  font-weight: 500 !important;
+}
+
+#universeOverlay .disco-spinner {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  border-top-color: var(--atv-text) !important;
+}
+
+@media (max-width: 720px) {
+  #universeOverlay .disco-hero { height: 58vh !important; margin-bottom: 40px !important; }
+  #universeOverlay .disco-hero-content { max-width: 100% !important; padding: 0 20px 40px !important; }
+  #universeOverlay .disco-card { width: 132px !important; min-width: 132px !important; }
+  #universeOverlay .mfd-header,
+  #universeOverlay .disco-header,
+  #universeOverlay .disco-nav,
+  #universeOverlay .disco-row-header,
+  #universeOverlay .disco-row-scroll {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+}
