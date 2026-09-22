@@ -1262,7 +1262,7 @@ async function loadDiscoContent(e, t) {
     const c = t.replace(/'/g, "\\'"),
       d = r.vote_average ? r.vote_average.toFixed(1) : "",
       m = (r.release_date || r.first_air_date || "").slice(0, 4);
-    l.innerHTML = `\n          <div class="disco-hero-badge">\n            <span class="disco-hero-badge-type">${"movie"===e?"🎬 Film":"📺 Seriál"}</span>\n            ${d?`<span class="disco-hero-badge-rating">★ ${d}</span>`:""}\n            ${m?`<span class="disco-hero-badge-year">${m}</span>`:""}\n          </div>\n          <div class="disco-hero-title">${t}</div>\n          <div class="disco-hero-desc">${(r.overview||"Žádný popis není k dispozici.").substring(0,160)}${(r.overview||"").length>160?"…":""}</div>\n          <div class="disco-hero-btns">\n            <button class="disco-hero-btn primary" onclick="event.stopPropagation();if(heroItem.id){window._mfFinderTmdbId=heroItem.id;window._cinYear='${m}';'tv'==='${e}'?openDiscoverTv(heroItem.id,'${c}'):_showCinemaOrFinderChoice(heroItem.id,'${c}','${e}',null);}else{openWithCopy('${c}','${e}','${m}');closeUniverse();}    ">↗ Otevřít na externím webu</button>\n                <button class="disco-hero-btn secondary" onclick="event.stopPropagation();shAddToWatchlistByItem({name:'${c}',media_type:'${e}'});showToast('Přidáno do Mého seznamu 🔖')">＋ Můj seznam</button>\n          </div>`, o.append(i, a, s, l), o.onclick = () => {
+    l.innerHTML = `\n          <div class="disco-hero-badge">\n            <span class="disco-hero-badge-type">${"movie"===e?"🎬 Film":"📺 Seriál"}</span>\n            ${d?`<span class="disco-hero-badge-rating">★ ${d}</span>`:""}\n            ${m?`<span class="disco-hero-badge-year">${m}</span>`:""}\n          </div>\n          <div class="disco-hero-title">${t}</div>\n          <div class="disco-hero-desc">${(r.overview||"Žádný popis není k dispozici.").substring(0,160)}${(r.overview||"").length>160?"…":""}</div>\n          <div class="disco-hero-btns">\n            <button class="disco-hero-btn primary" onclick="event.stopPropagation();if(heroItem.id){window._mfFinderTmdbId=heroItem.id;window._cinYear='${m}';'tv'==='${e}'?openDiscoverTv(heroItem.id,'${c}'):_showCinemaOrFinderChoice(heroItem.id,'${c}','${e}',null);}else{openWithCopy('${c}','${e}','${m}');closeUniverse();}    ">↗ Otevřít na externím webu</button>\n                <button class="disco-hero-btn secondary" onclick="event.stopPropagation();shAddToWatchlistByItem({name:'${c}',media_type:'${e}'});showToast('Přidáno do Mého seznamu ❤️')">＋ Můj seznam</button>\n          </div>`, o.append(i, a, s, l), o.onclick = () => {
       r.id ? (window._mfFinderTmdbId = r.id, window._cinYear = (r.release_date || r.first_air_date || "").slice(0, 4) || null, _showCinemaOrFinderChoice(r.id, t, e, t)) : (openWithCopy(t, e, (r.release_date || r.first_air_date || "").slice(0, 4) || null), closeUniverse())
     }, TMDB_KEY && r.id && (o.addEventListener("mouseenter", () => {
       o._t = setTimeout(async () => {
@@ -1402,7 +1402,7 @@ async function showShPreview(e) {
   d.onclick = () => openShItem(e), d.textContent = "▶ Otevřít" + (r ? " na Bombuj" : " na SvetSerialu");
   const m = getWatchlist().some(e => e.name === o),
     u = document.getElementById("shPreviewWlBtn");
-  u.classList.toggle("in-wl", m), u.textContent = m ? "✓ V seznamu" : "🔖 Chci koukat", n.style.display = "none", t.style.display = "flex";
+  u.classList.toggle("in-wl", m), u.textContent = m ? "✓ V seznamu" : "❤️ Chci koukat", n.style.display = "none", t.style.display = "flex";
   let p = document.getElementById("shJwAvail");
   if (!p) {
     p = document.createElement("div"), p.id = "shJwAvail", p.className = "jw-avail-slot";
@@ -1452,10 +1452,10 @@ function shAddToWatchlist() {
     name: t,
     type: n ? "movie" : "series",
     poster: e.poster_path ? `https://image.tmdb.org/t/p/w185${e.poster_path}` : ""
-  }), saveWatchlistData(o), showToast("Přidáno do Mého seznamu! 🔖"));
+  }), saveWatchlistData(o), showToast("Přidáno do Mého seznamu! ❤️"));
   const a = document.getElementById("shPreviewWlBtn"),
     s = getWatchlist().some(e => e.name === t);
-  a && (a.classList.toggle("in-wl", s), a.textContent = s ? "✓ V seznamu" : "🔖 Chci koukat")
+  a && (a.classList.toggle("in-wl", s), a.textContent = s ? "✓ V seznamu" : "❤️ Chci koukat")
 }
 
 function doSearch() {
@@ -1898,7 +1898,7 @@ function toggleWatchlistItem(e) {
     name: db[e]?.name || e,
     type: "series",
     poster: db[e]?._poster || db[e]?.poster || ""
-  }), showToast("Pridano do Chci koukat! 🔖")), saveWatchlistData(t), updateWatchlistBtns()
+  }), showToast("Pridano do Chci koukat! ❤️")), saveWatchlistData(t), updateWatchlistBtns()
 }
 
 function updateWatchlistBtns() {
