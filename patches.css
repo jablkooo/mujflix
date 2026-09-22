@@ -1135,3 +1135,40 @@ html body.discover-open #mfDock {
 #universeOverlay .disco-section .disco-row-nav-btn {
   display: none !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   OPRAVA 2 — mřížka pořád jen 2 sloupce.
+   Předchozí oprava cílila jen na .disco-card, ale šířku (a tím počet
+   sloupců auto-fill gridu) evidentně zmenšuje něco výš v řetězci
+   (.disco-section / .disco-row / .disco-row-scroll). Vynucujeme
+   šířku 100 % a display:grid na všech úrovních najednou, ať už to
+   způsobovalo cokoliv.
+   ═══════════════════════════════════════════════════════════════════ */
+
+#universeOverlay .disco-section,
+#universeOverlay .disco-row,
+#universeOverlay .disco-row-scroll {
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+  flex: none !important;
+}
+
+#universeOverlay .disco-section .disco-row-scroll {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)) !important;
+  justify-content: start !important;
+  justify-items: stretch !important;
+  gap: 16px !important;
+}
+
+/* ── OPRAVA 3 — dock nahoře (Domů/Objevovat/Můj seznam/Profil) se má
+   schovat, dokud je Objevování otevřené. #mfDock je v HTML PŘED
+   #universeOverlay, takže obecný "~" sourozenecký selektor (použitý
+   jinde v souboru pro #timerFab) na něj nezabere — je potřeba :has(). */
+body:has(#universeOverlay.open) #mfDock,
+body:has(#universeOverlay.visible) #mfDock {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
