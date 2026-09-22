@@ -1105,3 +1105,33 @@ html body.discover-open #mfDock {
     padding-right: 20px !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   OPRAVA — karty v .disco-section (mřížkový režim Objevování) se měly
+   roztahovat na 100 % šířky grid buňky, ale nová pevná šířka karet
+   (190px, viz výše) měla kvůli #universeOverlay vyšší prioritu než
+   stará pravidla ".disco-section .disco-card { width:100% }".
+   Tady to opravujeme selektorem se stejnou vyšší prioritou, ale
+   specifičtějším (přidává .disco-section), takže vyhraje nad obojím.
+   Zároveň vracíme tlačítko "↻ Nová doporučení" — staré pravidlo
+   schovávalo celé .disco-row-nav (i tlačítko refresh), schováváme
+   jen šipky pro vodorovný scroll, které v mřížce nedávají smysl.
+   ═══════════════════════════════════════════════════════════════════ */
+
+#universeOverlay .disco-section .disco-card {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+#universeOverlay .disco-section .disco-row-scroll {
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)) !important;
+  gap: 16px !important;
+}
+
+#universeOverlay .disco-section .disco-row-nav {
+  display: flex !important;
+}
+
+#universeOverlay .disco-section .disco-row-nav-btn {
+  display: none !important;
+}
